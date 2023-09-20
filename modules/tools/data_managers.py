@@ -647,6 +647,18 @@ class notification_manager_template():
         return(len(new_message) * font_size)#self.message = new_message
     '''
 
+    def handle_next_notification(self):
+        '''
+        Description:
+            Creates the next queued notification, if any, whenever a notification is removed
+        Input:
+            none
+        Output:
+            None
+        '''
+        if self.notification_queue:
+            self.notification_to_front(self.notification_queue.pop(0))
+
     def display_notification(self, input_dict): #default, exploration, or roll
         '''
         Description:
@@ -690,6 +702,11 @@ class notification_manager_template():
         else:
             notification_dice = 0
 
+        if 'attached_interface_elements' in notification_dict and notification_dict['attached_interface_elements'] != 'none':
+            attached_interface_elements = notification_dict['attached_interface_elements']
+        else:
+            attached_interface_elements = None
+
         if 'extra_parameters' in notification_dict and notification_dict['extra_parameters'] != 'none':
             extra_parameters = notification_dict['extra_parameters']
         else:
@@ -704,6 +721,8 @@ class notification_manager_template():
             'message': message,
             'notification_dice': notification_dice,
             'init_type': 'action notification',
+            'notification_type': notification_type,
+            'attached_interface_elements': attached_interface_elements,
             'extra_parameters': extra_parameters
         }
 

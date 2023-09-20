@@ -61,6 +61,20 @@ class interface_element():
         if 'image_id' in input_dict:
             self.create_image(input_dict['image_id'])
 
+    def remove_recursive(self, complete=False):
+        '''
+        Description:
+            Recursively removes a collection and its members
+        Input:
+            boolean complete=False: Whether to use remove_complete or remove for each item
+        Output:
+            None
+        '''
+        if complete:
+            self.remove_complete()
+        else:
+            self.remove()
+
     def remove_complete(self):
         '''
         Description:
@@ -398,6 +412,32 @@ class interface_collection(interface_element):
         if hasattr(removed_member, 'y_offset'):
             removed_member.y_offset = None
         self.members.remove(removed_member)
+
+    def remove_recursive(self, complete=False):
+        '''
+        Description:
+            Recursively removes a collection and its members
+        Input:
+            boolean complete=False: Whether to use remove_complete or remove for each item
+        Output:
+            None
+        '''
+        for current_member in self.members.copy():
+            self.remove_member(current_member)
+            current_member.remove_recursive(complete=complete)
+
+        super().remove_recursive(complete=complete)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove_recursive()
 
     def set_origin(self, new_x, new_y):
         '''

@@ -4,7 +4,6 @@ import pygame
 import random
 from ..mobs import mob
 from ...util import text_utility, utility, actor_utility, scaling, dice_utility, turn_management_utility, minister_utility
-from ...constructs import images
 
 class pmob(mob):
     '''
@@ -1512,10 +1511,27 @@ class pmob(mob):
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
             else:
                 minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-            minister_position_icon = images.dice_roll_minister_image(scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-                'position', self.global_manager)
-            minister_portrait_icon = images.dice_roll_minister_image(scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-                'portrait', self.global_manager)
+            input_dict = {
+                'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager),
+                'width': scaling.scale_width(100, self.global_manager),
+                'height': scaling.scale_height(100, self.global_manager),
+                'modes': self.modes,
+                'attached_minister': self.controlling_minister,
+                'minister_image_type': 'position',
+                'init_type': 'dice roll minister image'
+            }
+            minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+            
+            input_dict = {
+                'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager),
+                'width': scaling.scale_width(100, self.global_manager),
+                'height': scaling.scale_height(100, self.global_manager),
+                'modes': self.modes,
+                'attached_minister': self.controlling_minister,
+                'minister_image_type': 'portrait',
+                'init_type': 'dice roll minister image'
+            }
+            minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         
     def start_repair(self, building_info_dict):
         '''

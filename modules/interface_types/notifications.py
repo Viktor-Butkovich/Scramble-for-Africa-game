@@ -35,7 +35,7 @@ class notification(multi_line_label):
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         self.global_manager.get('sound_manager').play_sound('opening_letter')
         self.creation_time = time.time()
-        self.notification_type = 'default'
+        self.notification_type = input_dict['notification_type']
 
     def format_message(self):
         '''
@@ -69,10 +69,15 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        if time.time() - 0.1 > self.creation_time: #don't accidentally remove notifications instantly when clicking between them
-            self.remove_complete()
-            
-    def remove(self, handle_next_notification=True):
+        #if time.time() - 0.1 > self.creation_time: #don't accidentally remove notifications instantly when clicking between them
+        #    self.remove_complete()
+        if self.has_parent_collection:
+            self.parent_collection.remove_recursive(complete=False)
+        else:
+            self.remove()
+        self.global_manager.get('notification_manager').handle_next_notification()
+
+    def remove(self):
         '''
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
@@ -83,13 +88,14 @@ class notification(multi_line_label):
             None
         '''
         super().remove()
-        self.global_manager.set('displayed_notification', 'none')
-        if handle_next_notification:
-            notification_manager = self.global_manager.get('notification_manager')
-            if len(notification_manager.notification_queue) >= 1:
-                notification_manager.notification_queue.pop(0)
-            if len(notification_manager.notification_queue) > 0:
-                notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        if self.global_manager.get('displayed_notification') == self:
+            self.global_manager.set('displayed_notification', 'none')
+        #if handle_next_notification:
+        #    self.global_manager.get('notification_manager').handle_next_notification()
+            #if len(notification_manager.notification_queue) >= 1:
+            #    notification_manager.notification_queue.pop(0)
+            #if len(notification_manager.notification_queue) > 0:
+            #    notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
 class minister_notification(notification):
     '''

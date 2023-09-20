@@ -7,17 +7,22 @@ class mouse_follower(free_image):
     '''
     Free image that follows the mouse pointer and appears in certain situations, such as when choosing on a movement destination
     '''
-    def __init__(self, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        x, y = pygame.mouse.get_pos()
-        super().__init__('misc/targeting_mouse.png', (x, y), 50, 50, ['strategic', 'europe'], global_manager)
+        input_dict['image_id'] = 'misc/targeting_mouse.png'
+        input_dict['coordinates'] = pygame.mouse.get_pos()
+        input_dict['width'] = 50
+        input_dict['height'] = 50
+        input_dict['modes'] = ['strategic', 'europe']
+        super().__init__(input_dict, global_manager)
         
     def update(self):
         ''''

@@ -2,7 +2,6 @@
 
 import pygame
 import time
-from ..constructs import images
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
     minister_utility, trial_utility
 from . import interface_elements
@@ -1404,11 +1403,18 @@ class end_turn_button(button):
         '''
         input_dict['button_type'] = 'start end turn'
         super().__init__(input_dict, global_manager)
-        self.warning_image = images.warning_image(self, global_manager)
+
+        image_input_dict = {
+            'attached_image': self,
+            'init_type': 'warning image'
+        }
+        if self.parent_collection != 'none':
+            image_input_dict['parent_collection'] = self.parent_collection
+            image_input_dict['member_config'] = {'order_exempt': True, 'order_x_offset': 100}        
+        self.warning_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+
         self.warning_image.set_image('misc/enemy_turn_icon.png')
         self.warning_image.to_front = True
-        if self.parent_collection != 'none':
-            self.parent_collection.add_member(self.warning_image, {'order_exempt': True, 'order_x_offset': 100})
 
     def set_origin(self, new_x, new_y):
         '''
@@ -1968,10 +1974,14 @@ class minister_portrait_image(button):
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
             warning_x_offset = 0
         self.global_manager.get('minister_image_list').append(self)
-        self.warning_image = images.warning_image(self, global_manager)
 
-        #attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
-        self.insert_collection_above().add_member(self.warning_image, {'x_offset': warning_x_offset, 'y_offset': 0}) #offsets are being ignored
+        image_input_dict = {
+            'attached_image': self,
+            'init_type': 'warning image',
+            'parent_collection': self.insert_collection_above(),
+            'member_config': {'x_offset': warning_x_offset, 'y_offset': 0}
+        }    
+        self.warning_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
         self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
 
         self.calibrate('none')

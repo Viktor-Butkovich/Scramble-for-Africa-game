@@ -28,3 +28,4 @@ except Exception: #displays error message and records error message in crash log
 # restrict notification queue manipulation to the notification manager - removing notification should just tell notification manager to check for queued notifications,
 #   rather than directly handling the notification queue all over the program - a notification_dict should be popped the moment it is used to make a notification
 # ^until this is correctly implemented, essentially all action notifications will be broken
+#   clicking on a notification/choice button shouldn't "remove" notification - should have a new recursive remove function to remove above collection

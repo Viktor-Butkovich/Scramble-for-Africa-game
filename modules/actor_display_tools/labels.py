@@ -3,9 +3,7 @@
 import pygame
 
 from ..interface_types.labels import label
-from ..constructs.images import minister_type_image
 from ..util import utility, scaling
-from . import images
 
 class actor_display_label(label):
     '''
@@ -385,8 +383,20 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
-            attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
-            self.insert_collection_above().add_member(attached_minister_type_image, {'x_offset': -1 * attached_minister_type_image.height, 'y_offset': -0.5 * m_increment}) #offsets are being ignored
+
+            image_input_dict = {
+                'coordinates': (self.x - self.height - m_increment, self.y),
+                'width': self.height + m_increment,
+                'height': self.height + m_increment,
+                'modes': self.modes,
+                'minister_type': 'none',
+                'attached_label': self,
+                'init_type': 'minister type image',
+                'parent_collection': self.insert_collection_above(),
+                'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
+            }
+            attached_minister_type_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+
             self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
 
@@ -1156,7 +1166,7 @@ class commodity_display_label(actor_display_label):
         super().__init__(input_dict, global_manager)
         self.showing_commodity = False
         self.commodity_index = input_dict['commodity_index']
-        self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager)
+
         input_dict = {
             'coordinates': (self.x, self.y + 200),
             'width': self.height,
@@ -1167,7 +1177,19 @@ class commodity_display_label(actor_display_label):
         }
 
         self.insert_collection_above()
-        self.parent_collection.add_member(self.commodity_image, {'x_offset': -1 * self.height - 5})
+
+        image_input_dict = {
+            'coordinates': (self.x - self.height, self.y),
+            'width': self.height,
+            'height': self.height,
+            'modes': self.modes,
+            'attached_label': self,
+            'init_type': 'label image',
+            'parent_collection': self.parent_collection,
+            'member_config': {'x_offset': -1 * self.height - 5}
+        }
+        self.commodity_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+
         input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':
             input_dict['init_type'] = 'drop commodity button'

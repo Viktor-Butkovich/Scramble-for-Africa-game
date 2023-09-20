@@ -3,7 +3,6 @@
 import random
 import os
 from ..util import tutorial_utility, utility, actor_utility, minister_utility, scaling
-from . import images
 
 class minister():
     '''
@@ -221,10 +220,28 @@ class minister():
             None
         '''
         minister_icon_coordinates = (scaling.scale_width(self.global_manager.get('notification_manager').notification_x - 140, self.global_manager), scaling.scale_height(440, self.global_manager))
-        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
-            self, 'position', self.global_manager, True)
-        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
-            self, 'portrait', self.global_manager, True)
+        
+        minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
+            'coordinates': minister_icon_coordinates,
+            'width': scaling.scale_width(100, self.global_manager),
+            'height': scaling.scale_height(100, self.global_manager),
+            'modes': ['strategic', 'ministers', 'europe'],
+            'attached_minister': self,
+            'minister_image_type': 'position',
+            'init_type': 'dice roll minister image',
+            'minister_message_image': True
+        }, self.global_manager)
+
+        minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
+            'coordinates': minister_icon_coordinates,
+            'width': scaling.scale_width(100, self.global_manager),
+            'height': scaling.scale_height(100, self.global_manager),
+            'modes': ['strategic', 'ministers', 'europe'],
+            'attached_minister': self,
+            'minister_image_type': 'portrait',
+            'init_type': 'dice roll minister image',
+            'minister_message_image': True
+        }, self.global_manager)
 
         self.global_manager.get('notification_manager').display_notification({
             'message': text,

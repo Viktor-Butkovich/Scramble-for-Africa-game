@@ -10,8 +10,10 @@ from ..interface_types import dice, buttons, labels, panels, notifications, choi
     europe_transactions
 from ..actor_display_tools import buttons as actor_display_buttons
 from ..actor_display_tools import labels as actor_display_labels
-from ..constructs import ministers, lore_missions
+from ..actor_display_tools import images as actor_display_images
+from ..constructs import ministers, lore_missions, images
 from ..util import utility, actor_utility, market_utility
+from . import mouse_followers
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -347,6 +349,35 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_labels.actor_display_label(input_dict, global_manager)
         elif init_type == 'instructions page':
             new_element = instructions.instructions_page(input_dict, global_manager)
+
+        elif init_type.endswith('image'):
+            base = init_type.removesuffix(' image')
+            if base == 'free':
+                new_element = images.free_image(input_dict, global_manager)
+            elif base == 'actor display free':
+                new_element = actor_display_images.actor_display_free_image(input_dict, global_manager)
+            elif base == 'mob background':
+                new_element = actor_display_images.mob_background_image(input_dict, global_manager)
+            elif base == 'minister background':
+                new_element = actor_display_images.minister_background_image(input_dict, global_manager)
+            elif base == 'label':
+                new_element = actor_display_images.label_image(input_dict, global_manager)
+            elif base == 'background':
+                new_element = images.background_image(input_dict, global_manager)
+            elif base == 'tooltip free':
+                new_element = images.tooltip_free_image(input_dict, global_manager)
+            elif base == 'minister type':
+                new_element = images.minister_type_image(input_dict, global_manager)
+            elif base == 'dice roll minister':
+                new_element = images.dice_roll_minister_image(input_dict, global_manager)
+            elif base == 'indicator':
+                new_element = images.indicator_image(input_dict, global_manager)
+            elif base == 'warning':
+                new_element = images.warning_image(input_dict, global_manager)
+            elif base == 'loading image template':
+                new_element = images.loading_image_template(input_dict, global_manager)
+            elif base == 'mouse follower':
+                new_element = mouse_followers.mouse_follower(input_dict, global_manager)
 
         elif init_type.endswith('notification'):
             base = init_type.removesuffix('notification')

@@ -6,25 +6,30 @@ class actor_display_free_image(free_image):
     '''
     Free image that changes its appearance to match selected mobs or tiles
     '''
-    def __init__(self, coordinates, width, height, modes, actor_image_type, global_manager, default_image_id='none'):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this image can appear
-            string actor_image_type: Type of actor whose appearance will be copied by this image
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
+                'actor_image_type': string value - subtype of actor image, like 'minister_default' or 'possible_artifact_location'
+                'default_image_id' = 'none': string value - Image to use if not calibrated to any actor, such as for reorganization placeholder images
             global_manager_template global_manager: Object that accesses shared variables
-            string default_image_id='none': Default image to use, if any, when this image is calibrated to 'none'
         Output:
             None
         '''
-        self.actor_image_type = actor_image_type
+        self.actor_image_type = input_dict['actor_image_type']
         self.actor = 'none'
-        self.default_image_id = default_image_id
-        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
+        if not 'default_image_id' in input_dict:
+            input_dict['default_image_id'] = 'none'
+        self.default_image_id = input_dict['default_image_id']
+        input_dict['image_id'] = 'misc/empty.png'
+        super().__init__(input_dict, global_manager)
 
     def calibrate(self, new_actor):
         '''
@@ -76,47 +81,27 @@ class actor_display_free_image(free_image):
             image_id_list.append('misc/pmob_outline.png')
             self.set_image(image_id_list)
 
-class actor_display_infrastructure_connection_image(actor_display_free_image):
-    '''
-    Image appearing on tile info display to show the road/railroad connections of the displayed tile
-    '''
-    def __init__(self, coordinates, width, height, modes, actor_image_type, direction, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this image can appear
-            string actor_image_type: Type of actor whose appearance will be copied by this image
-            string direction: 'up', 'down', 'left', or 'right', side of tile that this image points to
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.direction = direction
-        super().__init__(coordinates, width, height, modes, actor_image_type, global_manager)
-
 class mob_background_image(free_image):
     '''
     Image appearing behind the displayed actor in the actor info display
     '''
-    def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            string image_id: File path to the image used by this object
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this image can appear
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(image_id, coordinates, width, height, modes, global_manager)
+        super().__init__(input_dict, global_manager)
         self.actor = 'none'
 
     def calibrate(self, new_actor):
@@ -192,22 +177,25 @@ class label_image(free_image):
     '''
     Free image that is attached to a label and will only show when the label is showing
     '''
-    def __init__(self, coordinates, width, height, modes, attached_label, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this image can appear
-            label attached_label: The label that this image is attached to
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
+                'attached_label': label value - Label attached to this image
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.attached_label = attached_label
-        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
+        self.attached_label = input_dict['attached_label']
+        input_dict['image_id'] = 'misc/empty.png'
+        super().__init__(input_dict, global_manager)
 
     def can_show(self, skip_parent_collection=False):
         '''

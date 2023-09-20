@@ -3,7 +3,6 @@
 import random
 from ..officers import officer
 from ....util import actor_utility, dice_utility, market_utility, scaling
-from ....constructs import images
 
 class merchant(officer):
     '''
@@ -63,10 +62,26 @@ class merchant(officer):
         self.global_manager.set('ongoing_action_type', 'loan_search')
 
         minister_icon_coordinates = (440, self.global_manager.get('notification_manager').notification_x - 140) #show minister in start loan search notification, remove on start/stop loan search
-        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-            'position', self.global_manager)
-        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-            'portrait', self.global_manager)
+        
+        minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
+            'coordinates': minister_icon_coordinates,
+            'width': scaling.scale_width(100, self.global_manager),
+            'height': scaling.scale_height(100, self.global_manager),
+            'modes': self.modes,
+            'attached_minister': self.controlling_minister,
+            'minister_image_type': 'position',
+            'init_type': 'dice roll minister image'
+        }, self.global_manager)
+
+        minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
+            'coordinates': minister_icon_coordinates,
+            'width': scaling.scale_width(100, self.global_manager),
+            'height': scaling.scale_height(100, self.global_manager),
+            'modes': self.modes,
+            'attached_minister': self.controlling_minister,
+            'minister_image_type': 'portrait',
+            'init_type': 'dice roll minister image'
+        }, self.global_manager)
         
         message = 'Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant\'s success will determine the interest rate found. /n /n'
         message += 'The search will cost ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money. /n /n '

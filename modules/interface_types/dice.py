@@ -79,8 +79,11 @@ class die(button):
         Output:
             None
         '''
-        if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
-            self.global_manager.get('displayed_notification').on_click()#self.start_rolling()
+        #if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
+        #    self.global_manager.get('displayed_notification').on_click()
+        if self.rolls_completed == 0:
+            self.global_manager.geT('displayed_notification').on_click()
+        #if self.global_manager.get('displayed_notification') != 'none' and self.global_manager.get('displayed_notification').notification_type == 'roll':
 
     def update_tooltip(self):
         '''
@@ -154,8 +157,11 @@ class die(button):
             for current_die in self.global_manager.get('dice_list'):
                 if current_die.rolling:
                     dice_rolling = True
-            if (not self.global_manager.get('current_dice_rolling_notification') == 'none') and not dice_rolling: #if notification present and dice finished rolling, remove notification
-                self.global_manager.get('current_dice_rolling_notification').remove_complete()
+            if not dice_rolling:
+                if self.global_manager.get('displayed_notification') != 'none' and self.global_manager.get('displayed_notification').notification_type == 'roll':
+                    self.global_manager.get('displayed_notification').remove_complete() #on_click()
+            #if (not self.global_manager.get('current_dice_rolling_notification') == 'none') and not dice_rolling: #if notification present and dice finished rolling, remove notification
+            #    self.global_manager.get('current_dice_rolling_notification').on_click() #remove_complete()
         else:
             self.roll_result = 0
             if self.rolls_completed == self.num_rolls - 1: #if last roll
