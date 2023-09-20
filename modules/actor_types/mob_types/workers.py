@@ -397,17 +397,21 @@ class slave_worker(worker):
         '''
         Description:
             Frees this slave and immediately recruits them as an African worker, only usable when not in a group
+        Input:
+            None
+        Output:
+            None
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.x, self.y)
-        input_dict['grids'] = self.grids
-        input_dict['modes'] = self.modes
-        input_dict['image'] = 'mobs/African workers/default.png'
-        input_dict['name'] = 'African workers'
-        input_dict['init_type'] = 'workers'
-        input_dict['worker_type'] = 'African'
-        input_dict['select_on_creation'] = self.selected
-        new_worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        new_worker = self.global_manager.get('actor_creation_manager').create(False, {
+            'coordinates': (self.x, self.y),
+            'grids': self.grids,
+            'modes': self.modes,
+            'image': 'mobs/African workers/default.png',
+            'name': 'African workers',
+            'init_type': 'workers',
+            'worker_type': 'African',
+            'select_on_creation': self.selected
+        }, self.global_manager)
         new_worker.set_automatically_replace(self.automatically_replace)
         if self.in_vehicle:
             new_worker.embark_vehicle(self.vehicle, focus = False)

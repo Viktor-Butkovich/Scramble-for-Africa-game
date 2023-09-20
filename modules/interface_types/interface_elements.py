@@ -297,8 +297,9 @@ class interface_collection(interface_element):
         customize_button_size = 20
         if ('allow_minimize' in input_dict and input_dict['allow_minimize']) or ('allow_move' in input_dict and input_dict['allow_move']):
             self.insert_collection_above()
+
             if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
-                member_input_dict = {
+                global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': scaling.scale_width(customize_button_size, global_manager),
                     'height': scaling.scale_height(customize_button_size, global_manager),
@@ -307,11 +308,11 @@ class interface_collection(interface_element):
                     'init_type': 'minimize interface collection button',
                     'image_id': 'buttons/minimize_button.png',
                     'member_config': {'order_exempt': True}
-                }
-                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
+
             if 'allow_move' in input_dict and input_dict['allow_move']:
-                member_input_dict = {
+                global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': scaling.scale_width(customize_button_size, global_manager),
                     'height': scaling.scale_height(customize_button_size, global_manager),
@@ -319,11 +320,10 @@ class interface_collection(interface_element):
                     'init_type': 'move interface collection button',
                     'image_id': 'buttons/reposition_button.png',
                     'member_config': {'order_exempt': True}
-                }
-                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
                 
-                member_input_dict = {
+                global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': scaling.scale_width(customize_button_size, global_manager),
                     'height': scaling.scale_height(customize_button_size, global_manager),
@@ -331,8 +331,7 @@ class interface_collection(interface_element):
                     'init_type': 'reset interface collection button',
                     'image_id': 'buttons/reset_button.png',
                     'member_config': {'order_exempt': True}
-                }
-                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
 
     def create_image(self, image_id):
@@ -576,15 +575,14 @@ class tabbed_collection(interface_collection):
         self.tabbed_members = []
         self.current_tabbed_member = None
         super().__init__(input_dict, global_manager)
-        tabs_collection_input_dict = {
+        self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element({
             'coordinates': scaling.scale_coordinates(0, 5, global_manager),
             'width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
             'init_type': 'ordered collection',
             'parent_collection': self,
             'direction': 'horizontal'
-        }
-        self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element(tabs_collection_input_dict, global_manager)
+        }, global_manager)
 
     def allow_show(self, member):
         '''
@@ -620,15 +618,14 @@ class tabbed_collection(interface_collection):
         super().add_member(new_member, member_config)
 
         if member_config['tabbed']:
-            tab_button_input_dict = {
+            self.global_manager.get('actor_creation_manager').create_interface_element({
                 'width': scaling.scale_width(36, self.global_manager), #20
                 'height': scaling.scale_height(36, self.global_manager),
                 'init_type': 'tab button',
                 'parent_collection': self.tabs_collection,
                 'image_id': member_config['button_image_id'],
                 'linked_element': new_member
-            }
-            self.global_manager.get('actor_creation_manager').create_interface_element(tab_button_input_dict, self.global_manager)
+            }, self.global_manager)
             self.tabbed_members.append(new_member)
             if len(self.tabbed_members) == 1:
                 self.current_tabbed_member = new_member

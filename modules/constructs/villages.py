@@ -127,16 +127,16 @@ class village():
         Output:
             native_warriors: Returns the created native warriors unit
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/native_warriors/default.png'
-        input_dict['canoes_image'] = 'mobs/native_warriors/canoe_default.png'
-        input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'native warriors'
-        input_dict['init_type'] = 'native_warriors'
-        input_dict['origin_village'] = self
-        new_warrior = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        new_warrior = self.global_manager.get('actor_creation_manager').create(False, {
+            'coordinates': (self.cell.x, self.cell.y),
+            'grids': [self.cell.grid, self.cell.grid.mini_grid],
+            'image': 'mobs/native_warriors/default.png',
+            'canoes_image': 'mobs/native_warriors/canoe_default.png',
+            'modes': ['strategic'],
+            'name': 'native warriors',
+            'init_type': 'native_warriors',
+            'origin_village': self
+        }, self.global_manager)
         self.change_population(-1)
         return(new_warrior)
 
@@ -149,17 +149,18 @@ class village():
         Output:
             None
         '''
-        input_dict = {'select_on_creation': True}
-        input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/African workers/default.png'
-        input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'African workers'
-        input_dict['init_type'] = 'workers'
-        input_dict['worker_type'] = 'African'
         self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
         self.change_population(-1)
-        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        self.global_manager.get('actor_creation_manager').create(False, {
+            'select_on_creation': True,
+            'coordinates': (self.cell.x, self.cell.y),
+            'grids': [self.cell.grid, self.cell.grid.mini_grid],
+            'image': 'mobs/African workers/default.png',
+            'modes': ['strategic'],
+            'name': 'African workers',
+            'init_type': 'workers',
+            'worker_type': 'African'
+        }, self.global_manager)
 
     def set_initial_population(self):
         '''

@@ -381,13 +381,13 @@ class cell():
         Outptu:
             None
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.x, self.y)
-        input_dict['grids'] = [self.grid, self.grid.mini_grid]
-        input_dict['name'] = 'slums'
-        input_dict['modes'] = ['strategic']
-        input_dict['init_type'] = 'slums'
-        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        self.global_manager.get('actor_creation_manager').create(False, {
+            'coordinates': (self.x, self.y),
+            'grids': [self.grid, self.grid.mini_grid],
+            'name': 'slums',
+            'modes': ['strategic'],
+            'init_type': 'slums'
+        }, self.global_manager)
         if self.tile == self.global_manager.get('displayed_tile'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.tile) #update tile display to show new building
 

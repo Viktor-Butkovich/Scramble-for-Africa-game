@@ -1232,14 +1232,15 @@ class button(interface_elements.interface_element):
                     current_minister_image.remove_complete()
 
         elif self.button_type == 'accept loan offer':
-            input_dict = {}
-            input_dict['principal'] = self.notification.choice_info_dict['principal']
-            input_dict['interest'] = self.notification.choice_info_dict['interest']
-            input_dict['remaining_duration'] = 10
             if self.notification.choice_info_dict['corrupt']:
                 self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
 
-            new_loan = market_utility.loan(False, input_dict, self.global_manager)
+            new_loan = market_utility.loan(False, {
+                'principal': self.notification.choice_info_dict['principal'],
+                'interest': self.notification.choice_info_dict['interest'],
+                'remaining_duration': 10
+            }, self.global_manager)
+
             self.global_manager.set('ongoing_action', False)
             self.global_manager.set('ongoing_action_type', 'none')
 
@@ -1975,13 +1976,12 @@ class minister_portrait_image(button):
             warning_x_offset = 0
         self.global_manager.get('minister_image_list').append(self)
 
-        image_input_dict = {
+        self.warning_image = global_manager.get('actor_creation_manager').create_interface_element({
             'attached_image': self,
             'init_type': 'warning image',
             'parent_collection': self.insert_collection_above(),
             'member_config': {'x_offset': warning_x_offset, 'y_offset': 0}
-        }    
-        self.warning_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+        }    , global_manager)
         self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
 
         self.calibrate('none')

@@ -279,18 +279,21 @@ class tile(actor): #to do: make terrain tiles a subclass
                         else:
                             self.cell.village.cell = self.cell
                 if not village_exists: #make new village if village not present
-                    input_dict = {'cell': self.cell}
                     if self.cell.grid.from_save:
-                        input_dict['name'] = self.cell.save_dict['village_name']
-                        input_dict['population'] = self.cell.save_dict['village_population']
-                        input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
-                        input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
-                        input_dict['attached_warriors'] = self.cell.save_dict['village_attached_warriors']
-                        input_dict['found_rumors'] = self.cell.save_dict['village_found_rumors']
-                        self.cell.village = villages.village(True, input_dict, self.global_manager)
+                        self.cell.village = villages.village(True, {
+                            'name': self.cell.save_dict['village_name'],
+                            'population': self.cell.save_dict['village_population'],
+                            'aggressiveness': self.cell.save_dict['village_aggressiveness'],
+                            'available_workers': self.cell.save_dict['village_available_workers'],
+                            'attached_warriors': self.cell.save_dict['village_attached_warriors'],
+                            'found_rumors': self.cell.save_dict['village_found_rumors'],
+                            'cell': self.cell
+                        }, self.global_manager)
                         self.cell.village.tiles.append(self)
                     else:
-                        self.cell.village = villages.village(False, input_dict, self.global_manager)
+                        self.cell.village = villages.village(False, {
+                            'cell': self.cell
+                        }, self.global_manager)
                         self.cell.village.tiles.append(self)
         if update_image_bundle:
             self.update_image_bundle()

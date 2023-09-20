@@ -48,13 +48,14 @@ class lore_mission():
             self.name = self.adjective + self.artifact_type
             num_possible_artifact_locations = random.randrange(1, 7)
             while len(self.possible_artifact_locations) < num_possible_artifact_locations:
-                input_dict = {
+
+                new_possible_artifact_location = possible_artifact_location(False, {
                     'lore_mission': self,
                     'coordinates': self.generate_possible_artifact_coordinates(),
                     'revealed': False,
                     'proven_false': False
-                }
-                new_possible_artifact_location = possible_artifact_location(False, input_dict, self.global_manager)
+                }, self.global_manager)
+
             for current_village in self.global_manager.get('village_list'):
                 current_village.found_rumors = False
             self.confirmed_all_locations_revealed = False

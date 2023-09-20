@@ -969,15 +969,16 @@ class slums(building):
         Output:
             None
         '''
-        input_dict = {'select_on_creation': True}
-        input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/African workers/default.png'
-        input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'African workers'
-        input_dict['init_type'] = 'workers'
-        input_dict['worker_type'] = 'African'
-        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        self.global_manager.get('actor_creation_manager').create(False, {
+            'select_on_creation': True,
+            'coordinates': (self.cell.x, self.cell.y),
+            'grids': [self.cell.grid, self.cell.grid.mini_grid],
+            'image': 'mobs/African workers/default.png',
+            'modes': ['strategic'],
+            'name': 'African workers',
+            'worker_type': 'African',
+            'init_type': 'workers'
+        }, self.global_manager)
         self.change_population(-1)
 
     def to_save_dict(self):

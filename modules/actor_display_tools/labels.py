@@ -384,7 +384,7 @@ class actor_display_label(label):
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
 
-            image_input_dict = {
+            attached_minister_type_image = global_manager.get('actor_creation_manager').create_interface_element({
                 'coordinates': (self.x - self.height - m_increment, self.y),
                 'width': self.height + m_increment,
                 'height': self.height + m_increment,
@@ -394,8 +394,7 @@ class actor_display_label(label):
                 'init_type': 'minister type image',
                 'parent_collection': self.insert_collection_above(),
                 'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
-            }
-            attached_minister_type_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+            }, global_manager)
 
             self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
@@ -1178,7 +1177,7 @@ class commodity_display_label(actor_display_label):
 
         self.insert_collection_above()
 
-        image_input_dict = {
+        self.commodity_image = global_manager.get('actor_creation_manager').create_interface_element({
             'coordinates': (self.x - self.height, self.y),
             'width': self.height,
             'height': self.height,
@@ -1187,8 +1186,7 @@ class commodity_display_label(actor_display_label):
             'init_type': 'label image',
             'parent_collection': self.parent_collection,
             'member_config': {'x_offset': -1 * self.height - 5}
-        }
-        self.commodity_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+        }, global_manager)
 
         input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':

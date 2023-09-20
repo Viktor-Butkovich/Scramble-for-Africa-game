@@ -75,10 +75,12 @@ class group(pmob):
         Output:
             None
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.x, self.y)
-        input_dict['grids'] = self.grids
-        input_dict['modes'] = self.modes
+        input_dict = {
+            'coordinates': (self.x, self.y),
+            'grids': self.grids,
+            'modes': self.modes
+        }
+
         if new_worker_type == 'European':
             input_dict['image'] = 'mobs/European workers/default.png'
             input_dict['name'] = 'European workers'

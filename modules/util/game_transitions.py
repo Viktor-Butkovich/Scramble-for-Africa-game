@@ -124,19 +124,20 @@ def create_strategic_map(global_manager, from_save=False):
 
     for current_grid in global_manager.get('grid_list'):
         if current_grid.is_abstract_grid: #if europe/slave traders grid
-            input_dict = {}
-            input_dict['grid'] = current_grid
-            input_dict['image'] = current_grid.tile_image_id
-            input_dict['name'] = current_grid.name
-            input_dict['modes'] = current_grid.modes
-            tiles.abstract_tile(False, input_dict, global_manager)
+            tiles.abstract_tile(False, {
+                'grid': current_grid,
+                'image': current_grid.tile_image_id,
+                'name': current_grid.name,
+                'modes': current_grid.modes
+            }, global_manager)
         else:
-            input_dict = {}
-            input_dict['grid'] = current_grid
-            input_dict['image'] = 'misc/empty.png'
-            input_dict['name'] = 'default'
-            input_dict['modes'] = ['strategic']
-            input_dict['show_terrain'] = True
+            input_dict = {
+                'grid': current_grid,
+                'image': 'misc/empty.png',
+                'name': 'default',
+                'modes': ['strategic'],
+                'show_terrain': True,
+            }
             if (not from_save) and current_grid == global_manager.get('strategic_map_grid'):
                 current_grid.generate_terrain()
             for cell in current_grid.get_flat_cell_list():

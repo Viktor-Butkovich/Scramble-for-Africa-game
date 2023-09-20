@@ -178,7 +178,7 @@ class exploration_notification(action_notification):
                 'level': -10
             }
             image_id_list = [background_dict] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': image_id_list,
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -186,8 +186,7 @@ class exploration_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
         super().__init__(input_dict, global_manager)
 
     def remove(self):
@@ -256,7 +255,7 @@ class off_tile_exploration_notification(action_notification):
             new_visibility = explored_cell.visible
         image_id_list = explored_tile.get_image_id_list(force_visibility = new_visibility)
 
-        image_input_dict = {
+        self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
             'image_id': explored_terrain_image_id,
             'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             'width': scaling.scale_width(200, global_manager),
@@ -264,8 +263,7 @@ class off_tile_exploration_notification(action_notification):
             'modes': input_dict['modes'],
             'to_front': True,
             'init_type': 'free image'
-        }
-        self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+        }, global_manager))
 
         if new_visibility == True and not explored_tile.cell.resource == 'none':
             image_id_list.append(actor_utility.generate_resource_icon(explored_tile, global_manager))
@@ -276,7 +274,7 @@ class off_tile_exploration_notification(action_notification):
         if self.current_expedition.current_action_type == 'exploration':
             explored_cell.set_visibility(True)
 
-        image_input_dict = {
+        self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
             'image_id': image_id_list,
             'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             'width': scaling.scale_width(200, global_manager),
@@ -284,8 +282,7 @@ class off_tile_exploration_notification(action_notification):
             'modes': input_dict['modes'],
             'to_front': True,
             'init_type': 'free image'
-        }
-        self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+        }, global_manager))
 
         global_manager.get('public_opinion_tracker').change(public_opinion_increase)
         global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
@@ -366,7 +363,7 @@ class trade_notification(action_notification):
             if self.commodity_trade_type == 'successful_commodity_trade':
                 consumer_goods_y = 500
                 min_y = 300
-                image_input_dict = {
+                self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                     'image_id': 'scenery/resources/' + self.trade_result[2] + '.png',
                     'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300, global_manager),
                     'width': scaling.scale_width(200, global_manager),
@@ -374,13 +371,12 @@ class trade_notification(action_notification):
                     'modes': input_dict['modes'],
                     'to_front': True,
                     'init_type': 'free image'
-                }
-                self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+                }, global_manager))
             else:
                 consumer_goods_y = 400 #either have icon at 300 and 500 or a single icon at 400
                 min_y = 400
 
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': 'scenery/resources/trade/sold consumer goods.png',
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -388,8 +384,7 @@ class trade_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
             if self.trade_result[3]: #if gets available worker
                 background_dict = {
@@ -410,8 +405,7 @@ class trade_notification(action_notification):
                 right_worker_dict['x_offset'] *= -1
                 button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
 
-                
-                image_input_dict = {
+                self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                     'image_id': button_image_id_list,
                     'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
                     'width': scaling.scale_width(150, global_manager),
@@ -419,8 +413,7 @@ class trade_notification(action_notification):
                     'modes': input_dict['modes'],
                     'to_front': True,
                     'init_type': 'free image'
-                }
-                self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+                }, global_manager))
 
         elif self.dies:
             self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
@@ -504,7 +497,7 @@ class religious_campaign_notification(action_notification):
             right_worker_dict['x_offset'] *= -1
             button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
 
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': button_image_id_list,
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -512,8 +505,7 @@ class religious_campaign_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
         elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
             if global_manager.get('religious_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
@@ -668,7 +660,7 @@ class advertising_campaign_notification(action_notification):
             current_merchant = global_manager.get('displayed_mob')
             self.notification_images = []
 
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': 'scenery/resources/' + current_merchant.current_advertised_commodity + '.png',
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -676,10 +668,9 @@ class advertising_campaign_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': 'scenery/resources/plus.png',
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 125, 600, global_manager),
                 'width': scaling.scale_width(100, global_manager),
@@ -687,10 +678,9 @@ class advertising_campaign_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': 'scenery/resources/' + current_merchant.current_unadvertised_commodity + '.png',
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 300, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -698,10 +688,9 @@ class advertising_campaign_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': 'scenery/resources/minus.png',
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 125, 400, global_manager),
                 'width': scaling.scale_width(100, global_manager),
@@ -709,8 +698,7 @@ class advertising_campaign_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
         elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
             if global_manager.get('advertising_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
@@ -975,7 +963,7 @@ class capture_slaves_notification(action_notification):
             right_worker_dict = left_worker_dict.copy()
             right_worker_dict['x_offset'] *= -1
             button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
-            image_input_dict = {
+            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': button_image_id_list,
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -983,8 +971,7 @@ class capture_slaves_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
         super().__init__(input_dict, global_manager)
 
     def remove(self):
@@ -1170,7 +1157,7 @@ class combat_notification(action_notification):
             }
             pmob_image_id_list = [background_dict] + global_manager.get('displayed_mob').get_image_id_list() + ['misc/pmob_outline.png']
 
-            image_input_dict = {
+            global_manager.get('combatant_images').append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': pmob_image_id_list,
                 'coordinates': scaling.scale_coordinates(image_x, 280, global_manager),
                 'width': scaling.scale_width(150, global_manager),
@@ -1178,12 +1165,11 @@ class combat_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            global_manager.get('combatant_images').append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
             npmob_image_id_list = [background_dict] + global_manager.get('displayed_mob').current_enemy.get_image_id_list() + ['misc/pmob_outline.png']
 
-            image_input_dict = {
+            global_manager.get('combatant_images').append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': npmob_image_id_list,
                 'coordinates': scaling.scale_coordinates(image_x, 670, global_manager),
                 'width': scaling.scale_width(150, global_manager),
@@ -1191,8 +1177,7 @@ class combat_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }
-            global_manager.get('combatant_images').append(global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager))
+            }, global_manager))
 
         super().__init__(input_dict, global_manager)
 

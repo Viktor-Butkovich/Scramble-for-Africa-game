@@ -406,16 +406,16 @@ class battalion(group):
         village.change_aggressiveness(village_aggressiveness_increase)
         if roll_result >= self.current_min_success: #if campaign succeeded
 
-            input_dict = {}
-            input_dict['coordinates'] = (self.x, self.y)
-            input_dict['grids'] = self.grids
-            input_dict['image'] = 'mobs/slave workers/default.png'
-            input_dict['name'] = 'slave workers'
-            input_dict['modes'] = ['strategic']
-            input_dict['init_type'] = 'slaves'
-            input_dict['purchased'] = False
-            input_dict['worker_type'] = 'slave' #not european - doesn't count as a European worker for upkeep
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            self.global_manager.get('actor_creation_manager').create(False, {
+                'coordinates': (self.x, self.y),
+                'grids': self.grids,
+                'image': 'mobs/slave workers/default.png',
+                'name': 'slave workers',
+                'modes': ['strategic'],
+                'init_type': 'slaves',
+                'purchased': False,
+                'worker_type': 'slave' #not european - doesn't count as a European worker for upkeep
+            }, self.global_manager)
 
             village.change_population(-1)
             if roll_result >= self.current_min_crit_success and not self.veteran:

@@ -136,14 +136,13 @@ class pmob(mob):
             string init_type='cell icon': init type of actor to create
             dictionary extra_parameters=None: dictionary of any extra parameters to pass to the created actor
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (x, y)
-        input_dict['grids'] = self.grids
-        input_dict['image'] = image_id
-        input_dict['modes'] = ['strategic']
-        input_dict['init_type'] = 'cell icon'
-        from_save = False
-        self.attached_cell_icon_list.append(self.global_manager.get('actor_creation_manager').create(from_save, input_dict, self.global_manager))
+        self.attached_cell_icon_list.append(self.global_manager.get('actor_creation_manager').create(False, {
+            'coordinates': (x, y),
+            'grids': self.grids,
+            'image': image_id,
+            'modes': ['strategic'],
+            'init_type': 'cell icon'
+        }, self.global_manager))
 
     def add_to_automatic_route(self, new_coordinates):
         '''
@@ -1410,12 +1409,14 @@ class pmob(mob):
                 self.promote()
             self.set_movement_points(0)
 
-            input_dict = {}
-            input_dict['coordinates'] = (self.x, self.y)
-            input_dict['grids'] = self.grids
-            input_dict['name'] = self.building_name
-            input_dict['modes'] = ['strategic']
-            input_dict['init_type'] = self.building_type
+            input_dict = {
+                'coordinates': (self.x, self.y),
+                'grids': self.grids,
+                'name': self.building_name,
+                'modes': ['strategic'],
+                'init_type': self.building_type
+            }
+
             if not self.building_type in ['train', 'steamboat']:
                 if self.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
                     self.images[0].current_cell.get_building(self.building_type).remove_complete()
@@ -1493,7 +1494,8 @@ class pmob(mob):
         '''
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        input_dict = {
+
+        new_die = self.global_manager.get('actor_creation_manager').create_interface_element({
             'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager),
             'width': scaling.scale_width(100, self.global_manager),
             'height': scaling.scale_height(100, self.global_manager),
@@ -1503,15 +1505,16 @@ class pmob(mob):
             'outcome_color_dict': outcome_color_dict,
             'final_result': result,
             'init_type': 'die'
-        }
-        new_die = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+        }, self.global_manager)
+
         self.attached_dice_list.append(new_die)
         if uses_minister:
             if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
             else:
                 minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-            input_dict = {
+
+            minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
                 'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager),
                 'width': scaling.scale_width(100, self.global_manager),
                 'height': scaling.scale_height(100, self.global_manager),
@@ -1519,10 +1522,9 @@ class pmob(mob):
                 'attached_minister': self.controlling_minister,
                 'minister_image_type': 'position',
                 'init_type': 'dice roll minister image'
-            }
-            minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+            }, self.global_manager)
             
-            input_dict = {
+            minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
                 'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager),
                 'width': scaling.scale_width(100, self.global_manager),
                 'height': scaling.scale_height(100, self.global_manager),
@@ -1530,8 +1532,7 @@ class pmob(mob):
                 'attached_minister': self.controlling_minister,
                 'minister_image_type': 'portrait',
                 'init_type': 'dice roll minister image'
-            }
-            minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+            }, self.global_manager)
         
     def start_repair(self, building_info_dict):
         '''

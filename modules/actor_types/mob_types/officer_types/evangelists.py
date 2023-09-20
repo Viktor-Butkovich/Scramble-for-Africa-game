@@ -201,15 +201,17 @@ class evangelist(officer):
         '''
         roll_result = self.global_manager.get('religious_campaign_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
-            input_dict = {}
-            input_dict['coordinates'] = (0, 0)
-            input_dict['grids'] = [self.global_manager.get('europe_grid')]
-            input_dict['image'] = 'mobs/church_volunteers/default.png'
-            input_dict['name'] = 'church volunteers'
-            input_dict['modes'] = ['strategic', 'europe']
-            input_dict['init_type'] = 'church_volunteers'
-            input_dict['worker_type'] = 'religious' #not european - doesn't count as a European worker for upkeep
-            church_volunteers = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+
+            church_volunteers = self.global_manager.get('actor_creation_manager').create(False, {
+                'coordinates': (0, 0),
+                'grids': [self.global_manager.get('europe_grid')],
+                'image': 'mobs/church_volunteers/default.png',
+                'name': 'church volunteers',
+                'modes': ['strategic', 'europe'],
+                'init_type': 'church_volunteers',
+                'worker_type': 'religious' #not european - doesn't count as a European worker for upkeep
+            }, self.global_manager)
+
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.global_manager.get('actor_creation_manager').create_group(church_volunteers, self, self.global_manager)

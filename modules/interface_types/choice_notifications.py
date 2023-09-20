@@ -36,20 +36,20 @@ class choice_notification(notifications.notification):
         self.choice_info_dict = input_dict['choice_info_dict']
         button_types = input_dict['button_types']
         for current_button_type_index in range(len(button_types)):
-            input_dict = {
+            if button_types[current_button_type_index] == 'recruitment':
+                init_type = 'recruitment choice button'
+            else:
+                init_type = 'choice button'
+            self.choice_buttons.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'coordinates': (self.x + (current_button_type_index * round(self.width / len(button_types))), self.y - button_height),
                 'width': round(self.width / len(button_types)),
                 'height': button_height,
                 'modes': self.modes,
                 'button_type': button_types[current_button_type_index],
                 'image_id': 'misc/paper_label.png',
-                'notification': self
-            }
-            if input_dict['button_type'] == 'recruitment':
-                input_dict['init_type'] = 'recruitment choice button'
-            else:
-                input_dict['init_type'] = 'choice button'
-            self.choice_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                'notification': self,
+                'init_type': init_type
+            }, global_manager))
         self.global_manager.set('making_choice', True)
 
     def format_message(self):

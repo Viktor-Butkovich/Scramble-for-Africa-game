@@ -182,24 +182,25 @@ def spawn_beast(global_manager):
     Output:
         None
     '''
-    input_dict = {}
-    requirements_dict = {}
-    requirements_dict['ocean_allowed'] = False
-    requirements_dict['allowed_terrains'] = global_manager.get('terrain_list') + ['water']
-    requirements_dict['nearby_buildings_allowed'] = True
-    spawn_cell = global_manager.get('strategic_map_grid').choose_cell(requirements_dict)
+    spawn_cell = global_manager.get('strategic_map_grid').choose_cell({
+        'ocean_allowed': False,
+        'allowed_terrains': global_manager.get('terrain_list') + ['water'],
+        'nearby_buildings_allowed': True
+    })
     if spawn_cell.adjacent_to_buildings():
         return() #cancel spawn if beast would spawn near buildings, become less common as colony develops
     terrain_type = spawn_cell.terrain
-    
-    input_dict['coordinates'] = (spawn_cell.x, spawn_cell.y)
-    input_dict['grids'] = [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid]
-    input_dict['modes'] = ['strategic']
-    input_dict['animal_type'] = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
-    input_dict['adjective'] = random.choice(global_manager.get('animal_adjectives'))
-    input_dict['image'] = 'mobs/beasts/' + input_dict['animal_type'] + '.png'
-    input_dict['init_type'] = 'beast'
-    global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
+    animal_type = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
+
+    global_manager.get('actor_creation_manager').create(False, {
+        'coordinates': (spawn_cell.x, spawn_cell.y),
+        'grids': [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid],
+        'modes': ['strategic'],
+        'animal_type': animal_type,
+        'adjective': random.choice(global_manager.get('animal_adjectives')),
+        'image': 'mobs/beasts/' + animal_type + '.png',
+        'init_type': 'beast'
+    }, global_manager)  
 
 def find_closest_available_worker(destination, global_manager):
     '''

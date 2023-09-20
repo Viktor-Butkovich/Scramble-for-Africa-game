@@ -483,16 +483,16 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (officer.x, officer.y)
-        input_dict['grids'] = officer.grids
-        input_dict['worker'] = worker
-        input_dict['officer'] = officer
-        input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
-        input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
-        input_dict['image'] = 'misc/empty.png'
-        input_dict['name'] = actor_utility.generate_group_name(worker, officer, global_manager) #name
-        return(self.create(False, input_dict, global_manager))
+        return(self.create(False, {
+            'coordinates': (officer.x, officer.y),
+            'grids': officer.grids,
+            'worker': worker,
+            'officer': officer,
+            'modes': officer.grids[0].modes, #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
+            'init_type': global_manager.get('officer_group_type_dict')[officer.officer_type],
+            'image': 'misc/empty.png',
+            'name': actor_utility.generate_group_name(worker, officer, global_manager)
+        }, global_manager))
 
     def create_initial_ministers(self, global_manager):
         '''
@@ -549,7 +549,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Ouptut:
             None
         '''
-        input_dict = {
+        new_die = global_manager.get('actor_creation_manager').create_interface_element({
             'coordinates': coordinates,
             'width': width,
             'height': height,
@@ -559,6 +559,5 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             'outcome_color_dict': outcome_color_dict,
             'final_result': final_result,
             'init_type': 'die'
-        }
-        new_die = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+        }, global_manager)
     
