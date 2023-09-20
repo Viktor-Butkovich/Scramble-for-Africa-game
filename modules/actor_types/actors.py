@@ -2,7 +2,7 @@
 
 import pygame
 import random
-from ..util import text_utility, notification_utility, utility, actor_utility, scaling, market_utility
+from ..util import text_utility, utility, actor_utility, scaling, market_utility
 
 class actor():
     '''
@@ -289,7 +289,9 @@ class actor():
             #this part of function only reached if no inventory attrition was triggered
             if self.actor_type == 'mob' and self.is_pmob and self.is_group and self.group_type == 'porters' and (not self.veteran) and random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6: #1/36 chance of porters promoting on successful inventory attrition roll
                 self.promote()
-                notification_utility.display_notification('By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.', 'default', self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': 'By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.',
+                })
 
     def trigger_inventory_attrition(self, transportation_minister, stealing = False): #later add input to see if corruption or real attrition to change how much minister has stolen
         '''
@@ -359,13 +361,9 @@ class actor():
             if self.actor_type == 'tile':
                 transportation_minister.display_message('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' ' + location_message + ' ' +
                     was_word + ' lost, damaged, or misplaced. /n /n')
-                #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' ' + location_message + ' ' +
-                #    was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
             elif self.actor_type == 'mob':
                 transportation_minister.display_message('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
                     self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n')
-                #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
-                #    self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
         if stealing and value_stolen > 0:
             transportation_minister.steal_money(value_stolen, 'inventory_attrition')
     

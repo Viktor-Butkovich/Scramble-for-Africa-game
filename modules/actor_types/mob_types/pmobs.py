@@ -3,7 +3,7 @@
 import pygame
 import random
 from ..mobs import mob
-from ...util import text_utility, utility, actor_utility, notification_utility, scaling, dice_utility, turn_management_utility, minister_utility
+from ...util import text_utility, utility, actor_utility, scaling, dice_utility, turn_management_utility, minister_utility
 from ...constructs import images
 
 class pmob(mob):
@@ -445,13 +445,21 @@ class pmob(mob):
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
-                notification_utility.display_zoom_notification(text, self.images[0].current_cell.tile, self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': text,
+                    'zoom_destination': self.images[0].current_cell.tile,
+                })
+
             self.temp_disable_movement()
             self.replace()
             self.death_sound('violent')
         else:
             if show_notification:
-                notification_utility.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')',
+                    'zoom_destination': self.images[0].current_cell.tile,
+                })
+
             self.die()
 
     def generate_attrition_replacement_text(self):
@@ -839,8 +847,12 @@ class pmob(mob):
             num_dice = 3
         else:
             num_dice = 2
-            
-        notification_utility.display_notification(message, 'combat', self.global_manager, num_dice)
+
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'num_dice': num_dice,
+            'notification_type': 'combat'
+        })
         if self.is_battalion or self.is_safari:
             self.global_manager.get('sound_manager').play_sound('bolt_action_1')
         self.combat() #later call next step when closing combat action notification instead of immediately
@@ -914,9 +926,17 @@ class pmob(mob):
         else:
             text += 'The outcome will be based on the difference between your roll and the enemy\'s roll. /n /n'
 
-        notification_utility.display_notification(text + 'Click to roll. ', 'combat', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to roll. ',
+            'num_dice': num_dice,
+            'notification_type': 'combat'
+        })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
         allow_promotion = False
@@ -1004,7 +1024,11 @@ class pmob(mob):
         text += 'Overall result: /n'
         text += str(own_roll + own_combat_modifier) + ' - ' + str(enemy_roll + enemy_combat_modifier) + ' = ' + str(overall_result) + ': ' + description + ' /n' #1 - 6 = -5: DEFEAT
         
-        notification_utility.display_notification(text + 'Click to continue.', 'combat', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'combat'
+        })
 
         text += '/n'
         if conclusion == 'win':
@@ -1090,7 +1114,10 @@ class pmob(mob):
             elif self.is_safari:
                 self.just_promoted = True
                 text += ' This safari\'s hunter is now a veteran. /n /n'
-        notification_utility.display_notification(text + ' Click to remove this notification.', 'final_combat', self.global_manager)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + ' Click to remove this notification.',
+            'notification_type': 'final_combat'
+        })
         self.global_manager.set('combat_result', [self, conclusion])
 
     def complete_combat(self):
@@ -1112,8 +1139,9 @@ class pmob(mob):
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
                 elif not self.movement_points >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
-                    notification_utility.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
-                        'default', self.global_manager)
+                    self.global_manager.get('notification_manager').display_notification({
+                        'message': 'While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
+                    })
                     self.retreat()
                 enemy.die()
                 if not enemy.npmob_type == 'beast':
@@ -1245,9 +1273,13 @@ class pmob(mob):
         else:
             message += 'Placeholder building description'
         message += ' /n /n'
-            
-        notification_utility.display_choice_notification(message, ['start construction', 'stop construction'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-        
+ 
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['start construction', 'stop construction'],
+            'extra_parameters': choice_info_dict
+        })
+
     def construct(self):
         '''
         Description:
@@ -1282,12 +1314,24 @@ class pmob(mob):
 
         text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + text_utility.remove_underscores(self.building_name) + '. /n /n'
         if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'construction'
+            })
         else:
             text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'construction'
+            })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -1323,8 +1367,12 @@ class pmob(mob):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_utility.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
-            
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'construction'
+        })
+
         text += '/n'
         if roll_result >= self.current_min_success:
             text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + text_utility.remove_underscores(self.building_name) + '. /n'
@@ -1336,10 +1384,15 @@ class pmob(mob):
             text += ' /nThe ' + self.officer.name + ' managed the ' + noun + ' well enough to become a veteran. /n'
         if roll_result >= 4:
             success = True
-            notification_utility.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + ' /nClick to remove this notification.',
+                'notification_type': 'final_construction'
+            })
         else:
             success = False
-            notification_utility.display_notification(text, 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
         self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])
         
     def complete_construction(self):
@@ -1496,7 +1549,11 @@ class pmob(mob):
         message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
         message += 'If successful, the ' + text_utility.remove_underscores(self.building_name) + ' will be restored to full functionality. /n /n'
             
-        notification_utility.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['start repair', 'stop repair'],
+            'extra_parameters': choice_info_dict
+        })
 
     def repair(self):
         '''
@@ -1521,12 +1578,24 @@ class pmob(mob):
         text = ''
         text += 'The ' + self.name + ' attempts to repair the ' + text_utility.remove_underscores(self.building_name) + '. /n /n'
         if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'construction'
+            })
         else:
             text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'construction'
+            })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -1560,7 +1629,11 @@ class pmob(mob):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_utility.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'construction'
+        })
             
         text += '/n'
         if roll_result >= self.current_min_success: #3+ required on D6 for repair
@@ -1573,10 +1646,15 @@ class pmob(mob):
             text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
             success = True
-            notification_utility.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + ' /nClick to remove this notification.',
+                'notification_type': 'final_construction'
+            })
         else:
             success = False
-            notification_utility.display_notification(text, 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
         self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])  
 
     def complete_repair(self):

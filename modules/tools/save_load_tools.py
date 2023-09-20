@@ -2,7 +2,7 @@
 
 import random
 import pickle
-from ..util import scaling, notification_utility, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility
+from ..util import scaling, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility, tutorial_utility
 from ..interface_types import grids
 from . import data_managers
 
@@ -202,7 +202,7 @@ class save_load_manager_template():
         if not self.global_manager.get('effect_manager').effect_active('skip_intro'):
             self.global_manager.set('minister_appointment_tutorial_completed', False)
             self.global_manager.set('exit_minister_screen_tutorial_completed', False)
-            notification_utility.show_tutorial_notifications(self.global_manager)
+            tutorial_utility.show_tutorial_notifications(self.global_manager)
         else:
             self.global_manager.set('minister_appointment_tutorial_completed', True)
             self.global_manager.set('exit_minister_screen_tutorial_completed', True)
@@ -400,6 +400,6 @@ class save_load_manager_template():
         for current_completed_lore_type in self.global_manager.get('completed_lore_mission_types'):
             self.global_manager.get('lore_types_effects_dict')[current_completed_lore_type].apply()
 
-        notification_utility.show_tutorial_notifications(self.global_manager)
+        tutorial_utility.show_tutorial_notifications(self.global_manager)
 
         self.global_manager.set('loading_save', False)

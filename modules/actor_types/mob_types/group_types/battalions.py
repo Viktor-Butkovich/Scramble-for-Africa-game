@@ -3,8 +3,7 @@
 import time
 import random
 from ..groups import group
-from ...tiles import tile
-from ....util import actor_utility, utility, notification_utility, text_utility, dice_utility, market_utility
+from ....util import actor_utility, utility, text_utility, dice_utility, market_utility
 
 class battalion(group):
     '''
@@ -150,11 +149,17 @@ class battalion(group):
                         message = 'RISK: DEADLY /n /n' + message
 
                     if defender.npmob_type == 'beast':
-                        notification_utility.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to hunt the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
-                            ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                        self.global_manager.get('notification_manager').display_notification({
+                            'message': message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to hunt the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
+                            'choices': ['attack', 'stop attack'],
+                            'extra_parameters': choice_info_dict
+                        })
                     else:
-                        notification_utility.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attack the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
-                            ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                        self.global_manager.get('notification_manager').display_notification({
+                            'message': message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attack the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
+                            'choices': ['attack', 'stop attack'],
+                            'extra_parameters': choice_info_dict
+                        })
                     self.global_manager.set('ongoing_action', True)
                     self.global_manager.set('ongoing_action_type', 'combat')
                     self.create_cell_icon(self.x + x_change, self.y + y_change, 'misc/attack_mark/' + direction + '.png')
@@ -243,7 +248,11 @@ class battalion(group):
         self.current_roll_modifier = 0
         self.global_manager.set('ongoing_action', True)
         self.global_manager.set('ongoing_action_type', 'slave_capture')
-        notification_utility.display_choice_notification(message, ['start capture slaves', 'stop capture slaves'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['start capture slaves', 'stop capture slaves'],
+            'extra_parameters': choice_info_dict
+        })
 
     def capture_slaves(self):
         '''
@@ -271,12 +280,24 @@ class battalion(group):
         text += 'The battalion tries to capture the natives as slaves. /n /n'
 
         if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'slave_capture', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'slave_capture'
+            })
         else:
             text += ('The veteran major can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'slave_capture', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'slave_capture'
+            })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -326,7 +347,11 @@ class battalion(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_utility.display_notification(text + 'Click to continue.', 'slave_capture', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'slave_capture'
+        })
             
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -353,9 +378,14 @@ class battalion(group):
             text += '/nRumors of your company\'s brutal treatment of the natives reaches Europe, decreasing public opinion by ' + str(-1 * public_opinion_decrease) + '. /n'
 
         if roll_result >= self.current_min_success:
-            notification_utility.display_notification(text + '/nClick to remove this notification.', 'final_slave_capture', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + '/nClick to remove this notification.',
+                'notification_type': 'final_slave_capture'
+            })
         else:
-            notification_utility.display_notification(text, 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
         self.global_manager.set('capture_slaves_result', [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])
 
     def complete_capture_slaves(self):
@@ -445,7 +475,11 @@ class battalion(group):
         self.current_roll_modifier = 0
         self.global_manager.set('ongoing_action', True)
         self.global_manager.set('ongoing_action_type', 'slave_trade_suppression')
-        notification_utility.display_choice_notification(message, ['start suppress slave trade', 'stop suppress slave trade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['start suppress slave trade', 'stop suppress slave trade'],
+            'extra_parameters': choice_info_dict
+        })
 
     def suppress_slave_trade(self):
         '''
@@ -472,12 +506,24 @@ class battalion(group):
         text += 'The battalion tries to suppress the slave trade. /n /n'
 
         if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'suppress_slave_trade', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'suppress_slave_trade'
+            })
         else:
             text += ('The veteran major can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'slave_capture', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'suppress_slave_trade'
+            })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -527,7 +573,11 @@ class battalion(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_utility.display_notification(text + 'Click to continue.', 'suppress_slave_trade', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'suppress_slave_trade'
+        })
             
         text += '/n'
         public_opinion_increase = 0
@@ -551,9 +601,14 @@ class battalion(group):
 
 
         if roll_result >= self.current_min_success:
-            notification_utility.display_notification(text + '/nClick to remove this notification.', 'final_suppress_slave_trade', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + '/nClick to remove this notification.',
+                'notification_type': 'final_suppress_slave_trade'
+            })
         else:
-            notification_utility.display_notification(text, 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
         self.global_manager.set('suppress_slave_trade_result', [self, roll_result, public_opinion_increase, strength_decrease])
 
     def complete_suppress_slave_trade(self):
@@ -588,7 +643,9 @@ class battalion(group):
                 for current_pmob in self.global_manager.get('pmob_list'):
                     if current_pmob.is_worker and current_pmob.worker_type == 'slave':
                         current_pmob.set_automatically_replace(False)
-                notification_utility.display_notification(text, 'none', self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': text,
+                })
             self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()

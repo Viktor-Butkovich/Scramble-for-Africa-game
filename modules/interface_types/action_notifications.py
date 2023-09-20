@@ -538,7 +538,7 @@ class public_relations_campaign_notification(action_notification):
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                 current_minister_image.remove_complete()
             self.global_manager.get('public_relations_campaign_result')[0].complete_public_relations_campaign()
-            
+
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 

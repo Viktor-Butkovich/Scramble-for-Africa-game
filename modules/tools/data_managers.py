@@ -556,12 +556,6 @@ class notification_manager_template():
             None
         '''
         self.notification_queue = []
-        self.notification_type_queue = []
-        self.notification_dice_queue = []
-        self.notification_sound_queue = []
-        self.choice_notification_choices_queue = []
-        self.choice_notification_info_dict_queue = []
-        self.minister_message_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
@@ -576,18 +570,12 @@ class notification_manager_template():
             None
         '''
         self.notification_width = 500
-        self.notification_height = 300 #300 #500#600
-        self.notification_y = 500#236#186
-        #height_difference = notification_height - self.notification_height
-        #if height_difference > 0: #if notification height greater than default notification height
-        #    self.notification_y -= (height_difference / 2) #lower by half of height change
-        #    self.notification_height += height_difference #increase height by height change
-            #should change top and bottom locations while keeping same center
+        self.notification_height = 300
+        self.notification_y = 500
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
             self.notification_x = self.global_manager.get('minimap_grid_x') - (self.notification_width + 40)
         else: #show notifications in center on europe mode
             self.notification_x = 610
-        #self.notification_height = 300
         if notification_height > self.notification_height:
             self.notification_height = notification_height
         self.notification_y -= self.notification_height / 2
@@ -618,11 +606,7 @@ class notification_manager_template():
             next_line = ''
         next_line += next_word
         new_message.append(next_line)
-        #new_height = len(new_message) * font_size #scaling.scale_height(25, self.global_manager) #font size
-        #print(len(new_message))
         return(new_message)
-        #if new_height > self.minimum_height:
-        #    self.height = new_height
     '''
     def get_notification_height(self, notification_text):
         
@@ -662,23 +646,54 @@ class notification_manager_template():
         new_message.append('Click to remove this notification.')
         return(len(new_message) * font_size)#self.message = new_message
     '''
-    def notification_to_front(self, message):
+
+    def display_notification(self, input_dict): #default, exploration, or roll
+        '''
+        Description:
+            Adds a future notification to the notification queue with the inputted text and type. If other notifications are already in the notification queue, adds this notification to the back, causing it to appear last. When a
+                notification is closed, the next notification in the queue is shown
+        Input:
+            dictionary notification_dict: Dictionary containing details regarding the notification, with 'message' being the only required parameter
+        Output:
+            None
+        '''
+        if self.notification_queue or self.global_manager.get('displayed_notification') != 'none':
+            self.notification_queue.append(input_dict)
+        else:
+            self.notification_to_front(input_dict)
+
+    def notification_to_front(self, notification_dict):
         '''
         Description:
             Displays and returns new notification with text matching the inputted string and a type based on what is in the front of this object's notification type queue
         Input:
-            string message: The text to put in the displayed notification
+            dictionary notification_dict: Dictionary containing details regarding the notification, with 'message' being the only required parameter
         Output:
             Notification: Returns the created notification
         '''
-        height = len(self.format_message(message)) * (self.global_manager.get('default_font_size') + 10)
+        message = notification_dict['message'] #message should be the only required parameter
+
+        height = len(self.format_message(message)) * (self.global_manager.get('default_font_size') + 10) #maybe font size is being scaled incorrectly here?
         self.update_notification_layout(height)
 
-        notification_type = self.notification_type_queue.pop(0)
-        notification_dice = self.notification_dice_queue.pop(0) #number of dice of selected mob to show when notification is visible
-        if self.notification_sound_queue[0]:
-            self.global_manager.get('sound_manager').play_sound(self.notification_sound_queue[0])
-        self.notification_sound_queue.pop(0)
+        if 'notification_type' in notification_dict:
+            notification_type = notification_dict['notification_type']
+        elif 'choices' in notification_dict:
+            notification_type = 'choice'
+        elif 'zoom_destination' in notification_dict:
+            notification_type = 'zoom'
+        else:
+            notification_type = 'default'
+
+        if 'num_dice' in notification_dict:
+            notification_dice = notification_dict['num_dice']
+        else:
+            notification_dice = 0
+
+        if 'extra_parameters' in notification_dict and notification_dict['extra_parameters'] != 'none':
+            extra_parameters = notification_dict['extra_parameters']
+        else:
+            extra_parameters = None
 
         input_dict = {
             'coordinates': scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager),
@@ -688,7 +703,8 @@ class notification_manager_template():
             'image_id': 'misc/default_notification.png',
             'message': message,
             'notification_dice': notification_dice,
-            'init_type': 'action notification'
+            'init_type': 'action notification',
+            'extra_parameters': extra_parameters
         }
 
         if notification_type == 'roll':
@@ -786,22 +802,25 @@ class notification_manager_template():
         elif notification_type == 'choice':
             del input_dict['notification_dice']
             input_dict['init_type'] = 'choice notification'
-            input_dict['button_types'] = self.choice_notification_choices_queue.pop(0)
-            input_dict['choice_info_dict'] = self.choice_notification_info_dict_queue.pop(0)
+            input_dict['button_types'] = notification_dict['choices']
+            input_dict['choice_info_dict'] = input_dict['extra_parameters']
         elif notification_type == 'zoom':
             del input_dict['notification_dice']
             input_dict['init_type'] = 'zoom notification'
-            input_dict['target'] = self.choice_notification_choices_queue.pop(0) #repurposing communication method used for choice notifications to tell notification which target
-            self.choice_notification_info_dict_queue.pop(0)  
+            input_dict['target'] = notification_dict['zoom_destination']
         elif notification_type == 'minister':
             del input_dict['notification_dice']
             input_dict['init_type'] = 'minister notification'
-            input_dict['attached_minister'] = self.minister_message_queue.pop(0)
+            input_dict['attached_minister'] = notification_dict['attached_minister']
 
         new_notification = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         if notification_type == 'roll':
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()
+
+        if 'audio' in notification_dict and notification_dict['audio'] != 'none':
+            self.global_manager.get('sound_manager').play_sound(notification_dict['audio'])
+
         return(new_notification)
 
 class sound_manager_template():

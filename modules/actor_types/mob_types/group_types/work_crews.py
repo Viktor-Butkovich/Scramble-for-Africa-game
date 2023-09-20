@@ -2,7 +2,7 @@
 
 import random
 from ..groups import group
-from ....util import actor_utility, utility, market_utility, notification_utility
+from ....util import actor_utility, utility, market_utility
 
 class work_crew(group):
     '''
@@ -105,7 +105,10 @@ class work_crew(group):
                             self.promote()
                             message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
                             message += ') has become a veteran and will be more successful in future production attempts.'
-                            notification_utility.display_zoom_notification(message, building.cell.tile, self.global_manager)
+                            self.global_manager.get('notification_manager').display_notification({
+                                'message': message,
+                                'zoom_destination': building.cell.tile,
+                            })
                     else:
                         value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
             if value_stolen > 0:

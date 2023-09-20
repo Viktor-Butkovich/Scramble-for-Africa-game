@@ -16,3 +16,15 @@ except Exception: #displays error message and records error message in crash log
     manage_crash(Exception)
 
 # tasks:
+# look into adding text on map, such as village names - should be a generalizable procedure that works similarly to tile images or cell icons, with some way to easily
+#   create a rendered text object with a string message and offset parameters
+# look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
+# action notifications rework - current design of each action having a different notification class and type with its own choice button types to do very similar
+#   functionality is very inefficient and impedes future development - there should be a single action notification class that can accept an input dictionary with values
+#   that any individualized behaviors rely on
+# fix double minister image on capture slaves notifications
+# fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
+# continue replacing instances of notification_utility.display_notification(, also need to replace choice and zoom notifications (and maybe minister message)
+# restrict notification queue manipulation to the notification manager - removing notification should just tell notification manager to check for queued notifications,
+#   rather than directly handling the notification queue all over the program - a notification_dict should be popped the moment it is used to make a notification
+# ^until this is correctly implemented, essentially all action notifications will be broken

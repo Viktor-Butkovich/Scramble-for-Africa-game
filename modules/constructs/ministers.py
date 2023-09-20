@@ -2,7 +2,7 @@
 
 import random
 import os
-from ..util import utility, actor_utility, minister_utility, notification_utility, scaling
+from ..util import tutorial_utility, utility, actor_utility, minister_utility, scaling
 from . import images
 
 class minister():
@@ -211,7 +211,7 @@ class minister():
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
             self.tooltip_text.append('If not reappointed by the end of the turn, they will be permanently fired, incurring a large public opinion penalty.')
 
-    def display_message(self, text, audio=''):
+    def display_message(self, text, audio='none'):
         '''
         Description:
             Displays a notification message from this minister with an attached portrait
@@ -225,8 +225,13 @@ class minister():
             self, 'position', self.global_manager, True)
         minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
             self, 'portrait', self.global_manager, True)
-        self.global_manager.get('notification_manager').minister_message_queue.append(self)
-        notification_utility.display_notification(text, 'minister', self.global_manager, 0, audio=audio)
+
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text,
+            'notification_type': 'minister',
+            'audio': audio,
+            'attached_minister': self
+        })
 
     def steal_money(self, value, theft_type = 'none'):
         '''
@@ -506,7 +511,7 @@ class minister():
                     completed = False
             if completed:
                 self.global_manager.set('minister_appointment_tutorial_completed', True)
-                notification_utility.show_tutorial_notifications(self.global_manager)
+                tutorial_utility.show_tutorial_notifications(self.global_manager)
 
     def skill_setup(self):
         '''
@@ -947,7 +952,7 @@ class minister():
             None
         '''
         text = ''
-        audio = ''
+        audio = 'none'
         public_opinion_change = 0
 
         if self.status_number >= 3:

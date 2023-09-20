@@ -134,11 +134,9 @@ class minister_notification(notification):
             None
         '''
         super().remove()
-        num_removed = 0
         for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-            if current_minister_image.attached_minister == self.attached_minister and num_removed < 2: #each minister message has up to 2 images
+            if current_minister_image.attached_minister == self.attached_minister:
                 current_minister_image.remove_complete()
-                num_removed += 1
         
 class zoom_notification(notification):
     '''

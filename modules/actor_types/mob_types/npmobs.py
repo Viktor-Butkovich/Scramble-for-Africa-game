@@ -2,7 +2,7 @@
 
 import random
 from ..mobs import mob
-from ...util import utility, turn_management_utility, notification_utility
+from ...util import utility, turn_management_utility
 
 class npmob(mob): #if enemy.turn_done
     '''
@@ -157,7 +157,9 @@ class npmob(mob): #if enemy.turn_done
             
         noncombatants = current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
-            notification_utility.display_notification('The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': 'The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
+            })
             current_noncombatant.die()
 
     def damage_buildings(self):
@@ -176,7 +178,9 @@ class npmob(mob): #if enemy.turn_done
         
         for current_building in current_cell.get_intact_buildings():
             if current_building.can_damage():
-                notification_utility.display_notification('The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': 'The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
+                })
                 current_building.set_damaged(True)
             
     def end_turn_move(self):

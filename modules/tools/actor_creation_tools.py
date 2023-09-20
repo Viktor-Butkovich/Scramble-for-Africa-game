@@ -11,7 +11,7 @@ from ..interface_types import dice, buttons, labels, panels, notifications, choi
 from ..actor_display_tools import buttons as actor_display_buttons
 from ..actor_display_tools import labels as actor_display_labels
 from ..constructs import ministers, lore_missions
-from ..util import notification_utility, utility, actor_utility, market_utility
+from ..util import utility, actor_utility, market_utility
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -435,7 +435,11 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         actor_utility.update_recruitment_descriptions(global_manager, recruitment_type)
         message += global_manager.get('recruitment_string_descriptions')[recruitment_type]
         
-        notification_utility.display_choice_notification(message, ['recruitment', 'none'], choice_info_dict, global_manager) #message, choices, choice_info_dict, global_manager
+        global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['recruitment', 'none'],
+            'extra_parameters': choice_info_dict
+        })
 
     def create_group(self, worker, officer, global_manager): #use when merging groups. At beginning of game, instead of using this, create a group which creates its worker and officer and merges them
         '''

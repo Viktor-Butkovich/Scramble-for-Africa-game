@@ -2,7 +2,7 @@
 
 import random
 from ..interface_types.buttons import button
-from ..util import main_loop_utility, utility, actor_utility, minister_utility, trial_utility, text_utility, game_transitions, notification_utility
+from ..util import main_loop_utility, utility, actor_utility, minister_utility, trial_utility, text_utility, game_transitions
 
 class embark_all_passengers_button(button):
     '''
@@ -2711,7 +2711,10 @@ class remove_minister_button(button):
                     text += appointed_minister.name + ' is of high social status, and firing him would reflect particularly poorly on your company. /n /n'
             elif appointed_minister.status_number == 1:
                 text += appointed_minister.name + ' is of low social status, and firing him would have a relatively minimal impact on your company\'s reputation. /n /n'
-            notification_utility.display_choice_notification(text, ['confirm remove minister', 'none'], {}, self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+                'choices': ['confirm remove minister', 'none']
+            })
         else:
             text_utility.print_to_screen('You are busy and cannot remove a minister.', self.global_manager)
 

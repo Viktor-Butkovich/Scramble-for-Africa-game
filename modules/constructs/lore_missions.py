@@ -1,7 +1,7 @@
 #Contains functionality for lore missions
 
 import random
-from ..util import utility, notification_utility
+from ..util import utility
 
 class lore_mission():
     '''
@@ -61,7 +61,9 @@ class lore_mission():
             self.artifact_location = random.choice(self.possible_artifact_locations)
             text = 'A new ' + self.lore_type + ' mission has been issued by the ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society'
             text += ' to find the ' + self.name + '. /n /n'
-            notification_utility.display_notification(text, 'none', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
 
         if self.global_manager.get('effect_manager').effect_active('show_lore_mission_locations'):
             print('new mission for ' + self.name)

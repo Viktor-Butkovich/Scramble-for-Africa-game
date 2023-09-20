@@ -3,7 +3,7 @@
 import pygame
 import time
 from ..constructs import images
-from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, notification_utility, game_transitions, \
+from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
     minister_utility, trial_utility
 from . import interface_elements
 
@@ -1067,9 +1067,18 @@ class button(interface_elements.interface_element):
                         if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
                             text = 'The warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
                             text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
-                            notification_utility.display_zoom_notification(text, current_cell.tile, self.global_manager)
+                            self.global_manager.get('notification_manager').display_notification({
+                                'message': text,
+                                'zoom_destination': current_cell.tile,
+                            })
                     choice_info_dict = {'type': 'end turn'}
-                    notification_utility.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+                    self.global_manager.get('notification_manager').display_notification({
+                        'message': 'Are you sure you want to end your turn? ',
+                        'choices': ['end turn', 'none'],
+                        'extra_parameters': choice_info_dict
+                    })
+
             else:
                 text_utility.print_to_screen('You are busy and cannot end your turn.', self.global_manager)
     
@@ -1106,7 +1115,9 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'save game':
             if main_loop_utility.action_possible(self.global_manager):
                 self.global_manager.get('save_load_manager').save_game('save1.pickle')
-                notification_utility.display_notification('Game successfully saved to save1.pickle /n /n', 'default', self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': 'Game successfully saved to save1.pickle /n /n',
+                })
             else:
                 text_utility.print_to_screen('You are busy and cannot save the game', self.global_manager)
 
@@ -1140,7 +1151,9 @@ class button(interface_elements.interface_element):
             if num_freed > 0:
                 message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
                 message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
-                notification_utility.display_notification(message, 'default', self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': message,
+                })
             else:
                 text_utility.print_to_screen('Your company has no slaves to free.', self.global_manager)
 
@@ -1702,7 +1715,12 @@ class fire_unit_button(button):
                         message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
                     elif self.attached_mob.worker_type == 'slave':
                         message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-                notification_utility.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': message,
+                    'choices': ['fire', 'cancel']
+                })
+
         else:
             text_utility.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
 
@@ -1782,7 +1800,10 @@ class free_unit_slaves_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
                 message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
-                notification_utility.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': message,
+                    'choices': ['free', 'cancel']
+                })
         else:
             text_utility.print_to_screen('You are busy and cannot free slaves', self.global_manager)
 
@@ -1871,13 +1892,20 @@ class switch_game_mode_button(button):
                     if defense.fabricated_evidence > 0:
                         text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
                         text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
-                        notification_utility.display_notification(text, 'default', self.global_manager)
+                        self.global_manager.get('notification_manager').display_notification({
+                            'message': text,
+                        })
                     if self.global_manager.get('prosecution_bribed_judge'):
                         text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
-                        notification_utility.display_notification(text, 'default', self.global_manager)
+                        self.global_manager.get('notification_manager').display_notification({
+                            'message': text,
+                        })
                 
                 if self.to_mode == 'main_menu':
-                    notification_utility.display_choice_notification('Are you sure you want to exit to the main menu without saving? /n /n', ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    self.global_manager.get('notification_manager').display_notification({
+                        'message': 'Are you sure you want to exit to the main menu without saving? /n /n',
+                        'choices': ['confirm main menu', 'none']
+                    })
                 elif not self.to_mode == 'previous':
                     game_transitions.set_game_mode(self.to_mode, self.global_manager)
                 else:
@@ -2322,7 +2350,9 @@ class show_previous_financial_report_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            notification_utility.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': self.global_manager.get('previous_financial_report'),
+            })
         else:
             text_utility.print_to_screen('You are busy and cannot view the last turn\'s financial report', self.global_manager)
 

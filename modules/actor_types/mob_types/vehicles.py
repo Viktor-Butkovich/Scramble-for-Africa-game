@@ -3,9 +3,7 @@
 import random
 
 from .pmobs import pmob
-from ...util import text_utility
-from ...util import actor_utility
-from ...util import notification_utility
+from ...util import text_utility, actor_utility
 
 class vehicle(pmob):
     '''
@@ -157,7 +155,10 @@ class vehicle(pmob):
                                 current_sub_mob.death_sound('violent')
                             else:
                                 non_replaced_attrition.append(current_sub_mob)
-                            notification_utility.display_zoom_notification(text, self, self.global_manager)
+                            self.global_manager.get('notification_manager').display_notification({
+                                'message': text,
+                                'zoom_destination': self,
+                            })
         for current_mob in non_replaced_attrition:
             current_sub_mob.disembark_vehicle(self)
             current_sub_mob.attrition_death(False)
@@ -179,7 +180,10 @@ class vehicle(pmob):
             self.temp_disable_movement()
         else:
             crew.attrition_death(False)
-        notification_utility.display_zoom_notification(text, self, self.global_manager)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text,
+            'zoom_destination': self,
+        })
         crew.death_sound('violent')
 
 

@@ -2,7 +2,7 @@
 
 import random
 from ..officers import officer
-from ....util import actor_utility, notification_utility, dice_utility
+from ....util import actor_utility, dice_utility
 
 class evangelist(officer):
     '''
@@ -74,8 +74,12 @@ class evangelist(officer):
             message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
             message = 'RISK: DEADLY /n /n' + message
-            
-        notification_utility.display_choice_notification(message, ['start religious campaign', 'stop religious campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['start religious campaign', 'stop religious campaign'],
+            'extra_parameters': choice_info_dict
+        })
 
     def religious_campaign(self): #called when start religious campaign clicked in choice notification
         '''
@@ -100,13 +104,25 @@ class evangelist(officer):
         actor_utility.double_action_price(self.global_manager, 'religious_campaign')
         text = ''
         text += 'The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n'
-        if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'religious_campaign', self.global_manager, num_dice)
+        if not self.veteran:
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'religious_campaign'
+            })
         else:
             text += ('The veteran evangelist can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'religious_campaign', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'religious_campaign'
+            })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -142,7 +158,11 @@ class evangelist(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_utility.display_notification(text + 'Click to continue.', 'religious_campaign', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'religious_campaign'
+        })
             
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -157,10 +177,16 @@ class evangelist(officer):
             text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
         if roll_result >= 4:
             success = True
-            notification_utility.display_notification(text + 'Click to remove this notification.', 'final_religious_campaign', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to remove this notification.',
+                'num_dice': num_dice,
+                'notification_type': 'final_religious_campaign'
+            })
         else:
             success = False
-            notification_utility.display_notification(text, 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
         self.global_manager.set('religious_campaign_result', [self, roll_result, success])
 
     def complete_religious_campaign(self):
@@ -232,8 +258,12 @@ class evangelist(officer):
             message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
             message = 'RISK: DEADLY /n /n' + message
-            
-        notification_utility.display_choice_notification(message, ['start public relations campaign', 'stop public relations campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+        self.global_manager.get('notification_manager').display_notification({
+            'message': message,
+            'choices': ['start public relations campaign', 'stop public relations campaign'],
+            'extra_parameters': choice_info_dict
+        })
 
     def public_relations_campaign(self):
         '''
@@ -259,12 +289,24 @@ class evangelist(officer):
         text = ''
         text += 'The evangelist campaigns to increase your company\'s public opinion with word of your company\'s benevolent goals and righteous deeds in Africa. /n /n'
         if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'public_relations_campaign', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'public_relations_campaign'
+            })
         else:
             text += ('The veteran evangelist can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'public_relations_campaign', self.global_manager, num_dice)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'num_dice': num_dice,
+                'notification_type': 'public_relations_campaign'
+            })
 
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Rolling... ',
+            'num_dice': num_dice,
+            'notification_type': 'roll'
+        })
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -298,8 +340,12 @@ class evangelist(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_utility.display_notification(text + 'Click to continue.', 'public_relations_campaign', self.global_manager, num_dice)
-            
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to continue.',
+            'num_dice': num_dice,
+            'notification_type': 'public_relations_campaign'
+        })
+
         text += '/n'
         public_relations_change = 0
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -314,9 +360,14 @@ class evangelist(officer):
             self.just_promoted = True
             text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
         if roll_result >= 4:
-            notification_utility.display_notification(text + 'Click to remove this notification.', 'final_public_relations_campaign', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text + 'Click to remove this notification.',
+                'notification_type': 'final_public_relations_campaign'
+            })
         else:
-            notification_utility.display_notification(text, 'default', self.global_manager)
+            self.global_manager.get('notification_manager').display_notification({
+                'message': text,
+            })
         self.global_manager.set('public_relations_campaign_result', [self, roll_result, public_relations_change])
 
     def complete_public_relations_campaign(self):
