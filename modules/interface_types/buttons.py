@@ -3,7 +3,7 @@
 import pygame
 import time
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
-    minister_utility, trial_utility
+    minister_utility, trial_utility, action_utility
 from . import interface_elements
 
 class button(interface_elements.interface_element):
@@ -442,11 +442,6 @@ class button(interface_elements.interface_element):
                               'If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages',
                               'Costs all remaining movement points, at least 1',
                               'Each religious campaign attempted doubles the cost of other religious campaigns in the same turn'])
-
-        elif self.button_type == 'public relations campaign':
-            self.set_tooltip(['Attempts to spread word of your company\'s benevolent goals and righteous deeds in Africa for ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money',
-                              'Can only be done in Europe', 'If successful, increases your company\'s public opinion', 'Costs all remaining movement points, at least 1',
-                              'Each public relations campaign attempted doubles the cost of other public relations campaigns in the same turn'])
 
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(['Attempts to advertise a chosen commodity and increase its price for for ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money',
@@ -1223,8 +1218,7 @@ class button(interface_elements.interface_element):
         elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop public relations campaign', 'stop advertising campaign', 
                                   'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
                                   'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
-            self.global_manager.set('ongoing_action', False)
-            self.global_manager.set('ongoing_action_type', 'none')
+            action_utility.cancel_ongoing_actions(self.global_manager)
             if self.button_type == 'stop attack':
                 self.notification.choice_info_dict['battalion'].clear_attached_cell_icons()
             elif self.button_type in ['stop loan search', 'decline loan offer']:
@@ -2632,3 +2626,152 @@ class cycle_autofill_button(button):
         self.parent_collection.search_start_index = current_cell.contained_mobs.index(self.parent_collection.autofill_actors[self.autofill_target_type]) + 1
         self.parent_collection.calibrate(self.global_manager.get('displayed_mob'))
         #start autofill search for corresponding target type at index right after the current target actor
+
+
+class action_button(button):
+    '''
+    Customizable button with basic functionality entirely determined by the functions mapped to by its corresponding action function
+    '''
+    def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'attached_label': label value - Label that this button is attached to, optional except for label-specific buttons, like disembarking a particular passenger
+                    based on which passenger label the button is attached to
+                'corresponding_action': function value - Function that this button references for all of its basic functionality - depending on the input,
+                    like 'can_show' or 'on_click', this function maps to other local functions of the matching name with any passed arguments
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.corresponding_action = input_dict['corresponding_action']
+        input_dict['button_type'] = 'action'
+        super().__init__(input_dict, global_manager)
+    
+    def can_show(self, skip_parent_collection=False):
+        '''
+        Description:
+            Returns whether this button can be shown, depending on its mapped 'can_show' function
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button can appear, otherwise returns False
+        '''
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.corresponding_action('can_show', self.global_manager))
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its mapped 'update_tooltip' function
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_tooltip(self.corresponding_action('update_tooltip', self.global_manager))
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on this button's mapped 'on_click' function
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.corresponding_action('on_click', self.global_manager.get('displayed_mob'), self.global_manager)
+
+class anonymous_button(button):
+    '''
+    Customizable button with basic functionality entirely determined by its button_type input dictionary
+    '''
+    def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'attached_label': label value - Label that this button is attached to, optional except for label-specific buttons, like disembarking a particular passenger
+                    based on which passenger label the button is attached to
+                'button_type': dictionary value - A button with a dictionary button_type value is created as an anonymous button, with basic functionality
+                    entirely defined by the dictionary's contents:
+                        'on_click': tuple value - Tuple containing function object followed by the parameters to be passed to it when this button is clicked
+                        'tooltip': string list value - Tuple containing tooltip list to display for this button
+                        'message': string value - Text to display over this button
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.notification = input_dict['notification']
+        button_info_dict = input_dict['button_type']
+        input_dict['button_type'] = 'anonymous'
+
+        self.on_click_info = button_info_dict['on_click']
+        self.tooltip = button_info_dict['tooltip']
+        self.message = button_info_dict['message']
+
+        super().__init__(input_dict, global_manager)
+        self.font_size = scaling.scale_width(25, global_manager)
+        self.font_name = self.global_manager.get('font_name')
+        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.in_notification = True
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. Choice buttons remove their notifications when clicked, along with the normal behaviors associated with their button_type
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().on_click()
+        self.on_click_info[0](*self.on_click_info[1]) #calls first item function with second item list as parameters
+        self.notification.remove_complete()
+
+    def draw(self):
+        '''
+        Description:
+            Draws this button below its choice notification and draws a description of what it does on top of it
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().draw()
+        if self.showing:
+            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                (self.y + self.height)))
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its button_type
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_tooltip(self.tooltip)

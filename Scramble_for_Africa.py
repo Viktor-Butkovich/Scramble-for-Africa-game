@@ -6,7 +6,7 @@ from modules.setup import *
 
 try:
     global_manager = data_managers.global_manager_template() #manages a dictionary of what would be global variables passed between functions and classes
-    setup(global_manager, debug_tools, fundamental, misc, terrains, commodities, def_ministers, def_countries, transactions, lore, value_trackers, buttons, europe_screen,
+    setup(global_manager, debug_tools, fundamental, misc, terrains, commodities, def_ministers, def_countries, transactions, actions, lore, value_trackers, buttons, europe_screen,
             ministers_screen, trial_screen, new_game_setup_screen, mob_interface, tile_interface, unit_organization_interface, inventory_interface, minister_interface,
             country_interface
     )

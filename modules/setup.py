@@ -13,6 +13,7 @@ import modules.constructs.countries as countries
 import modules.tools.data_managers as data_managers
 import modules.tools.save_load_tools as save_load_tools
 import modules.tools.effects as effects
+from modules.action_types import public_relations_campaign
 
 def setup(global_manager, *args):
     '''
@@ -358,6 +359,20 @@ def terrains(global_manager):
             current_index += 1
         current_index -= 1 #back up from index that didn't work
         global_manager.get('terrain_variant_dict')[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
+
+def actions(global_manager):
+    '''
+    Description:
+        Configures any actions in the action_types folder, preparing them to be automatically implemented
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        none
+    '''
+    global_manager.set('action_execute_def_list', [])
+    for module in [public_relations_campaign]: #action imports hardcoded here, alternative to needing to keep module files in .exe version
+        global_manager.get('action_execute_def_list').append(module.execute)
+        module.execute('initial_setup', global_manager)
 
 def commodities(global_manager):
     '''
@@ -804,7 +819,6 @@ def transactions(global_manager):
         'exploration': 5,
         'conversion': 5,
         'religious_campaign': 5,
-        'public_relations_campaign': 5,
         'advertising_campaign': 5,
         'loan_search': 5,
         'trade': 0,
@@ -832,7 +846,6 @@ def transactions(global_manager):
         'exploration': 'exploration',
         'conversion': 'religious conversion',
         'religious_campaign': 'religious campaigning',
-        'public_relations_campaign': 'public relations campaigning',
         'advertising_campaign': 'advertising',
         'loan_search': 'loan searches',
         'trade': 'trading with natives',

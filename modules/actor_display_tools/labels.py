@@ -4,6 +4,7 @@ import pygame
 
 from ..interface_types.labels import label
 from ..util import utility, scaling
+from ..action_types import public_relations_campaign
 
 class actor_display_label(label):
     '''
@@ -187,11 +188,8 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_t
             self.add_attached_button(input_dict)
 
-            input_dict['init_type'] = 'evangelist campaign button'
-            input_dict['image_id'] = 'buttons/public_relations_campaign_button.png'
-            input_dict['campaign_type'] = 'public relations campaign'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
+            for execute_def in self.global_manager.get('action_execute_def_list'):
+                self.add_attached_button(execute_def('button_setup', input_dict.copy(), self.global_manager))
 
             input_dict['init_type'] = 'evangelist campaign button'
             input_dict['image_id'] = 'buttons/religious_campaign_button.png'

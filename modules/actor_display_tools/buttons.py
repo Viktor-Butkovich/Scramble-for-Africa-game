@@ -1432,14 +1432,6 @@ class evangelist_campaign_button(button):
                                     current_mob.set_sentry_mode(False)
                                 current_mob.start_religious_campaign()
                         else:
-                            text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money needed for a public relations campaign.', self.global_manager)
-                    elif self.button_type == 'public relations campaign':
-                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['public_relations_campaign']:
-                            if current_mob.ministers_appointed():
-                                if current_mob.sentry_mode:
-                                    current_mob.set_sentry_mode(False)
-                                current_mob.start_public_relations_campaign()
-                        else:
                             text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money needed for a public relations campaign.', self.global_manager)
                 else:
                     text_utility.print_to_screen('A religious campaign requires all remaining movement points, at least 1.', self.global_manager)

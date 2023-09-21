@@ -25,6 +25,8 @@ class choice_notification(notifications.notification):
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'button_types': string list value - List of string corresponding to the button types of this notification's choice buttons, like ['end turn', 'none']
+                    - Each button type could also be a dictionary value, in which case the created button will be an anonymous button with
+                        functionality decided by the dictionary's contents
                 'choice_info_dict': dictionary value - Dictionary containing any case-specific information for choice buttons to function as intended
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -36,7 +38,9 @@ class choice_notification(notifications.notification):
         self.choice_info_dict = input_dict['choice_info_dict']
         button_types = input_dict['button_types']
         for current_button_type_index in range(len(button_types)):
-            if button_types[current_button_type_index] == 'recruitment':
+            if type(button_types[current_button_type_index]) == dict:
+                init_type = 'anonymous button'
+            elif button_types[current_button_type_index] == 'recruitment':
                 init_type = 'recruitment choice button'
             else:
                 init_type = 'choice button'

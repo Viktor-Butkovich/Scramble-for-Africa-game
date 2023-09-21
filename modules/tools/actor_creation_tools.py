@@ -186,6 +186,10 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.reorganize_unit_button(input_dict, global_manager)
                 elif base == 'cycle autofill':
                     new_element = buttons.cycle_autofill_button(input_dict, global_manager)
+                elif base == 'anonymous':
+                    new_element = buttons.anonymous_button(input_dict, global_manager)
+                elif base == 'action':
+                    new_element = buttons.action_button(input_dict, global_manager)
 
                 #instructions buttons
                 elif base == 'instructions':
