@@ -1170,10 +1170,6 @@ class button(interface_elements.interface_element):
             battalion = self.notification.choice_info_dict['battalion']
             battalion.suppress_slave_trade()
 
-        elif self.button_type == 'start public relations campaign':
-            evangelist = self.notification.choice_info_dict['evangelist']
-            evangelist.public_relations_campaign()
-
         elif self.button_type == 'start advertising campaign':
             merchant = self.notification.choice_info_dict['merchant']
             merchant.advertising_campaign()
@@ -1215,7 +1211,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start trial':
             trial_utility.trial(self.global_manager)
 
-        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop public relations campaign', 'stop advertising campaign', 
+        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop advertising campaign', 
                                   'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
                                   'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)
@@ -2669,7 +2665,7 @@ class action_button(button):
         Output:
             boolean: Returns True if this button can appear, otherwise returns False
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.corresponding_action('can_show', self.global_manager))
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.corresponding_action.can_show())
 
     def update_tooltip(self):
         '''
@@ -2680,7 +2676,7 @@ class action_button(button):
         Output:
             None
         '''
-        self.set_tooltip(self.corresponding_action('update_tooltip', self.global_manager))
+        self.set_tooltip(self.corresponding_action.update_tooltip())
 
     def on_click(self):
         '''
@@ -2691,7 +2687,7 @@ class action_button(button):
         Output:
             None
         '''
-        self.corresponding_action('on_click', self.global_manager.get('displayed_mob'), self.global_manager)
+        self.corresponding_action.on_click(self.global_manager.get('displayed_mob'))
 
 class anonymous_button(button):
     '''

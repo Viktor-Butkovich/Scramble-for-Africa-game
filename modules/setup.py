@@ -369,10 +369,9 @@ def actions(global_manager):
     Output:
         none
     '''
-    global_manager.set('action_execute_def_list', [])
-    for module in [public_relations_campaign]: #action imports hardcoded here, alternative to needing to keep module files in .exe version
-        global_manager.get('action_execute_def_list').append(module.execute)
-        module.execute('initial_setup', global_manager)
+    global_manager.set('action_obj_list', [])
+    public_relations_campaign.public_relations_campaign(global_manager)
+    #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities(global_manager):
     '''
