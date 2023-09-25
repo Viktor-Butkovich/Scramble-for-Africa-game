@@ -2745,7 +2745,7 @@ class anonymous_button(button):
         '''
         super().on_click()
         self.on_click_info[0](*self.on_click_info[1]) #calls first item function with second item list as parameters
-        self.notification.remove_complete()
+        self.notification.on_click(choice_button_override=True)
 
     def draw(self):
         '''

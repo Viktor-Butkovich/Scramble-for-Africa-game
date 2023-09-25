@@ -557,10 +557,11 @@ class notification_manager_template():
         '''
         self.notification_queue = []
         self.global_manager = global_manager
+        self.locked = False
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
 
-    def update_notification_layout(self, notification_height = 0):
+    def update_notification_layout(self, notification_height=0):
         '''
         Description:
             Changes where notifications are displayed depending on the current game mode to avoid blocking relevant information. Also changes the height of the notification based on how much text it contains
@@ -647,7 +648,7 @@ class notification_manager_template():
         return(len(new_message) * font_size)#self.message = new_message
     '''
 
-    def handle_next_notification(self):
+    def handle_next_notification(self, transferred_interface_elements = None):
         '''
         Description:
             Creates the next queued notification, if any, whenever a notification is removed
@@ -657,9 +658,19 @@ class notification_manager_template():
             None
         '''
         if self.notification_queue:
+            if transferred_interface_elements:
+                if 'attached_interface_elements' in self.notification_queue[0]:
+                    self.notification_queue[0]['attached_interface_elements'] += transferred_interface_elements
+                else:
+                    self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements
             self.notification_to_front(self.notification_queue.pop(0))
 
-    def display_notification(self, input_dict): #default, exploration, or roll
+    def set_lock(self, new_lock):
+        self.lock = new_lock
+        if (not new_lock) and self.notification_queue and self.global_manager.get('displayed_notification') == 'none':
+            self.notification_to_front(self.notification_queue.pop(0))
+
+    def display_notification(self, input_dict, insert_index=None): #default, exploration, or roll
         '''
         Description:
             Adds a future notification to the notification queue with the inputted text and type. If other notifications are already in the notification queue, adds this notification to the back, causing it to appear last. When a
@@ -669,8 +680,11 @@ class notification_manager_template():
         Output:
             None
         '''
-        if self.notification_queue or self.global_manager.get('displayed_notification') != 'none':
-            self.notification_queue.append(input_dict)
+        if self.locked or self.notification_queue or self.global_manager.get('displayed_notification') != 'none':
+            if insert_index != None:
+                self.notification_queue.insert(insert_index, input_dict)
+            else:
+                self.notification_queue.append(input_dict)
         else:
             self.notification_to_front(input_dict)
 
@@ -707,6 +721,14 @@ class notification_manager_template():
         else:
             attached_interface_elements = None
 
+        transfer_interface_elements = False
+        if 'transfer_interface_elements' in notification_dict:
+            transfer_interface_elements = notification_dict['transfer_interface_elements']
+
+        on_remove = None
+        if 'on_remove' in notification_dict:
+            on_remove = notification_dict['on_remove']
+
         if 'extra_parameters' in notification_dict and notification_dict['extra_parameters'] != 'none':
             extra_parameters = notification_dict['extra_parameters']
         else:
@@ -723,6 +745,8 @@ class notification_manager_template():
             'init_type': 'action notification',
             'notification_type': notification_type,
             'attached_interface_elements': attached_interface_elements,
+            'transfer_interface_elements': transfer_interface_elements,
+            'on_remove': on_remove,
             'extra_parameters': extra_parameters
         }
 
@@ -760,12 +784,6 @@ class notification_manager_template():
             input_dict['is_last'] = False
         elif notification_type == 'final_religious_campaign':
             input_dict['init_type'] = 'religious campaign notification'
-            input_dict['is_last'] = True
-        elif notification_type == 'public_relations_campaign':
-            input_dict['init_type'] = 'public relations campaign notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_public_relations_campaign':
-            input_dict['init_type'] = 'public relations campaign notification'
             input_dict['is_last'] = True
         elif notification_type == 'advertising_campaign':
             input_dict['init_type'] = 'advertising campaign notification'

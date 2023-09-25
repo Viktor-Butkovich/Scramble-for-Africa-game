@@ -69,8 +69,6 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        #if time.time() - 0.1 > self.creation_time: #don't accidentally remove notifications instantly when clicking between them
-        #    self.remove_complete()
         if self.has_parent_collection:
             self.parent_collection.remove_recursive(complete=False)
         else:

@@ -16,7 +16,7 @@ def draw_interface_elements(interface_elements, global_manager):
     for current_interface_element in global_manager.get('draw_list'):
         current_interface_element.draw()
     global_manager.set('draw_list', [])
-        
+
 def collection_traversal(current_element, global_manager, **kwargs):
     '''
     Description:

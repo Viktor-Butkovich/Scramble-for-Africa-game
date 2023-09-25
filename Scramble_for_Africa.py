@@ -12,7 +12,7 @@ try:
     )
     main_loop.main_loop(global_manager)
 
-except Exception: #displays error message and records error message in crash log file   
+except Exception: #displays error message and records error message in crash log file
     manage_crash(Exception)
 
 # tasks:

@@ -128,7 +128,6 @@ def misc(global_manager):
     global_manager.set('button_list', [])
     global_manager.set('recruitment_button_list', [])
     global_manager.set('current_instructions_page', 'none')
-    global_manager.set('current_dice_rolling_notification', 'none')
     global_manager.set('current_instructions_page_index', 0)
     global_manager.set('instructions_list', [])
     #page 1

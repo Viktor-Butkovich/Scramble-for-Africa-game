@@ -69,7 +69,7 @@ class choice_notification(notifications.notification):
         super().format_message()
         self.message.pop(-1)
 
-    def on_click(self):
+    def on_click(self, choice_button_override=False):
         '''
         Description:
             Controls this notification's behavior when clicked. Choice notifications do nothing when clicked, instead acting when their choice buttons are clicked
@@ -78,6 +78,8 @@ class choice_notification(notifications.notification):
         Output:
             None
         '''
+        if choice_button_override:
+            super().on_click()
         return #does not remove self when clicked
 
     def update_tooltip(self):

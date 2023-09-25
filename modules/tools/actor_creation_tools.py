@@ -412,8 +412,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.trade_notification(input_dict, global_manager)
                 elif base == 'religious campaign':
                     new_element = action_notifications.religious_campaign_notification(input_dict, global_manager)
-                elif base == 'public relations campaign':
-                    new_element = action_notifications.public_relations_campaign_notification(input_dict, global_manager)
                 elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict, global_manager)
                 elif base == 'advertising campaign':

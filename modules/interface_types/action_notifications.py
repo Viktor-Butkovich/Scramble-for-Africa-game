@@ -4,9 +4,6 @@ from .notifications import notification
 from ..util import scaling, actor_utility, trial_utility
 
 class action_notification(notification):
-    '''
-    Interactive notification attached in a series to other notifications that is used for dice rolls and other real-time player interactions
-    '''
     def __init__(self, input_dict, global_manager):
         '''
         Description:
@@ -29,8 +26,55 @@ class action_notification(notification):
             None
         '''
         super().__init__(input_dict, global_manager)
-        self.is_action_notification = True
-        self.notification_dice = input_dict['notification_dice'] #how many dice are allowed to be shown by selected mob when this notification shown
+        if 'attached_interface_elements' in input_dict:
+            self.attached_interface_elements = input_dict['attached_interface_elements']
+            if self.attached_interface_elements:
+                self.insert_collection_above(override_input_dict={
+                    'coordinates': (self.x, 0)
+                })
+                self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
+                index = 0
+                for element_input_dict in self.attached_interface_elements:
+                    if type(element_input_dict) == dict:
+                        element_input_dict['parent_collection'] = self.parent_collection
+                        self.attached_interface_elements[index] = global_manager.get('actor_creation_manager').create_interface_element(element_input_dict, global_manager) #if given input dict, create it and add it to notification
+                    else:
+                        self.parent_collection.add_member(element_input_dict, member_config=element_input_dict.transfer_info_dict)
+                    index += 1
+        else:
+            self.attached_interface_elements = None
+
+        self.transfer_interface_elements = False
+        if 'transfer_interface_elements' in input_dict:
+            self.transfer_interface_elements = input_dict['transfer_interface_elements']
+
+        self.on_remove = None
+        if 'on_remove' in input_dict:
+            self.on_remove = input_dict['on_remove']
+
+    def on_click(self):
+        transferred_interface_elements = []
+        if self.transfer_interface_elements:
+            transferred_interface_elements = [] #self.parent_collection.members.copy()
+            for interface_element in self.parent_collection.members.copy():
+                if interface_element != self:
+                    interface_element.transfer_info_dict = {
+                        'x_offset': interface_element.x_offset,
+                        'y_offset': interface_element.y_offset,
+                    }
+                    self.parent_collection.remove_member(interface_element)
+                    transferred_interface_elements.append(interface_element)
+
+        if self.has_parent_collection:
+            self.parent_collection.remove_recursive(complete=False)
+        else:
+            self.remove()
+        self.global_manager.get('notification_manager').handle_next_notification(transferred_interface_elements=transferred_interface_elements)
+
+    def remove(self):
+        super().remove()
+        if self.on_remove:
+            self.on_remove()
 
     def format_message(self):
         '''
@@ -71,7 +115,6 @@ class dice_rolling_notification(action_notification):
             None
         '''
         super().__init__(input_dict, global_manager)
-        global_manager.set('current_dice_rolling_notification', self)
         if self.global_manager.get('ongoing_action_type') in ['combat', 'slave_capture', 'slave_trade_suppression']:
             if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
                 self.global_manager.get('sound_manager').play_sound('gunfire')
@@ -87,7 +130,7 @@ class dice_rolling_notification(action_notification):
         '''
         self.set_tooltip(['Wait for the dice to finish rolling'])
 
-    def on_click(self):
+    def on_click(self, die_override=False):
         '''
         Description:
             Controls this notification's behavior when clicked. Unlike superclass, dice rolling notifications are not removed when clicked
@@ -96,7 +139,10 @@ class dice_rolling_notification(action_notification):
         Output:
             None
         '''
-        return()
+        if die_override:
+            super().on_click()
+        else:
+            return
 
     def remove(self):
         '''
@@ -109,8 +155,8 @@ class dice_rolling_notification(action_notification):
             None
         '''
         super().remove()
-        self.global_manager.set('current_dice_rolling_notification', 'none')
-        if len(self.global_manager.get('dice_list')) > 1: #if there are multiple dice, check if any player-controlled dice are critical successes for promotion
+        num_dice = len(self.global_manager.get('dice_list'))
+        if num_dice > 1: #if there are multiple dice, check if any player-controlled dice are critical successes for promotion
             max_roll = 0
             max_die = 0
             for current_die in self.global_manager.get('dice_list'):
@@ -134,12 +180,13 @@ class dice_rolling_notification(action_notification):
                     if not current_die == max_die:
                         current_die.normal_die = True
             max_die.highlighted = True
-        else: #if only 1 die, check if it is a crtiical success for promotion
+        elif num_dice: #if only 1 die, check if it is a crtiical success for promotion
             self.global_manager.get('dice_list')[0].highlighted = True
             if self.global_manager.get('dice_list')[0].final_result >= self.global_manager.get('dice_list')[0].result_outcome_dict['min_crit_success']:
                 if not self.global_manager.get('displayed_mob') == 'none':
                     if not self.global_manager.get('displayed_mob').veteran:
                         self.global_manager.get('sound_manager').play_sound('trumpet_1')
+
 
 class exploration_notification(action_notification):
     '''

@@ -823,9 +823,9 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
-        if self.global_manager.get('effect_manager').effect_active('band_of_thieves'):
+        if self.global_manager.get('effect_manager').effect_active('band_of_thieves') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self != self.global_manager.get('current_ministers')['Prosecutor']):
             return(True)
-        elif self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+        elif self.global_manager.get('effect_manager').effect_active('ministry_of_magic') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
             return(False)
             
         if random.randrange(1, 7) >= self.corruption_threshold:
@@ -901,7 +901,7 @@ class minister():
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
         modifier = 0
-        if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+        if self.global_manager.get('effect_manager').effect_active('ministry_of_magic') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
             return(5)
         elif self.global_manager.get('effect_manager').effect_active('nine_mortal_men'):
             return(-10)

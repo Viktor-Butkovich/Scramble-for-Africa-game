@@ -2,13 +2,13 @@
 
 import pygame
 import random
-from ..util import action_utility, main_loop_utility, text_utility, dice_utility, actor_utility
+from ..util import action_utility, main_loop_utility, text_utility, dice_utility, actor_utility, scaling
 
 class public_relations_campaign():
     def __init__(self, global_manager):
         self.global_manager = global_manager
+        self.action_type = 'public_relations_campaign'
         self.initial_setup()
-        self.global_manager.get('action_obj_list').append(self)
 
     def initial_setup(self):
         '''
@@ -19,10 +19,13 @@ class public_relations_campaign():
         Output:
             None
         '''
-        self.global_manager.get('action_types').append('public_relations_campaign')
-        self.global_manager.get('action_prices')['public_relations_campaign'] = 5
-        self.global_manager.get('base_action_prices')['public_relations_campaign'] = 5
-        self.global_manager.get('transaction_descriptions')['public_relations_campaign'] = 'public relations campaigning'
+        self.global_manager.get('action_obj_list').append(self)
+        self.current_unit = 'none'
+        self.global_manager.get('action_types').append(self.action_type)
+        self.global_manager.get('action_prices')[self.action_type] = 5
+        self.global_manager.get('base_action_prices')[self.action_type] = 5
+        self.global_manager.get('transaction_descriptions')[self.action_type] = 'public relations campaigning'
+        self.global_manager.get('transaction_types').append(self.action_type)
 
     def button_setup(self, initial_input_dict):
         '''
@@ -36,7 +39,7 @@ class public_relations_campaign():
         '''
         initial_input_dict['init_type'] = 'action button'
         initial_input_dict['corresponding_action'] = self
-        initial_input_dict['image_id'] = 'buttons/public_relations_campaign_button.png'
+        initial_input_dict['image_id'] = 'buttons/' + self.action_type + '_button.png'
         initial_input_dict['keybind_id'] = pygame.K_r
         return(initial_input_dict)
 
@@ -50,7 +53,7 @@ class public_relations_campaign():
             None
         '''
         return(['Attempts to spread word of your company\'s benevolent goals and righteous deeds in Africa for ' + 
-                    str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money',
+                    str(self.global_manager.get('action_prices')[self.action_type]) + ' money',
                 'Can only be done in Europe', 'If successful, increases your company\'s public opinion', 'Costs all remaining movement points, at least 1',
                 'Each public relations campaign attempted doubles the cost of other public relations campaigns in the same turn'
         ])
@@ -78,7 +81,7 @@ class public_relations_campaign():
         if main_loop_utility.action_possible(self.global_manager):
             if self.global_manager.get('europe_grid') in unit.grids:
                 if unit.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['public_relations_campaign']:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')[self.action_type]:
                         if unit.ministers_appointed():
                             if unit.sentry_mode:
                                 unit.set_sentry_mode(False)
@@ -104,20 +107,20 @@ class public_relations_campaign():
             None
         '''
         current_roll_modifier = 0
-        unit.current_min_success = 4 #default_min_success
-        unit.current_max_crit_fail = 1 #default_max_crit_fail
-        unit.current_min_crit_success = 6 #default_min_crit_success
+        self.current_min_success = 4 #default_min_success
+        self.current_max_crit_fail = 1 #default_max_crit_fail
+        self.current_min_crit_success = 6 #default_min_crit_success
         
-        unit.current_min_success -= current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
-        unit.current_max_crit_fail -= unit.current_roll_modifier
-        if unit.current_min_success > unit.current_min_crit_success:
-            unit.current_min_crit_success = unit.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        self.current_min_success -= current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
 
         choice_info_dict = {'evangelist': unit, 'type': 'start public relations campaign'}
         self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'public_relations_campaign')
+        self.global_manager.set('ongoing_action_type', self.action_type)
         message = 'Are you sure you want to start a public relations campaign? /n /nIf successful, your company\'s public opinion will increase by between 1 and 6 /n /n'
-        message += 'The campaign will cost ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money. /n /n'
+        message += 'The campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'
         risk_value = -1 * current_roll_modifier #modifier of -1 means risk value of 1
         if unit.veteran: #reduce risk if veteran
             risk_value -= 1
@@ -130,12 +133,12 @@ class public_relations_campaign():
             message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
             message = 'RISK: DEADLY /n /n' + message
-
+        self.current_unit = unit
         self.global_manager.get('notification_manager').display_notification({
             'message': message,
             'choices': [
                 {
-                'on_click': (self.middle, [unit]),
+                'on_click': (self.middle, []),
                 'tooltip': ['Starts a public relations campaign, possibly improving your company\'s public opinion'],
                 'message': 'Start campaign'
                 },
@@ -148,7 +151,7 @@ class public_relations_campaign():
             'extra_parameters': choice_info_dict
         })
 
-    def middle(self, unit):
+    def middle(self):
         '''
         Description:
             Controls the PR campaign process, determining and displaying its result through a series of notifications
@@ -158,104 +161,126 @@ class public_relations_campaign():
             None
         '''
         #Implementation in progress - currently correctly called when start campaign button is clicked
-        action_utility.cancel_ongoing_actions(self.global_manager)
-        return
-        '''
+        #action_utility.cancel_ongoing_actions(self.global_manager)
+        #return
+        #'''
+        self.global_manager.get('notification_manager').set_lock(True)
         roll_result = 0
-        unit.just_promoted = False
-        unit.set_movement_points(0)
+        self.current_unit = self.current_unit
+        self.current_unit.just_promoted = False
+        self.current_unit.set_movement_points(0)
 
-        price = global_manager.get('action_prices')['public_relations_campaign']
-        global_manager.get('money_tracker').change(global_manager.get('action_prices')['public_relations_campaign'] * -1, 'public_relations_campaign')
-        actor_utility.double_action_price(global_manager, 'public_relations_campaign')
+        #generic for campaigns given action type
+        price = self.global_manager.get('action_prices')[self.action_type]
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')[self.action_type] * -1, self.action_type)
+        actor_utility.double_action_price(self.global_manager, self.action_type)
+
+        roll_lists = []
+        if self.current_unit.veteran:
+            num_dice = 2
+        else:
+            num_dice = 1
+
+        results = self.current_unit.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'public_relations_campaign', num_dice)
+        roll_types = ('Public relations campaign roll', 'second')
+        for index in range(len(results)):
+            result = results[index]
+            roll_type = roll_types[index]
+            roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result))
+
+        attached_interface_elements = [
+            action_utility.generate_action_ordered_collection_input_dict(
+                scaling.scale_coordinates(-140, self.global_manager.get('notification_manager').notification_height, self.global_manager),
+                self,
+                self.global_manager)
+        ]
+        roll_result = 0
+
+        for roll_list in roll_lists:
+            attached_interface_elements[0]['initial_members'] += action_utility.generate_die_input_dicts((0, 0), roll_list[0], self, self.global_manager)
+            roll_result = max(roll_list[0], roll_result)
+
         text = ''
+
+        #pre-roll notification
+        #specific, action description
         text += 'The evangelist campaigns to increase your company\'s public opinion with word of your company\'s benevolent goals and righteous deeds in Africa. /n /n'
-        
-        roll_message = 'Click to roll. ' + str(unit.current_min_success) + '+ required '
-        if unit.veteran:
-            text += 'The veteran evangelist can roll twice and pick the higher result. /n /n'
+        roll_message = 'Click to roll. ' + str(self.current_min_success) + '+ required '
+        officer_name = self.current_unit.name
+        #generic given officer name
+        if self.current_unit.veteran:
+            text += 'The ' + officer_name + ' can roll twice and pick the higher result. /n /n'
             roll_message += 'on at least 1 die to succeed.'
             num_dice = 2
         else:
             roll_message += 'to succeed.'
             num_dice = 1
-            
-        global_manager.get('notification_manager').display_notification({
+
+        #generic given action type
+        self.global_manager.get('notification_manager').display_notification({
             'message': text + roll_message,
             'num_dice': num_dice,
-            'notification_type': 'public_relations_campaign'
-        })
+            'notification_type': 'action',
+            'attached_interface_elements': attached_interface_elements,
+            'transfer_interface_elements': True
+        }, insert_index=0)
 
-        global_manager.get('notification_manager').display_notification({
+        #generic
+        self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
-            'notification_type': 'roll'
-        })
+            'notification_type': 'roll',
+            'transfer_interface_elements': True
+        }, insert_index=1)
 
-        die_x = global_manager.get('notification_manager').notification_x - 140
+        self.global_manager.get('notification_manager').set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
 
-        if unit.veteran:
-            results = unit.controlling_minister.roll_to_list(6, unit.current_min_success, unit.current_max_crit_fail, price, 'public_relations_campaign', 2)
-            first_roll_list = dice_utility.roll_to_list(6, 'Public relations campaign roll', unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail, global_manager, results[0])
-            unit.display_die((die_x, 500), first_roll_list[0], unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail)
-
-            second_roll_list = dice_utility.roll_to_list(6, 'second', unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail, global_manager, results[1])
-            unit.display_die((die_x, 380), second_roll_list[0], unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail, False)
-                                
-            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-            roll_result = max(first_roll_list[0], second_roll_list[0])
+        for roll_list in roll_lists:
+            text += roll_list[1]
+        #generic
+        if len(roll_lists) > 1:
             result_outcome_dict = {}
             for i in range(1, 7):
-                if i <= unit.current_max_crit_fail:
+                if i <= self.current_max_crit_fail:
                     word = 'CRITICAL FAILURE'
-                elif i >= unit.current_min_crit_success:
+                elif i >= self.current_min_crit_success:
                     word = 'CRITICAL SUCCESS'
-                elif i >= unit.current_min_success:
+                elif i >= self.current_min_success:
                     word = 'SUCCESS'
                 else:
                     word = 'FAILURE'
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
-        else:
-            result = unit.controlling_minister.roll(6, unit.current_min_success, unit.current_max_crit_fail, price, 'public_relations_campaign')
-            roll_list = dice_utility.roll_to_list(6, 'Public relations campaign roll', unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail, global_manager, result)
-            unit.display_die((die_x, 440), roll_list[0], unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail)
-                
-            text += roll_list[1]
-            roll_result = roll_list[0]
 
-        global_manager.get('notification_manager').display_notification({
+        self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
-            'notification_type': 'public_relations_campaign'
+            'notification_type': 'action',
+            'transfer_interface_elements': True,
+            'on_remove': self.complete
         })
 
         text += '/n'
         public_relations_change = 0
-        if roll_result >= unit.current_min_success: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
             public_relations_change = random.randrange(1, 7)
             text += 'Met with gullible and enthusiastic audiences, the evangelist successfully improves your company\'s public opinion by ' + str(public_relations_change) + '. /n /n'
         else:
             text += 'Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to improve your company\'s public opinion. /n /n'
-        if roll_result <= unit.current_max_crit_fail:
+        if roll_result <= self.current_max_crit_fail:
             text += 'The evangelist is deeply embarassed by this public failure and decides to abandon your company. /n /n' #actual 'death' occurs when religious campaign completes
 
-        if (not unit.veteran) and roll_result >= unit.current_min_crit_success:
-            unit.just_promoted = True
+        if (not self.current_unit.veteran) and roll_result >= self.current_min_crit_success:
+            self.current_unit.just_promoted = True
             text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
-        if roll_result >= 4:
-            global_manager.get('notification_manager').display_notification({
-                'message': text + 'Click to remove this notification.',
-                'notification_type': 'final_public_relations_campaign'
-            })
-        else:
-            global_manager.get('notification_manager').display_notification({
-                'message': text,
-            })
-        global_manager.set('public_relations_campaign_result', [unit, roll_result, public_relations_change])
-        '''
 
-    def complete(self, unit):
+        self.global_manager.get('notification_manager').display_notification({
+            'message': text + 'Click to remove this notification.',
+            'notification_type': 'action',
+        })
+        self.result = (roll_result, public_relations_change)
+
+    def complete(self):
         '''
         Description:
             Used when the player finishes rolling for a PR campaign, shows the campaign's results and making any changes caused by the result. If successful, increases public opinion by random amount, promotes evangelist to a veteran on
@@ -265,13 +290,17 @@ class public_relations_campaign():
         Output:
             None
         '''
-        roll_result = self.global_manager.get('public_relations_campaign_result')[1]
-        if roll_result >= unit.current_min_success: #if campaign succeeded
-            self.global_manager.get('public_opinion_tracker').change(self.global_manager.get('public_relations_campaign_result')[2])
-            if roll_result >= unit.current_min_crit_success and not unit.veteran:
-                unit.promote()
-            unit.select()
-        elif roll_result <= unit.current_max_crit_fail:
-            unit.die('quit')
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
+        roll_result, public_relations_change = self.result
+        if roll_result >= self.current_min_success: #if campaign succeeded
+            #non-generic campaign effect
+            self.global_manager.get('public_opinion_tracker').change(public_relations_change)
+
+            #generic effect
+            if roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
+                self.current_unit.promote()
+            self.current_unit.select()
+
+        elif roll_result <= self.current_max_crit_fail:
+            #non-generic campaign effect
+            self.current_unit.die('quit')
+        action_utility.cancel_ongoing_actions(self.global_manager)

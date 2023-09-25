@@ -190,13 +190,13 @@ class interface_element():
         '''
         return
     
-    def insert_collection_above(self, override_input_dict={}):
+    def insert_collection_above(self, override_input_dict=None):
         '''
         Description:
             Replaces this element's place in its parent collection with a new interface collection, allowing elements to dynamically form collections after initialization 
                 without interfering with above hierarchies
         'Input':
-            string init_type='interface collection': actor_creation_tools init type of collection to create
+            boolean override_input_dict=None: Optional dictionary to override attributes of created collection's input_dict
         'Output':
             None
         '''
@@ -209,8 +209,9 @@ class interface_element():
             'init_type': 'interface collection',
             'member_config': {}
         }
-        for attribute in override_input_dict:
-            input_dict[attribute] = override_input_dict[attribute]
+        if override_input_dict:
+            for attribute in override_input_dict:
+                input_dict[attribute] = override_input_dict[attribute]
 
         if self.parent_collection != 'none':
             input_dict['member_config']['index'] = self.parent_collection.members.index(self)
@@ -238,7 +239,7 @@ class interface_element():
 
         new_parent_collection = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         
-        new_parent_collection.add_member(self)
+        new_parent_collection.add_member(self, {})
 
         return(new_parent_collection)
 
@@ -264,6 +265,7 @@ class interface_collection(interface_element):
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'initial_members' = None: members initially created with this collection
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -334,6 +336,11 @@ class interface_collection(interface_element):
                 }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
 
+        if 'initial_members' in input_dict:
+            for initial_member_dict in input_dict['initial_members']:
+                initial_member_dict['parent_collection'] = self
+                global_manager.get('actor_creation_manager').create_interface_element(initial_member_dict, global_manager)
+
     def create_image(self, image_id):
         '''
         Description:
@@ -361,7 +368,7 @@ class interface_collection(interface_element):
         if self.is_info_display:
             self.global_manager.set('displayed_' + self.actor_type, new_actor)
 
-    def add_member(self, new_member, member_config={}):
+    def add_member(self, new_member, member_config=None):
         '''
         Description:
             Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates
@@ -372,6 +379,9 @@ class interface_collection(interface_element):
         Output:
             None
         '''
+        if not member_config:
+            member_config = {}
+
         if not 'x_offset' in member_config:
             member_config['x_offset'] = 0
         if not 'y_offset' in member_config:
@@ -410,6 +420,9 @@ class interface_collection(interface_element):
             removed_member.x_offset = None
         if hasattr(removed_member, 'y_offset'):
             removed_member.y_offset = None
+        removed_member.parent_collection = 'none'
+        removed_member.has_parent_collection = False
+        self.global_manager.get('independent_interface_elements').append(removed_member)
         self.members.remove(removed_member)
 
     def remove_recursive(self, complete=False):
@@ -425,7 +438,10 @@ class interface_collection(interface_element):
             self.remove_member(current_member)
             current_member.remove_recursive(complete=complete)
 
-        super().remove_recursive(complete=complete)
+        if complete:
+            super().remove_complete()
+        else:
+            super().remove()
 
     def remove(self):
         '''
@@ -657,8 +673,13 @@ class ordered_collection(interface_collection):
             input_dict['separation'] = scaling.scale_height(5, global_manager)
         if not 'direction' in input_dict:
             input_dict['direction'] = 'vertical'
+        if not 'reversed' in input_dict:
+            input_dict['reversed'] = False
         self.separation = input_dict['separation']
         self.direction = input_dict['direction']
+        self.reverse_multiplier = 1
+        if input_dict['reversed']:
+            self.reverse_multiplier *= -1
         self.order_overlap_list = []
         self.order_exempt_list = []
         super().__init__(input_dict, global_manager)
@@ -737,20 +758,20 @@ class ordered_collection(interface_collection):
         for member in self.members:
             if member.showing and not member in self.order_exempt_list:
                 if self.direction == 'vertical':
-                    current_y -= member.height
+                    current_y -= member.height * self.reverse_multiplier
 
                     new_x = self.x + member.order_x_offset
                     new_y = current_y + member.order_y_offset
                     if (member.x, member.y) != (new_x, new_y):
                         effective_y = current_y + member.order_y_offset
                         if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
-                            effective_y += member.height
+                            effective_y += member.height * self.reverse_multiplier
                         member.set_origin(self.x + member.order_x_offset, effective_y)
 
                     if not member in self.order_overlap_list:
-                        current_y -= self.separation
+                        current_y -= self.separation * self.reverse_multiplier
                     else:
-                        current_y += member.height
+                        current_y += member.height * self.reverse_multiplier
 
                 elif self.direction == 'horizontal':
                     new_x = current_x + member.order_x_offset
@@ -759,4 +780,4 @@ class ordered_collection(interface_collection):
                         member.set_origin(current_x + member.order_x_offset, self.y + member.order_y_offset)
 
                     if not member in self.order_overlap_list:
-                        current_x += self.separation + member.width
+                        current_x += self.separation + member.width * self.reverse_multiplier

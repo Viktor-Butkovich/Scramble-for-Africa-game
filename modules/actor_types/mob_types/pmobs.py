@@ -1533,7 +1533,7 @@ class pmob(mob):
                 'minister_image_type': 'portrait',
                 'init_type': 'dice roll minister image'
             }, self.global_manager)
-        
+
     def start_repair(self, building_info_dict):
         '''
         Description

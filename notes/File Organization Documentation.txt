@@ -2,6 +2,7 @@ __pycache__
 configuration
 graphics
 modules
+    action_types: Actions that mobs can conduct
     actor_display_tools: Interface elements related to the left-hand displays, closely connected to actors
     actor_types: Actors that occupy cells, including mobs, tiles, and buildings
     constructs: Non-actor, non-interface entities, such as countries, images, and ministers

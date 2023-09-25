@@ -79,11 +79,20 @@ class die(button):
         Output:
             None
         '''
-        #if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
-        #    self.global_manager.get('displayed_notification').on_click()
         if self.rolls_completed == 0:
-            self.global_manager.geT('displayed_notification').on_click()
-        #if self.global_manager.get('displayed_notification') != 'none' and self.global_manager.get('displayed_notification').notification_type == 'roll':
+            self.find_sibling_notification().on_click()
+
+    def find_sibling_notification(self):
+        notification_found = False
+        current_parent_collection = self.parent_collection
+        while not notification_found:
+            for current_member in current_parent_collection.members:
+                if hasattr(current_member, 'notification_type'):
+                    return(current_member)
+            if current_parent_collection.parent_collection != 'none':
+                current_parent_collection = current_parent_collection.parent_collection
+            else:
+                return(None)
 
     def update_tooltip(self):
         '''
@@ -158,10 +167,7 @@ class die(button):
                 if current_die.rolling:
                     dice_rolling = True
             if not dice_rolling:
-                if self.global_manager.get('displayed_notification') != 'none' and self.global_manager.get('displayed_notification').notification_type == 'roll':
-                    self.global_manager.get('displayed_notification').remove_complete() #on_click()
-            #if (not self.global_manager.get('current_dice_rolling_notification') == 'none') and not dice_rolling: #if notification present and dice finished rolling, remove notification
-            #    self.global_manager.get('current_dice_rolling_notification').on_click() #remove_complete()
+                self.find_sibling_notification().on_click(die_override=True)
         else:
             self.roll_result = 0
             if self.rolls_completed == self.num_rolls - 1: #if last roll
@@ -214,22 +220,3 @@ class die(button):
         self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))
         if self.global_manager.get('displayed_mob') in self.global_manager.get('mob_list'): #only need to remove die from mob's list if mob still alive
             self.global_manager.get('displayed_mob').attached_dice_list = utility.remove_from_list(self.global_manager.get('displayed_mob').attached_dice_list, self)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this die should be shown. The currently displayed notification should have a number of dice attached to it, and only that many of existing dice are shown at once, starting from the those first created
-        Input:
-            None
-        Output:
-            boolean: Returns whether this die should be shown
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if self.global_manager.get('ongoing_action_type') == 'trial': #rolls during a trial are not done through a mob, so always show them
-                return(True)
-            displayed_mob_dice_list = self.global_manager.get('displayed_mob').attached_dice_list
-            num_notification_dice = self.global_manager.get('displayed_notification').notification_dice
-            if self in displayed_mob_dice_list:
-                if displayed_mob_dice_list.index(self) <= (num_notification_dice - 1): #if 1 notification die, index must be <= 0 to be shown
-                    return(True)
-        return(False)
