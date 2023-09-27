@@ -665,8 +665,19 @@ class notification_manager_template():
                 else:
                     self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements
             self.notification_to_front(self.notification_queue.pop(0))
+        elif transferred_interface_elements and ((not self.notification_queue) or self.notification_queue[0]['notification_type'] != 'action'):
+            for element in transferred_interface_elements:
+                element.remove_recursive(complete=True)
 
     def set_lock(self, new_lock):
+        '''
+        Description:
+            Sets this notification manager's lock to the new lock value - any notifications received when locked will be displayed once the lock is removed
+        Input:
+            boolean new_lock: New lock value
+        Output:
+            None
+        '''
         self.lock = new_lock
         if (not new_lock) and self.global_manager.get('displayed_notification') == 'none':
             self.handle_next_notification()

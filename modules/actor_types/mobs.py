@@ -50,7 +50,6 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_trade = False #if can trade or create trading posts
         self.can_convert = False #if can convert natives or build missions
-        self.just_promoted = False
         self.selected = False
         self.number = 1 #how many entities are in a unit, used for verb conjugation
         self.actor_type = 'mob'

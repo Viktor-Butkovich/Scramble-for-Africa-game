@@ -732,7 +732,6 @@ class ordered_collection(interface_collection):
             coordinate = 0
             valid = False
             while not valid:
-                coordinate += increment
                 if not str(coordinate) in self.second_dimension_coordinates:
                     valid = True
                 else:
@@ -742,6 +741,8 @@ class ordered_collection(interface_collection):
                             all_overlapped = False
                             break
                     valid = all_overlapped
+                if not valid:
+                    coordinate += increment
 
             member_config['second_dimension_coordinate'] = coordinate
 

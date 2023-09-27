@@ -104,3 +104,27 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
         'member_config': {'order_overlap': True}
     }
     return([portrait_background_input_dict, portrait_front_input_dict])
+
+def generate_risk_message(action, unit):
+    '''
+    Description:
+        Creates and returns the risk message for the inputted unit conducting the inputted action, based on veteran status and modifiers
+    Input:
+        action action: Action being conducted
+        pmob unit: Unit conducting action
+    Output:
+        dictionary list: Returns the created input dicts
+    '''
+    risk_value = -1 * action.current_roll_modifier #modifier of -1 means risk value of 1
+    if unit.veteran: #reduce risk if veteran
+        risk_value -= 1
+
+    if risk_value < 0: #0/6 = no risk
+        message = 'RISK: LOW /n /n'
+    elif risk_value == 0: #1/6 death = moderate risk
+        message = 'RISK: MODERATE /n /n' #puts risk message at beginning
+    elif risk_value == 1: #2/6 = high risk
+        message = 'RISK: HIGH /n /n'
+    elif risk_value > 1: #3/6 or higher = extremely high risk
+        message = 'RISK: DEADLY /n /n'
+    return(message)

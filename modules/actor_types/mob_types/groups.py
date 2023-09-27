@@ -290,7 +290,6 @@ class group(pmob):
         Output:
             None
         '''
-        self.just_promoted = False
         if not self.veteran:
             self.veteran = True
             self.set_name('veteran ' + self.name)
