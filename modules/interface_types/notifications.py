@@ -88,60 +88,7 @@ class notification(multi_line_label):
         super().remove()
         if self.global_manager.get('displayed_notification') == self:
             self.global_manager.set('displayed_notification', 'none')
-        #if handle_next_notification:
-        #    self.global_manager.get('notification_manager').handle_next_notification()
-            #if len(notification_manager.notification_queue) >= 1:
-            #    notification_manager.notification_queue.pop(0)
-            #if len(notification_manager.notification_queue) > 0:
-            #    notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
-class minister_notification(notification):
-    '''
-    Notification that is a message from a minister and has a minister portrait attached
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'message': string value - Default text for this label, with lines separated by /n
-                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
-                    will be started
-                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'attached_minister': minister value - Minister attached to this notification
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        super().__init__(input_dict, global_manager)
-        self.attached_minister = input_dict['attached_minister']
-        self.notification_type = 'minister'
-        if self.attached_minister.current_position == 'Prosecutor' and global_manager.get('evidence_just_found'):
-            self.attached_minister.play_voice_line('evidence')
-            global_manager.set('evidence_just_found', False)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
-                if there is one
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-            if current_minister_image.attached_minister == self.attached_minister:
-                current_minister_image.remove_complete()
-        
 class zoom_notification(notification):
     '''
     Notification that selects a certain tile or mob and moves the minimap to it when first displayed

@@ -33,10 +33,6 @@ class merchant(officer):
         '''
         input_dict['officer_type'] = 'merchant'
         super().__init__(from_save, input_dict, global_manager)
-        self.current_roll_modifier = 0
-        self.default_min_success = 5
-        self.default_max_crit_fail = 1
-        self.default_min_crit_success = 6
 
     def start_loan_search(self):
         '''

@@ -585,6 +585,20 @@ class free_image(image):
         self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
         self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
 
+    def remove_recursive(self, complete=False):
+        '''
+        Description:
+            Recursively removes a collection and its members
+        Input:
+            boolean complete=False: Whether to use remove_complete or remove for each item
+        Output:
+            None
+        '''
+        if complete:
+            self.remove_complete()
+        else:
+            self.remove()
+
     def set_image(self, new_image):
         '''
         Description:
@@ -875,7 +889,6 @@ class dice_roll_minister_image(tooltip_free_image):
         else:
             self.minister_message_image = False
         super().__init__(input_dict, global_manager)
-        global_manager.get('dice_roll_minister_images').append(self)
         self.to_front = True
 
     def update_tooltip(self):
@@ -892,35 +905,6 @@ class dice_roll_minister_image(tooltip_free_image):
             self.set_tooltip(self.attached_minister.tooltip_text)
         else:
             self.set_tooltip([])
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this image can be shown. Normal dice roll minister images return the same as superclass, while minister message images are only shown when their minister's message is currently displayed
-        Input:
-            None
-        Output:
-            boolean: Returns True if this image can currently appear, otherwise returns False
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if self.minister_message_image:
-                if self.global_manager.get('displayed_notification').notification_type == 'minister' and self.global_manager.get('displayed_notification').attached_minister == self.attached_minister:
-                    return(True)
-            else:
-                return(True)
-        return(False)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('dice_roll_minister_images', utility.remove_from_list(self.global_manager.get('dice_roll_minister_images'), self))
 
 class minister_type_image(tooltip_free_image):
     '''

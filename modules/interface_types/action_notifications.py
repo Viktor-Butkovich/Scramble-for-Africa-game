@@ -1,7 +1,7 @@
 #Contains functionality for multi-step notifications
 
 from .notifications import notification
-from ..util import scaling, actor_utility, trial_utility
+from ..util import scaling, actor_utility, trial_utility, action_utility
 
 class action_notification(notification):
     def __init__(self, input_dict, global_manager):
@@ -20,7 +20,11 @@ class action_notification(notification):
                 'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
+                'attached_interface_elements' = None: list value - Interface elements, either in initialized or input_dict form, to add to this notification's
+                    sibling ordered collection
+                'transfer_interface_elements' = False: boolean value - Whether this notification's sibling ordered collection's member should be transferred
+                    to that of the next action notification on removal
+                'on_remove' = None: function value - Function to run after this notification is removed
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -30,16 +34,28 @@ class action_notification(notification):
             self.attached_interface_elements = input_dict['attached_interface_elements']
             if self.attached_interface_elements:
                 self.insert_collection_above(override_input_dict={
-                    'coordinates': (self.x, 0)
+                    'coordinates': (self.x, 0),
                 })
+                self.parent_collection.can_show_override = self
                 self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
+
+                column_increment = 120
+                self.notification_ordered_collection = self.global_manager.get('actor_creation_manager').create_interface_element(
+                    action_utility.generate_action_ordered_collection_input_dict(
+                        scaling.scale_coordinates(-1 * column_increment, global_manager.get('notification_manager').default_notification_height, global_manager), #scaling.scale_coordinates(-140, self.global_manager.get('notification_manager').notification_height, self.global_manager),
+                        self.global_manager,
+                        override_input_dict = {'parent_collection': self.parent_collection, 'second_dimension_increment': scaling.scale_width(column_increment, global_manager)}
+                    ),
+                    self.global_manager
+                )
+
                 index = 0
                 for element_input_dict in self.attached_interface_elements:
                     if type(element_input_dict) == dict:
-                        element_input_dict['parent_collection'] = self.parent_collection
+                        element_input_dict['parent_collection'] = self.notification_ordered_collection #self.parent_collection
                         self.attached_interface_elements[index] = global_manager.get('actor_creation_manager').create_interface_element(element_input_dict, global_manager) #if given input dict, create it and add it to notification
                     else:
-                        self.parent_collection.add_member(element_input_dict, member_config=element_input_dict.transfer_info_dict)
+                        self.notification_ordered_collection.add_member(element_input_dict, member_config=element_input_dict.transfer_info_dict)
                     index += 1
         else:
             self.attached_interface_elements = None
@@ -53,17 +69,32 @@ class action_notification(notification):
             self.on_remove = input_dict['on_remove']
 
     def on_click(self):
+        '''
+        Description:
+            Controls this notification's behavior when clicked - action notifications recursively remove their automatically generated parent collections and
+                transfer sibling ordered collection's interface elements, if applicable
+        Input:
+            None
+        Output:
+            None
+        '''
         transferred_interface_elements = []
         if self.transfer_interface_elements:
-            transferred_interface_elements = [] #self.parent_collection.members.copy()
-            for interface_element in self.parent_collection.members.copy():
-                if interface_element != self:
-                    interface_element.transfer_info_dict = {
-                        'x_offset': interface_element.x_offset,
-                        'y_offset': interface_element.y_offset,
-                    }
-                    self.parent_collection.remove_member(interface_element)
-                    transferred_interface_elements.append(interface_element)
+            transferred_interface_elements = []
+            for interface_element in self.notification_ordered_collection.members.copy():
+                for key in self.notification_ordered_collection.second_dimension_coordinates:
+                    if interface_element in self.notification_ordered_collection.second_dimension_coordinates[key]:
+                        second_dimension_coordinate = int(key)
+                interface_element.transfer_info_dict = {
+                    'x_offset': interface_element.x_offset,
+                    'y_offset': interface_element.y_offset,
+                    'second_dimension_coordinate': second_dimension_coordinate,
+                    'order_overlap': interface_element in self.notification_ordered_collection.order_overlap_list,
+                    'order_exempt': interface_element in self.notification_ordered_collection.order_exempt_list
+                }
+
+                self.notification_ordered_collection.remove_member(interface_element)
+                transferred_interface_elements.append(interface_element)
 
         if self.has_parent_collection:
             self.parent_collection.remove_recursive(complete=False)
@@ -72,6 +103,15 @@ class action_notification(notification):
         self.global_manager.get('notification_manager').handle_next_notification(transferred_interface_elements=transferred_interface_elements)
 
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program, also running its on_remove function
+                if applicable
+        Input:
+            None
+        Output:
+            None
+        '''
         super().remove()
         if self.on_remove:
             self.on_remove()
@@ -170,11 +210,6 @@ class dice_rolling_notification(action_notification):
                     elif current_die.special_die_type == 'red':
                         current_die.outline_color = current_die.outcome_color_dict['crit_fail']
 
-                if current_die.final_result >= current_die.result_outcome_dict['min_crit_success']:
-                    if not self.global_manager.get('displayed_mob').veteran:
-                        if not self.global_manager.get('displayed_mob').veteran:
-                            self.global_manager.get('sound_manager').play_sound('trumpet_1')
-
             for current_die in self.global_manager.get('dice_list'):
                 if not (not current_die.normal_die and current_die.special_die_type == 'red'):
                     if not current_die == max_die:
@@ -182,11 +217,6 @@ class dice_rolling_notification(action_notification):
             max_die.highlighted = True
         elif num_dice: #if only 1 die, check if it is a crtiical success for promotion
             self.global_manager.get('dice_list')[0].highlighted = True
-            if self.global_manager.get('dice_list')[0].final_result >= self.global_manager.get('dice_list')[0].result_outcome_dict['min_crit_success']:
-                if not self.global_manager.get('displayed_mob') == 'none':
-                    if not self.global_manager.get('displayed_mob').veteran:
-                        self.global_manager.get('sound_manager').play_sound('trumpet_1')
-
 
 class exploration_notification(action_notification):
     '''
@@ -253,10 +283,6 @@ class exploration_notification(action_notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             if self.global_manager.get('exploration_result')[0].movement_points >= 1: #fix to exploration completing multiple times bug
                 self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
-                for current_die in self.global_manager.get('dice_list'):
-                    current_die.remove_complete()
-                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                    current_minister_image.remove_complete()
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last:
@@ -488,11 +514,6 @@ class trade_notification(action_notification):
             warrior = village.spawn_warrior()
             warrior.show_images()
             warrior.attack_on_spawn()
-        if self.is_last:
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
         if self.stops_trade:
             self.global_manager.set('ongoing_action', False)
             self.global_manager.set('ongoing_action_type', 'none')
@@ -579,10 +600,6 @@ class religious_campaign_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('religious_campaign_result')[0].complete_religious_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -636,10 +653,6 @@ class public_relations_campaign_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('public_relations_campaign_result')[0].complete_public_relations_campaign()
 
         elif len(notification_manager.notification_queue) > 0:
@@ -770,10 +783,6 @@ class advertising_campaign_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('advertising_campaign_result')[0].complete_advertising_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -836,10 +845,6 @@ class conversion_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('conversion_result')[0].complete_conversion()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -895,10 +900,6 @@ class rumor_search_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('rumor_search_result')[0].complete_rumor_search()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -952,11 +953,6 @@ class artifact_search_notification(action_notification):
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
-        if len(notification_manager.notification_type_queue) > 0 and not notification_manager.notification_type_queue[0] == 'roll':
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
         if len(notification_manager.notification_queue) > 0 and notification_manager.notification_type_queue[0] in ['final_artifact_search', 'default'] and not self.is_last: #if roll failed or succeeded and about to complete
             self.global_manager.get('artifact_search_result')[0].complete_artifact_search()
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
@@ -1037,10 +1033,6 @@ class capture_slaves_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('capture_slaves_result')[0].complete_capture_slaves()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -1091,10 +1083,6 @@ class suppress_slave_trade_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] == 'none': #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             self.global_manager.get('suppress_slave_trade_result')[0].complete_suppress_slave_trade()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -1149,10 +1137,6 @@ class construction_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
             constructor = self.global_manager.get('construction_result')[0]
             if constructor.current_construction_type == 'default':
                 constructor.complete_construction()
@@ -1244,10 +1228,6 @@ class combat_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.remove_complete()
-            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove_complete()
     
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])

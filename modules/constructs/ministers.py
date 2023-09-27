@@ -2,7 +2,7 @@
 
 import random
 import os
-from ..util import tutorial_utility, utility, actor_utility, minister_utility, scaling
+from ..util import tutorial_utility, utility, actor_utility, minister_utility, action_utility, scaling
 
 class minister():
     '''
@@ -219,35 +219,28 @@ class minister():
         Output:
             None
         '''
-        minister_icon_coordinates = (scaling.scale_width(self.global_manager.get('notification_manager').notification_x - 140, self.global_manager), scaling.scale_height(440, self.global_manager))
-        
-        minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
-            'coordinates': minister_icon_coordinates,
+        minister_position_icon_dict = {
+            'coordinates': (0, 0),
             'width': scaling.scale_width(100, self.global_manager),
             'height': scaling.scale_height(100, self.global_manager),
             'modes': ['strategic', 'ministers', 'europe'],
             'attached_minister': self,
             'minister_image_type': 'position',
             'init_type': 'dice roll minister image',
-            'minister_message_image': True
-        }, self.global_manager)
+            'minister_message_image': True,
+            'member_config': {'order_overlap': True, 'second_dimension_alignment': 'left'}
+        }
 
-        minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
-            'coordinates': minister_icon_coordinates,
-            'width': scaling.scale_width(100, self.global_manager),
-            'height': scaling.scale_height(100, self.global_manager),
-            'modes': ['strategic', 'ministers', 'europe'],
-            'attached_minister': self,
-            'minister_image_type': 'portrait',
-            'init_type': 'dice roll minister image',
-            'minister_message_image': True
-        }, self.global_manager)
+        minister_portrait_icon_dict = minister_position_icon_dict.copy()
+        minister_portrait_icon_dict['minister_image_type'] = 'portrait'
 
         self.global_manager.get('notification_manager').display_notification({
             'message': text,
-            'notification_type': 'minister',
+            'notification_type': 'action',
             'audio': audio,
-            'attached_minister': self
+            'attached_minister': self,
+            'attached_interface_elements': [minister_position_icon_dict, minister_portrait_icon_dict],
+            'transfer_interface_elements': True
         })
 
     def steal_money(self, value, theft_type = 'none'):
@@ -267,7 +260,7 @@ class minister():
                 print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('transaction_descriptions')[theft_type] + '.')
             difficulty = self.no_corruption_roll(6, 'minister_stealing')
             result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
-            if (not prosecutor == self) and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
+            if prosecutor != self and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
                 if prosecutor.check_corruption(): #if prosecutor takes bribe, split money
                     prosecutor.stolen_money += (value / 2)
                     self.stolen_money += (value / 2)
@@ -278,13 +271,11 @@ class minister():
                     self.stolen_money += value
                     self.corruption_evidence += 1
                     evidence_message = ''
-
                     evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
                     evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
-                    self.global_manager.set('evidence_just_found', True) #causes sound to be made next time prosecutor image appears
-                    prosecutor.display_message(evidence_message)
+                    prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'))
                     if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who chose to create evidence.') 
             else: #if not caught, keep money

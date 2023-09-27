@@ -24,8 +24,3 @@ except Exception: #displays error message and records error message in crash log
 #   that any individualized behaviors rely on
 # fix double minister image on capture slaves notifications
 # fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
-# continue replacing instances of notification_utility.display_notification(, also need to replace choice and zoom notifications (and maybe minister message)
-# restrict notification queue manipulation to the notification manager - removing notification should just tell notification manager to check for queued notifications,
-#   rather than directly handling the notification queue all over the program - a notification_dict should be popped the moment it is used to make a notification
-# ^until this is correctly implemented, essentially all action notifications will be broken
-#   clicking on a notification/choice button shouldn't "remove" notification - should have a new recursive remove function to remove above collection

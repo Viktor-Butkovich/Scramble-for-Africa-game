@@ -558,6 +558,7 @@ class notification_manager_template():
         self.notification_queue = []
         self.global_manager = global_manager
         self.locked = False
+        self.default_notification_height = 300
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
 
@@ -571,7 +572,7 @@ class notification_manager_template():
             None
         '''
         self.notification_width = 500
-        self.notification_height = 300
+        self.notification_height = self.default_notification_height
         self.notification_y = 500
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
             self.notification_x = self.global_manager.get('minimap_grid_x') - (self.notification_width + 40)
@@ -660,15 +661,15 @@ class notification_manager_template():
         if self.notification_queue:
             if transferred_interface_elements:
                 if 'attached_interface_elements' in self.notification_queue[0]:
-                    self.notification_queue[0]['attached_interface_elements'] += transferred_interface_elements
+                    self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements + self.notification_queue[0]['attached_interface_elements']
                 else:
                     self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements
             self.notification_to_front(self.notification_queue.pop(0))
 
     def set_lock(self, new_lock):
         self.lock = new_lock
-        if (not new_lock) and self.notification_queue and self.global_manager.get('displayed_notification') == 'none':
-            self.notification_to_front(self.notification_queue.pop(0))
+        if (not new_lock) and self.global_manager.get('displayed_notification') == 'none':
+            self.handle_next_notification()
 
     def display_notification(self, input_dict, insert_index=None): #default, exploration, or roll
         '''
@@ -845,10 +846,6 @@ class notification_manager_template():
             del input_dict['notification_dice']
             input_dict['init_type'] = 'zoom notification'
             input_dict['target'] = notification_dict['zoom_destination']
-        elif notification_type == 'minister':
-            del input_dict['notification_dice']
-            input_dict['init_type'] = 'minister notification'
-            input_dict['attached_minister'] = notification_dict['attached_minister']
 
         new_notification = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         if notification_type == 'roll':
@@ -900,7 +897,8 @@ class sound_manager_template():
         '''
         current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
         current_sound.set_volume(volume)
-        channel = current_sound.play()
+        channel = pygame.mixer.find_channel(force=True)
+        channel.play(current_sound)
         return(channel)
 
     def queue_sound(self, file_name, channel, volume = 0.3):

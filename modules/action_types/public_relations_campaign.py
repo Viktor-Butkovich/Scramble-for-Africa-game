@@ -5,7 +5,18 @@ import random
 from ..util import action_utility, main_loop_utility, text_utility, dice_utility, actor_utility, scaling
 
 class public_relations_campaign():
+    '''
+    Action for evangelist in Europe to increase public opinion
+    '''
     def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.global_manager = global_manager
         self.action_type = 'public_relations_campaign'
         self.initial_setup()
@@ -160,10 +171,6 @@ class public_relations_campaign():
         Output:
             None
         '''
-        #Implementation in progress - currently correctly called when start campaign button is clicked
-        #action_utility.cancel_ongoing_actions(self.global_manager)
-        #return
-        #'''
         self.global_manager.get('notification_manager').set_lock(True)
         roll_result = 0
         self.current_unit = self.current_unit
@@ -188,16 +195,10 @@ class public_relations_campaign():
             roll_type = roll_types[index]
             roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result))
 
-        attached_interface_elements = [
-            action_utility.generate_action_ordered_collection_input_dict(
-                scaling.scale_coordinates(-140, self.global_manager.get('notification_manager').notification_height, self.global_manager),
-                self,
-                self.global_manager)
-        ]
+        attached_interface_elements = []
         roll_result = 0
-
         for roll_list in roll_lists:
-            attached_interface_elements[0]['initial_members'] += action_utility.generate_die_input_dicts((0, 0), roll_list[0], self, self.global_manager)
+            attached_interface_elements.append(action_utility.generate_die_input_dict((0, 0), roll_list[0], self, self.global_manager))
             roll_result = max(roll_list[0], roll_result)
 
         text = ''
@@ -252,12 +253,18 @@ class public_relations_campaign():
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
 
+        if roll_result >= self.current_min_crit_success and (not self.current_unit.veteran): #not self.current_unit.veteran: #(not self.current_unit.veteran) and
+            audio = 'trumpet_1'
+        else:
+            audio = 'none'
+
         self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'action',
             'transfer_interface_elements': True,
-            'on_remove': self.complete
+            'on_remove': self.complete,
+            'audio': audio
         })
 
         text += '/n'

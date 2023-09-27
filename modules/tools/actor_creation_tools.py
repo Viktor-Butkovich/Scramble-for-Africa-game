@@ -533,33 +533,3 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             None
         '''
         lore_missions.lore_mission(from_save, input_dict, global_manager)
-
-    def display_die(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
-        '''
-        Description:
-            Initializes a die object through the global manager-accessible actor_creation_manager, removing the need to import the die module and create circular imports 
-        Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this die
-            int width: Pixel width of this die
-            int height: Pixel height of this die
-            string list modes: Game modes during which this button can appear
-            int num_sides: Number of sides for this die
-            string/int dictionary result_outcome_dict: dictionary of string result type keys and int die result values determining which die results are successes/failures or critical successes/failures
-            string/int outcome_color_dict: dictionary of string color name keys and int die result values determining what colors are shown for certain die results
-            int final_result: Predetermined final result of this roll that the die will end on
-            global_manager_template global_manager: Object that accesses shared variables
-        Ouptut:
-            None
-        '''
-        new_die = global_manager.get('actor_creation_manager').create_interface_element({
-            'coordinates': coordinates,
-            'width': width,
-            'height': height,
-            'modes': modes,
-            'num_sides': num_sides,
-            'result_outcome_dict': result_outcome_dict,
-            'outcome_color_dict': outcome_color_dict,
-            'final_result': final_result,
-            'init_type': 'die'
-        }, global_manager)
-    

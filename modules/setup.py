@@ -161,7 +161,6 @@ def misc(global_manager):
     global_manager.set('interface_collection_list', [])
     global_manager.set('independent_interface_elements', [])
     global_manager.set('dice_list', [])
-    global_manager.set('dice_roll_minister_images', [])
     global_manager.set('combatant_images', [])
     global_manager.set('draw_list', [])
 
@@ -1486,8 +1485,6 @@ def trial_screen(global_manager):
         'indicator_type': 'not prosecution_bribed_judge',
         'init_type': 'indicator image'
     }, global_manager)
-
-    global_manager.set('evidence_just_found', False)
 
 def new_game_setup_screen(global_manager):
     '''

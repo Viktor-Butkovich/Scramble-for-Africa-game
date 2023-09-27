@@ -1,5 +1,7 @@
 #Contains miscellaneous functions relating to action functionality
+
 from . import scaling
+
 def cancel_ongoing_actions(global_manager):
     '''
     Description:
@@ -12,7 +14,18 @@ def cancel_ongoing_actions(global_manager):
     global_manager.set('ongoing_action', False)
     global_manager.set('ongoing_action_type', 'none')
 
-def generate_die_input_dicts(coordinates, result, action, global_manager):
+def generate_die_input_dict(coordinates, final_result, action, global_manager):
+    '''
+    Description:
+        Creates and returns the input dict of a die created at the inputted coordinates with the inputted final result for the inputted action
+    Input:
+        int tuple coordinates: Two values representing x and y coordinates for the pixel location of the element
+        int final_result: Predetermined final result of roll for die to end on
+        action action: Action for which die is being rolled
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        dictionary: Returns the created input dict
+    '''
     result_outcome_dict = {'min_success': action.current_min_success, 'min_crit_success': action.current_min_crit_success, 'max_crit_fail': action.current_max_crit_fail}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
 
@@ -24,14 +37,23 @@ def generate_die_input_dicts(coordinates, result, action, global_manager):
         'num_sides': 6,
         'result_outcome_dict': result_outcome_dict,
         'outcome_color_dict': outcome_color_dict,
-        'final_result': result,
+        'final_result': final_result,
         'init_type': 'die'
     }
-    return([die_input_dict])
-    #attached_dice_list.append(new_die)
+    return(die_input_dict)
 
-def generate_action_ordered_collection_input_dict(coordinates, action, global_manager):
-    return({
+def generate_action_ordered_collection_input_dict(coordinates, global_manager, override_input_dict=None):
+    '''
+    Description:
+        Creates and returns the input dict of an ordered collection created at the inputted coordinates with any extra overrides
+    Input:
+        int tuple coordinates: Two values representing x and y coordinates for the pixel location of the element
+        global_manager_template global_manager: Object that accesses shared variables
+        dictionary override_input_dict=None: Optional dictionary to override attributes of created input_dict
+    Output:
+        dictionary: Returns the created input dict
+    '''
+    return_dict = {
         'coordinates': coordinates,
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
@@ -39,9 +61,23 @@ def generate_action_ordered_collection_input_dict(coordinates, action, global_ma
         'init_type': 'ordered collection',
         'initial_members': [],
         'reversed': True
-    })
+    }
+    if override_input_dict:
+        for value in override_input_dict:
+            return_dict[value] = override_input_dict[value]
+    return(return_dict)
 
 def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
+    '''
+    Description:
+        Creates and returns the input dicts of a minister portrait/background pair created at the inputted coordinates for the inputted action
+    Input:
+        int tuple coordinates: Two values representing x and y coordinates for the pixel location of the elements
+        action action: Action for which portrait is being created
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        dictionary list: Returns the created input dicts
+    '''
     if global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
         minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
     else:
@@ -68,4 +104,3 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
         'member_config': {'order_overlap': True}
     }
     return([portrait_background_input_dict, portrait_front_input_dict])
-#unit.display_die((die_x, 500), first_roll_list[0], unit.current_min_success, unit.current_min_crit_success, unit.current_max_crit_fail)

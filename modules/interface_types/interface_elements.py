@@ -196,7 +196,7 @@ class interface_element():
             Replaces this element's place in its parent collection with a new interface collection, allowing elements to dynamically form collections after initialization 
                 without interfering with above hierarchies
         'Input':
-            boolean override_input_dict=None: Optional dictionary to override attributes of created collection's input_dict
+            dictionary override_input_dict=None: Optional dictionary to override attributes of created collection's input_dict
         'Output':
             None
         '''
@@ -217,11 +217,11 @@ class interface_element():
             input_dict['member_config']['index'] = self.parent_collection.members.index(self)
             if hasattr(self.parent_collection, 'order_overlap_list') and self in self.parent_collection.order_overlap_list:
                 input_dict['member_config']['order_overlap'] = True
-                input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
+                #input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
 
             if hasattr(self.parent_collection, 'order_exempt_list') and self in self.parent_collection.order_exempt_list:
                 input_dict['member_config']['order_exempt'] = True
-                input_dict['member_config']['order_exempt_index'] = self.parent_collection.order_exempt_list.index(self)
+                #input_dict['member_config']['order_exempt_index'] = self.parent_collection.order_exempt_list.index(self)
 
             if hasattr(self, 'x_offset'):
                 input_dict['member_config']['x_offset'] = self.x_offset
@@ -402,10 +402,10 @@ class interface_collection(interface_element):
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
         if member_config['calibrate_exempt'] and hasattr(self, 'calibrate_exempt_list'):
-            if not 'order_overlap_index' in member_config:
-                self.calibrate_exempt_list.append(new_member)
-            else:
-                self.calibrate_exempt_list.insert(member_config['order_overlap_index'], new_member)
+            #if not 'order_overlap_index' in member_config:
+            self.calibrate_exempt_list.append(new_member)
+            #else:
+            #    self.calibrate_exempt_list.insert(member_config['order_overlap_index'], new_member)
 
     def remove_member(self, removed_member):
         '''
@@ -675,8 +675,12 @@ class ordered_collection(interface_collection):
             input_dict['direction'] = 'vertical'
         if not 'reversed' in input_dict:
             input_dict['reversed'] = False
+        if not 'second_dimension_increment' in input_dict:
+            input_dict['second_dimension_increment'] = 0
         self.separation = input_dict['separation']
         self.direction = input_dict['direction']
+        self.second_dimension_coordinates = {}
+        self.second_dimension_increment = input_dict['second_dimension_increment']
         self.reverse_multiplier = 1
         if input_dict['reversed']:
             self.reverse_multiplier *= -1
@@ -709,19 +713,43 @@ class ordered_collection(interface_collection):
             member_config['order_y_offset'] = 0
         new_member.order_y_offset = member_config['order_y_offset']
 
+        if not 'second_dimension_coordinate' in member_config:
+            member_config['second_dimension_coordinate'] = 0
+
         super().add_member(new_member, member_config)
 
         if member_config['order_overlap'] and hasattr(self, 'order_overlap_list'): #maybe have a list of lists to iterate through these operations
-            if not 'order_overlap_index' in member_config:
-                self.order_overlap_list.append(new_member)
-            else:
-                self.order_overlap_list.insert(member_config['order_overlap_index'], new_member)
+            self.order_overlap_list.append(new_member)
 
         if member_config['order_exempt'] and hasattr(self, 'order_exempt_list'):
-            if not 'order_exempt_index' in member_config:
-                self.order_exempt_list.append(new_member)
+            self.order_exempt_list.append(new_member)
+
+        if 'second_dimension_alignment' in member_config: #if left alignment, go left through each column until one is free, and vice versa
+            if member_config['second_dimension_alignment'] == 'left':
+                increment = -1
             else:
-                self.order_exempt_list.insert(member_config['order_exempt_index'], new_member)
+                increment = 1
+            coordinate = 0
+            valid = False
+            while not valid:
+                coordinate += increment
+                if not str(coordinate) in self.second_dimension_coordinates:
+                    valid = True
+                else:
+                    all_overlapped = True
+                    for interface_element in self.second_dimension_coordinates[str(coordinate)]:
+                        if not interface_element in self.order_overlap_list:
+                            all_overlapped = False
+                            break
+                    valid = all_overlapped
+
+            member_config['second_dimension_coordinate'] = coordinate
+
+        key = str(member_config['second_dimension_coordinate'])
+        if key in self.second_dimension_coordinates:
+            self.second_dimension_coordinates[key].append(new_member)
+        else:
+            self.second_dimension_coordinates[key] = [new_member]
 
     def remove_member(self, removed_member):
         '''
@@ -740,6 +768,9 @@ class ordered_collection(interface_collection):
             self.order_overlap_list.remove(removed_member)
         if removed_member in self.order_exempt_list:
             self.order_exempt_list.remove(removed_member)
+        for key in self.second_dimension_coordinates:
+            if removed_member in self.second_dimension_coordinates[key]:
+                self.second_dimension_coordinates[key].remove(removed_member)
         super().remove_member(removed_member)
 
     def update_collection(self):
@@ -753,31 +784,35 @@ class ordered_collection(interface_collection):
             None
         '''
         super().update_collection()
-        current_y = self.y
-        current_x = self.x
-        for member in self.members:
-            if member.showing and not member in self.order_exempt_list:
-                if self.direction == 'vertical':
-                    current_y -= member.height * self.reverse_multiplier
+        for key in self.second_dimension_coordinates:
+            second_dimension_coordinate = int(key)
+            if self.direction == 'vertical':
+                current_y = self.y
+                current_x = self.x + (second_dimension_coordinate * self.second_dimension_increment)
+            elif self.direction == 'horizontal':
+                current_y = self.y + (second_dimension_coordinate * self.second_dimension_increment)
+                current_x = self.x
+            for member in self.second_dimension_coordinates[key]:
+                if member.showing and not member in self.order_exempt_list:
+                    if self.direction == 'vertical':
+                        current_y -= member.height * self.reverse_multiplier
+                        new_x = current_x + member.order_x_offset
+                        new_y = current_y + member.order_y_offset
+                        if (member.x, member.y) != (new_x, new_y):
+                            if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
+                                new_y += member.height * self.reverse_multiplier
+                            member.set_origin(new_x, new_y)
 
-                    new_x = self.x + member.order_x_offset
-                    new_y = current_y + member.order_y_offset
-                    if (member.x, member.y) != (new_x, new_y):
-                        effective_y = current_y + member.order_y_offset
-                        if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
-                            effective_y += member.height * self.reverse_multiplier
-                        member.set_origin(self.x + member.order_x_offset, effective_y)
+                        if not member in self.order_overlap_list:
+                            current_y -= self.separation * self.reverse_multiplier
+                        else:
+                            current_y += member.height * self.reverse_multiplier
 
-                    if not member in self.order_overlap_list:
-                        current_y -= self.separation * self.reverse_multiplier
-                    else:
-                        current_y += member.height * self.reverse_multiplier
+                    elif self.direction == 'horizontal':
+                        new_x = current_x + member.order_x_offset
+                        new_y = current_y + member.order_y_offset
+                        if (member.x, member.y) != (new_x, new_y):
+                            member.set_origin(new_x, new_y)
 
-                elif self.direction == 'horizontal':
-                    new_x = current_x + member.order_x_offset
-                    new_y = self.y + member.order_y_offset
-                    if (member.x, member.y) != (new_x, new_y):
-                        member.set_origin(current_x + member.order_x_offset, self.y + member.order_y_offset)
-
-                    if not member in self.order_overlap_list:
-                        current_x += self.separation + member.width * self.reverse_multiplier
+                        if not member in self.order_overlap_list:
+                            current_x += self.separation + member.width * self.reverse_multiplier

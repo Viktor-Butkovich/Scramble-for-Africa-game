@@ -70,11 +70,6 @@ class pmob(mob):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
                 self.select()
-        self.current_roll_modifier = 0
-        self.default_min_success = 4
-        self.default_max_crit_fail = 1
-        self.default_min_crit_success = 6
-        self.attached_dice_list = []
         self.attached_cell_icon_list = []
 
     def to_save_dict(self):
@@ -1476,63 +1471,6 @@ class pmob(mob):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #update mob display to show new upgrade possibilities
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')
-
-    def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail, uses_minister = True):
-        '''
-        Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
-                the result
-        Input:
-            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
-            int result: Predetermined result that the die will end on after rolling
-            int min_success: Minimum roll required for a success
-            int min_crit_success: Minimum roll required for a critical success
-            int max_crit_fail: Maximum roll required for a critical failure
-            boolean uses_minister = True: Determines if the roll is controlled by a minister and whether a minister portrait should be shown during the roll
-        Output:
-            None
-        '''
-        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
-        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-
-        new_die = self.global_manager.get('actor_creation_manager').create_interface_element({
-            'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager),
-            'width': scaling.scale_width(100, self.global_manager),
-            'height': scaling.scale_height(100, self.global_manager),
-            'modes': self.modes,
-            'num_sides': 6,
-            'result_outcome_dict': result_outcome_dict,
-            'outcome_color_dict': outcome_color_dict,
-            'final_result': result,
-            'init_type': 'die'
-        }, self.global_manager)
-
-        self.attached_dice_list.append(new_die)
-        if uses_minister:
-            if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
-                minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
-            else:
-                minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-
-            minister_position_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
-                'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager),
-                'width': scaling.scale_width(100, self.global_manager),
-                'height': scaling.scale_height(100, self.global_manager),
-                'modes': self.modes,
-                'attached_minister': self.controlling_minister,
-                'minister_image_type': 'position',
-                'init_type': 'dice roll minister image'
-            }, self.global_manager)
-            
-            minister_portrait_icon = self.global_manager.get('actor_creation_manager').create_interface_element({
-                'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager),
-                'width': scaling.scale_width(100, self.global_manager),
-                'height': scaling.scale_height(100, self.global_manager),
-                'modes': self.modes,
-                'attached_minister': self.controlling_minister,
-                'minister_image_type': 'portrait',
-                'init_type': 'dice roll minister image'
-            }, self.global_manager)
 
     def start_repair(self, building_info_dict):
         '''

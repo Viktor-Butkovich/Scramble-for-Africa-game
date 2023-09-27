@@ -32,10 +32,6 @@ class evangelist(officer):
         '''
         input_dict['officer_type'] = 'evangelist'
         super().__init__(from_save, input_dict, global_manager)
-        self.current_roll_modifier = 0
-        self.default_min_success = 4
-        self.default_max_crit_fail = 1
-        self.default_min_crit_success = 6
 
     def start_religious_campaign(self): 
         '''

@@ -49,10 +49,6 @@ class group(pmob):
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        self.current_roll_modifier = 0
-        self.default_min_success = 4
-        self.default_max_crit_fail = 1
-        self.default_min_crit_success = 6
         self.set_group_type('none')
         self.update_image_bundle()
         if not from_save:
