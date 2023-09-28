@@ -107,7 +107,33 @@ class action():
                 roll_message += 'to succeed.'
             text += roll_message
         return(text)
-    
+
+    def generate_attached_interface_elements(self, subject):
+        '''
+        Description:
+            Returns list of input dicts of interface elements to attach to a notification regarding a particular subject for this action
+        Input:
+            string subject: Determines input dicts
+        Output:
+            dictionary list: Returns list of input dicts for inputted subject
+        '''
+        return([])
+
+    def generate_audio(self, subject):
+        '''
+        Description:
+            Returns list of audio dicts of sounds to play when notification appears, based on the inputted subject and other current circumstances
+        Input:
+            string subject: Determines sound dicts
+        Output:
+            dictionary list: Returns list of sound dicts for inputted subject
+        '''
+        audio = []
+        if subject == 'roll_finished':
+            if self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
+                audio.append('trumpet_1')
+        return(audio)
+
     def pre_start(self, unit):
         '''
         Description:
@@ -131,6 +157,19 @@ class action():
         self.global_manager.set('ongoing_action_type', self.action_type)
         self.current_unit = unit
 
+    def process_payment(self):
+        '''
+        Description:
+            Finds the price of this action and processes the payment
+        Input:
+            None
+        Output:
+            float: Returns the amount paid
+        '''
+        price = self.global_manager.get('action_prices')[self.action_type]
+        self.global_manager.get('money_tracker').change(price * -1, self.action_type)
+        return(price)
+
     def middle(self):
         '''
         Description:
@@ -145,9 +184,7 @@ class action():
         self.current_unit = self.current_unit
         self.current_unit.set_movement_points(0)
 
-        price = self.global_manager.get('action_prices')[self.action_type]
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')[self.action_type] * -1, self.action_type)
-        actor_utility.double_action_price(self.global_manager, self.action_type)
+        price = self.process_payment()
 
         roll_lists = []
         if self.current_unit.veteran:
@@ -205,38 +242,35 @@ class action():
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(self.roll_result) + ': ' + result_outcome_dict[self.roll_result] + ', was used. /n /n')
 
-        if self.roll_result >= self.current_min_crit_success and (not self.current_unit.veteran): #not self.current_unit.veteran: #(not self.current_unit.veteran) and
-            audio = 'trumpet_1'
-        else:
-            audio = 'none'
-
         self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Click to continue. /n',
             'num_dice': num_dice,
             'notification_type': 'action',
             'transfer_interface_elements': True,
             'on_remove': self.complete,
-            'audio': audio
+            'audio': self.generate_audio('roll_finished')
         })
 
         text += '/n'
         self.public_relations_change = 0
         if self.roll_result >= self.current_min_success: #4+ required on D6 for exploration
             self.public_relations_change = random.randrange(1, 7)
-        if self.roll_result >= self.current_min_success:
-            text += self.generate_notification_text('success')
-        else:
-            text += self.generate_notification_text('failure')
-            
-        if self.roll_result <= self.current_max_crit_fail:
-            text += self.generate_notification_text('critical_failure')
 
-        if (not self.current_unit.veteran) and self.roll_result >= self.current_min_crit_success:
-            text += self.generate_notification_text('promotion')
+        if self.roll_result <= self.current_max_crit_fail:
+            result = 'critical_failure'
+        elif (not self.current_unit.veteran) and self.roll_result >= self.current_min_crit_success:
+            result = 'critical_success'
+        elif self.roll_result >= self.current_min_success:
+            result = 'success'
+        else:
+            result = 'failure'
+
+        text += self.generate_notification_text(result)
 
         self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Click to remove this notification. /n',
             'notification_type': 'action',
+            'attached_interface_elements': self.generate_attached_interface_elements(result)
         })
 
     def complete(self):
@@ -252,3 +286,20 @@ class action():
             self.current_unit.promote()
             self.current_unit.select()
         action_utility.cancel_ongoing_actions(self.global_manager)
+
+class campaign(action):
+    '''
+    Action conducted without workers that doubles in price each time it is completed within a turn, resetting at the start of the next turn
+    '''
+    def process_payment(self):
+        '''
+        Description:
+            Finds the price of this action and processes the payment, also doubling the campaign cost
+        Input:
+            None
+        Output:
+            float: Returns the amount paid
+        '''
+        price = super().process_payment()
+        actor_utility.double_action_price(self.global_manager, self.action_type)
+        return(price)

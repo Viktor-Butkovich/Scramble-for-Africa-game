@@ -24,3 +24,4 @@ except Exception: #displays error message and records error message in crash log
 #   that any individualized behaviors rely on
 # fix double minister image on capture slaves notifications
 # fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
+# add option for ordered collection to center on a particular x/y (by setting its origin to the desired x/y - half of its height/width)

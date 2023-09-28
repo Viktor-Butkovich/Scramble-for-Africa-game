@@ -190,12 +190,6 @@ class actor_display_label(label):
             for action_obj in self.global_manager.get('action_obj_list'):
                 self.add_attached_button(action_obj.button_setup(input_dict.copy())) #execute_def('button_setup', input_dict.copy()))
 
-            input_dict['init_type'] = 'evangelist campaign button'
-            input_dict['image_id'] = 'buttons/religious_campaign_button.png'
-            input_dict['campaign_type'] = 'religious campaign'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
             input_dict['init_type'] = 'advertising campaign button'
             input_dict['image_id'] = 'ministers/icons/trade.png'
             input_dict['keybind_id'] = pygame.K_r

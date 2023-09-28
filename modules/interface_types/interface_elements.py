@@ -299,12 +299,14 @@ class interface_collection(interface_element):
         customize_button_size = 20
         if ('allow_minimize' in input_dict and input_dict['allow_minimize']) or ('allow_move' in input_dict and input_dict['allow_move']):
             self.insert_collection_above()
+            customize_button_width = scaling.scale_width(customize_button_size, global_manager)
+            customize_button_height = scaling.scale_width(customize_button_size, global_manager)
 
             if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
                 global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                    'width': scaling.scale_width(customize_button_size, global_manager),
-                    'height': scaling.scale_height(customize_button_size, global_manager),
+                    'width': customize_button_width,
+                    'height': customize_button_height,
                     'parent_collection': self.parent_collection,
                     'attached_collection': self,
                     'init_type': 'minimize interface collection button',
@@ -316,8 +318,8 @@ class interface_collection(interface_element):
             if 'allow_move' in input_dict and input_dict['allow_move']:
                 global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                    'width': scaling.scale_width(customize_button_size, global_manager),
-                    'height': scaling.scale_height(customize_button_size, global_manager),
+                    'width': customize_button_width,
+                    'height': customize_button_height,
                     'parent_collection': self.parent_collection,
                     'init_type': 'move interface collection button',
                     'image_id': 'buttons/reposition_button.png',
@@ -327,8 +329,8 @@ class interface_collection(interface_element):
                 
                 global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                    'width': scaling.scale_width(customize_button_size, global_manager),
-                    'height': scaling.scale_height(customize_button_size, global_manager),
+                    'width': customize_button_width,
+                    'height': customize_button_height,
                     'parent_collection': self.parent_collection,
                     'init_type': 'reset interface collection button',
                     'image_id': 'buttons/reset_button.png',
@@ -796,9 +798,15 @@ class ordered_collection(interface_collection):
             for member in self.second_dimension_coordinates[key]:
                 if member.showing and not member in self.order_exempt_list:
                     if self.direction == 'vertical':
-                        current_y -= member.height * self.reverse_multiplier
+                        preincrement = False
+                        if self.reverse_multiplier > 0:
+                            preincrement = True
+                            current_y -= member.height * self.reverse_multiplier
                         new_x = current_x + member.order_x_offset
                         new_y = current_y + member.order_y_offset
+                        if not preincrement:
+                            current_y -= member.height * self.reverse_multiplier
+
                         if (member.x, member.y) != (new_x, new_y):
                             if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
                                 new_y += member.height * self.reverse_multiplier

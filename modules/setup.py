@@ -13,7 +13,7 @@ import modules.constructs.countries as countries
 import modules.tools.data_managers as data_managers
 import modules.tools.save_load_tools as save_load_tools
 import modules.tools.effects as effects
-from modules.action_types import public_relations_campaign
+from modules.action_types import public_relations_campaign, religious_campaign
 
 def setup(global_manager, *args):
     '''
@@ -369,6 +369,7 @@ def actions(global_manager):
     '''
     global_manager.set('action_obj_list', [])
     public_relations_campaign.public_relations_campaign(global_manager)
+    religious_campaign.religious_campaign(global_manager)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities(global_manager):
@@ -815,7 +816,6 @@ def transactions(global_manager):
         {
         'exploration': 5,
         'conversion': 5,
-        'religious_campaign': 5,
         'advertising_campaign': 5,
         'loan_search': 5,
         'trade': 0,
@@ -842,7 +842,6 @@ def transactions(global_manager):
         {
         'exploration': 'exploration',
         'conversion': 'religious conversion',
-        'religious_campaign': 'religious campaigning',
         'advertising_campaign': 'advertising',
         'loan_search': 'loan searches',
         'trade': 'trading with natives',

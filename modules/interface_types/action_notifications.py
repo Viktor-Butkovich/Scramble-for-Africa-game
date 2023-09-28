@@ -34,17 +34,20 @@ class action_notification(notification):
             self.attached_interface_elements = input_dict['attached_interface_elements']
             if self.attached_interface_elements:
                 self.insert_collection_above(override_input_dict={
-                    'coordinates': (self.x, 0),
+                    'coordinates': (self.x, 0)
                 })
                 self.parent_collection.can_show_override = self
                 self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
 
                 column_increment = 120
+                collection_y = self.global_manager.get('notification_manager').default_notification_y - (self.global_manager.get('notification_manager').default_notification_height / 2)
                 self.notification_ordered_collection = self.global_manager.get('actor_creation_manager').create_interface_element(
                     action_utility.generate_action_ordered_collection_input_dict(
-                        scaling.scale_coordinates(-1 * column_increment, global_manager.get('notification_manager').default_notification_height, global_manager), #scaling.scale_coordinates(-140, self.global_manager.get('notification_manager').notification_height, self.global_manager),
+                        scaling.scale_coordinates(-1 * column_increment, collection_y, global_manager),
                         self.global_manager,
-                        override_input_dict = {'parent_collection': self.parent_collection, 'second_dimension_increment': scaling.scale_width(column_increment, global_manager)}
+                        override_input_dict = {'parent_collection': self.parent_collection,
+                                               'second_dimension_increment': scaling.scale_width(column_increment, global_manager)
+                        }
                     ),
                     self.global_manager
                 )
@@ -517,146 +520,6 @@ class trade_notification(action_notification):
         if self.stops_trade:
             self.global_manager.set('ongoing_action', False)
             self.global_manager.set('ongoing_action_type', 'none')
-
-class religious_campaign_notification(action_notification):
-    '''
-    Notification that does not automatically prompt the user to remove it and shows the results of a religious campaign when the last notification is removed
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'message': string value - Default text for this label, with lines separated by /n
-                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
-                    will be started
-                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-                'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.is_last = input_dict['is_last']
-        if self.is_last: #if last, show result
-            self.notification_images = []
-            background_dict = {
-                'image_id': 'mobs/default/button.png',
-                'size': 1,
-                'x_offset': 0,
-                'y_offset': 0,
-                'level': -10
-            } 
-            left_worker_dict = {
-                'image_id': 'mobs/church_volunteers/default.png',
-                'size': 0.8,
-                'x_offset': -0.2,
-                'y_offset': 0,
-                'level': 1
-            }
-            right_worker_dict = left_worker_dict.copy()
-            right_worker_dict['x_offset'] *= -1
-            button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
-
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
-                'image_id': button_image_id_list,
-                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                'width': scaling.scale_width(200, global_manager),
-                'height': scaling.scale_height(200, global_manager),
-                'modes': input_dict['modes'],
-                'to_front': True,
-                'init_type': 'free image'
-            }, global_manager))
-
-        elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
-            if global_manager.get('religious_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
-                global_manager.get('sound_manager').dampen_music()
-                if global_manager.get('current_country').religion == 'protestant':
-                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
-                elif global_manager.get('current_country').religion == 'catholic':
-                    global_manager.get('sound_manager').play_sound('ave maria')
-        super().__init__(input_dict, global_manager)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
-                such as recruiting a unit, as applicable. Removes dice and other side images as applicable
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove(handle_next_notification=False)
-        notification_manager = self.global_manager.get('notification_manager')
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            self.global_manager.get('religious_campaign_result')[0].complete_religious_campaign()
-            
-        elif len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-        if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
-            for current_image in self.notification_images:
-                current_image.remove_complete()
-
-class public_relations_campaign_notification(action_notification):
-    '''
-    Notification that does not automatically prompt the user to remove it and shows the results of a PR campaign when the last notification is removed
-    ''' 
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'message': string value - Default text for this label, with lines separated by /n
-                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
-                    will be started
-                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-                'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.is_last = input_dict['is_last']
-        super().__init__(input_dict, global_manager)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
-                such as recruiting a unit, as applicable. Removes dice and other side images as applicable
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove(handle_next_notification=False)
-        notification_manager = self.global_manager.get('notification_manager')
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            self.global_manager.get('public_relations_campaign_result')[0].complete_public_relations_campaign()
-
-        elif len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
 class trial_notification(action_notification):
     '''

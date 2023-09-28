@@ -67,6 +67,32 @@ def generate_action_ordered_collection_input_dict(coordinates, global_manager, o
             return_dict[value] = override_input_dict[value]
     return(return_dict)
 
+def generate_free_image_input_dict(image_id, default_size, global_manager, override_input_dict=None):
+    '''
+    Description:
+        Creates and returns the input dict of a free image with the inputted image id and inputted size
+    Input:
+        string/list/dict image_id: Image id of image to create
+        default_size: Non-scaled width and height of image to create
+        global_manager_template global_manager: Object that accesses shared variables
+        dictionary override_input_dict=None: Optional dictionary to override attributes of created input_dict
+    Output:
+        dictionary: Returns the created input dict
+    '''
+    return_dict = {
+        'image_id': image_id,
+        'coordinates': (0, 0),
+        'width': scaling.scale_width(default_size, global_manager),
+        'height': scaling.scale_height(default_size, global_manager),
+        'modes': [global_manager.get('current_game_mode')],
+        'to_front': True,
+        'init_type': 'free image'
+    }
+    if override_input_dict:
+        for value in override_input_dict:
+            return_dict[value] = override_input_dict[value]
+    return(return_dict)
+
 def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
     '''
     Description:
@@ -78,13 +104,9 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
     Output:
         dictionary list: Returns the created input dicts
     '''
-    if global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
-        minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
-    else:
-        minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
 
     portrait_background_input_dict = {
-        'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], global_manager),
+        'coordinates': (0, 0),
         'width': scaling.scale_width(100, global_manager),
         'height': scaling.scale_height(100, global_manager),
         'modes': [global_manager.get('current_game_mode')],
@@ -94,7 +116,7 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
     }
     
     portrait_front_input_dict = {
-        'coordinates': scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], global_manager),
+        'coordinates': (0, 0),
         'width': scaling.scale_width(100, global_manager),
         'height': scaling.scale_height(100, global_manager),
         'modes': [global_manager.get('current_game_mode')],

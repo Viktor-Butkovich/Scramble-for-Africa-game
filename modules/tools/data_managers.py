@@ -558,6 +558,7 @@ class notification_manager_template():
         self.notification_queue = []
         self.global_manager = global_manager
         self.locked = False
+        self.default_notification_y = 500
         self.default_notification_height = 300
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
@@ -573,7 +574,7 @@ class notification_manager_template():
         '''
         self.notification_width = 500
         self.notification_height = self.default_notification_height
-        self.notification_y = 500
+        self.notification_y = self.default_notification_y
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
             self.notification_x = self.global_manager.get('minimap_grid_x') - (self.notification_width + 40)
         else: #show notifications in center on europe mode
@@ -658,14 +659,17 @@ class notification_manager_template():
         Output:
             None
         '''
+        valid_transfer = False
         if self.notification_queue:
-            if transferred_interface_elements:
+            if transferred_interface_elements and self.notification_queue[0].get('notification_type', 'none') in ['action', 'roll']:
+                valid_transfer = True
                 if 'attached_interface_elements' in self.notification_queue[0]:
                     self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements + self.notification_queue[0]['attached_interface_elements']
                 else:
                     self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements
             self.notification_to_front(self.notification_queue.pop(0))
-        elif transferred_interface_elements and ((not self.notification_queue) or self.notification_queue[0]['notification_type'] != 'action'):
+
+        if transferred_interface_elements and not valid_transfer:
             for element in transferred_interface_elements:
                 element.remove_recursive(complete=True)
 
@@ -791,12 +795,6 @@ class notification_manager_template():
             input_dict['is_last'] = True
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
-        elif notification_type == 'religious_campaign':
-            input_dict['init_type'] = 'religious campaign notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_religious_campaign':
-            input_dict['init_type'] = 'religious campaign notification'
-            input_dict['is_last'] = True
         elif notification_type == 'advertising_campaign':
             input_dict['init_type'] = 'advertising campaign notification'
             input_dict['is_last'] = False
@@ -864,7 +862,18 @@ class notification_manager_template():
                 current_die.start_rolling()
 
         if 'audio' in notification_dict and notification_dict['audio'] != 'none':
-            self.global_manager.get('sound_manager').play_sound(notification_dict['audio'])
+            if type(notification_dict['audio']) == list:
+                sound_list = notification_dict['audio']
+            else:
+                sound_list = [notification_dict['audio']]
+            for current_sound in sound_list:
+                if type(current_sound) == dict:
+                    sound_file = current_sound['sound_id']
+                    if current_sound.get('dampen_music', False):
+                        self.global_manager.get('sound_manager').dampen_music()
+                else:
+                    sound_file = current_sound
+                self.global_manager.get('sound_manager').play_sound(sound_file)
 
         return(new_notification)
 

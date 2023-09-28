@@ -160,7 +160,7 @@ class choice_button(buttons.button):
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
             
-        elif input_dict['button_type'] in ['start religious campaign', 'start advertising campaign', 'start suppress slave trade']:
+        elif input_dict['button_type'] in ['start advertising campaign', 'start suppress slave trade']:
             self.message = 'Start campaign'
             if input_dict['button_type'] == 'start advertising campaign':
                 self.commodity = self.notification.choice_info_dict['commodity']
@@ -177,7 +177,7 @@ class choice_button(buttons.button):
         elif input_dict['button_type'] == 'start capture slaves':
             self.message = 'Capture slaves'
             
-        elif input_dict['button_type'] in ['stop religious campaign', 'stop advertising campaign']:
+        elif input_dict['button_type'] == 'stop advertising campaign':
             self.message = 'Stop campaign'
 
         elif input_dict['button_type'] == 'stop loan search':
@@ -264,9 +264,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'start trading':
             self.set_tooltip(['Start trading, allowing consumer goods to be sold for commodities if the villagers are willing'])
-
-        elif self.button_type == 'start religious campaign':
-            self.set_tooltip(['Start a religious campaign, possibly convincing church volunteers to join you'])
 
         elif self.button_type == 'start advertising campaign':
             self.set_tooltip(['Starts an advertising campaign for ' + self.commodity])

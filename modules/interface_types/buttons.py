@@ -436,13 +436,6 @@ class button(interface_elements.interface_element):
                               'Success chance and risk influenecd by the current strength of the slave traders',
                               'Costs all remaining movement points, at least 1'])
 
-        elif self.button_type == 'religious campaign':
-            self.set_tooltip(['Attempts to campaign for church volunteers for ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money',
-                              'Can only be done in Europe',
-                              'If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages',
-                              'Costs all remaining movement points, at least 1',
-                              'Each religious campaign attempted doubles the cost of other religious campaigns in the same turn'])
-
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(['Attempts to advertise a chosen commodity and increase its price for for ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money',
                               'Can only be done in Europe',
@@ -1158,10 +1151,6 @@ class button(interface_elements.interface_element):
             caravan = self.notification.choice_info_dict['caravan']
             caravan.willing_to_trade(self.notification)
 
-        elif self.button_type == 'start religious campaign':
-            evangelist = self.notification.choice_info_dict['evangelist']
-            evangelist.religious_campaign()
-
         elif self.button_type == 'start capture slaves':
             battalion = self.notification.choice_info_dict['battalion']
             battalion.capture_slaves()
@@ -1209,7 +1198,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start trial':
             trial_utility.trial(self.global_manager)
 
-        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop advertising campaign', 
+        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop advertising campaign', 
                                   'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
                                   'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)

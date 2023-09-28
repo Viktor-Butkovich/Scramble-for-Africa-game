@@ -4,7 +4,7 @@ import random
 from ..actor_types import mobs, buildings
 from ..actor_types.mob_types import vehicles, officers, dummy, workers
 from ..actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
-from ..actor_types.mob_types.officer_types import evangelists, merchants
+from ..actor_types.mob_types.officer_types import merchants
 from ..actor_types.mob_types.npmob_types import native_warriors, beasts
 from ..interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons, \
     europe_transactions
@@ -58,8 +58,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
         elif init_type == 'boat':
             new_actor = vehicles.boat(from_save, input_dict, global_manager)
-        elif init_type == 'evangelist':
-            new_actor = evangelists.evangelist(from_save, input_dict, global_manager)
         elif init_type == 'merchant':
             new_actor = merchants.merchant(from_save, input_dict, global_manager)
         elif init_type in global_manager.get('officer_types'):
@@ -410,8 +408,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.off_tile_exploration_notification(input_dict, global_manager)
                 elif base == 'trade':
                     new_element = action_notifications.trade_notification(input_dict, global_manager)
-                elif base == 'religious campaign':
-                    new_element = action_notifications.religious_campaign_notification(input_dict, global_manager)
                 elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict, global_manager)
                 elif base == 'advertising campaign':
