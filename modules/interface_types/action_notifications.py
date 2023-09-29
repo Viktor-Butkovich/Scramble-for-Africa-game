@@ -30,8 +30,8 @@ class action_notification(notification):
             None
         '''
         super().__init__(input_dict, global_manager)
-        if 'attached_interface_elements' in input_dict:
-            self.attached_interface_elements = input_dict['attached_interface_elements']
+        self.attached_interface_elements = input_dict.get('attached_interface_elements', None)
+        if self.attached_interface_elements:
             if self.attached_interface_elements:
                 self.insert_collection_above(override_input_dict={
                     'coordinates': (self.x, 0)
@@ -39,14 +39,16 @@ class action_notification(notification):
                 self.parent_collection.can_show_override = self
                 self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
 
+                notification_manager = self.global_manager.get('notification_manager')
                 column_increment = 120
-                collection_y = self.global_manager.get('notification_manager').default_notification_y - (self.global_manager.get('notification_manager').default_notification_height / 2)
+                collection_y = notification_manager.default_notification_y - (notification_manager.default_notification_height / 2)
                 self.notification_ordered_collection = self.global_manager.get('actor_creation_manager').create_interface_element(
                     action_utility.generate_action_ordered_collection_input_dict(
                         scaling.scale_coordinates(-1 * column_increment, collection_y, global_manager),
                         self.global_manager,
                         override_input_dict = {'parent_collection': self.parent_collection,
-                                               'second_dimension_increment': scaling.scale_width(column_increment, global_manager)
+                                               'second_dimension_increment': scaling.scale_width(column_increment, global_manager),
+                                               'anchor_coordinate': scaling.scale_height(notification_manager.default_notification_height / 2, self.global_manager)
                         }
                     ),
                     self.global_manager
@@ -60,16 +62,9 @@ class action_notification(notification):
                     else:
                         self.notification_ordered_collection.add_member(element_input_dict, member_config=element_input_dict.transfer_info_dict)
                     index += 1
-        else:
-            self.attached_interface_elements = None
 
-        self.transfer_interface_elements = False
-        if 'transfer_interface_elements' in input_dict:
-            self.transfer_interface_elements = input_dict['transfer_interface_elements']
-
-        self.on_remove = None
-        if 'on_remove' in input_dict:
-            self.on_remove = input_dict['on_remove']
+        self.transfer_interface_elements = input_dict.get('transfer_interface_elements', False)
+        self.on_remove = input_dict.get('on_remove', None)
 
     def on_click(self):
         '''

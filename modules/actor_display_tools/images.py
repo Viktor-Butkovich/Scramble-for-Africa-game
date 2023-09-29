@@ -25,9 +25,7 @@ class actor_display_free_image(free_image):
         '''
         self.actor_image_type = input_dict['actor_image_type']
         self.actor = 'none'
-        if not 'default_image_id' in input_dict:
-            input_dict['default_image_id'] = 'none'
-        self.default_image_id = input_dict['default_image_id']
+        self.default_image_id = input_dict.get('default_image_id', 'none')
         input_dict['image_id'] = 'misc/empty.png'
         super().__init__(input_dict, global_manager)
 

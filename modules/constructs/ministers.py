@@ -232,6 +232,7 @@ class minister():
         }
 
         minister_portrait_icon_dict = minister_position_icon_dict.copy()
+        minister_portrait_icon_dict['member_config'] = {'second_dimension_alignment': 'leftmost'}
         minister_portrait_icon_dict['minister_image_type'] = 'portrait'
 
         self.global_manager.get('notification_manager').display_notification({

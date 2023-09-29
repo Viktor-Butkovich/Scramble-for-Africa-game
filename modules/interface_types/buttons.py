@@ -43,18 +43,13 @@ class button(interface_elements.interface_element):
         self.has_released = True
         self.button_type = input_dict['button_type']
         self.global_manager.get('button_list').append(self)
-        if not 'keybind_id' in input_dict:
-            input_dict['keybind_id'] = 'none'
-        self.keybind_id = input_dict['keybind_id']
+        self.keybind_id = input_dict.get('keybind_id', 'none')
         self.has_keybind = self.keybind_id != 'none'
         if self.has_keybind:
             self.set_keybind(self.keybind_id)
         if 'color' in input_dict:
             self.color = self.global_manager.get('color_dict')[input_dict['color']]
-        if 'enable_shader' in input_dict:
-            self.enable_shader = input_dict['enable_shader']
-        else:
-            self.enable_shader = False
+        self.enable_shader = input_dict.get('enable_shader', False)
         self.showing_outline = False
         self.showing_background = True
         self.button_type = input_dict['button_type']

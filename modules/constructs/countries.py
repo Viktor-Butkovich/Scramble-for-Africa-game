@@ -40,10 +40,7 @@ class country:
         self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
         self.background_set = input_dict['background_set']
         self.country_effect = input_dict['country_effect']
-        if 'has_aristocracy' in input_dict:
-            self.has_aristocracy = input_dict['has_aristocracy']
-        else:
-            self.has_aristocracy = True
+        self.has_aristocracy = input_dict.get('has_aristocracy', True)
         self.colors = actor_utility.extract_folder_colors('locations/country_colors/' + self.adjective + '/')
 
     def select(self):

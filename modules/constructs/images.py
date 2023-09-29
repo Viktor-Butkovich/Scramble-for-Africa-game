@@ -483,17 +483,13 @@ class free_image(image):
         self.showing = False
         self.has_parent_collection = False    
         super().__init__(input_dict['width'], input_dict['height'], global_manager)
-
-        if not 'parent_collection' in input_dict:
-            input_dict['parent_collection'] = 'none'
-        self.parent_collection = input_dict['parent_collection']
+        self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
         if not self.has_parent_collection:
             self.global_manager.get('independent_interface_elements').append(self)
 
         if self.has_parent_collection:
-            if not 'member_config' in input_dict:
-                input_dict['member_config'] = {}
+            input_dict['member_config'] = input_dict.get('member_config', {})
             if not 'x_offset' in input_dict['member_config']:
                 input_dict['member_config']['x_offset'] = input_dict['coordinates'][0]
             if not 'y_offset' in input_dict['member_config']:
@@ -508,10 +504,7 @@ class free_image(image):
             self.set_modes(self.parent_collection.modes)
         self.set_image(input_dict['image_id'])
 
-        if 'to_front' in input_dict:
-            self.to_front = input_dict['to_front']
-        else:
-            self.to_front = False
+        self.to_front = input_dict.get('to_front', False)
         self.global_manager.get('free_image_list').append(self)
 
     def calibrate(self, new_actor):
@@ -884,10 +877,7 @@ class dice_roll_minister_image(tooltip_free_image):
                 input_dict['image_id'] = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
             else:
                 input_dict['image_id'] = 'misc/mob_background.png'
-        if 'minister_message_image' in input_dict:
-            self.minister_message_image = input_dict['minister_message_image']
-        else:
-            self.minister_message_image = False
+        self.minister_message_image = input_dict.get('minister_message_image', False)
         super().__init__(input_dict, global_manager)
         self.to_front = True
 

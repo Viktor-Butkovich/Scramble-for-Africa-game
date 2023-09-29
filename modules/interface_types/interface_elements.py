@@ -290,12 +290,12 @@ class interface_collection(interface_element):
         self.move_with_mouse_config = {'moving': False}
         customize_button_x_offset = 0
         customize_button_size = 20
-        if ('allow_minimize' in input_dict and input_dict['allow_minimize']) or ('allow_move' in input_dict and input_dict['allow_move']):
+        if input_dict.get('allow_minimize', False) or input_dict.get('allow_move', False):
             self.insert_collection_above()
             customize_button_width = scaling.scale_width(customize_button_size, global_manager)
             customize_button_height = scaling.scale_width(customize_button_size, global_manager)
 
-            if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
+            if input_dict.get('allow_minimize', False):
                 global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': customize_button_width,
@@ -308,7 +308,7 @@ class interface_collection(interface_element):
                 }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
 
-            if 'allow_move' in input_dict and input_dict['allow_move']:
+            if input_dict.get('allow_move', False):
                 global_manager.get('actor_creation_manager').create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': customize_button_width,
@@ -331,10 +331,9 @@ class interface_collection(interface_element):
                 }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
 
-        if 'initial_members' in input_dict:
-            for initial_member_dict in input_dict['initial_members']:
-                initial_member_dict['parent_collection'] = self
-                global_manager.get('actor_creation_manager').create_interface_element(initial_member_dict, global_manager)
+        for initial_member_dict in input_dict.get('initial_members', []):
+            initial_member_dict['parent_collection'] = self
+            global_manager.get('actor_creation_manager').create_interface_element(initial_member_dict, global_manager)
 
     def create_image(self, image_id):
         '''
@@ -655,6 +654,10 @@ class ordered_collection(interface_collection):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'separation' = scaling.scale_height(5, global_manager): int value - Distance to set between ordered members
                 'direction' = 'vertical': string value - Direction to order members in
+                'reversed' = False: boolean value - Whether to reverse the order of members in the specified direction (top to bottom or bottom to top)
+                'second_dimension_increment' = 0: int value - Increment between each row/column of this collection - 2 elements with a difference of 1 second dimension
+                    coordinate will be the increment away along the second dimension
+                'anchor_coordinate' = None: int value - Optional relative coordinate around which each row/column of collection will be centered 
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -668,6 +671,8 @@ class ordered_collection(interface_collection):
             self.reverse_multiplier *= -1
         self.order_overlap_list = []
         self.order_exempt_list = []
+        if 'anchor_coordinate' in input_dict:
+            self.anchor_coordinate = input_dict['anchor_coordinate']
         super().__init__(input_dict, global_manager)
 
     def add_member(self, new_member, member_config={}):
@@ -697,7 +702,7 @@ class ordered_collection(interface_collection):
             self.order_exempt_list.append(new_member)
 
         if 'second_dimension_alignment' in member_config: #if left alignment, go left through each column until one is free, and vice versa
-            if member_config['second_dimension_alignment'] == 'left':
+            if member_config['second_dimension_alignment'] in ['left', 'leftmost']:
                 increment = -1
             else:
                 increment = 1
@@ -706,16 +711,11 @@ class ordered_collection(interface_collection):
             while not valid:
                 if not str(coordinate) in self.second_dimension_coordinates:
                     valid = True
-                else:
-                    all_overlapped = True
-                    for interface_element in self.second_dimension_coordinates[str(coordinate)]:
-                        if not interface_element in self.order_overlap_list:
-                            all_overlapped = False
-                            break
-                    valid = all_overlapped
                 if not valid:
                     coordinate += increment
-
+            if member_config['second_dimension_alignment'] in ['leftmost', 'rightmost']: 
+                #leftmost and rightmost go to farthest column in that direction, rather than making a new column
+                coordinate -= increment
             member_config['second_dimension_coordinate'] = coordinate
 
         key = str(member_config['second_dimension_coordinate'])
@@ -746,6 +746,22 @@ class ordered_collection(interface_collection):
                 self.second_dimension_coordinates[key].remove(removed_member)
         super().remove_member(removed_member)
 
+    def get_size(self, second_dimension_coordinate=0):
+        '''
+        Description:
+            Calculates and returns the width or height of a particular row/column of this collection
+        Input:
+            int second_dimension_coordinate=0: Second dimension coordinate of row/column to check
+        Output:
+            int: Returns width or height of specified row/column
+        '''
+        size = 0
+        for member in self.second_dimension_coordinates.get(str(second_dimension_coordinate), []):
+            if not (member in self.order_exempt_list or member in self.order_overlap_list):
+                size += member.height
+                size += self.separation
+        return(size)
+
     def update_collection(self):
         '''
         Description:
@@ -762,9 +778,13 @@ class ordered_collection(interface_collection):
             if self.direction == 'vertical':
                 current_y = self.y
                 current_x = self.x + (second_dimension_coordinate * self.second_dimension_increment)
+                if hasattr(self, 'anchor_coordinate'):
+                    current_y += self.anchor_coordinate - (self.get_size(second_dimension_coordinate) / 2)
             elif self.direction == 'horizontal':
                 current_y = self.y + (second_dimension_coordinate * self.second_dimension_increment)
                 current_x = self.x
+                if hasattr(self, 'anchor_coordinate'):
+                    current_x += self.anchor_coordinate - (self.get_size(second_dimension_coordinate) / 2)
             for member in self.second_dimension_coordinates[key]:
                 if member.showing and not member in self.order_exempt_list:
                     if self.direction == 'vertical':
