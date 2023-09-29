@@ -2,7 +2,7 @@
 
 import random
 import os
-from ..util import tutorial_utility, utility, actor_utility, minister_utility, action_utility, scaling
+from ..util import tutorial_utility, utility, actor_utility, minister_utility, main_loop_utility, scaling
 
 class minister():
     '''
@@ -241,7 +241,7 @@ class minister():
             'audio': audio,
             'attached_minister': self,
             'attached_interface_elements': [minister_position_icon_dict, minister_portrait_icon_dict],
-            'transfer_interface_elements': True
+            'transfer_interface_elements': not main_loop_utility.action_possible(self.global_manager) #Transfer if during action, don't transfer if misc. messages
         })
 
     def steal_money(self, value, theft_type = 'none'):

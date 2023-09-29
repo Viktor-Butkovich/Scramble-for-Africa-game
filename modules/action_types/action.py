@@ -134,6 +134,18 @@ class action():
                 audio.append('trumpet_1')
         return(audio)
 
+    def generate_current_roll_modifier(self):
+        '''
+        Description:
+            Calculates and returns the current flat roll modifier for this action - this is always applied, while many modifiers are applied only half the time
+                A positive modifier increases the action's success chance and vice versa
+        Input:
+            None
+        Output:
+            int: Returns the current flat roll modifier for this action
+        '''
+        return(0)
+
     def pre_start(self, unit):
         '''
         Description:
@@ -143,7 +155,7 @@ class action():
         Output:
             none
         '''
-        self.current_roll_modifier = 0
+        self.current_roll_modifier = self.generate_current_roll_modifier()
         self.current_min_success = 4 #default_min_success
         self.current_max_crit_fail = 1 #default_max_crit_fail
         self.current_min_crit_success = 6 #default_min_crit_success
@@ -220,7 +232,8 @@ class action():
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
             'notification_type': 'roll',
-            'transfer_interface_elements': True
+            'transfer_interface_elements': True,
+            'audio': self.generate_audio('roll_started')
         }, insert_index=1)
 
         self.global_manager.get('notification_manager').set_lock(False) #locks notifications so that corruption messages will occur after the roll notification

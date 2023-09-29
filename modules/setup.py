@@ -13,7 +13,7 @@ import modules.constructs.countries as countries
 import modules.tools.data_managers as data_managers
 import modules.tools.save_load_tools as save_load_tools
 import modules.tools.effects as effects
-from modules.action_types import public_relations_campaign, religious_campaign
+from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade
 
 def setup(global_manager, *args):
     '''
@@ -370,6 +370,7 @@ def actions(global_manager):
     global_manager.set('action_obj_list', [])
     public_relations_campaign.public_relations_campaign(global_manager)
     religious_campaign.religious_campaign(global_manager)
+    suppress_slave_trade.suppress_slave_trade(global_manager)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities(global_manager):
@@ -822,7 +823,6 @@ def transactions(global_manager):
         'loan': 5,
         'attack': 5,
         'slave_capture': 5,
-        'suppress_slave_trade': 5,
         'trial': 5,
         'active_investigation': 5,
         'hunting': 5,
@@ -848,7 +848,6 @@ def transactions(global_manager):
         'loan': 'loans',
         'attack': 'combat supplies',
         'slave_capture': 'capturing slaves',
-        'suppress_slave_trade': 'slave trade suppression',
         'trial': 'trial fees',
         'active_investigation': 'investigations',
         'hunting': 'hunting supplies',

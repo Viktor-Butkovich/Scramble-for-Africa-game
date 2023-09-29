@@ -256,10 +256,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.artifact_search_button(input_dict, global_manager)
                 elif base == 'capture slaves':
                     new_element = actor_display_buttons.capture_slaves_button(input_dict, global_manager)
-                elif base == 'suppress slave trade':
-                    new_element = actor_display_buttons.suppress_slave_trade_button(input_dict, global_manager)
-                elif base == 'evangelist campaign':
-                    new_element = actor_display_buttons.evangelist_campaign_button(input_dict, global_manager)
                 elif base == 'take loan':
                     new_element = actor_display_buttons.take_loan_button(input_dict, global_manager)
                 elif base == 'labor broker':
@@ -420,8 +416,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.artifact_search_notification(input_dict, global_manager)
                 elif base == 'capture slaves':
                     new_element = action_notifications.capture_slaves_notification(input_dict, global_manager)
-                elif base == 'suppress slave trade':
-                    new_element = action_notifications.suppress_slave_trade_notification(input_dict, global_manager)
                 elif base == 'construction':
                     new_element = action_notifications.construction_notification(input_dict, global_manager)
                 elif base == 'combat':

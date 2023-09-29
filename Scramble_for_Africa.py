@@ -21,4 +21,3 @@ except Exception: #displays error message and records error message in crash log
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
 # fix double minister image on capture slaves notifications
 # fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
-# add option for ordered collection to center on a particular x/y (by setting its origin to the desired x/y - half of its height/width)

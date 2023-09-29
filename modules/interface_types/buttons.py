@@ -424,13 +424,6 @@ class button(interface_elements.interface_element):
                               'Has higher success chance and lower risk when aggressiveness is low',
                               'Costs all remaining movement points, at least 1'])
 
-        elif self.button_type == 'suppress slave trade':
-            self.set_tooltip(['Attempts to suppress the slave trade for ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money',
-                              'Can only be done in the slave traders tile',
-                              'If successful, will decrease the strength of the slave traders and increase public opinion',
-                              'Success chance and risk influenecd by the current strength of the slave traders',
-                              'Costs all remaining movement points, at least 1'])
-
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(['Attempts to advertise a chosen commodity and increase its price for for ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money',
                               'Can only be done in Europe',
@@ -1149,10 +1142,6 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start capture slaves':
             battalion = self.notification.choice_info_dict['battalion']
             battalion.capture_slaves()
-            
-        elif self.button_type == 'start suppress slave trade':
-            battalion = self.notification.choice_info_dict['battalion']
-            battalion.suppress_slave_trade()
 
         elif self.button_type == 'start advertising campaign':
             merchant = self.notification.choice_info_dict['merchant']
@@ -1194,7 +1183,7 @@ class button(interface_elements.interface_element):
             trial_utility.trial(self.global_manager)
 
         elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop advertising campaign', 
-                                  'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
+                                  'stop capture slaves', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
                                   'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)
             if self.button_type == 'stop attack':
