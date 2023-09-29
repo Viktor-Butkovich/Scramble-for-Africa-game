@@ -32,23 +32,17 @@ class interface_element():
         self.height = input_dict['height']
         self.Rect = pygame.Rect(0, self.global_manager.get('display_height') - (self.height), self.width, self.height)
         self.showing = False
-        if not 'parent_collection' in input_dict:
-            input_dict['parent_collection'] = 'none'
-        self.parent_collection = input_dict['parent_collection']
+        self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
         if not self.has_parent_collection:
             self.global_manager.get('independent_interface_elements').append(self)
 
-        if not 'coordinates' in input_dict:
-            input_dict['coordinates'] = (0, 0)
+        input_dict['coordinates'] = input_dict.get('coordinates', (0, 0))
         self.x, self.y = input_dict['coordinates']
         if self.has_parent_collection:
-            if not 'member_config' in input_dict:
-                input_dict['member_config'] = {}
-            if not 'x_offset' in input_dict['member_config']:
-                input_dict['member_config']['x_offset'] = input_dict['coordinates'][0]
-            if not 'y_offset' in input_dict['member_config']:
-                input_dict['member_config']['y_offset'] = input_dict['coordinates'][1]
+            input_dict['member_config'] = input_dict.get('member_config', {})
+            input_dict['member_config']['x_offset'] = input_dict['member_config'].get('x_offset', input_dict['coordinates'][0])
+            input_dict['member_config']['y_offset'] = input_dict['member_config'].get('y_offset', input_dict['coordinates'][1])
             self.parent_collection.add_member(self, input_dict['member_config'])
         else:
             self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
@@ -273,14 +267,13 @@ class interface_collection(interface_element):
         self.members = []
         global_manager.get('interface_collection_list').append(self)
         self.minimized = False
-        if 'is_info_display' in input_dict and input_dict['is_info_display']:
+        if input_dict.get('is_info_display', False):
             self.is_info_display = True
             self.actor_type = input_dict['actor_type']
         else:
             self.is_info_display = False
 
-        if not 'resize_with_contents' in input_dict:
-            input_dict['resize_with_contents'] = False
+        input_dict['resize_with_contents'] = input_dict.get('resize_with_contents', False)
         self.resize_with_contents = input_dict['resize_with_contents']
         if self.resize_with_contents:
             self.member_rects = []
@@ -384,12 +377,9 @@ class interface_collection(interface_element):
         if not member_config:
             member_config = {}
 
-        if not 'x_offset' in member_config:
-            member_config['x_offset'] = 0
-        if not 'y_offset' in member_config:
-            member_config['y_offset'] = 0
-        if not 'calibrate_exempt' in member_config:
-            member_config['calibrate_exempt'] = False
+        member_config['x_offset'] = member_config.get('x_offset', 0)
+        member_config['y_offset'] = member_config.get('y_offset', 0)
+        member_config['calibrate_exempt'] = member_config.get('calibrate_exempt', False)
 
         if not new_member.has_parent_collection:
             new_member.has_parent_collection = True
@@ -628,11 +618,9 @@ class tabbed_collection(interface_collection):
         Output:
             None
         '''
-        if not 'tabbed' in member_config:
-            member_config['tabbed'] = False
-        elif member_config['tabbed']:
-            if not 'button_image_id' in member_config:
-                member_config['button_image_id'] = 'buttons/default_button.png'
+        member_config['tabbed'] = member_config.get('tabbed', False)
+        if member_config['tabbed'] and not 'button_image_id' in member_config:
+            member_config['button_image_id'] = 'buttons/default_button.png'
         super().add_member(new_member, member_config)
 
         if member_config['tabbed']:
@@ -671,20 +659,12 @@ class ordered_collection(interface_collection):
         Output:
             None
         '''
-        if not 'separation' in input_dict:
-            input_dict['separation'] = scaling.scale_height(5, global_manager)
-        if not 'direction' in input_dict:
-            input_dict['direction'] = 'vertical'
-        if not 'reversed' in input_dict:
-            input_dict['reversed'] = False
-        if not 'second_dimension_increment' in input_dict:
-            input_dict['second_dimension_increment'] = 0
-        self.separation = input_dict['separation']
-        self.direction = input_dict['direction']
+        self.separation = input_dict.get('separation', scaling.scale_height(5, global_manager))
+        self.direction = input_dict.get('direction', 'vertical')
+        self.second_dimension_increment = input_dict.get('second_dimension_increment', 0)
         self.second_dimension_coordinates = {}
-        self.second_dimension_increment = input_dict['second_dimension_increment']
         self.reverse_multiplier = 1
-        if input_dict['reversed']:
+        if input_dict.get('reversed', False):
             self.reverse_multiplier *= -1
         self.order_overlap_list = []
         self.order_exempt_list = []
@@ -701,23 +681,13 @@ class ordered_collection(interface_collection):
         Output:
             None
         '''
-        if not 'order_overlap' in member_config:
-            member_config['order_overlap'] = False
-
-        if not 'order_exempt' in member_config:
-            member_config['order_exempt'] = False
-
-        if not 'order_x_offset' in member_config:
-            member_config['order_x_offset'] = 0
+        member_config['order_overlap'] = member_config.get('order_overlap', False)
+        member_config['order_exempt'] = member_config.get('order_exempt', False)
+        member_config['order_x_offset'] = member_config.get('order_x_offset', 0)
+        member_config['order_y_offset'] = member_config.get('order_y_offset', 0)
+        member_config['second_dimension_coordinate'] = member_config.get('second_dimension_coordinate', 0)
         new_member.order_x_offset = member_config['order_x_offset']
-
-        if not 'order_y_offset' in member_config:
-            member_config['order_y_offset'] = 0
         new_member.order_y_offset = member_config['order_y_offset']
-
-        if not 'second_dimension_coordinate' in member_config:
-            member_config['second_dimension_coordinate'] = 0
-
         super().add_member(new_member, member_config)
 
         if member_config['order_overlap'] and hasattr(self, 'order_overlap_list'): #maybe have a list of lists to iterate through these operations
