@@ -418,13 +418,11 @@ def manage_lmb_down(clicked_button, global_manager):
             
         elif (not clicked_button) and global_manager.get('choosing_advertised_commodity'):
             global_manager.set('choosing_advertised_commodity', False)
-            global_manager.set('choosing_advertised_commodity_info_dict', {})
             
         elif (not clicked_button) and global_manager.get('drawing_automatic_route'):
             for current_grid in global_manager.get('grid_list'): #destination_grids:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
-                        #target_cell = 'none'
                         if current_cell.grid.is_abstract_grid:
                             text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
                         else:

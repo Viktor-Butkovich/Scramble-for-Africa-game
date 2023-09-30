@@ -19,5 +19,5 @@ except Exception: #displays error message and records error message in crash log
 # look into adding text on map, such as village names - should be a generalizable procedure that works similarly to tile images or cell icons, with some way to easily
 #   create a rendered text object with a string message and offset parameters
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
-# fix double minister image on capture slaves notifications
 # fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
+# verify that country bonuses are still applying to actions like advertising - they should, as the bonuses are applied when a minister makes a roll

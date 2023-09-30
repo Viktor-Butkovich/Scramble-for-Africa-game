@@ -795,12 +795,6 @@ class notification_manager_template():
             input_dict['is_last'] = True
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
-        elif notification_type == 'advertising_campaign':
-            input_dict['init_type'] = 'advertising campaign notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_advertising_campaign':
-            input_dict['init_type'] = 'advertising campaign notification'
-            input_dict['is_last'] = True
         elif notification_type == 'conversion':
             input_dict['init_type'] = 'conversion notification'
             input_dict['is_last'] = False
@@ -860,14 +854,20 @@ class notification_manager_template():
                 sound_list = notification_dict['audio']
             else:
                 sound_list = [notification_dict['audio']]
+            channel = None
             for current_sound in sound_list:
+                in_sequence = False
                 if type(current_sound) == dict:
                     sound_file = current_sound['sound_id']
                     if current_sound.get('dampen_music', False):
-                        self.global_manager.get('sound_manager').dampen_music()
+                        self.global_manager.get('sound_manager').dampen_music(current_sound.get('dampen_time_interval', 0.5))
+                    in_sequence = current_sound.get('in_sequence', False)
                 else:
                     sound_file = current_sound
-                self.global_manager.get('sound_manager').play_sound(sound_file)
+                if in_sequence and channel:
+                    self.global_manager.get('sound_manager').queue_sound(sound_file, channel)
+                else:
+                    channel = self.global_manager.get('sound_manager').play_sound(sound_file)
 
         return(new_notification)
 

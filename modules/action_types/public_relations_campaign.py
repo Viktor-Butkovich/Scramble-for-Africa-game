@@ -62,7 +62,7 @@ class public_relations_campaign(action.campaign):
         if subject == 'confirmation':
             text += 'Are you sure you want to start a public relations campaign? /n /nIf successful, your company\'s public opinion will increase by between 1 and 6 /n /n'
             text += 'The campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'
-        if subject == 'initial':
+        elif subject == 'initial':
             text += 'The evangelist campaigns to increase your company\'s public opinion with word of your company\'s benevolent goals and righteous deeds in Africa. /n /n'
         elif subject == 'success':
             text += 'Met with gullible and enthusiastic audiences, the evangelist successfully improves your company\'s public opinion by ' + str(self.public_relations_change) + '. /n /n'

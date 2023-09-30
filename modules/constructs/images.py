@@ -336,24 +336,12 @@ class bundle_image():
         else:
             self.image_id_dict = image_id
             self.image_id = image_id['image_id']
-            if 'size' in image_id:
-                self.size = image_id['size']
-            else:
-                self.size = 1
-            if 'x_offset' in image_id:
-                self.x_offset = image_id['x_offset']
-            else:
-                self.x_offset = 0
-            if 'y_offset' in image_id:
-                self.y_offset = image_id['y_offset']
-            else:
-                self.y_offset = 0
+            self.size = image_id.get('size', 1)
+            self.x_offset = image_id.get('x_offset', 0)
+            self.y_offset = image_id.get('y_offset', 0)
+            self.level = image_id.get('level', 0)
             if 'override_width' in image_id:
                 self.override_width = image_id['override_width']
-            if 'level' in image_id:
-                self.level = image_id['level']
-            else:
-                self.level = 0
             if 'green_screen' in image_id:
                 self.has_green_screen = True
                 self.green_screen_colors = []

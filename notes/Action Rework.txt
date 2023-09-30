@@ -20,8 +20,6 @@ Exceptions:
     Combat - special action with no can_show, on_click, or initial functionality - attacking or being attacked immediately enters middle
     Attack - Currently, attempting to move into enemy acts as on_click, movement confirmation is initial phase, and attempt_local_combat is middle phase, which 
         links to middle of combat - this logical flow should stay intact and should be one of the last actions converted
-    Advertising - advertising button should start the selection process, and clicking on a commodity icon while in the selection process should act as the action
-        button/on_click - can_show will be used by the advertising button
 
 once this is all implemented, adding a new action type should only require creating the action file with the correct setup, can_show, on_click, initial,
   middle, and final phase functions - file will be scanned, and its setup will automatically be run and put into the program - it will contain all of its own

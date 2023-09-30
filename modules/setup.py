@@ -13,7 +13,7 @@ import modules.constructs.countries as countries
 import modules.tools.data_managers as data_managers
 import modules.tools.save_load_tools as save_load_tools
 import modules.tools.effects as effects
-from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade
+from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign
 
 def setup(global_manager, *args):
     '''
@@ -189,7 +189,6 @@ def misc(global_manager):
     global_manager.set('choosing_destination', False)
     global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('choosing_advertised_commodity', False)
-    global_manager.set('choosing_advertised_commodity_info_dict', {})
     global_manager.set('drawing_automatic_route', False)
     global_manager.set('prosecution_bribed_judge', False)
 
@@ -367,10 +366,11 @@ def actions(global_manager):
     Output:
         none
     '''
-    global_manager.set('action_obj_list', [])
+    global_manager.set('actions', {})
     public_relations_campaign.public_relations_campaign(global_manager)
     religious_campaign.religious_campaign(global_manager)
     suppress_slave_trade.suppress_slave_trade(global_manager)
+    advertising_campaign.advertising_campaign(global_manager)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities(global_manager):
@@ -817,7 +817,6 @@ def transactions(global_manager):
         {
         'exploration': 5,
         'conversion': 5,
-        'advertising_campaign': 5,
         'loan_search': 5,
         'trade': 0,
         'loan': 5,
@@ -831,10 +830,7 @@ def transactions(global_manager):
         'track_beasts': 0
         }
     )
-    action_types = []
-    for current_key in global_manager.get('base_action_prices'):
-        action_types.append(current_key)
-    global_manager.set('action_types', action_types)
+    global_manager.set('action_types', [current_key for current_key in global_manager.get('base_action_prices')])
     global_manager.set('action_prices', {})
     actor_utility.reset_action_prices(global_manager)
 
@@ -842,7 +838,6 @@ def transactions(global_manager):
         {
         'exploration': 'exploration',
         'conversion': 'religious conversion',
-        'advertising_campaign': 'advertising',
         'loan_search': 'loan searches',
         'trade': 'trading with natives',
         'loan': 'loans',
@@ -871,10 +866,7 @@ def transactions(global_manager):
         'none': 'miscellaneous company activities',
         }
     )
-    transaction_types = []
-    for current_key in global_manager.get('transaction_descriptions'):
-        transaction_types.append(current_key)
-    global_manager.set('transaction_types', transaction_types)
+    global_manager.set('transaction_types', [current_key for current_key in global_manager.get('transaction_descriptions')])
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
     actor_utility.set_slave_traders_strength(0, global_manager)
 

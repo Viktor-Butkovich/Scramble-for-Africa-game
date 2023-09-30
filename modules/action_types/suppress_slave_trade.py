@@ -97,7 +97,7 @@ class suppress_slave_trade(action.action):
                 text += 'The slave traders are approaching collapse and will provide weak resistance. /n /n'
             else:
                 text += 'The slave traders are relatively intact and will provide moderate resistance. /n /n'
-        if subject == 'initial':
+        elif subject == 'initial':
             text += 'The battalion tries to suppress the slave trade. /n /n'
         elif subject == 'success':
             self.strength_decrease = random.randrange(1, 4)

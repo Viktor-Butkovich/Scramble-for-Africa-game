@@ -260,8 +260,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.take_loan_button(input_dict, global_manager)
                 elif base == 'labor broker':
                     new_element = actor_display_buttons.labor_broker_button(input_dict, global_manager)
-                elif base == 'advertising campaign':
-                    new_element = actor_display_buttons.advertising_campaign_button(input_dict, global_manager)
                 elif base == 'track beasts':
                     new_element = actor_display_buttons.track_beasts_button(input_dict, global_manager)
                 elif base == 'switch theatre':
@@ -406,8 +404,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.trade_notification(input_dict, global_manager)
                 elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict, global_manager)
-                elif base == 'advertising campaign':
-                    new_element = action_notifications.advertising_campaign_notification(input_dict, global_manager)
                 elif base == 'conversion':
                     new_element = action_notifications.conversion_notification(input_dict, global_manager)
                 elif base == 'rumor search':

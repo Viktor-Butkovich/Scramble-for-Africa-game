@@ -424,13 +424,6 @@ class button(interface_elements.interface_element):
                               'Has higher success chance and lower risk when aggressiveness is low',
                               'Costs all remaining movement points, at least 1'])
 
-        elif self.button_type == 'advertising campaign':
-            self.set_tooltip(['Attempts to advertise a chosen commodity and increase its price for for ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money',
-                              'Can only be done in Europe',
-                              'If successful, increases the price of a chosen commodity while randomly decreasing the price of another',
-                              'Costs all remaining movement points, at least 1',
-                              'Each advertising campaign attempted doubles the cost of other advertising campaigns in the same turn'])
-
         elif self.button_type == 'take loan':
             self.set_tooltip(['Attempts to find a 100 money loan offer with a favorable interest rate for ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money',
                               'Can only be done in Europe',
@@ -1143,10 +1136,6 @@ class button(interface_elements.interface_element):
             battalion = self.notification.choice_info_dict['battalion']
             battalion.capture_slaves()
 
-        elif self.button_type == 'start advertising campaign':
-            merchant = self.notification.choice_info_dict['merchant']
-            merchant.advertising_campaign()
-
         elif self.button_type == 'start loan search':
             merchant = self.notification.choice_info_dict['merchant']
             merchant.loan_search()
@@ -1182,7 +1171,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start trial':
             trial_utility.trial(self.global_manager)
 
-        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop advertising campaign', 
+        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 
                                   'stop capture slaves', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
                                   'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)
@@ -2247,12 +2236,11 @@ class commodity_button(button):
             else:
                 can_advertise = False
                 for current_commodity in self.global_manager.get('collectable_resources'):
-                    if (not current_commodity == self.commodity) and self.global_manager.get('commodity_prices')[current_commodity] > 1:
+                    if current_commodity != self.commodity and self.global_manager.get('commodity_prices')[current_commodity] > 1:
                         can_advertise = True
                         break
                 if can_advertise:
-                    self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
-                    self.global_manager.set('choosing_advertised_commodity', False)
+                    self.global_manager.get('actions')['advertising_campaign'].start(self.global_manager.get('displayed_mob'), self.commodity)
                 else:
                     text_utility.print_to_screen('You cannot advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
 

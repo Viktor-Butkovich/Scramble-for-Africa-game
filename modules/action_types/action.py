@@ -29,7 +29,7 @@ class action():
         Output:
             None
         '''
-        self.global_manager.get('action_obj_list').append(self)
+        self.global_manager.get('actions')[self.action_type] = self
         self.current_unit = 'none'
         self.global_manager.get('action_types').append(self.action_type)
         self.global_manager.get('action_prices')[self.action_type] = 5
