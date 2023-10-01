@@ -172,11 +172,6 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_r
             self.add_attached_button(input_dict)
 
-            input_dict['init_type'] = 'convert button'
-            input_dict['image_id'] = 'buttons/convert_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
             input_dict['init_type'] = 'rumor search button'
             input_dict['image_id'] = 'buttons/rumor_search_button.png'
             input_dict['keybind_id'] = pygame.K_r

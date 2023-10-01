@@ -163,9 +163,6 @@ class choice_button(buttons.button):
         elif input_dict['button_type'] == 'start loan search':
             self.message = 'Find loan'
 
-        elif input_dict['button_type'] == 'start converting':
-            self.message = 'Convert'
-
         elif input_dict['button_type'] in ['start rumor search', 'start artifact search']:
             self.message = 'Search'
 
@@ -181,7 +178,7 @@ class choice_button(buttons.button):
         elif input_dict['button_type'] == 'decline loan offer':
             self.message = 'Decline'
             
-        elif input_dict['button_type'] in ['none', 'stop exploration', 'stop attack', 'stop capture slaves', 'stop converting', 'stop rumor search', 'stop artifact search']:
+        elif input_dict['button_type'] in ['none', 'stop exploration', 'stop attack', 'stop capture slaves', 'stop rumor search', 'stop artifact search']:
             self.message = 'Do nothing'
 
         elif input_dict['button_type'] == 'confirm main menu':
@@ -259,9 +256,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'start loan search':
             self.set_tooltip(['Starts a search for a low-interest loan offer'])
-
-        elif self.button_type == 'start converting':
-            self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
 
         elif self.button_type == 'start rumor search':
             self.set_tooltip(['Start searching for rumors about the artifact\'s location'])

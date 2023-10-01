@@ -166,22 +166,22 @@ class suppress_slave_trade(action.action):
         Output:
             None
         '''
-        self.pre_start(unit)
-        self.global_manager.get('notification_manager').display_notification({
-            'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
-            'choices': [
-                {
-                'on_click': (self.middle, []),
-                'tooltip': ['Starts attempting to suppress the slave trade'],
-                'message': 'Start campaign'
-                },
-                {
-                'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
-                'tooltip': ['Stop ' + self.name],
-                'message': 'Stop campaign'
-                }
-            ],
-        })
+        if super().start(unit):
+            self.global_manager.get('notification_manager').display_notification({
+                'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
+                'choices': [
+                    {
+                    'on_click': (self.middle, []),
+                    'tooltip': ['Starts attempting to suppress the slave trade'],
+                    'message': 'Start campaign'
+                    },
+                    {
+                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'tooltip': ['Stop ' + self.name],
+                    'message': 'Stop campaign'
+                    }
+                ],
+            })
 
     def complete(self):
         '''

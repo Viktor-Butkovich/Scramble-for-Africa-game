@@ -21,3 +21,4 @@ except Exception: #displays error message and records error message in crash log
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
 # fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
 # verify that country bonuses are still applying to actions like advertising - they should, as the bonuses are applied when a minister makes a roll
+# later test conversion with 0 population villages, combat, and villages with missions - relies on other actions working

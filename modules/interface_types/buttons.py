@@ -437,13 +437,6 @@ class button(interface_elements.interface_element):
                               'Cannot reveal beasts in unexplored tiles',
                               'Costs 1 movement point'])
 
-        elif self.button_type == 'convert':
-            self.set_tooltip(['Attempts to convert some of this village\'s inhabitants to Christianity for ' + str(self.global_manager.get('action_prices')['conversion']) + ' money',
-                              'Can only be done in a village',
-                              'If successful, reduces the aggressiveness of the village and increases public opinion',
-                              'Has higher success chance and lower risk when a mission is present',
-                              'Costs all remaining movement points, at least 1'])
-
         elif self.button_type == 'rumor search':
             if self.global_manager.get('current_lore_mission') == 'none':
                 intro = 'Attempts to search this village for rumors of a lore mission artifact\'s location for '
@@ -1140,10 +1133,6 @@ class button(interface_elements.interface_element):
             merchant = self.notification.choice_info_dict['merchant']
             merchant.loan_search()
 
-        elif self.button_type == 'start converting':
-            evangelist = self.notification.choice_info_dict['evangelist']
-            evangelist.convert()
-
         elif self.button_type == 'start rumor search':
             expedition = self.notification.choice_info_dict['expedition']
             expedition.rumor_search()
@@ -1172,7 +1161,7 @@ class button(interface_elements.interface_element):
             trial_utility.trial(self.global_manager)
 
         elif self.button_type in ['stop action', 'stop attack', 'stop trading', 
-                                  'stop capture slaves', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
+                                  'stop capture slaves', 'stop loan search', 'decline loan offer', 'stop rumor search', 
                                   'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)
             if self.button_type == 'stop attack':

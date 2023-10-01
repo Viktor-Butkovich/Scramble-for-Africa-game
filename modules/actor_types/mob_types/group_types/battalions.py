@@ -315,7 +315,6 @@ class battalion(group):
                     results = [second_roll, first_roll]
             else:
                 results = [self.controlling_minister.no_corruption_roll(6, 'slave_capture'), self.controlling_minister.no_corruption_roll(6, 'slave_capture')]
-            #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'slave capture', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
@@ -391,7 +390,7 @@ class battalion(group):
     def complete_capture_slaves(self):
         '''
         Description:
-            Used when the player finishes rolling for slave capture, shows the conversion's results and makes any changes caused by the result. If successful, capture village population unit as slaves, promotes major to a veteran on
+            Used when the player finishes rolling for slave capture, shows the results and makes any changes it causes. If successful, capture village population unit as slaves, promotes major to a veteran on
                 critical success. Native warriors spawn on critical failure. Regardless of success, may decrease public opinion and/or increase aggressiveness
         Input:
             None

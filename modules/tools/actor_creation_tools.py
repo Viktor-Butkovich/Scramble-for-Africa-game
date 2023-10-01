@@ -248,8 +248,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.work_crew_to_building_button(input_dict, global_manager)
                 elif base == 'trade':
                     new_element = actor_display_buttons.trade_button(input_dict, global_manager)
-                elif base == 'convert':
-                    new_element = actor_display_buttons.convert_button(input_dict, global_manager)
                 elif base == 'rumor search':
                     new_element = actor_display_buttons.rumor_search_button(input_dict, global_manager)
                 elif base == 'artifact search':
@@ -404,8 +402,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.trade_notification(input_dict, global_manager)
                 elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict, global_manager)
-                elif base == 'conversion':
-                    new_element = action_notifications.conversion_notification(input_dict, global_manager)
                 elif base == 'rumor search':
                     new_element = action_notifications.rumor_search_notification(input_dict, global_manager)
                 elif base == 'artifact search':

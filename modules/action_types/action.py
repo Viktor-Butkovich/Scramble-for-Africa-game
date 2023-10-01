@@ -106,6 +106,8 @@ class action():
             else:
                 roll_message += 'to succeed.'
             text += roll_message
+        elif subject == 'impossible':
+            text += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. /n /n'
         return(text)
 
     def generate_attached_interface_elements(self, subject):
@@ -168,6 +170,23 @@ class action():
         self.global_manager.set('ongoing_action', True)
         self.global_manager.set('ongoing_action_type', self.action_type)
         self.current_unit = unit
+
+    def start(self, unit):
+        '''
+        Description:
+            Used when the player clicks on the start campaign button, displays a choice notification that allows the player to campaign or not
+        Input:
+            pmob unit: Unit selected when the linked button is clicked
+        Output:
+            None
+        '''
+        self.pre_start(unit)
+        if self.current_min_success > 6:
+            self.global_manager.get('notification_manager').display_notification({
+                'message': self.generate_notification_text('impossible'),
+            })
+            return(False)
+        return(True)
 
     def process_payment(self):
         '''
@@ -253,21 +272,17 @@ class action():
                 else:
                     word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ('The higher result, ' + str(self.roll_result) + ': ' + result_outcome_dict[self.roll_result] + ', was used. /n /n')
-
+            text += 'The higher result, ' + str(self.roll_result) + ': ' + result_outcome_dict[self.roll_result] + ', was used. /n'
+        else:
+            text += '/n'
         self.global_manager.get('notification_manager').display_notification({
-            'message': text + 'Click to continue. /n',
+            'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'action',
             'transfer_interface_elements': True,
             'on_remove': self.complete,
             'audio': self.generate_audio('roll_finished')
         })
-
-        text += '/n'
-        self.public_relations_change = 0
-        if self.roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            self.public_relations_change = random.randrange(1, 7)
 
         if self.roll_result <= self.current_max_crit_fail:
             result = 'critical_failure'
@@ -281,7 +296,7 @@ class action():
         text += self.generate_notification_text(result)
 
         self.global_manager.get('notification_manager').display_notification({
-            'message': text + 'Click to remove this notification. /n',
+            'message': text + 'Click to remove this notification.',
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements(result)
         })

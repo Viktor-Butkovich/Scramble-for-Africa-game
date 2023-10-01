@@ -795,12 +795,6 @@ class notification_manager_template():
             input_dict['is_last'] = True
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
-        elif notification_type == 'conversion':
-            input_dict['init_type'] = 'conversion notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_conversion':
-            input_dict['init_type'] = 'conversion notification'
-            input_dict['is_last'] = True
         elif notification_type == 'rumor_search':
             input_dict['init_type'] = 'rumor search notification'
             input_dict['is_last'] = False

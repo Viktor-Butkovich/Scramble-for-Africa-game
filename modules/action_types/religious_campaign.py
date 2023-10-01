@@ -70,8 +70,10 @@ class religious_campaign(action.campaign):
         elif subject == 'failure':
             text += 'Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to gather any volunteers. /n /n'
         elif subject == 'critical_failure':
+            text += self.generate_notification_text('failure')
             text += 'The evangelist is disturbed by the lack of faith of your country\'s people and decides to abandon your company. /n /n'
         elif subject == 'critical_success':
+            text += self.generate_notification_text('success')
             text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
         return(text)
 
@@ -155,22 +157,22 @@ class religious_campaign(action.campaign):
         Output:
             None
         '''
-        self.pre_start(unit)
-        self.global_manager.get('notification_manager').display_notification({
-            'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
-            'choices': [
-                {
-                'on_click': (self.middle, []),
-                'tooltip': ['Starts a ' + self.name + ', possibly convincing church volunteers to join you'],
-                'message': 'Start campaign'
-                },
-                {
-                'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
-                'tooltip': ['Stop ' + self.name],
-                'message': 'Stop campaign'
-                }
-            ],
-        })
+        if super().start(unit):
+            self.global_manager.get('notification_manager').display_notification({
+                'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
+                'choices': [
+                    {
+                    'on_click': (self.middle, []),
+                    'tooltip': ['Starts a ' + self.name + ', possibly convincing church volunteers to join you'],
+                    'message': 'Start campaign'
+                    },
+                    {
+                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'tooltip': ['Stop ' + self.name],
+                    'message': 'Stop campaign'
+                    }
+                ],
+            })
 
     def complete(self):
         '''
@@ -183,8 +185,6 @@ class religious_campaign(action.campaign):
             None
         '''
         if self.roll_result >= self.current_min_success:
-            self.global_manager.get('public_opinion_tracker').change(self.public_relations_change)
-
             church_volunteers = self.global_manager.get('actor_creation_manager').create(False, {
                 'coordinates': (0, 0),
                 'grids': [self.global_manager.get('europe_grid')],

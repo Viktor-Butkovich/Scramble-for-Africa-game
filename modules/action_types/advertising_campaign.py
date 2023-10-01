@@ -186,23 +186,22 @@ class advertising_campaign(action.campaign):
         while self.target_unadvertised_commodity == 'consumer goods' or self.target_unadvertised_commodity == self.target_commodity or self.global_manager.get('commodity_prices')[self.target_unadvertised_commodity] == 1:
             self.target_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
 
-        self.pre_start(unit)
-
-        self.global_manager.get('notification_manager').display_notification({
-            'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
-            'choices': [
-                {
-                'on_click': (self.middle, []),
-                'tooltip': ['Starts an ' + self.name + ' for ' + self.target_commodity],
-                'message': 'Start campaign'
-                },
-                {
-                'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
-                'tooltip': ['Stop ' + self.name],
-                'message': 'Stop campaign'
-                }
-            ],
-        })
+        if super().start(unit):
+            self.global_manager.get('notification_manager').display_notification({
+                'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
+                'choices': [
+                    {
+                    'on_click': (self.middle, []),
+                    'tooltip': ['Starts an ' + self.name + ' for ' + self.target_commodity],
+                    'message': 'Start campaign'
+                    },
+                    {
+                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'tooltip': ['Stop ' + self.name],
+                    'message': 'Stop campaign'
+                    }
+                ],
+            })
 
     def complete(self):
         '''
