@@ -59,7 +59,7 @@ class religious_campaign(action.campaign):
         Output:
             string: Returns text for the inputted subject
         '''
-        text = ''
+        text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text += 'Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native '
             text += 'villages. /n /nThe campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'

@@ -59,7 +59,7 @@ class public_relations_campaign(action.campaign):
         Output:
             string: Returns text for the inputted subject
         '''
-        text = ''
+        text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text += 'Are you sure you want to start a public relations campaign? /n /nIf successful, your company\'s public opinion will increase by between 1 and 6 /n /n'
             text += 'The campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'

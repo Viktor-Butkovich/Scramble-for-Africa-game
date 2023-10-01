@@ -61,7 +61,7 @@ class conversion(action.action):
         Output:
             string: Returns text for the inputted subject
         '''
-        text = ''
+        text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text += 'Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n'
             text += 'The conversion will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'

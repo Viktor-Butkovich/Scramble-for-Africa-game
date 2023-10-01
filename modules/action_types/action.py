@@ -1,6 +1,5 @@
 #Contains functionality for generic actions
 
-import random
 from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility
 
 class action():
@@ -97,7 +96,7 @@ class action():
             string: Returns text for the inputted subject
         '''
         text = ''
-        if subject == 'roll message':
+        if subject == 'roll_message':
             roll_message = 'Click to roll. ' + str(self.current_min_success) + '+ required '
             officer_name = self.current_unit.name
             if self.current_unit.veteran:
@@ -166,9 +165,6 @@ class action():
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
-
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', self.action_type)
         self.current_unit = unit
 
     def start(self, unit):
@@ -183,10 +179,13 @@ class action():
         self.pre_start(unit)
         if self.current_min_success > 6:
             self.global_manager.get('notification_manager').display_notification({
-                'message': self.generate_notification_text('impossible'),
+                'message': self.generate_notification_text('confirmation') + self.generate_notification_text('impossible'),
             })
             return(False)
-        return(True)
+        else:
+            self.global_manager.set('ongoing_action', True)
+            self.global_manager.set('ongoing_action_type', self.action_type)
+            return(True)
 
     def process_payment(self):
         '''

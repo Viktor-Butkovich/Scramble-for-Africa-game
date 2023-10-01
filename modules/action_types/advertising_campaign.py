@@ -61,7 +61,7 @@ class advertising_campaign(action.campaign):
         Output:
             string: Returns text for the inputted subject
         '''
-        text = ''
+        text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text = 'Are you sure you want to start an advertising campaign for ' + self.target_commodity + '? If successful, the price of ' + self.target_commodity + ' will increase, decreasing the price of another random commodity. /n /n'
             text += 'The campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n '
