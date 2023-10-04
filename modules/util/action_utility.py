@@ -14,7 +14,7 @@ def cancel_ongoing_actions(global_manager):
     global_manager.set('ongoing_action', False)
     global_manager.set('ongoing_action_type', 'none')
 
-def generate_die_input_dict(coordinates, final_result, action, global_manager):
+def generate_die_input_dict(coordinates, final_result, action, global_manager, override_input_dict=None):
     '''
     Description:
         Creates and returns the input dict of a die created at the inputted coordinates with the inputted final result for the inputted action
@@ -29,7 +29,7 @@ def generate_die_input_dict(coordinates, final_result, action, global_manager):
     result_outcome_dict = {'min_success': action.current_min_success, 'min_crit_success': action.current_min_crit_success, 'max_crit_fail': action.current_max_crit_fail}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
 
-    die_input_dict = {
+    return_dict = {
         'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], global_manager),
         'width': scaling.scale_width(100, global_manager),
         'height': scaling.scale_height(100, global_manager),
@@ -40,7 +40,10 @@ def generate_die_input_dict(coordinates, final_result, action, global_manager):
         'final_result': final_result,
         'init_type': 'die'
     }
-    return(die_input_dict)
+    if override_input_dict:
+        for value in override_input_dict:
+            return_dict[value] = override_input_dict[value]
+    return(return_dict)
 
 def generate_action_ordered_collection_input_dict(coordinates, global_manager, override_input_dict=None):
     '''
@@ -126,6 +129,20 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
         'member_config': {'order_overlap': True}
     }
     return([portrait_background_input_dict, portrait_front_input_dict])
+
+def generate_background_image_input_dict():
+    '''
+    Description:
+        Creates and returns the input dict of a unit background image
+    Input:
+        None
+    Output:
+        dictionary: Returns the created input dict
+    '''
+    return({
+        'image_id': 'misc/mob_background.png',
+        'level': -10
+    })
 
 def generate_risk_message(action, unit):
     '''

@@ -20,22 +20,17 @@ def roll(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, glo
     '''
     if result == 'none':
         result = random.randrange(1, num_sides + 1)
-
-    if roll_type in ['Combat roll', 'second_combat']:
-        text_utility.print_to_screen(roll_type + ': ')
-        text_utility.print_to_screen('You rolled a ' + str(result))
-    else:
-        text_utility.print_to_screen(roll_type + ': ' + str(requirement) + '+ required to succeed', global_manager)
-        if result >= requirement:
-            if result >= min_crit_success:
-                text_utility.print_to_screen('You rolled a ' + str(result) + ': CRITICAL SUCCESS!', global_manager)
-            else:
-                text_utility.print_to_screen('You rolled a ' + str(result) + ': SUCCESS!', global_manager)
+    text_utility.print_to_screen(roll_type + ': ' + str(requirement) + '+ required to succeed', global_manager)
+    if result >= requirement:
+        if result >= min_crit_success:
+            text_utility.print_to_screen('You rolled a ' + str(result) + ': CRITICAL SUCCESS!', global_manager)
         else:
-            if result <= max_crit_fail:
-                text_utility.print_to_screen('You rolled a ' + str(result) + ': CRITICAL FAILURE', global_manager)
-            else:
-                text_utility.print_to_screen('You rolled a ' + str(result) + ': FAILURE', global_manager)
+            text_utility.print_to_screen('You rolled a ' + str(result) + ': SUCCESS!', global_manager)
+    else:
+        if result <= max_crit_fail:
+            text_utility.print_to_screen('You rolled a ' + str(result) + ': CRITICAL FAILURE', global_manager)
+        else:
+            text_utility.print_to_screen('You rolled a ' + str(result) + ': FAILURE', global_manager)
     return(result)
 
 def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, global_manager, result = 'none'):
@@ -86,7 +81,7 @@ def combat_roll_to_list(num_sides, roll_type, global_manager, result, modifier):
     if result == 'none':
         result = random.randrange(1, num_sides + 1)
     text = ''
-    if roll_type == 'second_combat':
+    if roll_type == 'second':
         text += 'Second roll: /n'
     else:
         text += (roll_type + ': /n')

@@ -228,11 +228,11 @@ class minister():
             'minister_image_type': 'position',
             'init_type': 'dice roll minister image',
             'minister_message_image': True,
-            'member_config': {'order_overlap': True, 'second_dimension_alignment': 'left'}
+            'member_config': {'order_overlap': True, 'second_dimension_alignment': 'left', 'centered': True}
         }
 
         minister_portrait_icon_dict = minister_position_icon_dict.copy()
-        minister_portrait_icon_dict['member_config'] = {'second_dimension_alignment': 'leftmost'}
+        minister_portrait_icon_dict['member_config'] = {'second_dimension_alignment': 'leftmost', 'centered': True}
         minister_portrait_icon_dict['minister_image_type'] = 'portrait'
 
         self.global_manager.get('notification_manager').display_notification({

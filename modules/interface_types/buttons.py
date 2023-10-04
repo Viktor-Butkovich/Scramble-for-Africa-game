@@ -136,7 +136,6 @@ class button(interface_elements.interface_element):
             selected_list = actor_utility.get_selected_list(self.global_manager)
             if len(selected_list) > 0:
                 current_mob = selected_list[0]
-                message = ''
                 movement_cost = current_mob.get_movement_cost(x_change, y_change)
                 local_cell = current_mob.images[0].current_cell
                 adjacent_cell = local_cell.adjacent_cells[non_cardinal_direction]
@@ -159,24 +158,20 @@ class button(interface_elements.interface_element):
                             adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
                             connecting_roads = False
                             if (current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none') or (current_mob.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none'):
-                                final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
-                                message = 'Attacking an enemy unit costs 5 money and requires only 1 movement point, but staying in the enemy\'s tile afterward would require the usual movement'
-                                tooltip_text.append(message)
-                                message = 'Staying afterward would cost ' + str(final_movement_cost - 1) + ' more movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
-                                if local_cell.has_walking_connection(adjacent_cell):
-                                    if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
-                                        connecting_roads = True
-                                        message += 'and connecting roads'
-                                    elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
-                                        message += 'and no connecting roads'
-                                    elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                                        message += 'and no connecting roads'
-                                    else: 
-                                        message += 'and no connecting roads'
-                        
+                                tooltip_text += self.global_manager.get('actions')['combat'].update_tooltip(
+                                    tooltip_info_dict = {
+                                        'adjacent_infrastructure': adjacent_infrastructure,
+                                        'local_infrastructure': local_infrastructure,
+                                        'x_change': x_change,
+                                        'y_change': y_change,
+                                        'local_cell': local_cell,
+                                        'adjacent_cell': adjacent_cell
+                                    }
+                                )
                             else:
+                                message = ''
                                 if current_mob.is_vehicle and current_mob.vehicle_type == 'train':
-                                    if (not adjacent_infrastructure == 'none') and adjacent_infrastructure.is_railroad and (not local_infrastructure == 'none') and local_infrastructure.is_railroad and local_cell.has_walking_connection(adjacent_cell):
+                                    if adjacent_infrastructure != 'none' and adjacent_infrastructure.is_railroad and local_infrastructure != 'none' and local_infrastructure.is_railroad and local_cell.has_walking_connection(adjacent_cell):
                                         message = 'Costs ' + str(movement_cost) + ' movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has connecting railroads'
                                     else:
                                         message = 'Not possible because the adjacent tile does not have connecting railroads'
@@ -185,12 +180,12 @@ class button(interface_elements.interface_element):
                                 else:
                                     message = 'Costs ' + str(movement_cost) + ' movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
                                     if local_cell.has_walking_connection(adjacent_cell):
-                                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                                        if local_infrastructure != 'none' and adjacent_infrastructure != 'none': #if both have infrastructure
                                             connecting_roads = True
                                             message += 'and connecting roads'
-                                        elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                                        elif local_infrastructure == 'none' and adjacent_infrastructure != 'none': #if local has no infrastructure but adjacent does
                                             message += 'and no connecting roads'
-                                        elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                                        elif local_infrastructure != 'none': #if local has infrastructure but not adjacent
                                             message += 'and no connecting roads'# + local_infrastructure.infrastructure_type
                                         else: 
                                             message += 'and no connecting roads'
@@ -241,7 +236,7 @@ class button(interface_elements.interface_element):
                         tooltip_text.append('However, can embark a ship, attack an enemy in a river, or spend its maximum movement and become disorganized to enter a river')
                     else:
                         tooltip_text.append('However, can embark a ship in the water by moving to it or spend its maximum movement and become disorganized to enter a river')
-                    
+
             self.set_tooltip(tooltip_text)
 
         elif self.button_type == 'toggle grid lines':
@@ -2670,6 +2665,8 @@ class anonymous_button(button):
         input_dict['button_type'] = 'anonymous'
 
         self.on_click_info = button_info_dict['on_click']
+        if type(self.on_click_info[0]) != list:
+            self.on_click_info = ([self.on_click_info[0]], [self.on_click_info[1]])
         self.tooltip = button_info_dict['tooltip']
         self.message = button_info_dict['message']
 
@@ -2689,7 +2686,8 @@ class anonymous_button(button):
             None
         '''
         super().on_click()
-        self.on_click_info[0](*self.on_click_info[1]) #calls first item function with second item list as parameters
+        for index in range(len(self.on_click_info[0])):
+            self.on_click_info[0][index](*self.on_click_info[1][index]) #calls each item function with corresponding parameters
         self.notification.on_click(choice_button_override=True)
 
     def draw(self):

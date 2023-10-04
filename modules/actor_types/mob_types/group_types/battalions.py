@@ -104,76 +104,14 @@ class battalion(group):
         self.global_manager.set('show_minimap_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         self.global_manager.set('last_minimap_outline_switch', time.time())
-        future_x = self.x + x_change
-        future_y = self.y + y_change
-        roll_result = 0
-        if x_change > 0:
-            direction = 'east'
-        elif x_change < 0:
-            direction = 'west'
-        elif y_change > 0:
-            direction = 'north'
-        elif y_change < 0:
-            direction = 'south'
-        else:
-            direction = 'none'
-        future_cell = self.grid.find_cell(future_x, future_y)
-        if self.is_battalion:
-            defender = future_cell.get_best_combatant('npmob')
-        elif self.is_safari:
-            defender = future_cell.get_best_combatant('npmob', 'beast')
-        
-        if (not attack_confirmed) and (not defender == 'none'): #if enemy in destination tile and attack not confirmed yet
-            if self.global_manager.get('money_tracker').get() >= self.attack_cost:
-                if self.ministers_appointed():
-                    choice_info_dict = {'battalion': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.attack_cost, 'type': 'combat'}
-                    
-                    message = ''
-
-                    risk_value = -1 * self.get_combat_modifier() #should be low risk with +2/veteran, moderate with +2 or +1/veteran, high with +1
-                    if self.veteran: #reduce risk if veteran
-                        risk_value -= 1
-                    if defender.npmob_type == 'beast':
-                        if self.is_safari:
-                            risk_value -= 3
-                        elif self.is_battalion:
-                            risk_value += 1
-
-                    if risk_value < -2:
-                        message = 'RISK: LOW /n /n' + message  
-                    elif risk_value == -2:
-                        message = 'RISK: MODERATE /n /n' + message
-                    elif risk_value == -1: #2/6 = high risk
-                        message = 'RISK: HIGH /n /n' + message
-                    elif risk_value > 0:
-                        message = 'RISK: DEADLY /n /n' + message
-
-                    if defender.npmob_type == 'beast':
-                        self.global_manager.get('notification_manager').display_notification({
-                            'message': message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to hunt the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
-                            'choices': ['attack', 'stop attack'],
-                            'extra_parameters': choice_info_dict
-                        })
-                    else:
-                        self.global_manager.get('notification_manager').display_notification({
-                            'message': message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attack the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
-                            'choices': ['attack', 'stop attack'],
-                            'extra_parameters': choice_info_dict
-                        })
-                    self.global_manager.set('ongoing_action', True)
-                    self.global_manager.set('ongoing_action_type', 'combat')
-                    self.create_cell_icon(self.x + x_change, self.y + y_change, 'misc/attack_mark/' + direction + '.png')
-            else:
-                if defender.npmob_type == 'beast':
-                    text_utility.print_to_screen('You do not have enough money to supply a hunt.', self.global_manager)
-                else:
-                    text_utility.print_to_screen('You do not have enough money to supply an attack.', self.global_manager)
-        elif defender == 'none' and ((self.is_battalion and not future_cell.get_best_combatant('npmob', 'beast') == 'none') or (self.is_safari and not future_cell.get_best_combatant('npmob') == 'none')): #if wrong type of defender present
-            if self.is_battalion:
-                text_utility.print_to_screen('Battalions cannot attack beasts.', self.global_manager)
-            elif self.is_safari:
-                text_utility.print_to_screen('Safaris can only attack beasts.', self.global_manager)
-        else: #if destination empty or attack already confirmed, move in
+        if not self.global_manager.get('actions')['combat'].on_click(
+            self,
+            on_click_info_dict={
+                'x_change': x_change,
+                'y_change': y_change,
+                'attack_confirmed': attack_confirmed
+            }
+        ): #if destination empty or attack already confirmed, move in
             initial_movement_points = self.movement_points
             if attack_confirmed:
                 original_disorganized = self.disorganized
@@ -182,22 +120,8 @@ class battalion(group):
                 self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
             if attack_confirmed:
                 self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
-            if not self.in_vehicle:
-                self.attempt_local_combat()
-
-    def attempt_local_combat(self):
-        '''
-        Description:
-            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will immediately start a combat with the strongest local non-beast npmob and pay to supply the attack
-        Input:
-            None
-        Output:
-            None
-        '''
-        defender = self.images[0].current_cell.get_best_combatant('npmob')
-        if not defender == 'none':
-            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'attack')
-            self.start_combat('attacking', defender)
+            #if not self.in_vehicle:
+            #    self.attempt_local_combat()
 
     def start_capture_slaves(self):
         '''
@@ -465,20 +389,6 @@ class safari(battalion):
         self.set_group_type('safari')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength
-
-    def attempt_local_combat(self):
-        '''
-        Description:
-            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will immediately start a combat with the strongest local beast npmob and pay to supply the hunt
-        Input:
-            None
-        Output:
-            None
-        '''
-        defender = self.images[0].current_cell.get_best_combatant('npmob', 'beast')
-        if not defender == 'none':
-            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'hunting')
-            self.start_combat('attacking', defender)
 
     def track_beasts(self):
         '''

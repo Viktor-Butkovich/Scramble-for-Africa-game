@@ -130,8 +130,8 @@ class npmob(mob): #if enemy.turn_done
         if current_cell.has_intact_building('resource'):
             current_cell.get_intact_building('resource').eject_work_crews()
         defender = current_cell.get_best_combatant('pmob', self.npmob_type)
-        if not defender == 'none':
-            defender.start_combat('defending', self)
+        if defender != 'none':
+            self.global_manager.get('actions')['combat'].middle({'defending': True, 'opponent': self, 'current_unit': defender})
         else:
             self.kill_noncombatants()
             self.damage_buildings()

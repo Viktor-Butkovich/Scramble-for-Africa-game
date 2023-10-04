@@ -22,3 +22,7 @@ except Exception: #displays error message and records error message in crash log
 # fix notification scaling issues - possibly an issue with font size scaling in notification_manager.notification_to_front
 # verify that country bonuses are still applying to actions like advertising - they should, as the bonuses are applied when a minister makes a roll
 # later test conversion with 0 population villages, combat, and villages with missions - relies on other actions working
+# make generic contested action type
+# change all notification interface to automatically be centered
+# test hunting/beast defense combat
+# verify that forts work as intended

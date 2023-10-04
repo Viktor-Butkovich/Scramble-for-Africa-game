@@ -44,6 +44,7 @@ class die(button):
         self.last_roll = 0
         self.highlighted = False
         self.normal_die = True
+
         if (self.result_outcome_dict['min_success'] <= 0 or self.result_outcome_dict['min_success'] >= 7) and self.result_outcome_dict['max_crit_fail'] <= 0: # and result_outcome_dict['min_crit_success'] >= 7
             #if roll without normal success/failure results, like combat
             input_dict['image_id'] = 'misc/dice/4.png'

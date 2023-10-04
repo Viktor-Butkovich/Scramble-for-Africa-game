@@ -13,7 +13,7 @@ import modules.constructs.countries as countries
 import modules.tools.data_managers as data_managers
 import modules.tools.save_load_tools as save_load_tools
 import modules.tools.effects as effects
-from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion
+from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat
 
 def setup(global_manager, *args):
     '''
@@ -161,7 +161,6 @@ def misc(global_manager):
     global_manager.set('interface_collection_list', [])
     global_manager.set('independent_interface_elements', [])
     global_manager.set('dice_list', [])
-    global_manager.set('combatant_images', [])
     global_manager.set('draw_list', [])
 
     global_manager.set('displayed_mob', 'none')
@@ -372,6 +371,7 @@ def actions(global_manager):
     suppress_slave_trade.suppress_slave_trade(global_manager)
     advertising_campaign.advertising_campaign(global_manager)
     conversion.conversion(global_manager)
+    combat.combat(global_manager)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities(global_manager):
@@ -840,11 +840,9 @@ def transactions(global_manager):
         'loan_search': 'loan searches',
         'trade': 'trading with natives',
         'loan': 'loans',
-        'attack': 'combat supplies',
         'slave_capture': 'capturing slaves',
         'trial': 'trial fees',
         'active_investigation': 'investigations',
-        'hunting': 'hunting supplies',
         'rumor_search': 'artifact rumor searches',
         'artifact_search': 'artifact searches',
         'construction': 'construction',

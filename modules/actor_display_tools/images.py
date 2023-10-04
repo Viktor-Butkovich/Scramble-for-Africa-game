@@ -1,6 +1,7 @@
 #Contains functionality for actor display images
 
 from ..constructs.images import free_image
+from ..util import action_utility
 
 class actor_display_free_image(free_image):
     '''
@@ -58,7 +59,7 @@ class actor_display_free_image(free_image):
                 else: #if id is list of strings for image bundle
                     image_id_list += new_actor.get_image_id_list()
                 if new_actor.actor_type == 'mob':
-                    image_id_list.append({'image_id': 'misc/mob_background.png', 'level': -10})
+                    image_id_list.append(action_utility.generate_background_image_input_dict())
                     if new_actor.is_dummy:
                         image_id_list.append('misc/shader.png')
                     if new_actor.is_pmob:

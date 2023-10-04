@@ -410,8 +410,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.capture_slaves_notification(input_dict, global_manager)
                 elif base == 'construction':
                     new_element = action_notifications.construction_notification(input_dict, global_manager)
-                elif base == 'combat':
-                    new_element = action_notifications.combat_notification(input_dict, global_manager)
                 else:
                     new_element = notifications.notification(input_dict, global_manager)
         return(new_element)

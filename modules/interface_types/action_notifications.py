@@ -77,7 +77,7 @@ class action_notification(notification):
             None
         '''
         transferred_interface_elements = []
-        if self.transfer_interface_elements:
+        if self.attached_interface_elements and self.transfer_interface_elements:
             transferred_interface_elements = []
             for interface_element in self.notification_ordered_collection.members.copy():
                 for key in self.notification_ordered_collection.second_dimension_coordinates:
@@ -86,6 +86,8 @@ class action_notification(notification):
                 interface_element.transfer_info_dict = {
                     'x_offset': interface_element.x_offset,
                     'y_offset': interface_element.y_offset,
+                    'order_x_offset': interface_element.order_x_offset,
+                    'order_y_offset': interface_element.order_y_offset,
                     'second_dimension_coordinate': second_dimension_coordinate,
                     'order_overlap': interface_element in self.notification_ordered_collection.order_overlap_list,
                     'order_exempt': interface_element in self.notification_ordered_collection.order_exempt_list
@@ -248,11 +250,7 @@ class exploration_notification(action_notification):
             self.notification_images = []
             explored_cell = current_expedition.destination_cell
             explored_tile = explored_cell.tile
-            background_dict = {
-                'image_id': 'misc/tile_background.png',
-                'level': -10
-            }
-            image_id_list = [background_dict] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
+            image_id_list = [action_utility.generate_background_image_input_dict()] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
             self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
                 'image_id': image_id_list,
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
@@ -794,93 +792,3 @@ class construction_notification(action_notification):
     
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-
-class combat_notification(action_notification):
-    '''
-    Notification that does not automatically prompt the user to remove it and shows the results of a combat when the last notification is removed
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'message': string value - Default text for this label, with lines separated by /n
-                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
-                    will be started
-                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-                'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.is_last = input_dict['is_last']
-        if len(global_manager.get('combatant_images')) == 0: #if none already exist
-            image_x = global_manager.get('notification_manager').notification_x - 165#175
-            if input_dict['notification_dice'] > 2:
-                image_x -= 60
-            background_dict = {
-                'image_id': 'misc/mob_background.png',
-                'size': 1,
-                'x_offset': 0,
-                'y_offset': 0,
-                'level': -10
-            }
-            pmob_image_id_list = [background_dict] + global_manager.get('displayed_mob').get_image_id_list() + ['misc/pmob_outline.png']
-
-            global_manager.get('combatant_images').append(global_manager.get('actor_creation_manager').create_interface_element({
-                'image_id': pmob_image_id_list,
-                'coordinates': scaling.scale_coordinates(image_x, 280, global_manager),
-                'width': scaling.scale_width(150, global_manager),
-                'height': scaling.scale_height(150, global_manager),
-                'modes': input_dict['modes'],
-                'to_front': True,
-                'init_type': 'free image'
-            }, global_manager))
-
-            npmob_image_id_list = [background_dict] + global_manager.get('displayed_mob').current_enemy.get_image_id_list() + ['misc/pmob_outline.png']
-
-            global_manager.get('combatant_images').append(global_manager.get('actor_creation_manager').create_interface_element({
-                'image_id': npmob_image_id_list,
-                'coordinates': scaling.scale_coordinates(image_x, 670, global_manager),
-                'width': scaling.scale_width(150, global_manager),
-                'height': scaling.scale_height(150, global_manager),
-                'modes': input_dict['modes'],
-                'to_front': True,
-                'init_type': 'free image'
-            }, global_manager))
-
-        super().__init__(input_dict, global_manager)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
-                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove(handle_next_notification=False)
-        notification_manager = self.global_manager.get('notification_manager')
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-    
-        elif len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-
-        if self.is_last:
-            self.global_manager.get('combat_result')[0].complete_combat()
-            for current_image in self.global_manager.get('combatant_images'):
-                current_image.remove_complete()
-            self.global_manager.set('combatant_images', [])

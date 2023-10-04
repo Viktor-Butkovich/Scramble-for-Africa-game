@@ -196,7 +196,7 @@ class mob(actor):
         self.disorganized = new_value
         self.update_image_bundle()
 
-    def get_combat_modifier(self):
+    def get_combat_modifier(self, opponent=None, include_tile=False):
         '''
         Description:
             Calculates and returns the modifier added to this unit's combat rolls
@@ -215,6 +215,13 @@ class mob(actor):
                 modifier -= 1
                 if self.is_officer:
                     modifier -= 1
+            if opponent and opponent.npmob_type == 'beast':
+                if self.is_group and self.group_type == 'safari':
+                    modifier += 3
+                else:
+                    modifier -= 1
+            if include_tile and self.images[0].current_cell.has_intact_building('fort'):
+                modifier += 1
         if self.disorganized:
             modifier -= 1
         return(modifier)

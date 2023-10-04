@@ -690,6 +690,8 @@ class ordered_collection(interface_collection):
         member_config['order_exempt'] = member_config.get('order_exempt', False)
         member_config['order_x_offset'] = member_config.get('order_x_offset', 0)
         member_config['order_y_offset'] = member_config.get('order_y_offset', 0)
+        if member_config.get('centered', False):
+            member_config['order_x_offset'] -= new_member.width / 2
         member_config['second_dimension_coordinate'] = member_config.get('second_dimension_coordinate', 0)
         new_member.order_x_offset = member_config['order_x_offset']
         new_member.order_y_offset = member_config['order_y_offset']
@@ -717,7 +719,6 @@ class ordered_collection(interface_collection):
                 #leftmost and rightmost go to farthest column in that direction, rather than making a new column
                 coordinate -= increment
             member_config['second_dimension_coordinate'] = coordinate
-
         key = str(member_config['second_dimension_coordinate'])
         if key in self.second_dimension_coordinates:
             self.second_dimension_coordinates[key].append(new_member)

@@ -819,12 +819,6 @@ class notification_manager_template():
         elif notification_type == 'final_construction':
             input_dict['init_type'] = 'construction notification'
             input_dict['is_last'] = True
-        elif notification_type == 'combat':
-            input_dict['init_type'] = 'combat notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_combat':
-            input_dict['init_type'] = 'combat notification'
-            input_dict['is_last'] = True
         elif notification_type == 'trial':
             input_dict['init_type'] = 'trial notification'
             input_dict['is_last'] = True

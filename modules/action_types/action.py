@@ -34,6 +34,7 @@ class action():
         self.global_manager.get('action_prices')[self.action_type] = 5
         self.global_manager.get('base_action_prices')[self.action_type] = 5
         self.global_manager.get('transaction_types').append(self.action_type)
+        self.roll_lists = []
 
     def button_setup(self, initial_input_dict):
         '''
@@ -97,14 +98,18 @@ class action():
         '''
         text = ''
         if subject == 'roll_message':
-            roll_message = 'Click to roll. ' + str(self.current_min_success) + '+ required '
+            base_roll_message = 'Click to roll. '
+            full_roll_message = base_roll_message + str(self.current_min_success) + '+ required '
             officer_name = self.current_unit.name
             if self.current_unit.veteran:
                 text += 'The ' + officer_name + ' can roll twice and pick the higher result. /n /n'
-                roll_message += 'on at least 1 die to succeed.'
+                full_roll_message += 'on at least 1 die to succeed.'
             else:
-                roll_message += 'to succeed.'
-            text += roll_message
+                full_roll_message += 'to succeed.'
+            if self.current_min_success >= 1 and self.current_min_success <= 6:
+                text += full_roll_message
+            else:
+                text += base_roll_message
         elif subject == 'impossible':
             text += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. /n /n'
         return(text)
@@ -118,7 +123,10 @@ class action():
         Output:
             dictionary list: Returns list of input dicts for inputted subject
         '''
-        return([])
+        return_list = []
+        if subject == 'dice':
+            return_list += [action_utility.generate_die_input_dict((0, 0), roll_list[0], self, self.global_manager) for roll_list in self.roll_lists]
+        return(return_list)
 
     def generate_audio(self, subject):
         '''
@@ -203,7 +211,7 @@ class action():
     def middle(self):
         '''
         Description:
-            Controls the PR campaign process, determining and displaying its result through a series of notifications
+            Controls the campaign process, determining and displaying its result through a series of notifications
         Input:
             None
         Output:
@@ -211,12 +219,11 @@ class action():
         '''
         self.global_manager.get('notification_manager').set_lock(True)
         self.roll_result = 0
-        self.current_unit = self.current_unit
         self.current_unit.set_movement_points(0)
 
         price = self.process_payment()
 
-        roll_lists = []
+        self.roll_lists = []
         if self.current_unit.veteran:
             num_dice = 2
         else:
@@ -227,12 +234,10 @@ class action():
         for index in range(len(results)):
             result = results[index]
             roll_type = roll_types[index]
-            roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result))
+            self.roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result))
 
-        attached_interface_elements = []
         self.roll_result = 0
-        for roll_list in roll_lists:
-            attached_interface_elements.append(action_utility.generate_die_input_dict((0, 0), roll_list[0], self, self.global_manager))
+        for roll_list in self.roll_lists:
             self.roll_result = max(roll_list[0], self.roll_result)
 
         text = self.generate_notification_text('initial')
@@ -240,15 +245,13 @@ class action():
 
         self.global_manager.get('notification_manager').display_notification({
             'message': text + roll_message,
-            'num_dice': num_dice,
             'notification_type': 'action',
-            'attached_interface_elements': attached_interface_elements,
+            'attached_interface_elements': self.generate_attached_interface_elements('dice'),
             'transfer_interface_elements': True
         }, insert_index=0)
 
         self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Rolling... ',
-            'num_dice': num_dice,
             'notification_type': 'roll',
             'transfer_interface_elements': True,
             'audio': self.generate_audio('roll_started')
@@ -256,10 +259,10 @@ class action():
 
         self.global_manager.get('notification_manager').set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
 
-        for roll_list in roll_lists:
+        for roll_list in self.roll_lists:
             text += roll_list[1]
 
-        if len(roll_lists) > 1:
+        if len(self.roll_lists) > 1:
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
@@ -276,7 +279,6 @@ class action():
             text += '/n'
         self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Click to continue.',
-            'num_dice': num_dice,
             'notification_type': 'action',
             'transfer_interface_elements': True,
             'on_remove': self.complete,

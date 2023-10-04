@@ -183,7 +183,9 @@ class actor_display_label(label):
             self.add_attached_button(input_dict)
 
             for action_type in self.global_manager.get('actions'):
-                self.add_attached_button(self.global_manager.get('actions')[action_type].button_setup(input_dict.copy()))
+                button_input_dict = self.global_manager.get('actions')[action_type].button_setup(input_dict.copy())
+                if button_input_dict:
+                    self.add_attached_button(button_input_dict)
 
             input_dict['init_type'] = 'take loan button'
             input_dict['image_id'] = 'buttons/take_loan_button.png'
