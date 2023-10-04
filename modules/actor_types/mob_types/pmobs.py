@@ -3,7 +3,7 @@
 import pygame
 import random
 from ..mobs import mob
-from ...util import text_utility, utility, actor_utility, scaling, dice_utility, turn_management_utility, minister_utility
+from ...util import text_utility, utility, actor_utility, dice_utility, minister_utility
 
 class pmob(mob):
     '''
@@ -217,7 +217,6 @@ class pmob(mob):
             None
         '''
         progressed = False
-        
         if len(self.in_progress_automatic_route) > 0:
             while self.can_follow_automatic_route():
                 next_step = self.in_progress_automatic_route[0]
@@ -226,6 +225,9 @@ class pmob(mob):
                 elif next_step == 'end':
                     self.drop_inventory()
                 else:
+                    if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')):
+                        if self.get_next_automatic_stop() == 'end': #only pick up commodities on way to end
+                            self.pick_up_all_commodities(True) #attempt to pick up commodities both before and after moving
                     x_change = next_step[0] - self.x
                     y_change = next_step[1] - self.y
                     self.move(x_change, y_change)

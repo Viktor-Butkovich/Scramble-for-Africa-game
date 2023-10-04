@@ -3,7 +3,7 @@
 import time
 import random
 from ..groups import group
-from ....util import actor_utility, utility, text_utility, dice_utility
+from ....util import actor_utility, utility, dice_utility
 
 class battalion(group):
     '''

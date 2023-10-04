@@ -26,3 +26,4 @@ except Exception: #displays error message and records error message in crash log
 # change all notification interface to automatically be centered
 # test hunting/beast defense combat
 # verify that forts work as intended
+# add horizontal ordered collection for double combat dice
