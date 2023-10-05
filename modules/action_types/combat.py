@@ -28,6 +28,7 @@ class combat(action.action):
         self.y_change = None
         self.opponent_roll_result = None
         self.total_roll_result = None
+        self.public_opinion_change = None
 
     def button_setup(self, initial_input_dict):
         '''
@@ -163,7 +164,6 @@ class combat(action.action):
             elif self.current_unit.is_safari:
                 if self.opponent.npmob_type == 'beast':
                     text += 'Your safari is trained in hunting beasts and will receive a +2 bonus after their roll. /n'
-                    own_combat_modifier += 3 #target-based modifiers not included in initial combat modifier calculation, cancels out -1 non-combat unit penalty
                 else:
                     text += 'Your safari is not accustomed to conventional combat and will receive a -1 penalty after their roll. /n'
             else:
@@ -179,11 +179,9 @@ class combat(action.action):
 
             if self.opponent.npmob_type == 'beast' and not self.current_unit.is_safari:
                 text += 'The ' + self.current_unit.name + ' ' + utility.conjugate('be', self.current_unit.number) + ' not trained in hunting beasts and will receive a -1 penalty after their roll. /n'
-                own_combat_modifier -= 1
 
             if self.current_unit.images[0].current_cell.has_intact_building('fort'):
                 text += 'The fort in this tile grants your ' + self.current_unit.name + ' a +1 bonus after their roll. /n'
-                own_combat_modifier += 1
                 
             if self.current_unit.veteran:
                 text += 'The outcome will be based on the difference between your highest roll and the enemy\'s roll. /n /n'
@@ -267,8 +265,8 @@ class combat(action.action):
             else:
                 if self.opponent.npmob_type == 'beast':
                     text += 'Your ' + self.current_unit.name + ' tracked down and killed the ' + self.opponent.name + '. /n /n'
-                    self.public_opinion_increase = random.randrange(1, 7)
-                    text += 'Sensationalized stories of your safari\'s exploits and the death of the ' + self.opponent.name + ' increase public opinion by ' + str(self.public_opinion_increase) + '. /n /n'
+                    self.public_relations_change = random.randrange(1, 7)
+                    text += 'Sensationalized stories of your safari\'s exploits and the death of the ' + self.opponent.name + ' increase public opinion by ' + str(self.public_relations_change) + '. /n /n'
                 else:
                     text += 'Your ' + self.current_unit.name + ' decisively defeated and destroyed the ' + self.opponent.name + '. /n /n'
         elif subject == 'critical_success': #win with a 6 and correct unit/enemy combination to promote - civilian units can't promote from defensive combat
@@ -358,7 +356,7 @@ class combat(action.action):
             self.current_min_crit_success = 6
         else:
             self.current_min_crit_success = 7
-        self.public_opinion_increase = 0
+        self.public_relations_change = 0
 
     def start(self, unit):
         '''
@@ -608,7 +606,7 @@ class combat(action.action):
                 if self.opponent.npmob_type != 'beast':
                     self.global_manager.get('evil_tracker').change(8)
                 else:
-                    self.global_manager.get('public_opinion_tracker').change(self.public_opinion_increase)
+                    self.global_manager.get('public_opinion_tracker').change(self.public_relations_change)
 
         if not self.defending:
             self.current_unit.set_movement_points(0)

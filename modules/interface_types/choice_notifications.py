@@ -145,13 +145,6 @@ class choice_button(buttons.button):
                 self.verb = 'hire'
             self.cost = self.notification.choice_info_dict['cost']
             self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
-            
-        elif input_dict['button_type'] == 'exploration':
-            self.message = 'Explore'
-            self.cost = self.notification.choice_info_dict['cost']
-            self.expedition = self.notification.choice_info_dict['expedition']
-            self.x_change = self.notification.choice_info_dict['x_change']
-            self.y_change = self.notification.choice_info_dict['y_change']
 
         elif input_dict['button_type'] == 'attack':
             self.message = 'Attack'
@@ -178,7 +171,7 @@ class choice_button(buttons.button):
         elif input_dict['button_type'] == 'decline loan offer':
             self.message = 'Decline'
             
-        elif input_dict['button_type'] in ['none', 'stop exploration', 'stop attack', 'stop capture slaves', 'stop rumor search', 'stop artifact search']:
+        elif input_dict['button_type'] in ['none', 'stop attack', 'stop capture slaves', 'stop rumor search', 'stop artifact search']:
             self.message = 'Do nothing'
 
         elif input_dict['button_type'] == 'confirm main menu':
@@ -241,9 +234,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])
-            
-        elif self.button_type == 'exploration':
-            self.set_tooltip(['Attempt an exploration for ' + str(self.cost) + ' money'])
 
         elif self.button_type == 'attack':
             self.set_tooltip(['Supply an attack for ' + str(self.cost) + ' money'])

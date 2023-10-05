@@ -238,18 +238,6 @@ def find_closest_available_worker(destination, global_manager):
             max_workers_sources.append(possible_source)
     return(random.choice(max_workers_sources)) #randomly choose from ['none'] or the list of tied closest sources w/ most workers
 
-def stop_exploration(global_manager):
-    '''
-    Description:
-        Stops any ongoing explorations and removes exploration destination marks, used at end of exploration
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        None
-    '''
-    global_manager.get('displayed_mob').clear_attached_cell_icons()
-    global_manager.set('ongoing_action', False)
-    global_manager.set('ongoing_action_type', 'none')
 def create_image_dict(stem):
     '''
     Description:

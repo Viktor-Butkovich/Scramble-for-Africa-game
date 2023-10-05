@@ -27,3 +27,11 @@ except Exception: #displays error message and records error message in crash log
 # test hunting/beast defense combat
 # verify that forts work as intended
 # add horizontal ordered collection for double combat dice
+# switching to Europe screen should select top unit in Europe, rather than just deselecting all
+# modify notification or inventory spacing to not show tile inventory commodity icon just past left edge of notification
+# financial report notification should say click to remove, possibly also production report
+# look into default tab modes, maybe with units with commodiy capacity going to inventory mode
+# maybe automatically navigate to minister screen if attempting to do action that requires minister, but allow leaving minister screen w/o appointing
+# error with movement from river - railroad bridge to road in desert cost 4, it should cost 1 - also verify that movement from river has normal cost for terrain 
+#   entered - calculated correctly as 1.0 by movement tooltip but actually sets to 0 - probably thinks it is landing f
+# errors with multiple combats occurring simulateously - make sure notification manager can only display 1 at a time

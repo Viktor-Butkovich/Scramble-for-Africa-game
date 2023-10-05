@@ -394,8 +394,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.action_notification(input_dict, global_manager)
                 elif base == 'dice rolling':
                     new_element = action_notifications.dice_rolling_notification(input_dict, global_manager)
-                elif base == 'exploration':
-                    new_element = action_notifications.exploration_notification(input_dict, global_manager)
                 elif base == 'off tile exploration':
                     new_element = action_notifications.off_tile_exploration_notification(input_dict, global_manager)
                 elif base == 'trade':

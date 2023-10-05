@@ -787,12 +787,6 @@ class notification_manager_template():
             trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade, 'dies': dies}
             input_dict['trade_info_dict'] = trade_info_dict
             input_dict['init_type'] = 'trade notification'
-        elif notification_type == 'exploration':
-            input_dict['init_type'] = 'exploration notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_exploration':
-            input_dict['init_type'] = 'exploration notification'
-            input_dict['is_last'] = True
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
         elif notification_type == 'rumor_search':

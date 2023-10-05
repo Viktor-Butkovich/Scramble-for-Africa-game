@@ -277,7 +277,7 @@ class battalion(group):
         })
             
         text += '/n'
-        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success: #4+ required on D6
             text += '/nThe battalion successfully captured enough slaves to create a slave workers unit. /n '
         else:
             text += '/nA majority of the natives managed to evade capture. /n '

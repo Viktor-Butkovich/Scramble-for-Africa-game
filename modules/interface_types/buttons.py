@@ -200,12 +200,8 @@ class button(interface_elements.interface_element):
                                     tooltip_text.append('Moving from a steamship or steamboat in the water after disembarking requires all remaining movement points, at least the usual amount')
                             if connecting_roads:
                                 tooltip_text.append('Moving between 2 tiles with roads or railroads costs half as many movement points.')
-                        elif current_mob.can_explore:
-                            tooltip_text.append('Press to attempt to explore in the ' + direction)
-                            tooltip_text.append('Attempting to explore would cost ' + str(self.global_manager.get('action_prices')['exploration']) + ' money and all remaining movement points, at least 1')
                         else:
-                            tooltip_text.append('This unit cannot currently move to the ' + direction)
-                            tooltip_text.append('This unit cannot move into unexplored areas')
+                            tooltip_text += self.global_manager.get('actions')['exploration'].update_tooltip(tooltip_info_dict={'direction': direction})
                     else:
                         tooltip_text.append('This unit cannot currently move to the ' + direction)
 
@@ -920,9 +916,6 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'do something':
             text_utility.get_input('do something', 'Placeholder do something message', self.global_manager)
 
-        elif self.button_type == 'exploration':
-            self.expedition.start_exploration(self.x_change, self.y_change)
-
         elif self.button_type == 'attack':
             self.battalion.clear_attached_cell_icons()
             self.battalion.move(self.x_change, self.y_change, True)
@@ -1112,9 +1105,6 @@ class button(interface_elements.interface_element):
                 })
             else:
                 text_utility.print_to_screen('Your company has no slaves to free.', self.global_manager)
-
-        elif self.button_type == 'stop exploration':
-            actor_utility.stop_exploration(self.global_manager)
 
         elif self.button_type == 'start trading':
             caravan = self.notification.choice_info_dict['caravan']
