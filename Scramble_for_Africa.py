@@ -35,3 +35,7 @@ except Exception: #displays error message and records error message in crash log
 # error with movement from river - railroad bridge to road in desert cost 4, it should cost 1 - also verify that movement from river has normal cost for terrain 
 #   entered - calculated correctly as 1.0 by movement tooltip but actually sets to 0 - probably thinks it is landing f
 # errors with multiple combats occurring simulateously - make sure notification manager can only display 1 at a time
+# add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
+#   no slums, otherwise like African
+# verify bridge issue has been fixed once construction is functional
+# make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
