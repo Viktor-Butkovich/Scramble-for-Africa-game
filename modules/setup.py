@@ -13,7 +13,8 @@ import modules.constructs.countries as countries
 import modules.tools.data_managers as data_managers
 import modules.tools.save_load_tools as save_load_tools
 import modules.tools.effects as effects
-from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration
+from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
+    construction
 
 def setup(global_manager, *args):
     '''
@@ -44,7 +45,6 @@ def fundamental(global_manager):
     pygame.mixer.init()
     pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
-    #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
     global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
@@ -373,6 +373,9 @@ def actions(global_manager):
     conversion.conversion(global_manager)
     combat.combat(global_manager)
     exploration.exploration(global_manager)
+    for building_type in global_manager.get('building_types'):
+        if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
+            construction.construction(global_manager, building_type=building_type)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities(global_manager):
@@ -788,9 +791,9 @@ def transactions(global_manager):
     global_manager.set('num_wandering_workers', 0)
     global_manager.set('num_church_volunteers', 0)
 
-    global_manager.set('recruitment_list_descriptions', {})
-    global_manager.set('recruitment_string_descriptions', {})
-    actor_utility.update_recruitment_descriptions(global_manager)
+    global_manager.set('list_descriptions', {})
+    global_manager.set('string_descriptions', {})
+    actor_utility.update_descriptions(global_manager)
 
     global_manager.set('worker_upkeep_fluctuation_amount', 0.25)
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)

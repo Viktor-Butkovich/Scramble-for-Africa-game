@@ -62,7 +62,7 @@ class exploration(action.action):
         message = []
         if self.global_manager.get('displayed_mob').can_explore:
             message.append('Press to attempt to explore in the ' + tooltip_info_dict['direction'])
-            message.append('Attempting to explore would cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money and all remaining movement points, at least 1')
+            message.append('Attempting to explore would cost ' + str(self.get_price()) + ' money and all remaining movement points, at least 1')
         else:
             message.append('This unit cannot currently move to the ' + tooltip_info_dict['direction'])
             message.append('This unit cannot move into unexplored areas')
@@ -79,7 +79,7 @@ class exploration(action.action):
         '''
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
-            text += 'Are you sure you want to spend ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money to attempt an exploration to the ' + self.direction + '?'
+            text += 'Are you sure you want to spend ' + str(self.get_price()) + ' money to attempt an exploration to the ' + self.direction + '?'
         elif subject == 'initial':
             self.future_cell = self.current_unit.grid.find_cell(self.current_unit.x + self.x_change, self.current_unit.y + self.y_change)
             text += 'The expedition heads towards the ' + self.direction + '. /n /n'
@@ -160,7 +160,7 @@ class exploration(action.action):
                 'choices': [
                     {
                     'on_click': (self.middle, []),
-                    'tooltip': ['Attempt an exploration for ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money'],
+                    'tooltip': ['Attempt an exploration for ' + str(self.get_price()) + ' money'],
                     'message': 'Explore'
                     },
                     {

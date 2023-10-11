@@ -443,8 +443,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             message = 'Are you sure you want to ' + verb + ' a unit of ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
         else:
             message = 'Are you sure you want to ' + verb + ' ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
-        actor_utility.update_recruitment_descriptions(global_manager, recruitment_type)
-        message += global_manager.get('recruitment_string_descriptions')[recruitment_type]
+        actor_utility.update_descriptions(global_manager, recruitment_type)
+        message += global_manager.get('string_descriptions')[recruitment_type]
         
         global_manager.get('notification_manager').display_notification({
             'message': message,

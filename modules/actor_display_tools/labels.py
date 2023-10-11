@@ -86,59 +86,40 @@ class actor_display_label(label):
 
             del input_dict['image_id']
             input_dict['init_type'] = 'construction button'
-            input_dict['building_type'] = 'resource'
-            input_dict['keybind_id'] = pygame.K_g
+           # input_dict['building_type'] = 'resource'
+           # input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (s_size, s_size)
-            self.add_attached_button(input_dict)
+            #self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'port'
-            input_dict['keybind_id'] = pygame.K_p
-            self.add_attached_button(input_dict)
+            #input_dict['building_type'] = 'port'
+            #input_dict['keybind_id'] = pygame.K_p
+            #self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'infrastructure'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
+            #input_dict['building_type'] = 'infrastructure'
+            #input_dict['keybind_id'] = pygame.K_r
+            #self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'train_station'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
+            #input_dict['building_type'] = 'train_station'
+            #input_dict['keybind_id'] = pygame.K_t
+            #self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'trading_post'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
+            #input_dict['building_type'] = 'trading_post'
+            #input_dict['keybind_id'] = pygame.K_y
+            #self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'mission'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
+            #input_dict['building_type'] = 'mission'
+            #input_dict['keybind_id'] = pygame.K_y
+            #self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'fort'
-            input_dict['keybind_id'] = pygame.K_v
-            self.add_attached_button(input_dict)
+            #input_dict['building_type'] = 'fort'
+            #input_dict['keybind_id'] = pygame.K_v
+            #self.add_attached_button(input_dict)
             
             input_dict['init_type'] = 'repair button'
             input_dict['building_type'] = 'resource'
             input_dict['keybind_id'] = pygame.K_g
             self.add_attached_button(input_dict)
 
-            input_dict['building_type'] = 'port'
-            input_dict['keybind_id'] = pygame.K_p
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'train_station'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'trading_post'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-            
-            input_dict['building_type'] = 'mission'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-            
-            input_dict['building_type'] = 'fort'
-            input_dict['keybind_id'] = pygame.K_v
-            self.add_attached_button(input_dict)
             del input_dict['building_type']
             del input_dict['keybind_id']
             

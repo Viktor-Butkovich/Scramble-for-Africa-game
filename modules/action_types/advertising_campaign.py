@@ -45,7 +45,7 @@ class advertising_campaign(action.campaign):
         Output:
             None
         '''
-        return(['Attempts to advertise a chosen commodity and increase its price for ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money',
+        return(['Attempts to advertise a chosen commodity and increase its price for ' + str(self.get_price()) + ' money',
                 'Can only be done in Europe',
                 'If successful, increases the price of a chosen commodity while randomly decreasing the price of another',
                 'Costs all remaining movement points, at least 1',
@@ -64,7 +64,7 @@ class advertising_campaign(action.campaign):
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text = 'Are you sure you want to start an advertising campaign for ' + self.target_commodity + '? If successful, the price of ' + self.target_commodity + ' will increase, decreasing the price of another random commodity. /n /n'
-            text += 'The campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n '
+            text += 'The campaign will cost ' + str(self.get_price()) + ' money. /n /n '
         elif subject == 'initial':
             text += 'The merchant attempts to increase public demand for ' + self.target_commodity + '. /n /n'
             advertising_message, index = self.global_manager.get('flavor_text_manager').generate_substituted_indexed_flavor_text('advertising_campaign', '_', self.target_commodity)

@@ -769,7 +769,7 @@ class mob(actor):
                     else:
                         self.embark_vehicle(vehicle)
                         self.set_movement_points(0)
-            vehicle.select()
+                    vehicle.select()
         if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 

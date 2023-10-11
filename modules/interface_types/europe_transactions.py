@@ -108,11 +108,11 @@ class recruitment_button(button):
         Output:
             None
         '''
-        actor_utility.update_recruitment_descriptions(self.global_manager, self.recruitment_type)
+        actor_utility.update_descriptions(self.global_manager, self.recruitment_type)
         if self.recruitment_type == 'European workers':
-            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('recruitment_list_descriptions')[self.recruitment_type])
+            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('list_descriptions')[self.recruitment_type])
         else:
-            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('recruitment_list_descriptions')[self.recruitment_type])
+            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('list_descriptions')[self.recruitment_type])
 
 class buy_commodity_button(button):
     '''

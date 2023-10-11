@@ -63,7 +63,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
 
     return(base_price * cost_multiplier)
 
-def update_recruitment_descriptions(global_manager, target = 'all'):
+def update_descriptions(global_manager, target = 'all'):
     '''
     Description:
         Updates the descriptions of recruitable units for use in various parts of the program. Updates all units during setup and can target a certain unit to update prices, etc. when the information is needed later in the game.
@@ -76,12 +76,13 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
     '''
     if target == 'all':
         targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
+        targets_to_update += global_manager.get('building_types') + ['road', 'railroad', 'road_bridge', 'railroad_bridge']
     else:
         targets_to_update = [target]
 
     for current_target in targets_to_update:
-        recruitment_list_descriptions = global_manager.get('recruitment_list_descriptions')
-        recruitment_string_descriptions = global_manager.get('recruitment_string_descriptions')
+        list_descriptions = global_manager.get('list_descriptions')
+        string_descriptions = global_manager.get('string_descriptions')
         text_list = []
         if current_target in global_manager.get('officer_types'):
             first_line = utility.capitalize(current_target) + 's are controlled by the ' + global_manager.get('officer_minister_dict')[current_target]
@@ -166,12 +167,48 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
         elif current_target == 'train':
             text_list.append('While useless by itself, a train crewed by workers can quickly transport units and cargo through railroads between train stations.')
             text_list.append('Crewing a train requires a basic level of technological training, which is generally unavailable to slave workers.')
-        recruitment_list_descriptions[current_target] = text_list
+
+        elif current_target == 'resource':
+            text_list.append('A resource production facility expands the tile\'s warehouse capacity, and each work crew attached to it attempts to produce resources each turn.')
+            text_list.append('Upgrades to the facility can increase the maximum number of attached work crews and the number of production attempts each work crew can make. ')
+
+        elif current_target == 'road':
+            text_list.append('A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad.')
+
+        elif current_target == 'railroad':
+            text_list.append('A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad.')
+            text_list.append('It is also required for trains to move and for a train station to be built.')
+
+        elif current_target == 'road_bridge':
+            text_list.append('A bridge built on a river tile between 2 land tiles allows movement across the river.')
+            text_list.append('A road bridge acts as a road between the tiles it connects and can later be upgraded to a railroad bridge.')
+
+        elif current_target == 'railroad_bridge':
+            text_list.append('A bridge built on a river tile between 2 land tiles allows movement across the river.')
+            text_list.append('A railroad bridge acts as a railroad between the tiles it connects.')
+
+        elif current_target == 'port':
+            text_list.append('A port allows steamboats and steamships to enter the tile, expands the tile\'s warehouse capacity, and attracts local labor brokers.')
+            text_list.append('A port adjacent to the ocean allows entry by steamships, while a port adjacent to a river allows entry by and assembly of steamboats.')
+
+        elif current_target == 'train_station':
+            text_list.append('A train station is required for a train to exchange cargo and passengers, expands the tile\'s warehouse capacity, and allows assembly of trains.')
+
+        elif current_target == 'trading_post':
+            text_list.append('A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading.')
+
+        elif current_target == 'mission':
+            text_list.append('A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting.')
+
+        elif current_target == 'fort':
+            text_list.append('A fort increases the combat effectiveness of your units standing in this tile.')
+
+        list_descriptions[current_target] = text_list
 
         text = ''
-        for current_line in recruitment_list_descriptions[current_target]:
+        for current_line in list_descriptions[current_target]:
             text += current_line + ' /n /n' #replaces each tooltip list line with newline characters for notification descriptions
-        recruitment_string_descriptions[current_target] = text
+        string_descriptions[current_target] = text
             
 def spawn_beast(global_manager):
     '''

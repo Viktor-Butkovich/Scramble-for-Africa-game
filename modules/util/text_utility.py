@@ -110,10 +110,4 @@ def remove_underscores(message):
     Output:
         string: the inputted message but with spaces
     '''
-    return_message = ''
-    for current_character in message:
-        if current_character == '_':
-            return_message += ' '
-        else:
-            return_message += current_character
-    return(return_message)
+    return(message.replace('_', ' '))

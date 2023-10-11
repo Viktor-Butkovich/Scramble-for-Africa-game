@@ -43,7 +43,7 @@ class religious_campaign(action.campaign):
         Output:
             None
         '''
-        return(['Attempts to campaign for church volunteers for ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money',
+        return(['Attempts to campaign for church volunteers for ' + str(self.get_price()) + ' money',
                 'Can only be done in Europe',
                 'If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages',
                 'Costs all remaining movement points, at least 1',
@@ -62,7 +62,7 @@ class religious_campaign(action.campaign):
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text += 'Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native '
-            text += 'villages. /n /nThe campaign will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'
+            text += 'villages. /n /nThe campaign will cost ' + str(self.get_price()) + ' money. /n /n'
         elif subject == 'initial':
             text += 'The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n'
         elif subject == 'success':

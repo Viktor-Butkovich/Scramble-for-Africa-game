@@ -139,10 +139,10 @@ class combat(action.action):
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             if self.opponent.npmob_type == 'beast':
-                text += 'Are you sure you want to spend ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money to hunt the '
+                text += 'Are you sure you want to spend ' + str(self.get_price()) + ' money to hunt the '
                 text + self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'
             else:
-                text += 'Are you sure you want to spend ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money to attack the '
+                text += 'Are you sure you want to spend ' + str(self.get_price) + ' money to attack the '
                 text += self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'
         elif subject == 'initial':
             if self.defending:
@@ -384,21 +384,19 @@ class combat(action.action):
                 ],
             })
 
-    def process_payment(self):
+    def get_price(self):
         '''
         Description:
-            Finds the price of this action and processes the payment
+            Calculates and returns the price of this action
         Input:
             None
         Output:
-            float: Returns the amount paid
+            float: Returns price of this action
         '''
         if self.defending:
             return(0)
         else:
-            price = self.global_manager.get('action_prices')[self.action_type]
-            self.global_manager.get('money_tracker').change(price * -1, self.action_type)
-            return(price)
+            return(super().get_price())
 
     def generate_audio(self, subject):
         '''

@@ -44,7 +44,7 @@ class suppress_slave_trade(action.action):
         Output:
             None
         '''
-        return(['Attempts to suppress the slave trade for ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money',
+        return(['Attempts to suppress the slave trade for ' + str(self.get_price()) + ' money',
                 'Can only be done in the slave traders tile',
                 'If successful, decreases the strength of the slave traders and increases public opinion',
                 'Success chance and risk influenced by the current strength of the slave traders',
@@ -89,7 +89,7 @@ class suppress_slave_trade(action.action):
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text += 'Are you sure you want to attempt to suppress the slave trade? If successful, your company\'s public opinion will increase and the strength of the slave traders will decrease, ending the slave trade once strength reaches 0. /n /n'
-            text += 'The suppression will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'
+            text += 'The suppression will cost ' + str(self.get_price()) + ' money. /n /n'
             strength_modifier = actor_utility.get_slave_traders_strength_modifier(self.global_manager)
             if strength_modifier < 0:
                 text += 'The slave traders are flourishing and will provide strong resistance. /n /n'

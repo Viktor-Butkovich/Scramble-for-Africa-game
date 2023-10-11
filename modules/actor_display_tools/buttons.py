@@ -1920,7 +1920,6 @@ class construction_button(button):
             terrain = self.attached_mob.images[0].current_cell.terrain
             message.append(utility.generate_capitalized_article(self.building_name) + text_utility.remove_underscores(self.building_name) + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
         self.set_tooltip(message)
-        
 
     def on_click(self):
         '''

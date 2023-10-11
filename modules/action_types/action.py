@@ -6,7 +6,7 @@ class action():
     '''
     Generic action class with automatic setup, button creation/functionality, and start/middle/complete logical flow
     '''
-    def __init__(self, global_manager):
+    def __init__(self, global_manager, **kwargs):
         '''
         Description:
             Initializes this object
@@ -17,9 +17,9 @@ class action():
         '''
         self.global_manager = global_manager
         self.action_type = type(self).__name__ #class name
-        self.initial_setup()
+        self.initial_setup(**kwargs)
 
-    def initial_setup(self):
+    def initial_setup(self, **kwargs):
         '''
         Description:
             Completes any configuration required for this action during setup - automatically called during action_setup
@@ -77,15 +77,25 @@ class action():
         elif not (unit.movement_points >= 1):
             text_utility.print_to_screen(utility.generate_article(self.name).capitalize() + ' ' + self.name + ' requires all remaining movement points, at least 1.', self.global_manager)
             return(False)
-        elif not (self.global_manager.get('money') >= self.global_manager.get('action_prices')[self.action_type]):
-            text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')[self.action_type]) +
-                                                        ' money needed for a ' + self.name + '.', self.global_manager)
+        elif self.global_manager.get('money') < self.get_price():
+            text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.', self.global_manager)
             return(False)
         elif not (unit.ministers_appointed()):
             return(False)
         if unit.sentry_mode:
             unit.set_sentry_mode(False)
         return(True)
+
+    def get_price(self):
+        '''
+        Description:
+            Calculates and returns the price of this action
+        Input:
+            None
+        Output:
+            float: Returns price of this action
+        '''
+        return(self.global_manager.get('action_prices')[self.action_type])
 
     def generate_notification_text(self, subject):
         '''
@@ -204,7 +214,7 @@ class action():
         Output:
             float: Returns the amount paid
         '''
-        price = self.global_manager.get('action_prices')[self.action_type]
+        price = self.get_price()
         self.global_manager.get('money_tracker').change(price * -1, self.action_type)
         return(price)
 

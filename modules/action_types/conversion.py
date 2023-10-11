@@ -45,7 +45,7 @@ class conversion(action.action):
         Output:
             None
         '''
-        return(['Attempts to convert some of this village\'s inhabitants to Christianity for ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money',
+        return(['Attempts to convert some of this village\'s inhabitants to Christianity for ' + str(self.get_price()) + ' money',
                 'Can only be done in a village',
                 'If successful, reduces the aggressiveness of the village and increases public opinion',
                 'Has higher success chance and lower risk when a mission is present',
@@ -64,7 +64,7 @@ class conversion(action.action):
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
             text += 'Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n'
-            text += 'The conversion will cost ' + str(self.global_manager.get('action_prices')[self.action_type]) + ' money. /n /n'
+            text += 'The conversion will cost ' + str(self.get_price()) + ' money. /n /n'
             if not self.current_village.cell.has_intact_building('mission'):
                 text += 'Without an established mission, the missionaries will have difficulty converting the villagers. /n /n'
             if self.aggressiveness_modifier < 0:
