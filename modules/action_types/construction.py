@@ -3,7 +3,7 @@
 import pygame
 import random
 from . import action
-from ..util import action_utility, utility, actor_utility
+from ..util import action_utility, utility, actor_utility, text_utility
 
 class construction(action.action):
     '''
@@ -37,6 +37,7 @@ class construction(action.action):
         if self.building_type == 'resource':
             self.attached_resource = 'none'
         self.name = 'construction'
+        self.allow_critical_failures = False
 
     def button_setup(self, initial_input_dict):
         '''
@@ -128,25 +129,51 @@ class construction(action.action):
             string: Returns text for the inputted subject
         '''
         text = super().generate_notification_text(subject)
+        if self.building_name in ['train', 'steamboat']:
+            verb = 'assemble'
+            preterit_verb = 'assembled'
+            noun = 'assembly'
+        else:
+            verb = 'construct'
+            preterit_verb = 'constructed'
+            noun = 'construction'
+
         if subject == 'confirmation':
             text += 'Are you sure you want to start building a ' + self.building_name + '? /n /n'
             text += 'The planning and materials will cost ' + str(self.get_price()) + ' money. /n /n'
             text += 'If successful, a ' + self.building_name + ' will be built. '
             text += self.global_manager.get('string_descriptions')[self.building_type]
         elif subject == 'initial':
-            text += 'The evangelist campaigns to increase your company\'s public opinion with word of your company\'s benevolent goals and righteous deeds in Africa. /n /n'
+            text += 'The ' + self.current_unit.name + ' attempts to ' + verb + ' a ' + self.building_name + '. /n /n'
         elif subject == 'success':
             self.public_relations_change = random.randrange(1, 7)
-            text += 'Met with gullible and enthusiastic audiences, the evangelist successfully improves your company\'s public opinion by ' + str(self.public_relations_change) + '. /n /n'
+            text += 'The ' + self.current_unit.name + ' successfully ' + preterit_verb + ' the ' + self.building_name + '. /n /n'
         elif subject == 'failure':
-            text += 'Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to improve your company\'s public opinion. /n /n'
-        elif subject == 'critical_failure':
-            text += self.generate_notification_text('failure')
-            text += 'The evangelist is deeply embarassed by this public failure and decides to abandon your company. /n /n'
+            text += 'Little progress was made and the ' + self.current_unit.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + self.building_name + '. /n /n'
         elif subject == 'critical_success':
             text += self.generate_notification_text('success')
-            text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
+            text += 'The ' + self.current_unit.officer.name + ' managed the ' + noun + ' well enough to become a veteran. /n /n'
         return(text)
+
+    def generate_audio(self, subject):
+        '''
+        Description:
+            Returns list of audio dicts of sounds to play when notification appears, based on the inputted subject and other current circumstances
+        Input:
+            string subject: Determines sound dicts
+        Output:
+            dictionary list: Returns list of sound dicts for inputted subject
+        '''
+        audio = super().generate_audio(subject)
+        if subject == 'roll_finished':
+            if self.roll_result >= self.current_min_success:
+                if self.building_type == 'mission':
+                    if self.global_manager.get('current_country').religion == 'protestant':
+                        sound_id = 'onward christian soldiers'
+                    elif self.global_manager.get('current_country').religion == 'catholic':
+                        sound_id = 'ave maria'
+                    audio.append({'sound_id': sound_id, 'dampen_music': True})
+        return(audio)
 
     def get_price(self):
         '''
@@ -162,7 +189,7 @@ class construction(action.action):
     def can_show(self):
         '''
         Description:
-            Returns whether a button linked to this action should be drawn
+            Returns whether a button linked to this action should be drawn - if correct type of unit selected and building not yet present in tile
         Input:
             None
         Output:
@@ -170,8 +197,61 @@ class construction(action.action):
         '''
         return(super().can_show() and 
                self.global_manager.get('displayed_mob').is_group and
-               getattr(self.global_manager.get('displayed_mob'), self.requirement)
+               getattr(self.global_manager.get('displayed_mob'), self.requirement) and
+                not (self.global_manager.get('displayed_mob').images[0].current_cell.has_building(self.building_type) and self.building_type != 'infrastructure')
         )
+
+    def can_build(self, unit):
+        '''
+        Description:
+            Calculates and returns the result of any building-specific logic to allow building in the current tile
+        Input:
+            None
+        Output:
+            boolean: Returns the result of any building-specific logic to allow building in the current tile
+        '''
+        return_value = False
+        if self.building_type == 'resource':
+            if self.attached_resource != 'none':
+                return_value = True
+            else:
+                text_utility.print_to_screen('This building can only be built in tiles with resources.', self.global_manager)
+        elif self.building_type == 'port':
+            if unit.adjacent_to_water() and unit.images[0].current_cell.terrain != 'water':
+                return_value = True
+            else:
+                text_utility.print_to_screen('This building can only be built in land tiles adjacent to water.', self.global_manager)
+        elif self.building_type == 'train_station':
+            if unit.images[0].current_cell.has_intact_building('railroad'):
+                return_value = True
+            else:
+                text_utility.print_to_screen('This building can only be built on railroads.', self.global_manager)
+        elif self.building_type in ['trading_post', 'mission']:
+            if unit.images[0].current_cell.has_building('village'):
+                return_value = True
+            else:
+                text_utility.print_to_screen('This building can only be built in villages.', self.global_manager)
+        elif self.building_type == 'infrastructure':
+            if self.building_name in ['road bridge', 'railroad bridge']:
+                current_cell = unit.images[0].current_cell
+                if current_cell.terrain == 'water' and current_cell.y > 0: #if in river tile
+                    up_cell = current_cell.grid.find_cell(current_cell.x, current_cell.y + 1)
+                    down_cell = current_cell.grid.find_cell(current_cell.x, current_cell.y - 1)
+                    left_cell = current_cell.grid.find_cell(current_cell.x - 1, current_cell.y)
+                    right_cell = current_cell.grid.find_cell(current_cell.x + 1, current_cell.y)
+                    if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')): #if vertical bridge
+                        if up_cell.visible and down_cell.visible:
+                            return_value = True
+                    elif (not (left_cell == 'none' or right_cell == 'none')) and (not (left_cell.terrain == 'water' or right_cell.terrain == 'water')): #if horizontal bridge
+                        if left_cell.visible and right_cell.visible:
+                            return_value = True
+                if not return_value:
+                    text_utility.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
+            else:
+                return_value = True
+        else:
+            return_value = True
+        return(return_value)
 
     def on_click(self, unit):
         '''
@@ -183,7 +263,19 @@ class construction(action.action):
             None
         '''
         if super().on_click(unit):
-            self.start(unit)
+            current_cell = unit.images[0].current_cell
+            current_building = current_cell.get_building(self.building_type)
+            if not (current_building == 'none' or (self.building_name in ['railroad', 'railroad bridge'] and current_building.is_road)):
+                if self.building_type == 'infrastructure': #if railroad
+                    text_utility.print_to_screen('This tile already contains a railroad.', self.global_manager)
+                else:
+                    text_utility.print_to_screen('This tile already contains a ' + self.building_type + ' building.', self.global_manager)
+            elif not self.global_manager.get('strategic_map_grid') in unit.grids:
+                text_utility.print_to_screen('This building can only be built in Africa.', self.global_manager)
+            elif not (current_cell.terrain != 'water' or self.building_name in ['road bridge', 'railroad bridge']):
+                text_utility.print_to_screen('This building cannot be built in water.', self.global_manager)
+            elif self.can_build(unit):
+                self.start(unit)
 
     def start(self, unit):
         '''
@@ -201,13 +293,13 @@ class construction(action.action):
                 'choices': [
                     {
                     'on_click': (self.middle, []),
-                    'tooltip': ['Starts a ' + self.name + ', possibly improving your company\'s public opinion'],
-                    'message': 'Start campaign'
+                    'tooltip': ['Start ' + self.name],
+                    'message': 'Start ' + self.name
                     },
                     {
                     'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
                     'tooltip': ['Stop ' + self.name],
-                    'message': 'Stop campaign'
+                    'message': 'Stop ' + self.name
                     }
                 ],
             })
@@ -223,5 +315,72 @@ class construction(action.action):
             None
         '''
         if self.roll_result >= self.current_min_success:
-            return #build building
+            input_dict = {
+                'coordinates': (self.current_unit.x, self.current_unit.y),
+                'grids': self.current_unit.grids,
+                'name': self.building_name,
+                'modes': ['strategic'],
+                'init_type': self.building_type
+            }
+
+            if not self.building_type in ['train', 'steamboat']:
+                if self.current_unit.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
+                    self.current_unit.images[0].current_cell.get_building(self.building_type).remove_complete()
+            if self.building_type == 'resource':
+                input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
+                input_dict['resource_type'] = self.attached_resource
+            elif self.building_type == 'infrastructure':
+                building_image_id = 'none'
+                if self.building_name == 'road':
+                    building_image_id = 'buildings/infrastructure/road.png'
+                elif self.building_name == 'railroad':
+                    building_image_id = 'buildings/infrastructure/railroad.png'
+                else: #bridge image handled in infrastructure initialization to use correct horizontal/vertical version
+                    building_image_id = 'buildings/infrastructure/road.png'
+                input_dict['image'] = building_image_id
+                input_dict['infrastructure_type'] = self.building_name
+            elif self.building_type == 'port':
+                input_dict['image'] = 'buildings/port.png'
+            elif self.building_type == 'train_station':
+                input_dict['image'] = 'buildings/train_station.png'
+            elif self.building_type == 'trading_post':
+                input_dict['image'] = 'buildings/trading_post.png'
+            elif self.building_type == 'mission':
+                input_dict['image'] = 'buildings/mission.png'
+            elif self.building_type == 'fort':
+                input_dict['image'] = 'buildings/fort.png'
+            elif self.building_type == 'train':
+                image_dict = {'default': 'mobs/train/default.png', 'crewed': 'mobs/train/default.png', 'uncrewed': 'mobs/train/uncrewed.png'}
+                input_dict['image_dict'] = image_dict
+                input_dict['crew'] = 'none'
+            elif self.building_type == 'steamboat':
+                image_dict = {'default': 'mobs/steamboat/default.png', 'crewed': 'mobs/steamboat/default.png', 'uncrewed': 'mobs/steamboat/uncrewed.png'}
+                input_dict['image_dict'] = image_dict
+                input_dict['crew'] = 'none'
+                input_dict['init_type'] = 'boat'
+            else:
+                input_dict['image'] = 'buildings/' + self.building_type + '.png'
+            new_building = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+
+            if self.building_type in ['port', 'train_station', 'resource']:
+                warehouses = self.current_unit.images[0].current_cell.get_building('warehouses')
+                if warehouses != 'none':
+                    if warehouses.damaged:
+                        warehouses.set_damaged(False)
+                    warehouses.upgrade()
+                else:
+                    input_dict['image'] = 'misc/empty.png'
+                    input_dict['name'] = 'warehouses'
+                    input_dict['init_type'] = 'warehouses'
+                    self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+                    
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.current_unit.images[0].current_cell.tile) #update tile display to show new building
+            if self.building_type in ['steamboat', 'train']:
+                new_building.move_to_front()
+                new_building.select()
+            else:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.current_unit) #update mob display to show new upgrade possibilities
         super().complete()
+
+    def update_info(self): #use this to keep buttons and building name accurate
+        return

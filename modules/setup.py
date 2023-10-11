@@ -847,7 +847,6 @@ def transactions(global_manager):
         'active_investigation': 'investigations',
         'rumor_search': 'artifact rumor searches',
         'artifact_search': 'artifact searches',
-        'construction': 'construction',
         'production': 'production',
         'bribery': 'bribery',
         'loan_interest': 'loan interest',

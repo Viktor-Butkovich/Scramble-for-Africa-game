@@ -39,3 +39,5 @@ except Exception: #displays error message and records error message in crash log
 #   no slums, otherwise like African
 # verify bridge issue has been fixed once construction is functional
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
+# multiple combat error is persisting, fix ASAP - probably related to notification inserts
+# construction: add infrastructure/resource building update info functionality, upgrades, repairs

@@ -21,6 +21,7 @@ class suppress_slave_trade(action.action):
         super().initial_setup()
         self.global_manager.get('transaction_descriptions')[self.action_type] = 'slave trade suppression'
         self.name = 'suppress slave trade'
+        self.allow_critical_failures = False
 
     def button_setup(self, initial_input_dict):
         '''
@@ -144,18 +145,6 @@ class suppress_slave_trade(action.action):
                 text_utility.print_to_screen('The slave trade has already been eradicated.', self.global_manager)
             else:
                 self.start(unit)
-
-    def pre_start(self, unit):
-        '''
-        Description:
-            Prepares for starting an action starting with roll modifiers, setting ongoing action, etc.
-        Input:
-            pmob unit: Unit selected when the linked button is clicked
-        Output:
-            none
-        '''
-        super().pre_start(unit)
-        self.current_max_crit_fail = 0
 
     def start(self, unit):
         '''

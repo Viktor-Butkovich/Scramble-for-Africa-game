@@ -807,12 +807,6 @@ class notification_manager_template():
         elif notification_type == 'final_slave_capture':
             input_dict['init_type'] = 'capture slaves notification'
             input_dict['is_last'] = True
-        elif notification_type == 'construction':
-            input_dict['init_type'] = 'construction notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_construction':
-            input_dict['init_type'] = 'construction notification'
-            input_dict['is_last'] = True
         elif notification_type == 'trial':
             input_dict['init_type'] = 'trial notification'
             input_dict['is_last'] = True

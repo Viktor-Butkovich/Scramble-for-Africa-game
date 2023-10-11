@@ -30,11 +30,13 @@ class action():
         '''
         self.global_manager.get('actions')[self.action_type] = self
         self.current_unit = 'none'
-        self.global_manager.get('action_types').append(self.action_type)
+        if not self.action_type in self.global_manager.get('action_types'):
+            self.global_manager.get('action_types').append(self.action_type)
+            self.global_manager.get('transaction_types').append(self.action_type)
         self.global_manager.get('action_prices')[self.action_type] = 5
         self.global_manager.get('base_action_prices')[self.action_type] = 5
-        self.global_manager.get('transaction_types').append(self.action_type)
         self.roll_lists = []
+        self.allow_critical_failures = False
 
     def button_setup(self, initial_input_dict):
         '''
@@ -183,6 +185,8 @@ class action():
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        if not self.allow_critical_failures:
+            self.current_max_crit_fail = 0
         self.current_unit = unit
 
     def start(self, unit):
