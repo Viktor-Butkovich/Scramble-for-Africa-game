@@ -10,9 +10,10 @@ import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
 import modules.tools.actor_creation_tools as actor_creation_tools
 import modules.constructs.countries as countries
-import modules.tools.data_managers as data_managers
-import modules.tools.save_load_tools as save_load_tools
+import modules.tools.data_managers.save_load_manager_template as save_load_manager_template
 import modules.tools.effects as effects
+from modules.tools.data_managers import effect_manager_template, flavor_text_manager_template, input_manager_template, \
+    notification_manager_template, sound_manager_template, value_tracker_template, event_manager_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
     construction
 
@@ -44,10 +45,10 @@ def fundamental(global_manager):
     pygame.init()
     pygame.mixer.init()
     pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
-    global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
-    global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
-    global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
-    global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
+    global_manager.set('sound_manager', sound_manager_template.sound_manager_template(global_manager))
+    global_manager.set('save_load_manager', save_load_manager_template.save_load_manager_template(global_manager))
+    global_manager.set('flavor_text_manager', flavor_text_manager_template.flavor_text_manager_template(global_manager))
+    global_manager.set('input_manager', input_manager_template.input_manager_template(global_manager))
     global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
 
     global_manager.set('europe_grid', 'none')
@@ -65,7 +66,7 @@ def fundamental(global_manager):
     global_manager.set('last_selection_outline_switch', start_time)
     global_manager.set('mouse_moved_time', start_time)
     global_manager.set('end_turn_wait_time', 0.8)
-    global_manager.set('event_manager', data_managers.event_manager_template(global_manager))
+    global_manager.set('event_manager', event_manager_template.event_manager_template(global_manager))
 
     if global_manager.get('effect_manager').effect_active('track_fps'):
         global_manager.set('fps', 0)
@@ -252,7 +253,7 @@ def misc(global_manager):
 
     global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses'])
 
-    global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
+    global_manager.set('notification_manager', notification_manager_template.notification_manager_template(global_manager))
 
     global_manager.set('current_advertised_commodity', 'none')
     global_manager.set('current_sound_file_index', 0)
@@ -939,7 +940,7 @@ def value_trackers(global_manager):
         'init_type': 'ordered collection'
     }, global_manager)
 
-    global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
+    global_manager.set('turn_tracker', value_tracker_template.value_tracker('turn', 0, 'none', 'none', global_manager))
     global_manager.get('actor_creation_manager').create_interface_element({
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
@@ -951,7 +952,7 @@ def value_trackers(global_manager):
         'member_config': {'order_x_offset': scaling.scale_width(275, global_manager), 'order_overlap': True}
     }    , global_manager)
 
-    global_manager.set('public_opinion_tracker', data_managers.public_opinion_tracker('public_opinion', 0, 0, 100, global_manager))
+    global_manager.set('public_opinion_tracker', value_tracker_template.public_opinion_tracker('public_opinion', 0, 0, 100, global_manager))
     global_manager.get('actor_creation_manager').create_interface_element({
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
@@ -962,7 +963,7 @@ def value_trackers(global_manager):
         'parent_collection': value_trackers_ordered_collection
     }, global_manager)
 
-    global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
+    global_manager.set('money_tracker', value_tracker_template.money_tracker(100, global_manager))
     global_manager.set('money_label', global_manager.get('actor_creation_manager').create_interface_element({
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
@@ -974,7 +975,7 @@ def value_trackers(global_manager):
     }, global_manager))
 
     if global_manager.get('effect_manager').effect_active('track_fps'):
-        global_manager.set('fps_tracker', data_managers.value_tracker('fps', 0, 0, 'none', global_manager))
+        global_manager.set('fps_tracker', value_tracker_template.value_tracker('fps', 0, 0, 'none', global_manager))
         global_manager.get('actor_creation_manager').create_interface_element({
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
@@ -995,9 +996,9 @@ def value_trackers(global_manager):
         'init_type': 'show previous financial report button'
     }, global_manager)
     
-    global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
+    global_manager.set('evil_tracker', value_tracker_template.value_tracker('evil', 0, 0, 100, global_manager))
     
-    global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
+    global_manager.set('fear_tracker', value_tracker_template.value_tracker('fear', 1, 1, 6, global_manager))
 
 def buttons(global_manager):
     '''
@@ -2166,7 +2167,7 @@ def debug_tools(global_manager):
     Output:
         None
     '''
-    global_manager.set('effect_manager', data_managers.effect_manager_template(global_manager))
+    global_manager.set('effect_manager', effect_manager_template.effect_manager_template(global_manager))
 
     #for release, official version of config file with only intended user settings
     file = open('configuration/release_config.json')

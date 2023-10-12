@@ -2,10 +2,10 @@
 
 import random
 import pickle
-from ..util import scaling, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility, tutorial_utility
-from ..interface_types import grids
-from . import data_managers
-
+from ...util import scaling, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility, tutorial_utility
+from ...interface_types import grids
+from . import global_manager_template
+import os
 class save_load_manager_template():
     '''
     Object that controls creating new games, saving, and loading
@@ -213,7 +213,7 @@ class save_load_manager_template():
             None
         '''
         file_path = 'save_games/' + file_path
-        saved_global_manager = data_managers.global_manager_template()
+        saved_global_manager = global_manager_template.global_manager_template()
         self.global_manager.set('transaction_history', self.global_manager.get('money_tracker').transaction_history)
         for current_element in self.copied_elements: #save necessary data into new global manager
             saved_global_manager.set(current_element, self.global_manager.get(current_element))

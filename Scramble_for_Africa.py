@@ -1,11 +1,11 @@
 #Runs setup and main loop on program start
 
 import modules.main_loop as main_loop
-import modules.tools.data_managers as data_managers
+import modules.tools.data_managers.global_manager_template as global_manager_template
 from modules.setup import *
 
 try:
-    global_manager = data_managers.global_manager_template() #manages a dictionary of what would be global variables passed between functions and classes
+    global_manager = global_manager_template.global_manager_template() #manages a dictionary of what would be global variables passed between functions and classes
     setup(global_manager, debug_tools, fundamental, misc, terrains, commodities, def_ministers, def_countries, transactions, actions, lore, value_trackers, buttons, europe_screen,
             ministers_screen, trial_screen, new_game_setup_screen, mob_interface, tile_interface, unit_organization_interface, inventory_interface, minister_interface,
             country_interface
@@ -39,5 +39,5 @@ except Exception: #displays error message and records error message in crash log
 #   no slums, otherwise like African
 # verify bridge issue has been fixed once construction is functional
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# multiple combat error is persisting, fix ASAP - probably related to notification inserts
+# multiple combat error is persisting, fix ASAP - probably related to interface trying to transfer between, confirmed not from inserts or lock
 # construction: add infrastructure/resource building update info functionality, upgrades, repairs
