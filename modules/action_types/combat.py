@@ -142,7 +142,7 @@ class combat(action.action):
                 text += 'Are you sure you want to spend ' + str(self.get_price()) + ' money to hunt the '
                 text + self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'
             else:
-                text += 'Are you sure you want to spend ' + str(self.get_price) + ' money to attack the '
+                text += 'Are you sure you want to spend ' + str(self.get_price()) + ' money to attack the '
                 text += self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'
         elif subject == 'initial':
             if self.defending:
@@ -451,6 +451,9 @@ class combat(action.action):
 
         price = self.process_payment()
 
+        insert_index = len(self.global_manager.get('notification_manager').notification_queue)
+        #roll messages should be inserted between any previously queued notifications and any minister messages that appear as a result of the roll
+
         self.current_roll_modifier = self.generate_current_roll_modifier(opponent=False)
         self.opponent_roll_modifier = self.generate_current_roll_modifier(opponent=True)
         if not self.defending:
@@ -490,7 +493,7 @@ class combat(action.action):
             'audio': self.generate_audio('initial'),
             'attached_interface_elements': attached_interface_elements,
             'transfer_interface_elements': True
-        }, insert_index=0)
+        }, insert_index=insert_index)
 
         text = self.generate_notification_text('modifier_breakdown')
         roll_message = self.generate_notification_text('roll_message')
@@ -499,14 +502,14 @@ class combat(action.action):
             'message': text + roll_message,
             'notification_type': 'action',
             'transfer_interface_elements': True
-        }, insert_index=1)
+        }, insert_index=insert_index + 1)
 
         self.global_manager.get('notification_manager').display_notification({
             'message': text + 'Rolling... ',
             'notification_type': 'roll',
             'transfer_interface_elements': True,
             'audio': self.generate_audio('roll_started')
-        }, insert_index=2)
+        }, insert_index=insert_index + 2)
 
         self.global_manager.get('notification_manager').set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
 

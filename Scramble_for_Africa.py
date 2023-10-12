@@ -25,7 +25,6 @@ except Exception: #displays error message and records error message in crash log
 # make generic contested action type
 # change all notification interface to automatically be centered
 # test hunting/beast defense combat
-# verify that forts work as intended
 # add horizontal ordered collection for double combat dice
 # switching to Europe screen should select top unit in Europe, rather than just deselecting all
 # modify notification or inventory spacing to not show tile inventory commodity icon just past left edge of notification
@@ -34,10 +33,8 @@ except Exception: #displays error message and records error message in crash log
 # maybe automatically navigate to minister screen if attempting to do action that requires minister, but allow leaving minister screen w/o appointing
 # error with movement from river - railroad bridge to road in desert cost 4, it should cost 1 - also verify that movement from river has normal cost for terrain 
 #   entered - calculated correctly as 1.0 by movement tooltip but actually sets to 0 - probably thinks it is landing f
-# errors with multiple combats occurring simulateously - make sure notification manager can only display 1 at a time
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # verify bridge issue has been fixed once construction is functional
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# multiple combat error is persisting, fix ASAP - probably related to interface trying to transfer between, confirmed not from inserts or lock
 # construction: add infrastructure/resource building update info functionality, upgrades, repairs

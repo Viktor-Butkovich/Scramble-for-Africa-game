@@ -118,14 +118,15 @@ class notification_manager_template():
             None
         '''
         valid_transfer = False
-        if self.notification_queue:
-            if transferred_interface_elements and self.notification_queue[0].get('notification_type', 'none') in ['action', 'roll']:
-                valid_transfer = True
-                if 'attached_interface_elements' in self.notification_queue[0]:
-                    self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements + self.notification_queue[0]['attached_interface_elements']
-                else:
-                    self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements
-            self.notification_to_front(self.notification_queue.pop(0))
+        if self.global_manager.get('displayed_notification') == 'none':
+            if self.notification_queue:
+                if transferred_interface_elements and self.notification_queue[0].get('notification_type', 'none') in ['action', 'roll']:
+                    valid_transfer = True
+                    if 'attached_interface_elements' in self.notification_queue[0]:
+                        self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements + self.notification_queue[0]['attached_interface_elements']
+                    else:
+                        self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements
+                self.notification_to_front(self.notification_queue.pop(0))
 
         if transferred_interface_elements and not valid_transfer:
             for element in transferred_interface_elements:
