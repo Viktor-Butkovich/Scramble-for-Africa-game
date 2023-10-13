@@ -31,10 +31,7 @@ except Exception: #displays error message and records error message in crash log
 # financial report notification should say click to remove, possibly also production report
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # maybe automatically navigate to minister screen if attempting to do action that requires minister, but allow leaving minister screen w/o appointing
-# error with movement from river - railroad bridge to road in desert cost 4, it should cost 1 - also verify that movement from river has normal cost for terrain 
-#   entered - calculated correctly as 1.0 by movement tooltip but actually sets to 0 - probably thinks it is landing f
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
-# verify bridge issue has been fixed once construction is functional
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# construction: add infrastructure/resource building update info functionality, upgrades, repairs
+# convert upgrades and repairs

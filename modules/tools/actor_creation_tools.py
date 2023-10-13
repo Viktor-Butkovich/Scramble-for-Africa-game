@@ -262,12 +262,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.track_beasts_button(input_dict, global_manager)
                 elif base == 'switch theatre':
                     new_element = actor_display_buttons.switch_theatre_button(input_dict, global_manager)
-                elif base == 'build train':
-                    new_element = actor_display_buttons.build_train_button(input_dict, global_manager)
-                elif base == 'build steamboat':
-                    new_element = actor_display_buttons.build_steamboat_button(input_dict, global_manager)
-                elif base == 'construction':
-                    new_element = actor_display_buttons.construction_button(input_dict, global_manager)
                 elif base == 'repair':
                     new_element = actor_display_buttons.repair_button(input_dict, global_manager)
                 elif base == 'upgrade':

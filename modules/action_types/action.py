@@ -17,6 +17,7 @@ class action():
         '''
         self.global_manager = global_manager
         self.action_type = type(self).__name__ #class name
+        self.button = None
         self.initial_setup(**kwargs)
 
     def initial_setup(self, **kwargs):

@@ -43,8 +43,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
         int: Returns the cost of the inputted unit attempting to construct the inputted building
     '''
     if building_type == 'infrastructure':
-        building_type = building_name #road, railroad, road_bridge, or railroad_bridge
-
+        building_type = building_name.replace(' ', '_') #road, railroad, road_bridge, or railroad_bridge
     if building_type == 'warehouses':
         if constructor == 'none':
             base_price = 5
@@ -169,7 +168,13 @@ def update_descriptions(global_manager, target = 'all'):
             text_list.append('Crewing a train requires a basic level of technological training, which is generally unavailable to slave workers.')
 
         elif current_target == 'resource':
-            text_list.append('A resource production facility expands the tile\'s warehouse capacity, and each work crew attached to it attempts to produce resources each turn.')
+            if global_manager.has('actions'):
+                building_name = global_manager.get('actions')['resource'].building_name
+                if building_name == 'none':
+                    building_name = 'resource production facility'
+            else:
+                building_name = 'resource production facility'
+            text_list.append('A ' + building_name + ' expands the tile\'s warehouse capacity, and each work crew attached to it attempts to produce resources each turn.')
             text_list.append('Upgrades to the facility can increase the maximum number of attached work crews and the number of production attempts each work crew can make. ')
 
         elif current_target == 'road':

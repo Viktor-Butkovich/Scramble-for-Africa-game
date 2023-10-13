@@ -788,7 +788,7 @@ class pmob(mob):
         for current_image in self.images:
             current_image.add_to_cell()
         vehicle.selected = False
-        if self.images[0].current_cell.get_intact_building('port') == 'none':
+        if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
         if self.can_trade and self.can_hold_commodities: #if caravan
             consumer_goods_present = vehicle.get_inventory('consumer goods')

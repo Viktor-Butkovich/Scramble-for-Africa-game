@@ -51,21 +51,19 @@ class construction(action.action):
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
         if self.building_type == 'resource':
-            initial_input_dict['image_id'] = self.global_manager.get('resource_building_button_dict')[self.attached_resource] #need way to update button image from action
+            initial_input_dict['image_id'] = self.global_manager.get('resource_building_button_dict')[self.attached_resource]
         elif self.building_type == 'infrastructure':
-            if self.current_unit != 'none':
-                if self.current_unit.images[0].current_cell.terrain == 'water' and self.current_unit.images[0].current_cell.y > 0:
-                    if self.current_unit.images[0].current_cell.contained_buildings[self.building_type] != 'none':
-                        initial_input_dict['image_id'] = 'buildings/buttons/railroad_bridge.png'
-                    else:
-                        initial_input_dict['image_id'] = 'buildings/buttons/road_bridge.png'
-                else:
-                    if self.current_unit.images[0].current_cell.contained_buildings[self.building_type] != 'none':
-                        initial_input_dict['image_id'] = 'buildings/buttons/railroad.png'
-                    else:
-                        initial_input_dict['image_id'] = 'buildings/buttons/road.png'
-            else:
-                initial_input_dict['image_id'] = 'buildings/buttons/road.png'
+            initial_input_dict['image_id'] = 'buildings/buttons/road.png'
+        elif self.building_type == 'train':
+            initial_input_dict['image_id'] = [
+                'mobs/default/button.png',
+                {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
+            ]
+        elif self.building_type == 'steamboat':
+            initial_input_dict['image_id'] = [
+                'mobs/default/button.png', 
+                {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
+            ]
         else:
             initial_input_dict['image_id'] = 'buildings/buttons/' + self.building_type + '.png'
         initial_input_dict['keybind_id'] = {
@@ -76,7 +74,9 @@ class construction(action.action):
             'trading_post': pygame.K_y,
             'mission': pygame.K_y,
             'fort': pygame.K_v,
-            'warehouses': pygame.K_k
+            'warehouses': pygame.K_k,
+            'train': pygame.K_y,
+            'steamboat': pygame.K_u
         }[self.building_type]
         return(initial_input_dict)
 
@@ -90,19 +90,25 @@ class construction(action.action):
             None
         '''
         message = []
+        actor_utility.update_descriptions(self.global_manager, self.building_type)
+        message.append('Attempts to build a ' + self.building_name + ' in this tile')
         if self.building_type != 'infrastructure':
             message += self.global_manager.get('list_descriptions')[self.building_type]
         else:
-            message += self.global_manager.get('list_descriptions')[self.building_name]
+            message += self.global_manager.get('list_descriptions')[self.building_name.replace(' ', '_')]
             if self.building_name == 'railroad':
                 message += ['Upgrades this tile\'s road into a railroad, retaining the benefits of a road']
-            elif self.building_name == 'railroad_bridge':
+            elif self.building_name == 'railroad bridge':
                 message += ['Upgrades this tile\'s road bridge into a railroad bridge, retaining the benefits of a road bridge']
 
         if self.building_type == 'trading_post':
             message.append('Can only be built in a village')
         elif self.building_type == 'mission':
             message.append('Can only be built in a village')
+        elif self.building_type == 'train':
+            message.append('Can only be assembled at a train station')
+        elif self.building_type == 'steamboat':
+            message.append('Can only be assembled at a river port')
 
         if self.building_type in ['train_station', 'port', 'resource']:
             message.append('Also upgrades this tile\'s warehouses by 9 inventory capacity, or creates new warehouses if none are present')
@@ -195,11 +201,58 @@ class construction(action.action):
         Output:
             boolean: Returns whether a button linked to this action should be drawn
         '''
-        return(super().can_show() and 
-               self.global_manager.get('displayed_mob').is_group and
-               getattr(self.global_manager.get('displayed_mob'), self.requirement) and
-                not (self.global_manager.get('displayed_mob').images[0].current_cell.has_building(self.building_type) and self.building_type != 'infrastructure')
-        )
+        unit = self.global_manager.get('displayed_mob')
+        can_show = (super().can_show() and unit.is_group and getattr(unit, self.requirement))
+        if can_show and not self.building_type in ['train', 'steamboat']:
+            can_show = (self.building_type == 'infrastructure') or (not unit.images[0].current_cell.has_building(self.building_type))
+        if can_show:
+            self.update_info()
+        return(can_show)
+
+    def update_info(self):
+        '''
+        Description:
+            Updates this action based on any local circumstances, such as changing resource building built depending on local resource
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.building_type == 'resource':
+            cell = self.global_manager.get('displayed_mob').images[0].current_cell
+            if cell.resource != self.attached_resource:
+                if cell.resource in self.global_manager.get('collectable_resources'): #if not natives or none
+                    self.attached_resource = cell.resource
+                    if self.attached_resource in ['gold', 'iron', 'copper', 'diamond']:
+                        self.building_name = self.attached_resource + ' mine'
+                    elif self.attached_resource in ['exotic wood', 'fruit', 'rubber', 'coffee']:
+                        self.building_name = self.attached_resource + ' plantation'
+                    elif self.attached_resource == 'ivory':
+                        self.building_name = 'ivory camp'
+                else:
+                    self.attached_resource = 'none'
+                    self.building_name = 'none'
+                self.button.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
+
+        elif self.building_type == 'infrastructure':
+            cell = self.global_manager.get('displayed_mob').images[0].current_cell
+            if not cell.has_building('infrastructure'):
+                if cell.terrain == 'water' and cell.y > 0:
+                    new_name = 'road bridge'
+                    new_image = 'buildings/buttons/road_bridge.png'
+                else:
+                    new_name = 'road'
+                    new_image = 'buildings/buttons/road.png'
+            else:
+                if cell.terrain == 'water' and cell.y > 0:
+                    new_name = 'railroad bridge'
+                    new_image = 'buildings/buttons/railroad_bridge.png'
+                else:
+                    new_name = 'railroad'
+                    new_image = 'buildings/buttons/railroad.png'
+            if new_name != self.building_name:
+                self.building_name = new_name
+                self.button.image.set_image(new_image)
 
     def can_build(self, unit):
         '''
@@ -249,6 +302,16 @@ class construction(action.action):
                     text_utility.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
             else:
                 return_value = True
+        elif self.building_type == 'train':
+            if unit.images[0].current_cell.has_intact_building('train_station'):
+                return_value = True
+            else:
+                text_utility.print_to_screen('This building can only be built on train stations', self.global_manager)
+        elif self.building_type == 'steamboat':
+            if unit.images[0].current_cell.has_intact_building('port') and unit.adjacent_to_river():
+                return_value = True
+            else:
+                text_utility.print_to_screen('This building can only be built on river ports', self.global_manager)
         else:
             return_value = True
         return(return_value)
@@ -338,7 +401,7 @@ class construction(action.action):
                 else: #bridge image handled in infrastructure initialization to use correct horizontal/vertical version
                     building_image_id = 'buildings/infrastructure/road.png'
                 input_dict['image'] = building_image_id
-                input_dict['infrastructure_type'] = self.building_name
+                input_dict['infrastructure_type'] = self.building_name.replace(' ', '_')
             elif self.building_type == 'port':
                 input_dict['image'] = 'buildings/port.png'
             elif self.building_type == 'train_station':
@@ -381,6 +444,3 @@ class construction(action.action):
             else:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.current_unit) #update mob display to show new upgrade possibilities
         super().complete()
-
-    def update_info(self): #use this to keep buttons and building name accurate
-        return

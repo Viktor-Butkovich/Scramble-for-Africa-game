@@ -374,7 +374,7 @@ def actions(global_manager):
     conversion.conversion(global_manager)
     combat.combat(global_manager)
     exploration.exploration(global_manager)
-    for building_type in global_manager.get('building_types'):
+    for building_type in global_manager.get('building_types') + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(global_manager, building_type=building_type)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version

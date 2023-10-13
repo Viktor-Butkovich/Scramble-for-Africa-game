@@ -85,36 +85,7 @@ class actor_display_label(label):
             self.add_attached_button(input_dict)
 
             del input_dict['image_id']
-            input_dict['init_type'] = 'construction button'
-           # input_dict['building_type'] = 'resource'
-           # input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (s_size, s_size)
-            #self.add_attached_button(input_dict)
-
-            #input_dict['building_type'] = 'port'
-            #input_dict['keybind_id'] = pygame.K_p
-            #self.add_attached_button(input_dict)
-
-            #input_dict['building_type'] = 'infrastructure'
-            #input_dict['keybind_id'] = pygame.K_r
-            #self.add_attached_button(input_dict)
-
-            #input_dict['building_type'] = 'train_station'
-            #input_dict['keybind_id'] = pygame.K_t
-            #self.add_attached_button(input_dict)
-
-            #input_dict['building_type'] = 'trading_post'
-            #input_dict['keybind_id'] = pygame.K_y
-            #self.add_attached_button(input_dict)
-
-            #input_dict['building_type'] = 'mission'
-            #input_dict['keybind_id'] = pygame.K_y
-            #self.add_attached_button(input_dict)
-
-            #input_dict['building_type'] = 'fort'
-            #input_dict['keybind_id'] = pygame.K_v
-            #self.add_attached_button(input_dict)
-            
             input_dict['init_type'] = 'repair button'
             input_dict['building_type'] = 'resource'
             input_dict['keybind_id'] = pygame.K_g
@@ -137,16 +108,6 @@ class actor_display_label(label):
             self.add_attached_button(input_dict)
             del input_dict['base_building_type']
             del input_dict['upgrade_type']
-            
-            input_dict['init_type'] = 'build train button'
-            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'build steamboat button'
-            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-            input_dict['keybind_id'] = pygame.K_u
-            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'trade button'
             input_dict['image_id'] = 'buttons/trade_button.png'

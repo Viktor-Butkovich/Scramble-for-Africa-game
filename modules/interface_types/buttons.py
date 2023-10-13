@@ -2579,6 +2579,7 @@ class action_button(button):
             None
         '''
         self.corresponding_action = input_dict['corresponding_action']
+        self.corresponding_action.button = self
         input_dict['button_type'] = 'action'
         super().__init__(input_dict, global_manager)
     

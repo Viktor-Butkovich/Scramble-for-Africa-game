@@ -181,7 +181,6 @@ class cell():
                 return(False)
             else:
                 return(True)
-            
         elif building_type in ['road', 'railroad']:
             if self.contained_buildings['infrastructure'] == 'none':
                 return(False)
@@ -191,7 +190,8 @@ class cell():
                 return(True)
             else:
                 return(False)
-            
+        elif not building_type in self.contained_buildings: #if checking for something that is not actually a building, like 'train'
+            return(False)
         else:
             if self.contained_buildings[building_type] == 'none':
                 return(False)
@@ -211,8 +211,8 @@ class cell():
             if self.village == 'none':
                 return(False)
             else:
-                returned_building = self.village
-                
+                return(True)
+
         elif building_type in ['road', 'railroad']:
             if self.contained_buildings['infrastructure'] == 'none':
                 return(False)
@@ -222,7 +222,10 @@ class cell():
                 returned_building = self.contained_buildings['infrastructure']
             else:
                 return(False)
-            
+
+        elif not building_type in self.contained_buildings: #if checking for something that is not actually a building, like 'train'
+            return(False)
+
         else:
             if self.contained_buildings[building_type] == 'none':
                 return(False)
