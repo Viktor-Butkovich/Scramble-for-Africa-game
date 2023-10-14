@@ -371,10 +371,9 @@ def manage_lmb_down(clicked_button, global_manager):
                                     else:
                                         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
             if selected_mob:
-                selected_list = actor_utility.get_selected_list(global_manager)
-                if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
-                    global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
-                    
+                unit = global_manager.get('displayed_mob')
+                if unit != 'none' and unit.grids[0] == global_manager.get('minimap_grid').attached_grid:
+                    global_manager.get('minimap_grid').calibrate(unit.x, unit.y)
             else:
                 if global_manager.get('current_game_mode') == 'ministers':
                     minister_utility.calibrate_minister_info_display(global_manager, 'none')

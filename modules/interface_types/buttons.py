@@ -132,10 +132,9 @@ class button(interface_elements.interface_element):
                 x_change = 1
                 
             tooltip_text = []
-                           
-            selected_list = actor_utility.get_selected_list(self.global_manager)
-            if len(selected_list) > 0:
-                current_mob = selected_list[0]
+
+            current_mob = self.global_manager.get('displayed_mob')
+            if current_mob != 'none':
                 movement_cost = current_mob.get_movement_cost(x_change, y_change)
                 local_cell = current_mob.images[0].current_cell
                 adjacent_cell = local_cell.adjacent_cells[non_cardinal_direction]
@@ -805,25 +804,22 @@ class button(interface_elements.interface_element):
                 y_change = 1
             elif self.button_type == 'move down':
                 y_change = -1
-            selected_list = actor_utility.get_selected_list(self.global_manager)
             if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
-                    if len(selected_list) == 1:
+                    current_mob = self.global_manager.get('displayed_mob')
+                    if current_mob != 'none':
                         if self.global_manager.get('current_game_mode') == 'strategic':
-                            mob = selected_list[0]
-                            if mob.can_move(x_change, y_change):
-                                mob.move(x_change, y_change)
+                            if current_mob.can_move(x_change, y_change):
+                                current_mob.move(x_change, y_change)
                                 self.global_manager.set('show_selection_outlines', True)
                                 self.global_manager.set('last_selection_outline_switch', time.time())
-                                if mob.sentry_mode:
-                                    mob.set_sentry_mode(False)
-                                mob.clear_automatic_route()
+                                if current_mob.sentry_mode:
+                                    current_mob.set_sentry_mode(False)
+                                current_mob.clear_automatic_route()
                         else:
                             text_utility.print_to_screen('You cannot move while in the European HQ screen.', self.global_manager)
-                    elif len(selected_list) < 1:
-                        text_utility.print_to_screen('There are no selected units to move.', self.global_manager)
                     else:
-                        text_utility.print_to_screen('You can only move one unit at a time.', self.global_manager)
+                        text_utility.print_to_screen('There are no selected units to move.', self.global_manager)
                 else:
                     text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
                     text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)

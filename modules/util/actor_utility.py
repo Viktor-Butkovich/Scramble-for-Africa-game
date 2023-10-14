@@ -309,21 +309,6 @@ def update_roads(global_manager):
     for current_building in global_manager.get('building_list'):
         if current_building.building_type == 'infrastructure':
             current_building.cell.tile.update_image_bundle()
-    
-def get_selected_list(global_manager):
-    '''
-    Description:
-        Returns a list of all currently selected units. Currently, the game will only have 1 selected unit at a time and this should be updated
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        mob list: All mobs that are currently selected
-    '''
-    selected_list = []
-    for current_mob in global_manager.get('mob_list'):
-        if current_mob.selected:
-            selected_list.append(current_mob)
-    return(selected_list)
 
 def deselect_all(global_manager):
     '''
@@ -347,8 +332,6 @@ def get_random_ocean_coordinates(global_manager):
     Output:
         int tuple: Two values representing x and y coordinates
     '''
-    mob_list = global_manager.get('mob_list')
-    mob_coordinate_list = []
     start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
     start_y = 0
     return(start_x, start_y)
