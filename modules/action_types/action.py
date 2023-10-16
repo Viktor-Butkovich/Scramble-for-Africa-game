@@ -16,9 +16,20 @@ class action():
             None
         '''
         self.global_manager = global_manager
-        self.action_type = type(self).__name__ #class name
+        self.action_type = self.generate_action_type() #class name
         self.button = None
         self.initial_setup(**kwargs)
+
+    def generate_action_type(self):
+        '''
+        Description:
+            Determines this action's action type, usually based on the class name
+        Input:
+            None
+        Output:
+            None
+        '''
+        return(type(self).__name__)
 
     def initial_setup(self, **kwargs):
         '''

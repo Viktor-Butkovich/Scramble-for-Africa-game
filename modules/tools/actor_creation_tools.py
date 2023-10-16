@@ -264,8 +264,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.switch_theatre_button(input_dict, global_manager)
                 elif base == 'repair':
                     new_element = actor_display_buttons.repair_button(input_dict, global_manager)
-                elif base == 'upgrade':
-                    new_element = actor_display_buttons.upgrade_button(input_dict, global_manager)
                 elif base == 'appoint minister':
                     new_element = actor_display_buttons.appoint_minister_button(input_dict, global_manager)
                 elif base == 'remove minister':

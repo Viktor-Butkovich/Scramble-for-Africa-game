@@ -76,6 +76,7 @@ def update_descriptions(global_manager, target = 'all'):
     if target == 'all':
         targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
         targets_to_update += global_manager.get('building_types') + ['road', 'railroad', 'road_bridge', 'railroad_bridge']
+        targets_to_update += global_manager.get('upgrade_types')
     else:
         targets_to_update = [target]
 
@@ -169,7 +170,7 @@ def update_descriptions(global_manager, target = 'all'):
 
         elif current_target == 'resource':
             if global_manager.has('actions'):
-                building_name = global_manager.get('actions')['resource'].building_name
+                building_name = global_manager.get('actions')[current_target].building_name
                 if building_name == 'none':
                     building_name = 'resource production facility'
             else:
@@ -207,6 +208,15 @@ def update_descriptions(global_manager, target = 'all'):
 
         elif current_target == 'fort':
             text_list.append('A fort increases the combat effectiveness of your units standing in this tile.')
+
+        elif current_target == 'scale':
+            text_list.append('A resource production facility can have a number of attached work crews equal to its scale')
+
+        elif current_target == 'efficiency':
+            text_list.append('A resource production facility\'s attached work crews each make a number of production attempts per turn equal to its efficiency.')
+
+        elif current_target == 'warehouse_level':
+            text_list.append('Each of a tile\'s warehouse levels corresponds to 9 inventory capacity.')
 
         list_descriptions[current_target] = text_list
 

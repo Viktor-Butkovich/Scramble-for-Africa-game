@@ -34,4 +34,5 @@ except Exception: #displays error message and records error message in crash log
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# convert upgrades and repairs
+# convert repairs
+# maybe add constants file that can be imported and allow accessing certain values w/o global manager

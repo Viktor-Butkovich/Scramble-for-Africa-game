@@ -1,4 +1,4 @@
-#Contains all functionality for public relations campaigns
+#Contains all functionality for construction
 
 import pygame
 import random
@@ -74,10 +74,9 @@ class construction(action.action):
             'trading_post': pygame.K_y,
             'mission': pygame.K_y,
             'fort': pygame.K_v,
-            'warehouses': pygame.K_k,
             'train': pygame.K_y,
             'steamboat': pygame.K_u
-        }[self.building_type]
+        }.get(self.building_type, 'none')
         return(initial_input_dict)
 
     def update_tooltip(self):
@@ -113,15 +112,16 @@ class construction(action.action):
         if self.building_type in ['train_station', 'port', 'resource']:
             message.append('Also upgrades this tile\'s warehouses by 9 inventory capacity, or creates new warehouses if none are present')
         
+        unit = self.global_manager.get('displayed_mob') 
         base_cost = actor_utility.get_building_cost(self.global_manager, 'none', self.building_type, self.building_name)
-        cost = actor_utility.get_building_cost(self.global_manager, self.current_unit, self.building_type, self.building_name)
+        cost = actor_utility.get_building_cost(self.global_manager, unit, self.building_type, self.building_name)
         
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
         if self.building_type in ['train', 'steamboat']:
             message.append('Unlike buildings, the cost of vehicle assembly is not impacted by local terrain')
 
-        if self.current_unit != 'none' and self.global_manager.get('strategic_map_grid') in self.current_unit.grids:
-            terrain = self.current_unit.images[0].current_cell.terrain
+        if unit != 'none' and self.global_manager.get('strategic_map_grid') in unit.grids:
+            terrain = unit.images[0].current_cell.terrain
             message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
         return(message)
 

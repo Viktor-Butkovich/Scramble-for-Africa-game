@@ -93,21 +93,6 @@ class actor_display_label(label):
 
             del input_dict['building_type']
             del input_dict['keybind_id']
-            
-            input_dict['init_type'] = 'upgrade button'
-            input_dict['base_building_type'] = 'resource'
-            input_dict['upgrade_type'] = 'scale'
-            self.add_attached_button(input_dict)
-
-            input_dict['upgrade_type'] = 'efficiency'
-            self.add_attached_button(input_dict)
-
-            input_dict['base_building_type'] = 'warehouses'
-            input_dict['upgrade_type'] = 'warehouse_level'
-            input_dict['keybind_id'] = pygame.K_k
-            self.add_attached_button(input_dict)
-            del input_dict['base_building_type']
-            del input_dict['upgrade_type']
 
             input_dict['init_type'] = 'trade button'
             input_dict['image_id'] = 'buttons/trade_button.png'

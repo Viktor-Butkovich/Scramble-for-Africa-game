@@ -612,7 +612,7 @@ class warehouses(building):
         Description:
             Returns whether this building can be upgraded in the inputted field. Warehouses can be upgraded infinitely
         Input:
-            string upgrade_type = 'warehosue_level': Represents type of upgrade, like 'scale' or 'efficiency'
+            string upgrade_type = 'warehouse_level': Represents type of upgrade, like 'scale' or 'efficiency'
         Output:
             boolean: Returns True if this building can be upgraded in the inputted field, otherwise returns False
         '''

@@ -1122,10 +1122,6 @@ class button(interface_elements.interface_element):
             expedition = self.notification.choice_info_dict['expedition']
             expedition.artifact_search()
 
-        elif self.button_type == 'start upgrade':
-            constructor = self.notification.choice_info_dict['constructor']
-            constructor.upgrade()
-
         elif self.button_type == 'start repair':
             constructor = self.notification.choice_info_dict['constructor']
             constructor.repair()
@@ -1139,7 +1135,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type in ['stop action', 'stop attack', 'stop trading', 
                                   'stop capture slaves', 'stop loan search', 'decline loan offer', 'stop rumor search', 
-                                  'stop artifact search', 'stop upgrade', 'stop repair', 'stop trial']:
+                                  'stop artifact search', 'stop repair', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)
             if self.button_type == 'stop attack':
                 self.notification.choice_info_dict['battalion'].clear_attached_cell_icons()
