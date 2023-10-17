@@ -1,12 +1,11 @@
-#Contains all functionality for building upgrades
+#Contains all functionality for building repairs
 
-import pygame
 from . import action
 from ..util import actor_utility, action_utility
 
-class upgrade(action.action):
+class repair(action.action):
     '''
-    Action for construction gang to upgrade a particular aspect of a building
+    Action for unit to repair a damaged building
     '''
     def initial_setup(self, **kwargs):
         '''
@@ -19,18 +18,25 @@ class upgrade(action.action):
         '''
         super().initial_setup(**kwargs)
         self.building_type = kwargs.get('building_type', 'none')
+        self.requirement = self.global_manager.get('actions')[self.building_type].requirement
         del self.global_manager.get('actions')[self.action_type]
-        self.global_manager.get('actions')[self.building_type] = self
-        self.building_name = self.building_type.replace('_', ' ')
-        self.requirement = 'can_construct'
+        self.global_manager.get('actions')['repair_' + self.building_type] = self
         self.current_building = 'none'
-        self.upgraded_building_type = {
-            'scale': 'resource',
-            'efficiency': 'resource',
-            'warehouse_level': 'warehouses'
-        }[self.building_type]
-        self.name = 'upgrade'
+        self.global_manager.get('transaction_descriptions')[self.action_type] = 'repairs'
+        self.name = 'repair'
         self.allow_critical_failures = False
+
+    def generate_current_roll_modifier(self):
+        '''
+        Description:
+            Calculates and returns the current flat roll modifier for this action - this is always applied, while many modifiers are applied only half the time.
+                A positive modifier increases the action's success chance and vice versa
+        Input:
+            None
+        Output:
+            int: Returns the current flat roll modifier for this action
+        '''
+        return(super().generate_current_roll_modifier() + 1)
 
     def generate_action_type(self):
         '''
@@ -54,12 +60,8 @@ class upgrade(action.action):
             None
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
-        initial_input_dict['image_id'] = 'buttons/upgrade_' + self.building_type + '_button.png'
-        initial_input_dict['keybind_id'] = {
-            'scale': 'none',
-            'efficiency': 'none',
-            'warehouse_level': pygame.K_k
-        }.get(self.building_type, 'none')
+        initial_input_dict['image_id'] = 'buildings/buttons/repair_' + self.building_type + '.png'
+        initial_input_dict['keybind_id'] = self.global_manager.get('actions')[self.building_type].button.keybind_id
         return(initial_input_dict)
 
     def update_tooltip(self):
@@ -74,17 +76,10 @@ class upgrade(action.action):
         message = []
         unit = self.global_manager.get('displayed_mob') 
         if unit != 'none':
-            self.current_building = unit.images[0].current_cell.get_intact_building(self.upgraded_building_type)
-            actor_utility.update_descriptions(self.global_manager, self.building_type)
-            if self.building_type == 'warehouse_level':
-                noun = 'tile'
-            elif self.building_type in ['efficiency', 'scale']:
-                noun = self.current_building.name
-            value = getattr(self.current_building, self.building_type)
-            message.append('Attempts to increase this ' + noun + '\'s ' + self.building_name + ' from ' + str(value) + ' to ' + str(value + 1) + ' for ' + str(self.get_price()) + ' money')
-            message += self.global_manager.get('list_descriptions')[self.building_type]
-            message.append('Unlike new buildings, the cost of building upgrades is not impacted by local terrain')
-            message.append('An upgrade\'s cost is doubled for each previous upgrade to that ' + noun)
+            self.current_building = unit.images[0].current_cell.get_building(self.building_type)
+            message.append('Attempts to repair this tile\'s ' + self.current_building.name + ' for ' + str(self.get_price()) + ' money')
+            if self.building_type in ['port', 'train_station', 'resource']:
+                message.append('If successful, also repairs this tile\'s warehouses')
             message.append('Costs all remaining movement points, at least 1')
         return(message)
 
@@ -98,27 +93,19 @@ class upgrade(action.action):
             string: Returns text for the inputted subject
         '''
         text = super().generate_notification_text(subject)
-
-        if self.building_type == 'warehouse_level':
-            noun = 'tile'
-        elif self.building_type in ['efficiency', 'scale']:
-            noun = self.current_building.name
-
         if subject == 'confirmation':
-            value = getattr(self.current_building, self.building_type)
-            text += 'Are you sure you want to start upgrading this ' + noun + '\'s ' + self.building_name + '? /n /n'
-            text += 'The planning and materials will cost ' + str(self.get_price()) + ' money. Each upgrade to a building doubles the cost of all future upgrades to that building. /n /n'
-            text += 'If successful, this ' + noun + '\'s ' + self.building_name + ' will increase from ' + str(value) + ' to ' + str(value + 1) + '. /n /n'
-            text += self.global_manager.get('string_descriptions')[self.building_type]
+            text += 'Are you sure you want to start repairing this ' + self.current_building.name + '? /n /n'
+            text += 'The planning and materials will cost ' + str(self.get_price()) + ' money (half of the building\'s initial cost). /n /n'
+            text += 'If successful, the ' + self.current_building.name + ' will be restored to full functionality. /n /n'
         elif subject == 'initial':
-            text += 'The ' + self.current_unit.name + ' attempts to upgrade the ' + noun + '\'s ' + self.building_name + '. /n /n'
+            text += 'The ' + self.current_unit.name + ' attempts to repair the ' + self.current_building.name + '. /n /n'
         elif subject == 'success':
-            text += 'The ' + self.current_unit.name + ' successfully upgraded the ' + noun + '\'s ' + self.building_name + '. /n /n'
+            text += 'The ' + self.current_unit.name + ' successfully repaired the ' + self.current_building.name + '. /n /n'
         elif subject == 'failure':
-            text += 'Little progress was made and the ' + self.current_unit.officer.name + ' requests more time and funds to complete the upgrade. /n /n'
+            text += 'Little progress was made and the ' + self.current_unit.officer.name + ' requests more time and funds to complete the repair. /n /n'
         elif subject == 'critical_success':
             text += self.generate_notification_text('success')
-            text += 'The ' + self.current_unit.officer.name + ' managed the upgrade well enough to become a veteran. /n /n'
+            text += 'The ' + self.current_unit.officer.name + ' managed the repair well enough to become a veteran. /n /n'
         return(text)
 
     def get_price(self):
@@ -132,8 +119,8 @@ class upgrade(action.action):
         '''
         building = self.current_building
         if building == 'none':
-            building = self.global_manager.get('displayed_mob').images[0].current_cell.get_intact_building(self.upgraded_building_type)
-        return(building.get_upgrade_cost())
+            building = self.global_manager.get('displayed_mob').images[0].current_cell.get_building(self.building_type)
+        return(building.get_repair_cost())
 
     def can_show(self):
         '''
@@ -145,9 +132,9 @@ class upgrade(action.action):
             boolean: Returns whether a button linked to this action should be drawn
         '''
         unit = self.global_manager.get('displayed_mob')
-        building = unit.images[0].current_cell.get_intact_building(self.upgraded_building_type)
+        building = unit.images[0].current_cell.get_building(self.building_type)
         can_show = (super().can_show() and unit.is_group and getattr(unit, self.requirement)
-                        and building != 'none' and building.can_upgrade(self.building_type))
+                        and building != 'none' and building.damaged)
         return(can_show)
 
     def on_click(self, unit):
@@ -172,7 +159,7 @@ class upgrade(action.action):
             none
         '''
         super().pre_start(unit)
-        self.current_building = unit.images[0].current_cell.get_intact_building(self.upgraded_building_type)
+        self.current_building = unit.images[0].current_cell.get_building(self.building_type)
 
     def start(self, unit):
         '''
@@ -204,14 +191,13 @@ class upgrade(action.action):
     def complete(self):
         '''
         Description:
-            Used when the player finishes rolling for a PR campaign, shows the campaign's results and making any changes caused by the result. If successful, increases public opinion by random amount, promotes evangelist to a veteran on
-                critical success. Evangelist dies on critical failure
+            Used when the player finishes rolling for repair
         Input:
             None
         Output:
             None
         '''
         if self.roll_result >= self.current_min_success:
-            self.current_building.upgrade(self.building_type)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.current_unit.images[0].current_cell.tile) #update tile display to show building upgrade
+            self.current_building.set_damaged(False)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.current_unit.images[0].current_cell.tile) #update tile display to show building repair
         super().complete()

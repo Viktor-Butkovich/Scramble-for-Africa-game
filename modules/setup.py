@@ -15,7 +15,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import effect_manager_template, flavor_text_manager_template, input_manager_template, \
     notification_manager_template, sound_manager_template, value_tracker_template, event_manager_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
-    construction, upgrade
+    construction, upgrade, repair
 
 def setup(global_manager, *args):
     '''
@@ -378,6 +378,8 @@ def actions(global_manager):
     for building_type in global_manager.get('building_types') + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(global_manager, building_type=building_type)
+            if not building_type in ['train', 'steamboat', 'infrastructure']:
+                repair.repair(global_manager, building_type=building_type)
     for upgrade_type in global_manager.get('upgrade_types'):
         upgrade.upgrade(global_manager, building_type=upgrade_type)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version

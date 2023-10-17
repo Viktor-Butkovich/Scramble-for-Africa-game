@@ -1,7 +1,6 @@
 #Contains all functionality for construction
 
 import pygame
-import random
 from . import action
 from ..util import action_utility, utility, actor_utility, text_utility
 
@@ -152,7 +151,6 @@ class construction(action.action):
         elif subject == 'initial':
             text += 'The ' + self.current_unit.name + ' attempts to ' + verb + ' a ' + self.building_name + '. /n /n'
         elif subject == 'success':
-            self.public_relations_change = random.randrange(1, 7)
             text += 'The ' + self.current_unit.name + ' successfully ' + preterit_verb + ' the ' + self.building_name + '. /n /n'
         elif subject == 'failure':
             text += 'Little progress was made and the ' + self.current_unit.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + self.building_name + '. /n /n'
@@ -370,8 +368,7 @@ class construction(action.action):
     def complete(self):
         '''
         Description:
-            Used when the player finishes rolling for a PR campaign, shows the campaign's results and making any changes caused by the result. If successful, increases public opinion by random amount, promotes evangelist to a veteran on
-                critical success. Evangelist dies on critical failure
+            Used when the player finishes rolling for construction
         Input:
             None
         Output:

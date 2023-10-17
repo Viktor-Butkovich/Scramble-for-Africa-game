@@ -83,17 +83,7 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             self.add_attached_button(input_dict)
-
-            del input_dict['image_id']
             input_dict['width'], input_dict['height'] = (s_size, s_size)
-            input_dict['init_type'] = 'repair button'
-            input_dict['building_type'] = 'resource'
-            input_dict['keybind_id'] = pygame.K_g
-            self.add_attached_button(input_dict)
-
-            del input_dict['building_type']
-            del input_dict['keybind_id']
-
             input_dict['init_type'] = 'trade button'
             input_dict['image_id'] = 'buttons/trade_button.png'
             input_dict['keybind_id'] = pygame.K_r
