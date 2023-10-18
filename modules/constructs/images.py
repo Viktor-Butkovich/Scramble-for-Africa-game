@@ -901,12 +901,14 @@ class minister_type_image(tooltip_free_image):
                 'modes': string list value - Game modes during which this button can appear
                 'minister_type': string value - Minister office whose icon is always represented by this image, or 'none' if the icon can change
                 'attached_label': actor_display_label/string value - Actor display label that this image appears next to, or 'none' if not attached to a label
+                'minister_image_type': string value = 'position': Type of minister image to show - either only position or full portrait
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.current_minister = 'none'
         input_dict['image_id'] = 'misc/empty.png'
+        self.minister_image_type = input_dict.get('minister_image_type', 'position')
         super().__init__(input_dict, global_manager)
         self.attached_label = input_dict['attached_label']
         self.minister_type = input_dict['minister_type'] #position, like General
@@ -934,12 +936,12 @@ class minister_type_image(tooltip_free_image):
             new_minister = 'none'
 
         self.current_minister = new_minister
-        if not new_minister == 'none':
+        if new_minister != 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position
         current_minister_type = self.minister_type
         if self.attached_label != 'none' and self.attached_label.actor != 'none' and self.attached_label.actor.is_pmob:
             current_minister_type = self.attached_label.actor.controlling_minister_type
-        if not current_minister_type == 'none':
+        if current_minister_type != 'none':
             keyword = self.global_manager.get('minister_type_dict')[current_minister_type] #type, like military
             self.tooltip_text = []
             if keyword == 'prosecution':
@@ -964,7 +966,10 @@ class minister_type_image(tooltip_free_image):
                     self.tooltip_text.append('The ' + current_minister_type + ' also ensures that goods are not lost in transport or storage.')
             if new_minister == 'none':
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
-            self.set_image('ministers/icons/' + keyword + '.png')
+            image_id_list = ['ministers/icons/' + keyword + '.png']
+            if self.minister_image_type == 'portrait' and self.current_minister != 'none':
+                image_id_list += self.current_minister.image_id
+            self.set_image(image_id_list)
         self.update_image_bundle()
 
     def update_tooltip(self):

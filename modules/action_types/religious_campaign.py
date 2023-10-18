@@ -94,8 +94,9 @@ class religious_campaign(action.campaign):
                         actor_utility.generate_unit_component_image_id('mobs/church_volunteers/default.png', 'left', to_front=True), 
                         actor_utility.generate_unit_component_image_id('mobs/church_volunteers/default.png', 'right', to_front=True)
                     ],
-                    100,
+                    200,
                     self.global_manager,
+                    override_input_dict={'member_config': {'second_dimension_coordinate': -2, 'centered': True}}
             ))
         return(return_list)
 

@@ -102,7 +102,7 @@ class combat(action.action):
             pmob_image_id_list = [background_dict] + self.current_unit.get_image_id_list() + ['misc/pmob_outline.png']
             npmob_image_id_list = [background_dict] + self.opponent.get_image_id_list() + ['misc/pmob_outline.png']
 
-            image_size = 150
+            image_size = 125
             return_list.append(action_utility.generate_free_image_input_dict(pmob_image_id_list, image_size, self.global_manager,
                                 override_input_dict={
                                     'member_config': {'centered': True}
@@ -126,6 +126,8 @@ class combat(action.action):
                     'member_config': {'centered': True}
                 }
             ))
+            if not self.defending:
+                return_list += self.current_unit.controlling_minister.generate_icon_input_dicts(alignment='left')
         return(return_list)
 
     def generate_notification_text(self, subject):
@@ -533,7 +535,7 @@ class combat(action.action):
         text += str(self.roll_result + self.current_roll_modifier) + ' - ' + str(self.opponent_roll_result + self.opponent_roll_modifier) + ' = ' + str(self.total_roll_result) + ': ' + description + ' /n /n'
 
         self.global_manager.get('notification_manager').display_notification({
-            'message': text + 'Click to continue.',
+            'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'transfer_interface_elements': True,
             'on_remove': self.complete,
@@ -552,7 +554,7 @@ class combat(action.action):
         text += self.generate_notification_text(result)
 
         self.global_manager.get('notification_manager').display_notification({
-            'message': text + 'Click to remove this notification.',
+            'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements(result)
         })

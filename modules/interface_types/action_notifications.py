@@ -44,7 +44,7 @@ class action_notification(notification):
                 collection_y = notification_manager.default_notification_y - (notification_manager.default_notification_height / 2)
                 self.notification_ordered_collection = self.global_manager.get('actor_creation_manager').create_interface_element(
                     action_utility.generate_action_ordered_collection_input_dict(
-                        scaling.scale_coordinates(-1 * column_increment, collection_y, global_manager),
+                        scaling.scale_coordinates(-1 * column_increment + (column_increment / 2), collection_y, global_manager),
                         self.global_manager,
                         override_input_dict = {'parent_collection': self.parent_collection,
                                                'second_dimension_increment': scaling.scale_width(column_increment, global_manager),
@@ -64,7 +64,6 @@ class action_notification(notification):
                     index += 1
 
         self.transfer_interface_elements = input_dict.get('transfer_interface_elements', False)
-        self.on_remove = input_dict.get('on_remove', None)
 
     def on_click(self):
         '''
@@ -101,20 +100,6 @@ class action_notification(notification):
         else:
             self.remove()
         self.global_manager.get('notification_manager').handle_next_notification(transferred_interface_elements=transferred_interface_elements)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program, also running its on_remove function
-                if applicable
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        if self.on_remove:
-            self.on_remove()
 
     def format_message(self):
         '''

@@ -104,11 +104,6 @@ class actor_display_label(label):
                 if button_input_dict:
                     self.add_attached_button(button_input_dict)
 
-            input_dict['init_type'] = 'take loan button'
-            input_dict['image_id'] = 'buttons/take_loan_button.png'
-            input_dict['keybind_id'] = pygame.K_l
-            self.add_attached_button(input_dict)
-
             input_dict['init_type'] = 'track beasts button'
             input_dict['image_id'] = 'buttons/track_beasts_button.png'
             input_dict['keybind_id'] = pygame.K_t
@@ -278,8 +273,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
-
-            attached_minister_type_image = global_manager.get('actor_creation_manager').create_interface_element({
+            
+            attached_minister_position_image = global_manager.get('actor_creation_manager').create_interface_element({
                 'coordinates': (self.x - self.height - m_increment, self.y),
                 'width': self.height + m_increment,
                 'height': self.height + m_increment,
@@ -287,6 +282,7 @@ class actor_display_label(label):
                 'minister_type': 'none',
                 'attached_label': self,
                 'init_type': 'minister type image',
+                'minister_image_type': 'portrait',
                 'parent_collection': self.insert_collection_above(),
                 'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
             }, global_manager)

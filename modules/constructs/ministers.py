@@ -191,11 +191,6 @@ class minister():
                 else:
                     message = displayed_skill_name.capitalize() + ' ability: ' + self.apparent_skill_descriptions[displayed_skill]
                 self.tooltip_text.append(message)
-        #elif self.current_position == 'none':
-        #    message = 'Highest ability: unknown'
-        #else:
-        #    message = self.global_manager.get('minister_type_dict')[self.current_position] + 'ability: unknown'
-        #self.tooltip_text.append(message)
 
         rank = 0
         for skill_value in range(6, 0, -1): #iterates backwards from 6 to 1
@@ -210,14 +205,14 @@ class minister():
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
             self.tooltip_text.append('If not reappointed by the end of the turn, they will be permanently fired, incurring a large public opinion penalty.')
 
-    def display_message(self, text, audio='none'):
+    def generate_icon_input_dicts(self, alignment='left'):
         '''
         Description:
-            Displays a notification message from this minister with an attached portrait
+            Generates the input dicts for this minister's face and position background to be attached to a notification
         Input:
-            string text: Message to display in notification
-        Output:
             None
+        Output:
+            dictionary list: Returns list of input dicts for this minister's face and position background
         '''
         minister_position_icon_dict = {
             'coordinates': (0, 0),
@@ -228,29 +223,65 @@ class minister():
             'minister_image_type': 'position',
             'init_type': 'dice roll minister image',
             'minister_message_image': True,
-            'member_config': {'order_overlap': True, 'second_dimension_alignment': 'left', 'centered': True}
+            'member_config': {'order_overlap': True, 'second_dimension_alignment': alignment, 'centered': True}
         }
 
         minister_portrait_icon_dict = minister_position_icon_dict.copy()
         minister_portrait_icon_dict['member_config'] = {'second_dimension_alignment': 'leftmost', 'centered': True}
         minister_portrait_icon_dict['minister_image_type'] = 'portrait'
+        return([minister_position_icon_dict, minister_portrait_icon_dict])
 
+    def display_message(self, text, audio='none'):
+        '''
+        Description:
+            Displays a notification message from this minister with an attached portrait
+        Input:
+            string text: Message to display in notification
+        Output:
+            None
+        '''
         self.global_manager.get('notification_manager').display_notification({
-            'message': text,
+            'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'audio': audio,
             'attached_minister': self,
-            'attached_interface_elements': [minister_position_icon_dict, minister_portrait_icon_dict],
+            'attached_interface_elements': self.generate_icon_input_dicts(alignment='left'),
             'transfer_interface_elements': not main_loop_utility.action_possible(self.global_manager) #Transfer if during action, don't transfer if misc. messages
         })
 
-    def steal_money(self, value, theft_type = 'none'):
+    def can_pay(self, value):
         '''
         Description:
-            Steals money from a company action, giving this minister money but causing a chance to be caught by the prosecutor. If caught by the prosecutor, the prosecutor may create evidence and report to the player, or, if corrupt,
-                take a bribe to do nothing
+            Checks if this minister has enough money to pay the inputted amount
         Input:
-            double value: Amount of money stolen
+            double value: Amount of money being paid
+        Output:
+            boolean: Returns whether this minister is able to pay the inputted amount
+        '''
+        return(self.personal_savings + self.stolen_money >= value)
+
+    def pay(self, target, value):
+        '''
+        Description:
+            Pays the inputted amount of money to the inputted minister, taking money from savings if needed. Assumes that can_pay was True for the value
+        Input:
+            minister target: Minister being paid
+            double value: Amount of money being paid
+        Output:
+            None
+        '''
+        self.stolen_money -= value
+        if self.stolen_money < 0:
+            self.personal_savings += self.stolen_money
+            self.stolen_money = 0
+        target.stolen_money += value
+
+    def attempt_prosecutor_detection(self, value=0, theft_type='none'):
+        '''
+        Description:
+            Resolves the outcome of the prosecutor attempting to detect a corrupt action, regardless of if money was immediately stolen
+        Input:
+            double value = 0: Amount of money stolen
             string theft_type = 'none': Type of theft, used in prosecutor report description
         Output:
             None
@@ -262,14 +293,13 @@ class minister():
             difficulty = self.no_corruption_roll(6, 'minister_stealing')
             result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
             if prosecutor != self and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
-                if prosecutor.check_corruption(): #if prosecutor takes bribe, split money
-                    prosecutor.stolen_money += (value / 2)
-                    self.stolen_money += (value / 2)
+                required_bribe_amount = max(value / 2, 5)
+                if prosecutor.check_corruption() and self.can_pay(required_bribe_amount): #if prosecutor takes bribe, split money
+                    self.pay(prosecutor, required_bribe_amount)
                     if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who accepted a bribe to not create evidence.')
                         print(prosecutor.current_position + ' ' + prosecutor.name + ' has now stolen a total of ' + str(prosecutor.stolen_money) + ' money.')
                 else: #if prosecutor refuses bribe, still keep money but create evidence
-                    self.stolen_money += value
                     self.corruption_evidence += 1
                     evidence_message = ''
                     evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
@@ -278,11 +308,25 @@ class minister():
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
                     prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'))
                     if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
-                        print('The theft was caught by the prosecutor, who chose to create evidence.') 
-            else: #if not caught, keep money
-                self.stolen_money += value
-                if self.global_manager.get('effect_manager').effect_active('show_minister_stealing') and not prosecutor == self:
+                        print('The theft was caught by the prosecutor, who chose to create evidence.')
+            else:
+                if self.global_manager.get('effect_manager').effect_active('show_minister_stealing') and prosecutor != self:
                     print('The theft was not caught by the prosecutor.')
+
+    def steal_money(self, value, theft_type = 'none', allow_prosecutor_detection=True):
+        '''
+        Description:
+            Steals money from a company action, giving this minister money but causing a chance of prosecutor detection
+        Input:
+            double value: Amount of money stolen
+            string theft_type = 'none': Type of theft, used in prosecutor report description
+        Output:
+            None
+        '''
+        self.stolen_money += value
+        if allow_prosecutor_detection:
+            self.attempt_prosecutor_detection(value=value, theft_type=theft_type)
+
         if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
             print(self.current_position + ' ' + self.name + ' has now stolen a total of ' + str(self.stolen_money) + ' money.')
 
@@ -815,7 +859,7 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
-        if self.global_manager.get('effect_manager').effect_active('band_of_thieves') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self != self.global_manager.get('current_ministers')['Prosecutor']):
+        if self.global_manager.get('effect_manager').effect_active('band_of_thieves') or ((self.global_manager.get('effect_manager').effect_active('lawbearer') and self != self.global_manager.get('current_ministers')['Prosecutor'])):
             return(True)
         elif self.global_manager.get('effect_manager').effect_active('ministry_of_magic') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
             return(False)

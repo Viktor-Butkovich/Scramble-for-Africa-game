@@ -15,7 +15,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import effect_manager_template, flavor_text_manager_template, input_manager_template, \
     notification_manager_template, sound_manager_template, value_tracker_template, event_manager_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
-    construction, upgrade, repair
+    construction, upgrade, repair, loan_search
 
 def setup(global_manager, *args):
     '''
@@ -375,6 +375,7 @@ def actions(global_manager):
     conversion.conversion(global_manager)
     combat.combat(global_manager)
     exploration.exploration(global_manager)
+    loan_search.loan_search(global_manager)
     for building_type in global_manager.get('building_types') + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(global_manager, building_type=building_type)
@@ -826,7 +827,6 @@ def transactions(global_manager):
     
     global_manager.set('base_action_prices',
         {
-        'loan_search': 5,
         'trade': 0,
         'loan': 5,
         'slave_capture': 5,
@@ -843,7 +843,6 @@ def transactions(global_manager):
 
     global_manager.set('transaction_descriptions',
         {
-        'loan_search': 'loan searches',
         'trade': 'trading with natives',
         'loan': 'loans',
         'slave_capture': 'capturing slaves',

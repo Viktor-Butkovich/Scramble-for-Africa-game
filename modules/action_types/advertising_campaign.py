@@ -23,6 +23,18 @@ class advertising_campaign(action.campaign):
         self.name = 'advertising campaign'
         self.target_commodity = 'none'
 
+    def pre_start(self, unit):
+        '''
+        Description:
+            Prepares for starting an action starting with roll modifiers, setting ongoing action, etc.
+        Input:
+            pmob unit: Unit selected when the linked button is clicked
+        Output:
+            none
+        '''
+        super().pre_start(unit)
+        self.current_min_success = 5 #alternative to subtracting a roll modifier, which would change the max crit fail
+
     def button_setup(self, initial_input_dict):
         '''
         Description:
@@ -63,7 +75,7 @@ class advertising_campaign(action.campaign):
         '''
         text = super().generate_notification_text(subject)
         if subject == 'confirmation':
-            text = 'Are you sure you want to start an advertising campaign for ' + self.target_commodity + '? If successful, the price of ' + self.target_commodity + ' will increase, decreasing the price of another random commodity. /n /n'
+            text += 'Are you sure you want to start an advertising campaign for ' + self.target_commodity + '? If successful, the price of ' + self.target_commodity + ' will increase, decreasing the price of another random commodity. /n /n'
             text += 'The campaign will cost ' + str(self.get_price()) + ' money. /n /n '
         elif subject == 'initial':
             text += 'The merchant attempts to increase public demand for ' + self.target_commodity + '. /n /n'
@@ -71,9 +83,9 @@ class advertising_campaign(action.campaign):
             self.success_audio = [{'sound_id': 'voices/advertising/messages/' + str(index), 'dampen_music': True, 'dampen_time_interval': 0.75},
                                   {'sound_id': 'voices/advertising/commodities/' + self.target_commodity, 'in_sequence': True}]
             text += advertising_message + ' /n /n'
-        elif subject in ['success', 'critical_success']:
+        elif subject == 'success':
             increase = 1
-            if subject == 'critical_success':
+            if self.roll_result >= 6:
                 increase += 1
             advertised_original_price = self.global_manager.get('commodity_prices')[self.target_commodity]
             unadvertised_original_price = self.global_manager.get('commodity_prices')[self.target_unadvertised_commodity]
@@ -82,8 +94,11 @@ class advertising_campaign(action.campaign):
                 unadvertised_final_price = 1
             text += 'The merchant successfully advertised for ' + self.target_commodity + ', increasing its price from ' + str(advertised_original_price) + ' to '
             text += str(advertised_original_price + increase) + '. The price of ' + self.target_unadvertised_commodity + ' decreased from ' + str(unadvertised_original_price) + ' to ' + str(unadvertised_final_price) + '. /n /n'
-            if subject == 'critical_success':
+            if self.roll_result >= 6:
                 text += 'The advertising campaign was so popular that the value of ' + self.target_commodity + ' increased by 2 instead of 1. /n /n'
+        elif subject == 'critical_success':
+            text += self.generate_notification_text('success')
+            text += 'This merchant is now a veteran. /n /n'
         elif subject == 'failure':
             text += 'The merchant failed to increase the popularity of ' + self.target_unadvertised_commodity + '. /n /n'
         elif subject == 'critical_failure':
@@ -105,20 +120,20 @@ class advertising_campaign(action.campaign):
             return_list.append(
                 action_utility.generate_free_image_input_dict(
                     ['scenery/resources/' + self.target_unadvertised_commodity + '.png',
-                     {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': -0.2, 'y_offset': 0.2},
+                     {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     self.global_manager,
-                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75, self.global_manager), 'second_dimension_alignment': 'left'}}
+                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75, self.global_manager), 'second_dimension_alignment': 'left', 'centered': True}}
             ))
             return_list.append(
                 action_utility.generate_free_image_input_dict(
                     ['scenery/resources/' + self.target_commodity + '.png',
-                     {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': -0.2, 'y_offset': 0.2},
+                     {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     self.global_manager,
-                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75, self.global_manager), 'second_dimension_alignment': 'leftmost'}}
+                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75, self.global_manager), 'second_dimension_alignment': 'leftmost', 'centered': True}}
             ))
         return(return_list)
 

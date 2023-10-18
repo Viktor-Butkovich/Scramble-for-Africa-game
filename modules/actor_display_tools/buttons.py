@@ -1230,71 +1230,6 @@ class capture_slaves_button(button):
         else:
             text_utility.print_to_screen('You are busy and cannot capture slaves.', self.global_manager)
 
-class take_loan_button(button):
-    '''
-    Button that commands a merchant to start a loan search in Europe
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        input_dict['button_type'] = 'take loan'
-        super().__init__(input_dict, global_manager)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
-        '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_officer and self.global_manager.get('displayed_mob').officer_type == 'merchant')
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_utility.action_possible(self.global_manager):
-            current_mob = self.global_manager.get('displayed_mob')
-            if self.global_manager.get('europe_grid') in current_mob.grids:
-                if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['loan']:
-                        if current_mob.ministers_appointed():
-                            if current_mob.sentry_mode:
-                                current_mob.set_sentry_mode(False)
-                            current_mob.start_loan_search()
-                    else:
-                        text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money needed to search for a loan offer.', self.global_manager)
-                else:
-                    text_utility.print_to_screen('Searching for a loan offer requires all remaining movement points, at least 1.', self.global_manager)
-            else:
-                text_utility.print_to_screen('A merchant can only search for a loan while in Europe', self.global_manager)
-        else:
-            text_utility.print_to_screen('You are busy and cannot search for a loan offer.', self.global_manager)
-
 class labor_broker_button(button):
     '''
     Buttons that commands a vehicle without crew or an officer to use a labor broker in a port to recruit a worker from a nearby village, with a price based on the village's aggressiveness and distance
@@ -1455,7 +1390,7 @@ class track_beasts_button(button):
                                 current_mob.set_sentry_mode(False)
                             current_mob.track_beasts()
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['track_beasts']) + ' money needed to search for a loan offer.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['track_beasts']) + ' money needed to track beasts.', self.global_manager)
                 else:
                     text_utility.print_to_screen('Tracking beasts requires 1 movement point.', self.global_manager)
             else:

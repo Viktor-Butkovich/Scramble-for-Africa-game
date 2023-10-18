@@ -120,7 +120,7 @@ class notification_manager_template():
         valid_transfer = False
         if self.global_manager.get('displayed_notification') == 'none':
             if self.notification_queue:
-                if transferred_interface_elements and self.notification_queue[0].get('notification_type', 'none') in ['action', 'roll']:
+                if transferred_interface_elements and (self.notification_queue[0].get('notification_type', 'none') in ['action', 'roll'] or 'choices' in self.notification_queue[0]):
                     valid_transfer = True
                     if 'attached_interface_elements' in self.notification_queue[0]:
                         self.notification_queue[0]['attached_interface_elements'] = transferred_interface_elements + self.notification_queue[0]['attached_interface_elements']

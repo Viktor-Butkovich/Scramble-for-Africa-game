@@ -1,10 +1,10 @@
 #Contains functionality for choice notifications
 
 import pygame
-from . import buttons, notifications
+from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
 
-class choice_notification(notifications.notification):
+class choice_notification(action_notifications.action_notification):
     '''
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
@@ -55,19 +55,6 @@ class choice_notification(notifications.notification):
                 'init_type': init_type
             }, global_manager))
         self.global_manager.set('making_choice', True)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
 
     def on_click(self, choice_button_override=False):
         '''
@@ -153,23 +140,11 @@ class choice_button(buttons.button):
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
 
-        elif input_dict['button_type'] == 'start loan search':
-            self.message = 'Find loan'
-
         elif input_dict['button_type'] in ['start rumor search', 'start artifact search']:
             self.message = 'Search'
 
         elif input_dict['button_type'] == 'start capture slaves':
             self.message = 'Capture slaves'
-
-        elif input_dict['button_type'] == 'stop loan search':
-            self.message = 'Stop search'
-
-        elif input_dict['button_type'] == 'accept loan offer':
-            self.message = 'Accept'
-
-        elif input_dict['button_type'] == 'decline loan offer':
-            self.message = 'Decline'
             
         elif input_dict['button_type'] in ['none', 'stop attack', 'stop capture slaves', 'stop rumor search', 'stop artifact search']:
             self.message = 'Do nothing'
@@ -244,9 +219,6 @@ class choice_button(buttons.button):
         elif self.button_type == 'start trading':
             self.set_tooltip(['Start trading, allowing consumer goods to be sold for commodities if the villagers are willing'])
 
-        elif self.button_type == 'start loan search':
-            self.set_tooltip(['Starts a search for a low-interest loan offer'])
-
         elif self.button_type == 'start rumor search':
             self.set_tooltip(['Start searching for rumors about the artifact\'s location'])
 
@@ -255,12 +227,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'start capture slaves':
             self.set_tooltip(['Start attempting to capture native villagers as slaves'])
-
-        elif self.button_type == 'accept loan offer':
-            self.set_tooltip(['Accepts the loan offer'])
-
-        elif self.button_type == 'reject loan offer':
-            self.set_tooltip(['Rejects the loan offer'])
 
         elif self.button_type == 'confirm main menu':
             self.set_tooltip(['Exits to the main menu without saving'])

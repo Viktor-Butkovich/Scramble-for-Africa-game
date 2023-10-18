@@ -36,6 +36,7 @@ class notification(multi_line_label):
         self.global_manager.get('sound_manager').play_sound('opening_letter')
         self.creation_time = time.time()
         self.notification_type = input_dict['notification_type']
+        self.on_remove = input_dict.get('on_remove', None)
 
     def format_message(self):
         '''
@@ -88,6 +89,8 @@ class notification(multi_line_label):
         super().remove()
         if self.global_manager.get('displayed_notification') == self:
             self.global_manager.set('displayed_notification', 'none')
+        if self.on_remove:
+            self.on_remove()
 
 class zoom_notification(notification):
     '''

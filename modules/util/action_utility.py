@@ -158,7 +158,9 @@ def generate_risk_message(action, unit):
     if unit.veteran: #reduce risk if veteran
         risk_value -= 1
 
-    if risk_value < 0: #0/6 = no risk
+    if action.current_max_crit_fail <= 0: #if action can never have risk
+        message = ''
+    elif risk_value < 0: #0/6 = no risk
         message = 'RISK: LOW /n /n'
     elif risk_value == 0: #1/6 death = moderate risk
         message = 'RISK: MODERATE /n /n' #puts risk message at beginning

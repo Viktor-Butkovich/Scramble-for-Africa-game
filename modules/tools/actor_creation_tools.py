@@ -4,7 +4,6 @@ import random
 from ..actor_types import mobs, buildings
 from ..actor_types.mob_types import vehicles, officers, dummy, workers
 from ..actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
-from ..actor_types.mob_types.officer_types import merchants
 from ..actor_types.mob_types.npmob_types import native_warriors, beasts
 from ..interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons, \
     europe_transactions
@@ -58,8 +57,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
         elif init_type == 'boat':
             new_actor = vehicles.boat(from_save, input_dict, global_manager)
-        elif init_type == 'merchant':
-            new_actor = merchants.merchant(from_save, input_dict, global_manager)
         elif init_type in global_manager.get('officer_types'):
             new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'native_warriors':
@@ -254,8 +251,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.artifact_search_button(input_dict, global_manager)
                 elif base == 'capture slaves':
                     new_element = actor_display_buttons.capture_slaves_button(input_dict, global_manager)
-                elif base == 'take loan':
-                    new_element = actor_display_buttons.take_loan_button(input_dict, global_manager)
                 elif base == 'labor broker':
                     new_element = actor_display_buttons.labor_broker_button(input_dict, global_manager)
                 elif base == 'track beasts':

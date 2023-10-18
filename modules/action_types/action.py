@@ -48,7 +48,7 @@ class action():
         self.global_manager.get('action_prices')[self.action_type] = 5
         self.global_manager.get('base_action_prices')[self.action_type] = 5
         self.roll_lists = []
-        self.allow_critical_failures = False
+        self.allow_critical_failures = True
 
     def button_setup(self, initial_input_dict):
         '''
@@ -149,7 +149,21 @@ class action():
         '''
         return_list = []
         if subject == 'dice':
-            return_list += [action_utility.generate_die_input_dict((0, 0), roll_list[0], self, self.global_manager) for roll_list in self.roll_lists]
+            return_list += [
+                action_utility.generate_die_input_dict(
+                    (0, 0),
+                    roll_list[0],
+                    self,
+                    self.global_manager,
+                    override_input_dict={
+                        'member_config':
+                        {
+                            'centered': True
+                        }
+                    }
+                )
+            for roll_list in self.roll_lists]
+            return_list += self.current_unit.controlling_minister.generate_icon_input_dicts(alignment='leftmost')
         return(return_list)
 
     def generate_audio(self, subject):
@@ -304,7 +318,7 @@ class action():
         else:
             text += '/n'
         self.global_manager.get('notification_manager').display_notification({
-            'message': text + 'Click to continue.',
+            'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'transfer_interface_elements': True,
             'on_remove': self.complete,
@@ -323,7 +337,7 @@ class action():
         text += self.generate_notification_text(result)
 
         self.global_manager.get('notification_manager').display_notification({
-            'message': text + 'Click to remove this notification.',
+            'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements(result)
         })

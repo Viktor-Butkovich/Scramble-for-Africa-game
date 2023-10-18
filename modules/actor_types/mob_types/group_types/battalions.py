@@ -202,14 +202,14 @@ class battalion(group):
 
         if not self.veteran:    
             self.global_manager.get('notification_manager').display_notification({
-                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed. /n /n',
                 'num_dice': num_dice,
                 'notification_type': 'slave_capture'
             })
         else:
             text += ('The veteran major can roll twice and pick the higher result. /n /n')
             self.global_manager.get('notification_manager').display_notification({
-                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
+                'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed. /n /n',
                 'num_dice': num_dice,
                 'notification_type': 'slave_capture'
             })

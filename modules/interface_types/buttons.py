@@ -414,13 +414,6 @@ class button(interface_elements.interface_element):
                               'Has higher success chance and lower risk when aggressiveness is low',
                               'Costs all remaining movement points, at least 1'])
 
-        elif self.button_type == 'take loan':
-            self.set_tooltip(['Attempts to find a 100 money loan offer with a favorable interest rate for ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money',
-                              'Can only be done in Europe',
-                              'While automatically successful, the offered interest rate may vary',
-                              'Costs all remaining movement points, at least 1',
-                              'Each loan search attempted doubles the cost of other loan searches in the same turn'])
-
         elif self.button_type == 'track beasts':
             self.set_tooltip(['Attempts to reveal beasts in this tile and adjacent tiles',
                               'If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them',
@@ -1107,10 +1100,6 @@ class button(interface_elements.interface_element):
             battalion = self.notification.choice_info_dict['battalion']
             battalion.capture_slaves()
 
-        elif self.button_type == 'start loan search':
-            merchant = self.notification.choice_info_dict['merchant']
-            merchant.loan_search()
-
         elif self.button_type == 'start rumor search':
             expedition = self.notification.choice_info_dict['expedition']
             expedition.rumor_search()
@@ -1126,25 +1115,10 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start trial':
             trial_utility.trial(self.global_manager)
 
-        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 
-                                  'stop capture slaves', 'stop loan search', 'decline loan offer', 'stop rumor search', 
-                                  'stop artifact search', 'stop trial']:
+        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop capture slaves', 'stop rumor search', 'stop artifact search', 'stop trial']:
             action_utility.cancel_ongoing_actions(self.global_manager)
             if self.button_type == 'stop attack':
                 self.notification.choice_info_dict['battalion'].clear_attached_cell_icons()
-
-        elif self.button_type == 'accept loan offer':
-            if self.notification.choice_info_dict['corrupt']:
-                self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
-
-            new_loan = market_utility.loan(False, {
-                'principal': self.notification.choice_info_dict['principal'],
-                'interest': self.notification.choice_info_dict['interest'],
-                'remaining_duration': 10
-            }, self.global_manager)
-
-            self.global_manager.set('ongoing_action', False)
-            self.global_manager.set('ongoing_action_type', 'none')
 
         elif self.button_type == 'launch trial':
             if main_loop_utility.action_possible(self.global_manager):
