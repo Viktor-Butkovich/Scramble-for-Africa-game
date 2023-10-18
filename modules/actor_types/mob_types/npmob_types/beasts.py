@@ -150,7 +150,6 @@ class beast(npmob):
             self.set_hidden(True)
         super().retreat()
 
-        
     def set_hidden(self, new_hidden, on_load = False):
         '''
         Description:
@@ -158,14 +157,13 @@ class beast(npmob):
                 beasts nearby 
         '''
         self.hidden = new_hidden
-        if new_hidden == True:
+        if new_hidden:
             self.hide_images()
         else:
             self.show_images()
             if not on_load:
                 self.global_manager.get('sound_manager').play_sound('beasts/' + self.animal_type, 0.6)
-            
-    
+
     def check_despawn(self):
         '''
         Description:

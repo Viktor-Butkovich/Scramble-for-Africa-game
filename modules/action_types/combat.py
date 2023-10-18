@@ -17,8 +17,9 @@ class combat(action.action):
         Output:
             None
         '''
-        super().initial_setup()
         for action_type in ['combat', 'hunting']:
+            self.action_type = action_type
+            super().initial_setup()
             self.global_manager.get('transaction_descriptions')[action_type] = 'combat supplies'
         self.name = 'combat'
         self.opponent = None
@@ -140,7 +141,7 @@ class combat(action.action):
         if subject == 'confirmation':
             if self.opponent.npmob_type == 'beast':
                 text += 'Are you sure you want to spend ' + str(self.get_price()) + ' money to hunt the '
-                text + self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'
+                text += self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'
             else:
                 text += 'Are you sure you want to spend ' + str(self.get_price()) + ' money to attack the '
                 text += self.opponent.name + ' to the ' + self.direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.'

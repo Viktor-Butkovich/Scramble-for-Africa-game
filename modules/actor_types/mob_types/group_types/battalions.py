@@ -119,8 +119,6 @@ class battalion(group):
                 self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
             if attack_confirmed:
                 self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
-            #if not self.in_vehicle:
-            #    self.attempt_local_combat()
 
     def start_capture_slaves(self):
         '''
@@ -380,11 +378,8 @@ class safari(battalion):
         super().__init__(from_save, input_dict, global_manager)    
         self.is_battalion = False
         self.is_safari = True
-        
         self.set_has_canoes(True)
-        
         self.battalion_type = 'none'
-        self.attack_cost = self.global_manager.get('action_prices')['hunting']
         self.set_group_type('safari')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength

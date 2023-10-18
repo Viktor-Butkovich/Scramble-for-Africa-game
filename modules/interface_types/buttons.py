@@ -821,8 +821,7 @@ class button(interface_elements.interface_element):
                     else:
                         text_utility.print_to_screen('There are no selected units to move.', self.global_manager)
                 else:
-                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    game_transitions.force_minister_appointment(self.global_manager)
             else:
                 text_utility.print_to_screen('You are busy and cannot move.', self.global_manager)
         elif self.button_type == 'toggle grid lines':
@@ -903,8 +902,7 @@ class button(interface_elements.interface_element):
                     else:
                         transportation_minister.display_message('There were no units with designated movement routes. /n /n')
                 else:
-                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    game_transitions.force_minister_appointment(self.global_manager)
             else:
                 text_utility.print_to_screen('You are busy and cannot move units.', self.global_manager)
                 
@@ -918,7 +916,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
             if main_loop_utility.action_possible(self.global_manager):
-                if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                if minister_utility.positions_filled(self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
@@ -948,7 +946,7 @@ class button(interface_elements.interface_element):
                 
         elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
             if main_loop_utility.action_possible(self.global_manager):
-                if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                if minister_utility.positions_filled(self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
@@ -999,8 +997,7 @@ class button(interface_elements.interface_element):
                     if self.global_manager.get('current_ministers')[current_position] == 'none':
                         stopping = True
                 if stopping:
-                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    game_transitions.force_minister_appointment(self.global_manager)
                 else:
                     if not self.global_manager.get('current_game_mode') == 'strategic':
                         game_transitions.set_game_mode('strategic', self.global_manager)
@@ -1031,7 +1028,7 @@ class button(interface_elements.interface_element):
             turn_management_utility.end_turn(self.global_manager)
 
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-            if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
+            if minister_utility.positions_filled(self.global_manager):
                 commodity_list = self.attached_label.actor.get_held_commodities()
                 commodity = commodity_list[self.attached_label.commodity_index]
                 num_present = self.attached_label.actor.get_inventory(commodity)
@@ -1798,34 +1795,30 @@ class switch_game_mode_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.to_mode in ['ministers', 'main_menu', 'new_game_setup'] or (self.global_manager.get('minister_appointment_tutorial_completed') and minister_utility.positions_filled(self.global_manager)):
-                if self.to_mode == 'ministers' and 'trial' in self.modes:
-                    defense = self.global_manager.get('displayed_defense')
-                    if defense.fabricated_evidence > 0:
-                        text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
-                        text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
-                        self.global_manager.get('notification_manager').display_notification({
-                            'message': text,
-                        })
-                    if self.global_manager.get('prosecution_bribed_judge'):
-                        text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
-                        self.global_manager.get('notification_manager').display_notification({
-                            'message': text,
-                        })
-                
-                if self.to_mode == 'main_menu':
+            if self.to_mode == 'ministers' and 'trial' in self.modes:
+                defense = self.global_manager.get('displayed_defense')
+                if defense.fabricated_evidence > 0:
+                    text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
+                    text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
                     self.global_manager.get('notification_manager').display_notification({
-                        'message': 'Are you sure you want to exit to the main menu without saving? /n /n',
-                        'choices': ['confirm main menu', 'none']
+                        'message': text,
                     })
-                elif not self.to_mode == 'previous':
-                    game_transitions.set_game_mode(self.to_mode, self.global_manager)
-                else:
-                    self.global_manager.set('exit_minister_screen_tutorial_completed', True)
-                    game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+                if self.global_manager.get('prosecution_bribed_judge'):
+                    text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
+                    self.global_manager.get('notification_manager').display_notification({
+                        'message': text,
+                    })
+            
+            if self.to_mode == 'main_menu':
+                self.global_manager.get('notification_manager').display_notification({
+                    'message': 'Are you sure you want to exit to the main menu without saving? /n /n',
+                    'choices': ['confirm main menu', 'none']
+                })
+            elif not self.to_mode == 'previous':
+                game_transitions.set_game_mode(self.to_mode, self.global_manager)
             else:
-                text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+                game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
 

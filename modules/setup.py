@@ -829,11 +829,9 @@ def transactions(global_manager):
         'loan_search': 5,
         'trade': 0,
         'loan': 5,
-        'attack': 5,
         'slave_capture': 5,
         'trial': 5,
         'active_investigation': 5,
-        'hunting': 5,
         'rumor_search': 5,
         'artifact_search': 5,
         'track_beasts': 0

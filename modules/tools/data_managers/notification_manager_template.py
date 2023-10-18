@@ -217,7 +217,7 @@ class notification_manager_template():
             'image_id': 'misc/default_notification.png',
             'message': message,
             'notification_dice': notification_dice,
-            'init_type': 'action notification',
+            'init_type': notification_type + ' notification',
             'notification_type': notification_type,
             'attached_interface_elements': attached_interface_elements,
             'transfer_interface_elements': transfer_interface_elements,
@@ -278,7 +278,6 @@ class notification_manager_template():
             del input_dict['notification_dice']
             input_dict['init_type'] = 'zoom notification'
             input_dict['target'] = notification_dict['zoom_destination']
-
         new_notification = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         if notification_type == 'roll':
             for current_die in self.global_manager.get('dice_list'):

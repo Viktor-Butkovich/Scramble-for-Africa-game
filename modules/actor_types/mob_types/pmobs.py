@@ -3,7 +3,7 @@
 import pygame
 import random
 from ..mobs import mob
-from ...util import text_utility, utility, actor_utility, minister_utility
+from ...util import text_utility, utility, actor_utility, minister_utility, game_transitions
 
 class pmob(mob):
     '''
@@ -538,9 +538,7 @@ class pmob(mob):
         if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
             return(True)
         else:
-            text_utility.print_to_screen('', self.global_manager)
-            text_utility.print_to_screen('You cannot do that until all ministers have been appointed', self.global_manager)
-            text_utility.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', self.global_manager)
+            game_transitions.force_minister_appointment(self.global_manager)
             return(False)
 
     def set_controlling_minister_type(self, new_type):

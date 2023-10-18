@@ -13,9 +13,6 @@ def update_display(global_manager):
     Output:
         None
     '''
-    #global_manager.set('can_show_counter', 0)
-    #global_manager.set('draw_counter', 0)
-
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #end load timer faster once program starts repeating this part
         draw_loading_screen(global_manager)
@@ -90,26 +87,6 @@ def update_display(global_manager):
             global_manager.get('fps_tracker').set(global_manager.get('frames_this_second'))
             global_manager.set('frames_this_second', 0)
             global_manager.set('last_fps_update', current_time)
-    #print('can_show calls: ' + str(global_manager.get('can_show_counter')))
-    #print('draw calls: ' + str(global_manager.get('draw_counter')))
-
-def minister_appointed(minister_type, global_manager):
-    '''
-    Description:
-        Checks if there is a minister appointed in the inputted office and prints a warning if there is not one, used to explain why the player can't do an action
-    Input:
-        string minister_type: minister office to check the occupancy of, like 'Minister of Trade'
-    Output:
-        boolean: Returns whether there is a minister appointed in the inputted office
-    '''
-    if not global_manager.get('current_ministers')[minister_type] == 'none':
-        return(True)
-    else:
-        keyword = global_manager.get('minister_type_dict')[minister_type]
-        text_utility.print_to_screen('', global_manager)
-        text_utility.print_to_screen('You cannot do ' + keyword + ' actions because a ' + minister_type + ' has not been appointed', global_manager)
-        text_utility.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', global_manager)
-        return(False)
 
 def action_possible(global_manager):
     '''

@@ -1724,8 +1724,7 @@ class to_trial_button(button):
                     else:
                         text_utility.print_to_screen('There are currently no available appointees to replace this minister in the event of a successful trial.', self.global_manager)
                 else:
-                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    game_transitions.force_minister_appointment(self.global_manager)
             else:
                 text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
         else:
@@ -1789,8 +1788,7 @@ class active_investigation_button(button):
                     self.global_manager.get('displayed_minister').attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
                     actor_utility.double_action_price(self.global_manager, 'active_investigation')
                 else:
-                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    game_transitions.force_minister_appointment(self.global_manager)
             else:
                 text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['active_investigation']) + ' money needed to start an active investigation.', self.global_manager)
         else:

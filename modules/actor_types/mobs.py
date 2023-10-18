@@ -897,6 +897,8 @@ class mob(actor):
         Output:
             None
         '''
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none')
         for current_image in self.images:
             current_image.remove_from_cell()
         
