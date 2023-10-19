@@ -6,6 +6,7 @@ from ...util import scaling, game_transitions, turn_management_utility, text_uti
 from ...interface_types import grids
 from . import global_manager_template
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class save_load_manager_template():
     '''
@@ -66,7 +67,7 @@ class save_load_manager_template():
         Output:
             None
         '''
-        self.global_manager.set('creating_new_game', True)
+        constants.creating_new_game = True
         country.select()
         strategic_grid_height = 300
         strategic_grid_width = 320
@@ -103,7 +104,7 @@ class save_load_manager_template():
         europe_grid_x = self.global_manager.get('europe_grid_x') #constants.default_display_width - (strategic_grid_width + 340)
         europe_grid_y = self.global_manager.get('europe_grid_y') #constants.default_display_height - (strategic_grid_height + 25)
 
-        self.global_manager.set('europe_grid', grids.abstract_grid(False, {
+        status.europe_grid = grids.abstract_grid(False, {
             'coordinates': scaling.scale_coordinates(europe_grid_x, europe_grid_y),
             'width': scaling.scale_width(120),
             'height': scaling.scale_height(120),
@@ -113,7 +114,7 @@ class save_load_manager_template():
             'tile_image_id': 'locations/europe/' + country.name + '.png',
             'grid_line_width': 3,
             'name': 'Europe'
-        }, self.global_manager))
+        }, self.global_manager)
 
 
         slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
@@ -191,7 +192,7 @@ class save_load_manager_template():
         minister_utility.update_available_minister_display(self.global_manager)
 
         turn_management_utility.start_player_turn(self.global_manager, True)
-        if not self.global_manager.get('effect_manager').effect_active('skip_intro'):
+        if not constants.effect_manager.effect_active('skip_intro'):
             self.global_manager.set('minister_appointment_tutorial_completed', False)
             self.global_manager.set('exit_minister_screen_tutorial_completed', False)
             tutorial_utility.show_tutorial_notifications(self.global_manager)
@@ -201,7 +202,7 @@ class save_load_manager_template():
             for current_minister_position_index in range(len(self.global_manager.get('minister_types'))):
                 self.global_manager.get('minister_list')[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
             game_transitions.set_game_mode('strategic', self.global_manager)
-        self.global_manager.set('creating_new_game', False)
+        constants.creating_new_game = False
         
     def save_game(self, file_path):
         '''
@@ -243,7 +244,7 @@ class save_load_manager_template():
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
-            if self.global_manager.get('effect_manager').effect_active('show_corruption_on_save'):
+            if constants.effect_manager.effect_active('show_corruption_on_save'):
                 print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
                     ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
@@ -339,8 +340,7 @@ class save_load_manager_template():
                     input_dict['coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y)
                     input_dict['tile_image_id'] = 'locations/europe/' + self.global_manager.get('current_country').name + '.png' 
                     input_dict['name'] = 'Europe'
-                    europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
-                    self.global_manager.set('europe_grid', europe_grid)
+                    status.europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                 else:
                     input_dict['modes'] = ['strategic']
                     input_dict['coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y)
@@ -365,7 +365,7 @@ class save_load_manager_template():
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager, from_save=True)
-        if self.global_manager.get('effect_manager').effect_active('eradicate_slave_trade'):
+        if constants.effect_manager.effect_active('eradicate_slave_trade'):
             actor_utility.set_slave_traders_strength(0, self.global_manager)
         else:
             actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength'), self.global_manager)

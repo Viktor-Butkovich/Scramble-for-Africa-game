@@ -56,7 +56,7 @@ class building(actor):
         self.is_port = False #used to determine if port is in a tile to move there
 
         self.set_inventory_capacity(self.default_inventory_capacity)
-        if self.global_manager.get('effect_manager').effect_active('damaged_buildings'):
+        if constants.effect_manager.effect_active('damaged_buildings'):
             if self.can_damage():
                 self.set_damaged(True, True)
 
@@ -589,7 +589,7 @@ class warehouses(building):
             while self.warehouse_level < input_dict['warehouse_level']:
                 self.upgrade()
                 
-        if global_manager.get('effect_manager').effect_active('damaged_buildings'):
+        if constants.effect_manager.effect_active('damaged_buildings'):
             if self.can_damage():
                 self.set_damaged(True, True)
                 
@@ -777,10 +777,10 @@ class resource_building(building):
         officer_attrition_list = []
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                     officer_attrition_list.append(current_work_crew) #current_work_crew.attrition_death('officer')
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                         current_work_crew.attrition_death('worker')

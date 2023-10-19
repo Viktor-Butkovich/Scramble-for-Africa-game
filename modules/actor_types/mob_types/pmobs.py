@@ -420,7 +420,7 @@ class pmob(mob):
             return()
         if current_cell.local_attrition():
             transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type
@@ -500,7 +500,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.global_manager.get('show_selection_outlines'):
+        if constants.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)

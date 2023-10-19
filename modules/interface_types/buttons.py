@@ -6,6 +6,7 @@ from ..util import text_utility, scaling, main_loop_utility, actor_utility, util
     minister_utility, trial_utility, action_utility
 from . import interface_elements
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class button(interface_elements.interface_element):
     '''
@@ -805,8 +806,8 @@ class button(interface_elements.interface_element):
                         if self.global_manager.get('current_game_mode') == 'strategic':
                             if current_mob.can_move(x_change, y_change):
                                 current_mob.move(x_change, y_change)
-                                self.global_manager.set('show_selection_outlines', True)
-                                self.global_manager.set('last_selection_outline_switch', time.time())
+                                constants.show_selection_outlines = True
+                                constants.last_selection_outline_switch = constants.current_time
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
                                 current_mob.clear_automatic_route()
@@ -819,7 +820,7 @@ class button(interface_elements.interface_element):
             else:
                 text_utility.print_to_screen('You are busy and cannot move.', self.global_manager)
         elif self.button_type == 'toggle grid lines':
-            self.global_manager.get('effect_manager').set_effect('hide_grid_lines', utility.toggle(self.global_manager.get('effect_manager').effect_active('hide_grid_lines')))
+            constants.effect_manager.set_effect('hide_grid_lines', utility.toggle(constants.effect_manager.effect_active('hide_grid_lines')))
 
         elif self.button_type == 'toggle text box':
             self.global_manager.set('show_text_box', utility.toggle(self.global_manager.get('show_text_box')))
@@ -1248,7 +1249,7 @@ class button(interface_elements.interface_element):
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
-                if self.global_manager.get('europe_grid') in self.attached_label.actor.grids and self.attached_label.current_commodity != 'consumer goods':
+                if status.europe_grid in self.attached_label.actor.grids and self.attached_label.current_commodity != 'consumer goods':
                     return(True)
                 else:
                     return(False)
@@ -1889,7 +1890,7 @@ class minister_portrait_image(button):
             showing = True
             if not self.current_minister == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
-                if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
+                if self.global_manager.get('displayed_minister') == self.current_minister and constants.show_selection_outlines: 
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
         super().draw()
         if showing and self.warning_image.showing:
@@ -1995,7 +1996,7 @@ class country_selection_image(button):
         if self.showing: #draw outline around portrait if country selected
             if not self.current_country == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
-                if self.global_manager.get('displayed_country') == self.current_country and self.global_manager.get('show_selection_outlines'): 
+                if self.global_manager.get('displayed_country') == self.current_country and constants.show_selection_outlines: 
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
         super().draw()
 

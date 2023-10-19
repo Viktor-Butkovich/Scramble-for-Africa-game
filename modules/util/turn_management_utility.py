@@ -3,6 +3,7 @@
 import random
 from . import text_utility, actor_utility, trial_utility, market_utility, utility, game_transitions
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def end_turn(global_manager):
     '''
@@ -140,7 +141,7 @@ def manage_attrition(global_manager):
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.manage_inventory_attrition()
 
-    terrain_cell_lists = [global_manager.get('strategic_map_grid').get_flat_cell_list(), [global_manager.get('slave_traders_grid').cell_list[0][0]], [global_manager.get('europe_grid').cell_list[0][0]]]
+    terrain_cell_lists = [global_manager.get('strategic_map_grid').get_flat_cell_list(), [global_manager.get('slave_traders_grid').cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
@@ -156,7 +157,7 @@ def remove_excess_inventory(global_manager):
     Output:
         None
     '''
-    terrain_cell_lists = [global_manager.get('strategic_map_grid').get_flat_cell_list(), [global_manager.get('slave_traders_grid').cell_list[0][0]], [global_manager.get('europe_grid').cell_list[0][0]]]
+    terrain_cell_lists = [global_manager.get('strategic_map_grid').get_flat_cell_list(), [global_manager.get('slave_traders_grid').cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
@@ -274,9 +275,9 @@ def manage_public_opinion(global_manager):
         global_manager.get('public_opinion_tracker').change(-1)
         text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1), global_manager)
     global_manager.get('evil_tracker').change(-1)
-    if global_manager.get('effect_manager').effect_active('show_evil'):
+    if constants.effect_manager.effect_active('show_evil'):
         print('Evil number: ' + str(global_manager.get('evil')))
-    if global_manager.get('effect_manager').effect_active('show_fear'):
+    if constants.effect_manager.effect_active('show_fear'):
         print('Fear number: ' + str(global_manager.get('fear')))
     
 def manage_subsidies(global_manager):
@@ -589,7 +590,7 @@ def manage_ministers(global_manager):
             removing_minister = True
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('effect_manager').effect_active('farm_upstate'):
+        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or constants.effect_manager.effect_active('farm_upstate'):
             removed_ministers.append(current_minister)
         else: #if not retired/fired
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1: #1/36 chance to increase relevant specific skill
@@ -743,5 +744,5 @@ def manage_lore(global_manager):
         None
     '''
     if global_manager.get('current_lore_mission') == 'none':
-        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or global_manager.get('effect_manager').effect_active('instant_lore_mission'):
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or constants.effect_manager.effect_active('instant_lore_mission'):
             constants.actor_creation_manager.create_lore_mission(False, {}, global_manager)

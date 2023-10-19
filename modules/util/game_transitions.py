@@ -4,6 +4,7 @@ import time
 from . import main_loop_utility, text_utility, actor_utility, minister_utility, scaling
 from ..actor_types import tiles
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def cycle_player_turn(global_manager, start_of_turn = False):
     '''
@@ -24,7 +25,7 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
             text_utility.print_to_screen('There are no other units left to move this turn.', global_manager)
-        if global_manager.get('current_game_mode') == 'europe' and not global_manager.get('europe_grid') in turn_queue[0].grids:
+        if global_manager.get('current_game_mode') == 'europe' and not status.europe_grid in turn_queue[0].grids:
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:
             turn_queue[0].selection_sound()
@@ -55,10 +56,10 @@ def set_game_mode(new_game_mode, global_manager):
         return()
     else:
         if previous_game_mode in ['main_menu', 'new_game_setup'] and not new_game_mode in ['main_menu', 'new_game_setup']: #new_game_mode in ['strategic', 'ministers', 'europe']:
-            global_manager.get('event_manager').clear()
+            constants.event_manager.clear()
             constants.sound_manager.play_random_music('europe')
         elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
-            global_manager.get('event_manager').clear()
+            constants.event_manager.clear()
             constants.sound_manager.play_random_music('main menu')
 
         if not (new_game_mode == 'trial' or global_manager.get('current_game_mode') == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
@@ -73,7 +74,7 @@ def set_game_mode(new_game_mode, global_manager):
                 #calibrate tile info to minimap center
         elif new_game_mode == 'europe':
             global_manager.set('current_game_mode', 'europe')
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0][0].tile) #calibrate tile info to Europe
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main_menu':
             global_manager.set('current_game_mode', 'main_menu')
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
@@ -81,7 +82,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0][0].tile) #calibrate tile info to Europe
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
         elif new_game_mode == 'new_game_setup':
@@ -108,7 +109,7 @@ def set_game_mode(new_game_mode, global_manager):
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display'), 'none')
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), 'none')
 
-    if global_manager.get('startup_complete') and not new_game_mode in ['main_menu', 'new_game_setup']:
+    if constants.startup_complete and not new_game_mode in ['main_menu', 'new_game_setup']:
         global_manager.get('notification_manager').update_notification_layout()
 
 def create_strategic_map(global_manager, from_save=False):
@@ -158,8 +159,8 @@ def start_loading(global_manager):
     Output:
         None
     '''
-    global_manager.set('loading', True)
-    global_manager.set('loading_start_time', time.time())
+    constants.loading = True
+    constants.loading_start_time = time.time()
     main_loop_utility.update_display(global_manager)
 
 def to_main_menu(global_manager, override = False):

@@ -4,6 +4,7 @@ import pygame
 from . import action
 from ..util import action_utility, text_utility, actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class religious_campaign(action.campaign):
     '''
@@ -144,7 +145,7 @@ class religious_campaign(action.campaign):
             None
         '''
         if super().on_click(unit):
-            if self.global_manager.get('europe_grid') in unit.grids:
+            if status.europe_grid in unit.grids:
                 self.start(unit)
             else:
                 text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe', self.global_manager)
@@ -189,7 +190,7 @@ class religious_campaign(action.campaign):
         if self.roll_result >= self.current_min_success:
             church_volunteers = constants.actor_creation_manager.create(False, {
                 'coordinates': (0, 0),
-                'grids': [self.global_manager.get('europe_grid')],
+                'grids': [status.europe_grid],
                 'image': 'mobs/church_volunteers/default.png',
                 'name': 'church volunteers',
                 'modes': ['strategic', 'europe'],

@@ -14,8 +14,8 @@ def update_display(global_manager):
     Output:
         None
     '''
-    if global_manager.get('loading'):
-        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #end load timer faster once program starts repeating this part
+    if constants.loading:
+        constants.loading_start_time -= 1 #end load timer faster once program starts repeating this part
         draw_loading_screen(global_manager)
     else:
         possible_tooltip_drawers = []
@@ -72,16 +72,16 @@ def update_display(global_manager):
             if instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
                 possible_tooltip_drawers = [instructions_page] #instructions have priority over everything
         if (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) != pygame.mouse.get_pos():
-            global_manager.set('mouse_moved_time', time.time())
+            constants.mouse_moved_time = constants.current_time
             old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
             global_manager.set('old_mouse_x', old_mouse_x)
             global_manager.set('old_mouse_y', old_mouse_y)
-        if time.time() > global_manager.get('mouse_moved_time') + 0.15: #show tooltip when mouse is still
+        if time.time() > constants.mouse_moved_time + 0.15: #show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         
     pygame.display.update()
 
-    if global_manager.get('effect_manager').effect_active('track_fps'):
+    if constants.effect_manager.effect_active('track_fps'):
         current_time = time.time()
         global_manager.set('frames_this_second', global_manager.get('frames_this_second') + 1)
         if current_time > global_manager.get('last_fps_update') + 1:
@@ -126,8 +126,8 @@ def draw_loading_screen(global_manager):
         None
     '''
     global_manager.get('loading_image').draw() 
-    if global_manager.get('loading_start_time') + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
-        global_manager.set('loading', False)
+    if constants.loading_start_time + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
+        constants.loading = False
 
 def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
     '''
@@ -286,8 +286,8 @@ def manage_rmb_down(clicked_button, global_manager):
                                 if not current_image.current_cell == 'none':
                                     while not moved_mob == current_image.current_cell.contained_mobs[0]:
                                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-                            global_manager.set('show_selection_outlines', True)
-                            global_manager.set('last_selection_outline_switch', time.time())
+                            constants.show_selection_outlines = True
+                            constants.last_selection_outline_switch = constants.current_time
                             if global_manager.get('minimap_grid') in moved_mob.grids:
                                 global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
                             moved_mob.select()
@@ -383,8 +383,8 @@ def manage_lmb_down(clicked_button, global_manager):
                             chose_destination = True
                             if not stopping:
                                 chooser.end_turn_destination = target_cell.tile
-                                global_manager.set('show_selection_outlines', True)
-                                global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+                                constants.show_selection_outlines = True
+                                constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately once destination is chosen
                                 chooser.remove_from_turn_queue()
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), chooser)
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), chooser.images[0].current_cell.tile)
@@ -439,8 +439,8 @@ def manage_lmb_down(clicked_button, global_manager):
                                                                      
                                 displayed_mob.add_to_automatic_route((destination_x, destination_y))
                                 click_move_minimap(global_manager)
-                                global_manager.set('show_selection_outlines', True)
-                                global_manager.set('last_selection_outline_switch', time.time())
+                                constants.show_selection_outlines = True
+                                constants.last_selection_outline_switch = constants.current_time
                             else:
                                 text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
                                 
@@ -486,5 +486,5 @@ def debug_print(global_manager):
         None
     '''
     print('')
-    print(global_manager.get('effect_manager'))
+    print(constants.effect_manager)
     

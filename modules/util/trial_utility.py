@@ -55,7 +55,7 @@ def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
             defense_cost = max_defense_fund / 2
             prosecutor.steal_money(defense_cost, 'bribery')
             building_defense = False
-            if global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+            if constants.effect_manager.effect_active('show_minister_stealing'):
                 print(defense.current_position + ' ' + defense.name + ' now has ' + str(defense.stolen_money - defense_cost) + ' money remaining.')
         else:
             lawyer_cost = get_lawyer_cost(num_lawyers)

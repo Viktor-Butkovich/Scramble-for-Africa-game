@@ -4,6 +4,7 @@ import pygame
 import random
 from ..util import text_utility, utility, actor_utility, scaling, market_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class actor():
     '''
@@ -153,7 +154,7 @@ class actor():
         '''
         self.inventory = {}
         for current_commodity in self.global_manager.get('commodity_types'):
-            if self.global_manager.get('effect_manager').effect_active('infinite_commodities') and self.name == 'Europe':
+            if constants.effect_manager.effect_active('infinite_commodities') and self.name == 'Europe':
                 self.inventory[current_commodity] = 10
             else:
                 self.inventory[current_commodity] = 0
@@ -270,7 +271,7 @@ class actor():
             None
         '''
         if self.get_inventory_used() > 0:
-            if random.randrange(1, 7) <= 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
+            if random.randrange(1, 7) <= 1 or constants.effect_manager.effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
                 transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
                 if self.actor_type == 'tile':
                     current_cell = self.cell
@@ -354,7 +355,7 @@ class actor():
                 was_word = 'were'
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 location_message = 'at (' + str(self.x) + ', ' + str(self.y) + ')'
-            elif self.global_manager.get('europe_grid') in self.grids:
+            elif status.europe_grid in self.grids:
                 location_message = 'in Europe'
             elif self.global_manager.get('slave_traders_grid') in self.grids:
                 location_message = 'in the Arab slave markets'

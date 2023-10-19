@@ -42,7 +42,7 @@ class village():
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
                 constants.actor_creation_manager.create(True, current_save_dict, global_manager)
-        if self.global_manager.get('effect_manager').effect_active('infinite_village_workers'):
+        if constants.effect_manager.effect_active('infinite_village_workers'):
             self.available_workers = self.population
         self.cell = input_dict['cell']
         self.x = self.cell.x
@@ -100,7 +100,7 @@ class village():
         Output:
             Returns whether this village can currently spawn a warrior
         '''
-        if self.global_manager.get('effect_manager').effect_active('block_native_warrior_spawning'):
+        if constants.effect_manager.effect_active('block_native_warrior_spawning'):
             return(False)
         if self.population > self.available_workers:
             return(True)

@@ -30,7 +30,7 @@ def main_loop(global_manager):
             else:
                 global_manager.set('ctrl', False)
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p and global_manager.get('effect_manager').effect_active('debug_print'):
+                if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
                     main_loop_utility.debug_print(global_manager)
                 for current_button in global_manager.get('button_list'):
                     if current_button.showing and not global_manager.get('typing'):
@@ -195,16 +195,16 @@ def main_loop(global_manager):
                 if current_button.has_released:
                     current_button.showing_outline = False
 
-        if not global_manager.get('loading'):
+        if not constants.loading:
             main_loop_utility.update_display(global_manager)
         else:
             main_loop_utility.draw_loading_screen(global_manager)
-        global_manager.set('current_time', time.time())
-        if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
-            global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
-            global_manager.set('last_selection_outline_switch', global_manager.get('current_time'))
-        global_manager.get('event_manager').update(global_manager.get('current_time'))
-        if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= global_manager.get('current_time'): #if enough time has passed based on delay from previous movement
+        constants.current_time = time.time()
+        if constants.current_time - constants.last_selection_outline_switch > 1:
+            constants.show_selection_outlines = not constants.show_selection_outlines
+            constants.last_selection_outline_switch = constants.current_time
+        constants.event_manager.update(constants.current_time)
+        if not global_manager.get('player_turn') and constants.previous_turn_time + constants.end_turn_wait_time <= constants.current_time: #if enough time has passed based on delay from previous movement
             enemy_turn_done = True
             for enemy in global_manager.get('npmob_list'):
                 if not enemy.turn_done:
@@ -282,24 +282,24 @@ def main_loop(global_manager):
                 if removed: #show unit despawning if visible
                     current_enemy.turn_done = True
                     if not current_enemy.visible():
-                        global_manager.set('end_turn_wait_time', 0)
+                        constants.end_turn_wait_time = 0
                     else:
-                        global_manager.set('end_turn_wait_time', 1)
+                        constants.end_turn_wait_time = 1
                     global_manager.get('enemy_turn_queue').pop(0)
                     
                 else: #If unit visible, have short delay depending on action taken to let user see it
                     if (not spawning) and (did_nothing or not current_enemy.visible()): #do not wait if not visible or nothing to show, exception for spawning units, which may not be visible as user watches them spawn
-                        global_manager.set('end_turn_wait_time', 0)
+                        constants.end_turn_wait_time = 0
                     elif spawning and not current_enemy.grids[0].find_cell(current_enemy.x, current_enemy.y).visible: #do not wait if spawning unit won't be visible even after it spawns
-                        global_manager.set('end_turn_wait_time', 0)
+                        constants.end_turn_wait_time = 0
                     elif moving and not enemy.turn_done:#if will move again after this
-                        global_manager.set('end_turn_wait_time', 0.25)
+                        constants.end_turn_wait_time = 0.25
                     else: #if done with turn
-                        global_manager.set('end_turn_wait_time', 0.5)
+                        constants.end_turn_wait_time = 0.5
 
                     if current_enemy.turn_done:
                         global_manager.get('enemy_turn_queue').pop(0)
-            if global_manager.get('effect_manager').effect_active('fast_turn'):
-                global_manager.set('end_turn_wait_time', 0)
-            global_manager.set('previous_turn_time', time.time())
+            if constants.effect_manager.effect_active('fast_turn'):
+                constants.end_turn_wait_time = 0
+            constants.previous_turn_time = time.time()
     pygame.quit()

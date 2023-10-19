@@ -1,12 +1,12 @@
 #Contains functionality for mobs
 
 import pygame
-import time
 import random
 from ..constructs import images
 from ..util import utility, actor_utility
 from .actors import actor
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class mob(actor):
     '''
@@ -88,7 +88,7 @@ class mob(actor):
         else:
             self.reset_movement_points()
             self.update_tooltip()
-            if global_manager.get('creating_new_game'):
+            if constants.creating_new_game:
                 self.creation_turn = 0
             else:
                 self.creation_turn = self.global_manager.get('turn')
@@ -480,7 +480,7 @@ class mob(actor):
         Output:
             None
         '''
-        if new_grid == self.global_manager.get('europe_grid'):
+        if new_grid == status.europe_grid:
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), 'none')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), new_grid.cell_list[0][0].tile)
@@ -513,14 +513,9 @@ class mob(actor):
         actor_utility.deselect_all(self.global_manager)
         self.selected = True
         self.global_manager.set('end_turn_selected_mob', self) #tells game to select this unit at the end of the turn because it was selected most recently
-        self.global_manager.set('show_selection_outlines', True)
-        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+        constants.show_selection_outlines = True
+        constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
-        #for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members: #automatically selects default interface tab when selected
-        #    if hasattr(tab_button.linked_element, 'identifier'):
-        #        if tab_button.linked_element.identifier == self.default_interface_tab and tab_button.linked_element != self.global_manager.get('mob_tabbed_collection').current_tabbed_member:
-        #            tab_button.on_click()
-        #            continue
 
     def move_to_front(self):
         '''
@@ -545,7 +540,7 @@ class mob(actor):
         Output:
             None
         '''
-        if self.global_manager.get('show_selection_outlines'):
+        if constants.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
@@ -601,7 +596,7 @@ class mob(actor):
         if not self.end_turn_destination == 'none':
             if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
                 tooltip_list.append('This unit has been issued an order to travel to (' + str(self.end_turn_destination.cell.x) + ', ' + str(self.end_turn_destination.cell.y) + ') in Africa at the end of the turn')
-            elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
+            elif self.end_turn_destination.cell.grid == status.europe_grid:
                 tooltip_list.append('This unit has been issued an order to travel to Europe at the end of the turn')
             elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
                 tooltip_list.append('This unit has been issued an order to travel to the slave traders at the end of the turn')

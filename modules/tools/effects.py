@@ -15,7 +15,7 @@ class effect():
         Output:
             None
         '''
-        self.effect_manager = global_manager.get('effect_manager')
+        self.effect_manager = constants.effect_manager
         self.effect_manager.possible_effects.append(self)
         
         self.effect_id = effect_id

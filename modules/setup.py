@@ -23,13 +23,13 @@ def setup(*args):
         global_manager_template global_manager: Object that accesses shared variables
         function list args: List of setup functions to run
     Output:
-        None 
+        None
     '''
-    constants.global_manager.set('startup_complete', False)
+    constants.startup_complete = False
     for setup_function in args:
         setup_function(constants.global_manager)
-    constants.global_manager.set('startup_complete', True)
-    constants.global_manager.set('creating_new_game', False)
+    constants.startup_complete = True
+    constants.creating_new_game = False
 
 def fundamental(global_manager):
     '''
@@ -40,19 +40,7 @@ def fundamental(global_manager):
     Output:
         None
     '''
-    global_manager.set('europe_grid', 'none')
-    
-    start_time = time.time()
-    global_manager.set('loading', True)
-    global_manager.set('loading_start_time', start_time)
-    global_manager.set('previous_turn_time', start_time)
-    global_manager.set('current_time', start_time)
-    global_manager.set('last_selection_outline_switch', start_time)
-    global_manager.set('mouse_moved_time', start_time)
-    global_manager.set('end_turn_wait_time', 0.8)
-    global_manager.set('event_manager', event_manager_template.event_manager_template(global_manager))
-
-    if global_manager.get('effect_manager').effect_active('track_fps'):
+    if constants.effect_manager.effect_active('track_fps'):
         global_manager.set('fps', 0)
         global_manager.set('frames_this_second', 0)
         global_manager.set('last_fps_update', time.time())
@@ -139,8 +127,6 @@ def misc(global_manager):
     global_manager.set('typing', False)
     global_manager.set('message', '')
     global_manager.set('show_text_box', True)
-    global_manager.set('show_selection_outlines', True)
-    global_manager.set('show_minimap_outlines', True)
     global_manager.set('making_choice', False)
     global_manager.set('loading_save', False)
     global_manager.set('player_turn', True)
@@ -875,7 +861,7 @@ def value_trackers(global_manager):
         'member_config': {'index': 1} #should appear before public opinion in collection but relies on public opinion existing
     }, global_manager))
 
-    if global_manager.get('effect_manager').effect_active('track_fps'):
+    if constants.effect_manager.effect_active('track_fps'):
         global_manager.set('fps_tracker', value_tracker_template.value_tracker('fps', 0, 0, 'none', global_manager))
         constants.actor_creation_manager.create_interface_element({
             'minimum_width': scaling.scale_width(10),
@@ -2067,8 +2053,6 @@ def debug_tools(global_manager):
     Output:
         None
     '''
-    global_manager.set('effect_manager', effect_manager_template.effect_manager_template(global_manager))
-
     #for release, official version of config file with only intended user settings
     file = open('configuration/release_config.json')
 
@@ -2086,8 +2070,8 @@ def debug_tools(global_manager):
     except:
         active_effects_config = debug_config
     for current_effect in active_effects_config['active_effects']:
-        if global_manager.get('effect_manager').effect_exists(current_effect):
-            global_manager.get('effect_manager').set_effect(current_effect, True)
+        if constants.effect_manager.effect_exists(current_effect):
+            constants.effect_manager.set_effect(current_effect, True)
         else:
             print('Invalid effect: ' + current_effect)
 

@@ -17,7 +17,7 @@ class event_manager_template():
         self.event_list = []
         self.event_time_list = []
         self.global_manager = global_manager
-        self.previous_time = self.global_manager.get('current_time')
+        self.previous_time = 0.0
 
     def add_event(self, function, inputs, activation_time):
         '''

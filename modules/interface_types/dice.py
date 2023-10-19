@@ -36,7 +36,7 @@ class die(button):
         self.outcome_color_dict = input_dict['outcome_color_dict'] #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
         self.rolls_completed = 0
         self.num_sides = input_dict['num_sides']
-        if global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+        if constants.effect_manager.effect_active('ministry_of_magic'):
             self.num_rolls = 1
         else:
             self.num_rolls = random.randrange(-3, 4) + 7 #4-10

@@ -4,6 +4,7 @@ import pygame
 from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class choice_notification(action_notifications.action_notification):
     '''
@@ -295,7 +296,7 @@ class recruitment_choice_button(choice_button):
 
         else:
             input_dict['coordinates'] = (0, 0)
-            input_dict['grids'] = [self.global_manager.get('europe_grid')]
+            input_dict['grids'] = [status.europe_grid]
             input_dict['image'] = self.mob_image_id
             input_dict['modes'] = ['strategic', 'europe']
             self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')

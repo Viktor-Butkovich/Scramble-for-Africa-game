@@ -67,7 +67,7 @@ class lore_mission():
                 'message': text,
             })
 
-        if self.global_manager.get('effect_manager').effect_active('show_lore_mission_locations'):
+        if constants.effect_manager.effect_active('show_lore_mission_locations'):
             print('new mission for ' + self.name)
             for current_possible_artifact_location in self.possible_artifact_locations:
                 print('possible location at (' + str(current_possible_artifact_location.x) + ', ' + str(current_possible_artifact_location.y) + ')')

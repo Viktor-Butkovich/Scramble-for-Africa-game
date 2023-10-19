@@ -289,7 +289,7 @@ class minister():
         '''
         prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
         if prosecutor != 'none':
-            if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+            if constants.effect_manager.effect_active('show_minister_stealing'):
                 print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + constants.transaction_descriptions[theft_type] + '.')
             difficulty = self.no_corruption_roll(6, 'minister_stealing')
             result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
@@ -297,7 +297,7 @@ class minister():
                 required_bribe_amount = max(value / 2, 5)
                 if prosecutor.check_corruption() and self.can_pay(required_bribe_amount): #if prosecutor takes bribe, split money
                     self.pay(prosecutor, required_bribe_amount)
-                    if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+                    if constants.effect_manager.effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who accepted a bribe to not create evidence.')
                         print(prosecutor.current_position + ' ' + prosecutor.name + ' has now stolen a total of ' + str(prosecutor.stolen_money) + ' money.')
                 else: #if prosecutor refuses bribe, still keep money but create evidence
@@ -308,10 +308,10 @@ class minister():
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
                     prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'))
-                    if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+                    if constants.effect_manager.effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who chose to create evidence.')
             else:
-                if self.global_manager.get('effect_manager').effect_active('show_minister_stealing') and prosecutor != self:
+                if constants.effect_manager.effect_active('show_minister_stealing') and prosecutor != self:
                     print('The theft was not caught by the prosecutor.')
 
     def steal_money(self, value, theft_type = 'none', allow_prosecutor_detection=True):
@@ -328,7 +328,7 @@ class minister():
         if allow_prosecutor_detection:
             self.attempt_prosecutor_detection(value=value, theft_type=theft_type)
 
-        if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+        if constants.effect_manager.effect_active('show_minister_stealing'):
             print(self.current_position + ' ' + self.name + ' has now stolen a total of ' + str(self.stolen_money) + ' money.')
 
         if value > 0:
@@ -587,7 +587,7 @@ class minister():
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
             if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill and (self.specific_skills[current_minister_type] + self.general_skill) < 6:
                 self.specific_skills[current_minister_type] += 1
-            if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+            if constants.effect_manager.effect_active('transparent_ministers'):
                 self.set_apparent_skill(current_minister_type, self.specific_skills[current_minister_type] + self.general_skill)
             else:
                 self.set_apparent_skill(current_minister_type, 0)
@@ -603,7 +603,7 @@ class minister():
         if (not skill_type in self.apparent_skills) or self.apparent_skills[skill_type] != new_value:
             self.apparent_skills[skill_type] = new_value
             self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
-            if not (self.global_manager.get('creating_new_game') or self.initializing):
+            if not (constants.creating_new_game or self.initializing):
                 self.update_tooltip()
             if self.global_manager.get('displayed_minister') == self:
                 minister_utility.calibrate_minister_info_display(self.global_manager, self)
@@ -673,7 +673,7 @@ class minister():
         self.corruption = random.randrange(1, 7) #1-6
         self.corruption_threshold = 10 - self.corruption #minimum roll on D6 required for corruption to occur
         
-        if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+        if constants.effect_manager.effect_active('transparent_ministers'):
             self.set_apparent_corruption(self.corruption)
         else:
             self.set_apparent_corruption(0)
@@ -688,7 +688,7 @@ class minister():
         if (not hasattr(self, 'apparent_corruption')) or self.apparent_corruption != new_value:
             self.apparent_corruption = new_value
             self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
-            if not (self.global_manager.get('creating_new_game') or self.initializing):
+            if not (constants.creating_new_game or self.initializing):
                 self.update_tooltip()
             if self.global_manager.get('displayed_minister') == self:
                 minister_utility.calibrate_minister_info_display(self.global_manager, self)
@@ -834,7 +834,7 @@ class minister():
             self.set_apparent_skill(rumor_type, apparent_value)
 
         if prosecutor == 'none' :
-            if not self.global_manager.get('creating_new_game'):
+            if not constants.creating_new_game:
                 message = 'A rumor has been found that ' + self.name + ', '
                 if self.current_position == 'none':
                     message += ' a potential minister candidate, '
@@ -860,16 +860,16 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
-        if self.global_manager.get('effect_manager').effect_active('band_of_thieves') or ((self.global_manager.get('effect_manager').effect_active('lawbearer') and self != self.global_manager.get('current_ministers')['Prosecutor'])):
+        if constants.effect_manager.effect_active('band_of_thieves') or ((constants.effect_manager.effect_active('lawbearer') and self != self.global_manager.get('current_ministers')['Prosecutor'])):
             return(True)
-        elif self.global_manager.get('effect_manager').effect_active('ministry_of_magic') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
+        elif constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
             return(False)
             
         if random.randrange(1, 7) >= self.corruption_threshold:
             if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
                 return(True)
             else:
-                if self.global_manager.get('effect_manager').effect_active('show_fear'):
+                if constants.effect_manager.effect_active('show_fear'):
                     print(self.name + ' was too afraid to steal money')
                 return(False)
         else:
@@ -938,30 +938,30 @@ class minister():
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
         modifier = 0
-        if self.global_manager.get('effect_manager').effect_active('ministry_of_magic') or (self.global_manager.get('effect_manager').effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
+        if constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
             return(5)
-        elif self.global_manager.get('effect_manager').effect_active('nine_mortal_men'):
+        elif constants.effect_manager.effect_active('nine_mortal_men'):
             return(-10)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             modifier += self.get_skill_modifier()
-            if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+            if constants.effect_manager.effect_active('show_modifiers'):
                 if modifier >= 0:
                     print('Minister gave modifier of +' + str(modifier) + ' to ' + roll_type + ' roll.')
                 else:
                     print('Minister gave modifier of ' + str(modifier) + ' to ' + roll_type + ' roll.')
-        if self.global_manager.get('effect_manager').effect_active(roll_type + '_plus_modifier'):
+        if constants.effect_manager.effect_active(roll_type + '_plus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier += 1
-                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                if constants.effect_manager.effect_active('show_modifiers'):
                     print('Country gave modifier of +1 to ' + roll_type + ' roll.')
-            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+            elif constants.effect_manager.effect_active('show_modifiers'):
                 print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
-        elif self.global_manager.get('effect_manager').effect_active(roll_type + '_minus_modifier'):
+        elif constants.effect_manager.effect_active(roll_type + '_minus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier -= 1
-                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                if constants.effect_manager.effect_active('show_modifiers'):
                     print('Country gave modifier of -1 to ' + roll_type + ' roll.')
-            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+            elif constants.effect_manager.effect_active('show_modifiers'):
                 print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
         return(modifier)
 

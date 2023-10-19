@@ -474,7 +474,7 @@ class combat(action.action):
         else:
             results = [random.randrange(1, 7), random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
 
-        if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+        if constants.effect_manager.effect_active('ministry_of_magic'):
             results = [1, 6, 6]
         
         self.opponent_roll_result = results.pop(0) #first minister roll is for enemies

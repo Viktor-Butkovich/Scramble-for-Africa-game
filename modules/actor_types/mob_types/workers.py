@@ -111,7 +111,7 @@ class worker(pmob):
             text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
             market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
 
-            if self.global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+            if constants.effect_manager.effect_active('no_slave_trade_penalty'):
                 text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.', self.global_manager)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
@@ -338,7 +338,7 @@ class slave_worker(worker):
         super().__init__(from_save, input_dict, global_manager)
         if not from_save:
             if input_dict['purchased']: #as opposed to captured
-                if not self.global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+                if not constants.effect_manager.effect_active('no_slave_trade_penalty'):
                     public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                     current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                     self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)

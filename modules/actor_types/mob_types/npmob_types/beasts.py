@@ -51,7 +51,7 @@ class beast(npmob):
             self.set_hidden(True, True)
             self.set_max_movement_points(4)
             
-        if global_manager.get('effect_manager').effect_active('reveal_beasts'):
+        if constants.effect_manager.effect_active('reveal_beasts'):
             self.set_hidden(False, True)
             
         self.just_revealed = False

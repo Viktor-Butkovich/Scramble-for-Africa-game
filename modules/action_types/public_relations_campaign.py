@@ -5,6 +5,7 @@ import random
 from . import action
 from ..util import action_utility, text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class public_relations_campaign(action.campaign):
     '''
@@ -103,7 +104,7 @@ class public_relations_campaign(action.campaign):
             None
         '''
         if super().on_click(unit):
-            if self.global_manager.get('europe_grid') in unit.grids:
+            if status.europe_grid in unit.grids:
                 self.start(unit)
             else:
                 text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe', self.global_manager)

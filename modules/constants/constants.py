@@ -5,6 +5,9 @@ from modules.tools.data_managers.save_load_manager_template import save_load_man
 from modules.tools.data_managers.flavor_text_manager_template import flavor_text_manager_template
 from modules.tools.data_managers.input_manager_template import input_manager_template
 from modules.tools.data_managers.actor_creation_manager_template import actor_creation_manager_template
+from modules.tools.data_managers.event_manager_template import event_manager_template
+from modules.tools.data_managers.effect_manager_template import effect_manager_template
+
 from typing import Dict, List
 
 pygame.init()
@@ -17,6 +20,27 @@ save_load_manager:save_load_manager_template = save_load_manager_template(global
 flavor_text_manager:flavor_text_manager_template = flavor_text_manager_template(global_manager)
 input_manager:input_manager_template = input_manager_template(global_manager)
 actor_creation_manager:actor_creation_manager_template = actor_creation_manager_template()
+event_manager:event_manager_template = event_manager_template(global_manager)
+effect_manager:effect_manager_template = effect_manager_template(global_manager)
+
+loading: bool = True
+loading_start_time: float = 0.0
+previous_turn_time: float = 0.0
+current_time: float = 0.0
+last_selection_outline_switch: float = 0.0
+show_selection_outlines: bool = False
+show_minimap_outlines: bool = False
+mouse_moved_time: float = 0.0
+end_turn_wait_time: float = 0.8
+
+default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
+default_display_height: int = 972
+resolution_finder = pygame.display.Info()
+display_width: float = resolution_finder.current_w - round(default_display_width/10)
+display_height: float = resolution_finder.current_h - round(default_display_height/10)
+
+startup_complete: bool = False
+creating_new_game: bool = False
 
 building_prices: Dict[str, int] = {
     'resource': 10,
@@ -95,9 +119,3 @@ color_dict: Dict[str, tuple[int, int, int]] = {
     'purple': (127, 0, 170),
     'transparent': (1, 1, 1)
 }
-
-default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
-default_display_height: int = 972
-resolution_finder = pygame.display.Info()
-display_width: float = resolution_finder.current_w - round(default_display_width/10)
-display_height: float = resolution_finder.current_h - round(default_display_height/10)

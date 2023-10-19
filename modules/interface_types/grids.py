@@ -7,6 +7,7 @@ import json
 from . import cells, interface_elements
 from ..util import actor_utility, utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class grid(interface_elements.interface_element):
     '''
@@ -85,14 +86,14 @@ class grid(interface_elements.interface_element):
         '''
         area = self.coordinate_width * self.coordinate_height
         num_worms = area // 5
-        if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+        if constants.effect_manager.effect_active('enable_oceans'):
             self.global_manager.get('terrain_list').append('water')
         for i in range(num_worms):
             self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
-        #if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+        #if constants.effect_manager.effect_active('enable_oceans'):
         #    for i in range(num_worms // 6): #range(num_worms / 3):
         #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
-        if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+        if not constants.effect_manager.effect_active('enable_oceans'):
             for row in self.cell_list:
                 terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
                 row[0].set_terrain('water', terrain_variant)
@@ -133,7 +134,7 @@ class grid(interface_elements.interface_element):
         Output:
             None
         '''
-        if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+        if not constants.effect_manager.effect_active('hide_grid_lines'):
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(self.global_manager.get('game_display'), constants.color_dict[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
             for y in range(0, self.coordinate_height+1):
@@ -142,7 +143,7 @@ class grid(interface_elements.interface_element):
         pygame.draw.line(self.global_manager.get('game_display'), constants.color_dict[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
         pygame.draw.line(self.global_manager.get('game_display'), constants.color_dict[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
         pygame.draw.line(self.global_manager.get('game_display'), constants.color_dict[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
-        if (not self.mini_grid == 'none') and self.global_manager.get('show_minimap_outlines'):
+        if (not self.mini_grid == 'none') and constants.show_minimap_outlines:
             mini_map_outline_color = self.mini_grid.external_line_color
             left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
             right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1
@@ -637,7 +638,7 @@ class mini_grid(grid):
             up_y = self.coordinate_height
         else:
             up_y = upper_right_corner[1]
-        if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+        if not constants.effect_manager.effect_active('hide_grid_lines'):
                 
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(self.global_manager.get('game_display'), constants.color_dict[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)),
@@ -706,7 +707,7 @@ class abstract_grid(grid):
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
         save_dict = super().to_save_dict()
-        if self.global_manager.get('europe_grid') == self:
+        if status.europe_grid == self:
             save_dict['grid_type'] = 'europe_grid'
         elif self.global_manager.get('slave_traders_grid') == self:
             save_dict['grid_type'] = 'slave_traders_grid'

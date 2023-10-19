@@ -5,6 +5,7 @@ import random
 from .pmobs import pmob
 from ...util import text_utility, actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class vehicle(pmob):
     '''
@@ -135,7 +136,7 @@ class vehicle(pmob):
             elif current_sub_mob.is_group:
                 worker_type = current_sub_mob.worker.worker_type
             if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
-                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew: #if crew died of attrition
                             crew = self.crew
@@ -362,7 +363,7 @@ class vehicle(pmob):
             current_mob.in_vehicle = True
             current_mob.selected = False
             current_mob.hide_images()
-        if new_grid == self.global_manager.get('europe_grid') or self.images[0].current_cell.has_intact_building('port'):
+        if new_grid == status.europe_grid or self.images[0].current_cell.has_intact_building('port'):
             self.eject_passengers()
             self.drop_inventory()
         elif new_grid == self.global_manager.get('slave_traders_grid'):

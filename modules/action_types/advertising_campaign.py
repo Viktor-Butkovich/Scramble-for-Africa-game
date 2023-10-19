@@ -5,6 +5,7 @@ import random
 from . import action
 from ..util import action_utility, text_utility, market_utility, scaling, game_transitions
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class advertising_campaign(action.campaign):
     '''
@@ -177,7 +178,7 @@ class advertising_campaign(action.campaign):
             None
         '''
         if super().on_click(unit):
-            if self.global_manager.get('europe_grid') in unit.grids:
+            if status.europe_grid in unit.grids:
                 if not self.global_manager.get('current_game_mode') == 'europe':
                     game_transitions.set_game_mode('europe', self.global_manager)
                     unit.select()

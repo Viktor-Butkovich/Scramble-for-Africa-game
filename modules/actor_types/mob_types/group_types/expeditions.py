@@ -57,10 +57,10 @@ class expedition(group):
         Output:
             None
         '''
-        self.global_manager.set('show_selection_outlines', True)
-        self.global_manager.set('show_minimap_outlines', True)
-        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-        self.global_manager.set('last_minimap_outline_switch', time.time())
+        constants.show_selection_outlines = True
+        constants.show_minimap_outlines = True
+        constants.last_selection_outline_switch = constants.current_time
+        
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0

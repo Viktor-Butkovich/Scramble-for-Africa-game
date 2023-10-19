@@ -208,7 +208,7 @@ class enable_sentry_mode_button(button):
         if main_loop_utility.action_possible(self.global_manager):   
             displayed_mob = self.global_manager.get('displayed_mob')      
             displayed_mob.set_sentry_mode(True)
-            if (self.global_manager.get('effect_manager').effect_active('promote_on_sentry') 
+            if (constants.effect_manager.effect_active('promote_on_sentry') 
             and (displayed_mob.is_group or displayed_mob.is_officer) 
             and not displayed_mob.veteran): #purely for promotion testing, not normal functionality
                 displayed_mob.promote()

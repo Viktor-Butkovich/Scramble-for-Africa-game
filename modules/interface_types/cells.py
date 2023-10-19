@@ -4,6 +4,7 @@ import pygame
 import random
 from ..util import actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class cell():
     '''
@@ -48,12 +49,12 @@ class cell():
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
         if not save_dict == 'none': #if from save
             self.save_dict = save_dict
-            if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
+            if constants.effect_manager.effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
             self.terrain_variant = save_dict['terrain_variant']
         else: #if creating new map
-            if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
+            if constants.effect_manager.effect_active('remove_fog_of_war'):
                 self.set_visibility(True)
             else:
                 self.set_visibility(False)
@@ -141,8 +142,7 @@ class cell():
         Output:
             boolean: Returns whether attrition should happen here based on this cell's terrain and buildings
         '''
-        #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
-        if self.grid in [self.global_manager.get('europe_grid'), self.global_manager.get('slave_traders_grid')]: #no attrition in Europe or with slave traders
+        if self.grid in [status.europe_grid, self.global_manager.get('slave_traders_grid')]: #no attrition in Europe or with slave traders
             if attrition_type == 'health':
                 return(False)
             elif attrition_type == 'inventory': #losing inventory in warehouses and such is uncommon but not impossible in Europe, but no health attrition in Europe
