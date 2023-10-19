@@ -40,16 +40,7 @@ def fundamental(global_manager):
     Output:
         None
     '''
-    pygame.init()
-    pygame.mixer.init()
-    pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
-
     global_manager.set('europe_grid', 'none')
-    resolution_finder = pygame.display.Info()
-    global_manager.set('default_display_width', 1728) #all parts of game made to be at default_display and scaled to display
-    global_manager.set('default_display_height', 972)
-    global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
-    global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
     
     start_time = time.time()
     global_manager.set('loading', True)
@@ -68,12 +59,12 @@ def fundamental(global_manager):
 
     global_manager.set('font_name', 'times new roman')
     global_manager.set('default_font_size', 15)
-    global_manager.set('font_size', scaling.scale_height(15, global_manager))
+    global_manager.set('font_size', scaling.scale_height(15))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
     global_manager.set('default_music_volume', 0.5)
 
-    global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
+    global_manager.set('game_display', pygame.display.set_mode((constants.display_width, constants.display_height)))
 
     pygame.display.set_caption('SFA')
     global_manager.set('green_screen_colors', 
@@ -188,8 +179,8 @@ def misc(global_manager):
     }, global_manager)
 
     global_manager.set('safe_click_area', constants.actor_creation_manager.create_interface_element({
-        'width': global_manager.get('display_width') / 2 - scaling.scale_width(35, global_manager),
-        'height': global_manager.get('display_height'),
+        'width': constants.display_width / 2 - scaling.scale_width(35),
+        'height': constants.display_height,
         'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'image_id': 'misc/empty.png', #make a good image for this
         'init_type': 'safe click panel',
@@ -200,11 +191,11 @@ def misc(global_manager):
     strategic_grid_width = 320
     mini_grid_width = 640
 
-    global_manager.set('minimap_grid_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
+    global_manager.set('minimap_grid_x', constants.default_display_width - (mini_grid_width + 100))
 
-    global_manager.set('europe_grid_x', global_manager.get('default_display_width') - (strategic_grid_width + 100 + 120 + 25)) 
+    global_manager.set('europe_grid_x', constants.default_display_width - (strategic_grid_width + 100 + 120 + 25)) 
     #100 for gap on right side of screen, 120 for width of europe grid, 25 for gap between europe and strategic grids
-    global_manager.set('europe_grid_y', global_manager.get('default_display_height') - (strategic_grid_height + 25))
+    global_manager.set('europe_grid_y', constants.default_display_height - (strategic_grid_height + 25))
 
     global_manager.set('mob_ordered_list_start_y', 0)
     global_manager.set('tile_ordered_list_start_y', 0)
@@ -236,9 +227,9 @@ def misc(global_manager):
     pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
 
     global_manager.set('info_displays_collection', constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, global_manager.get('default_display_height') - 205 + 125, global_manager),
-        'width': scaling.scale_width(10, global_manager), #scaling.scale_width(800, global_manager),
-        'height': scaling.scale_height(10, global_manager),
+        'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 205 + 125),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(10),
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
         'allow_minimize': True,
@@ -843,29 +834,29 @@ def value_trackers(global_manager):
         None
     '''
     value_trackers_ordered_collection = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(300, global_manager.get('default_display_height'), global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(300, constants.default_display_height),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup'],
         'init_type': 'ordered collection'
     }, global_manager)
 
     global_manager.set('turn_tracker', value_tracker_template.value_tracker('turn', 0, 'none', 'none', global_manager))
     constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers'],
         'image_id': 'misc/default_label.png',
         'value_name': 'turn',
         'init_type': 'value label',
         'parent_collection': value_trackers_ordered_collection,
-        'member_config': {'order_x_offset': scaling.scale_width(275, global_manager), 'order_overlap': True}
-    }    , global_manager)
+        'member_config': {'order_x_offset': scaling.scale_width(275), 'order_overlap': True}
+    }, global_manager)
 
     global_manager.set('public_opinion_tracker', value_tracker_template.public_opinion_tracker('public_opinion', 0, 0, 100, global_manager))
     constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers'],
         'image_id': 'misc/default_label.png',
         'value_name': 'public_opinion',
@@ -875,8 +866,8 @@ def value_trackers(global_manager):
 
     global_manager.set('money_tracker', value_tracker_template.money_tracker(100, global_manager))
     global_manager.set('money_label', constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial'],
         'image_id': 'misc/default_label.png',
         'init_type': 'money label',
@@ -887,8 +878,8 @@ def value_trackers(global_manager):
     if global_manager.get('effect_manager').effect_active('track_fps'):
         global_manager.set('fps_tracker', value_tracker_template.value_tracker('fps', 0, 0, 'none', global_manager))
         constants.actor_creation_manager.create_interface_element({
-            'minimum_width': scaling.scale_width(10, global_manager),
-            'height': scaling.scale_height(30, global_manager),
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
             'modes': ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup'],
             'image_id': 'misc/default_label.png',
             'value_name': 'fps',
@@ -898,9 +889,9 @@ def value_trackers(global_manager):
 
     global_manager.set('previous_financial_report', 'none')
     constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(270, global_manager.get('default_display_height') - 30, global_manager),
-        'width': scaling.scale_width(30, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(270, constants.default_display_height - 30),
+        'width': scaling.scale_width(30),
+        'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial'],
         'image_id': 'buttons/instructions.png',
         'init_type': 'show previous financial report button'
@@ -923,9 +914,9 @@ def buttons(global_manager):
     europe_button_width = 150
     europe_button_height = 100
     input_dict = {
-        'coordinates': scaling.scale_coordinates(global_manager.get('europe_grid_x') - europe_button_width - 25, global_manager.get('europe_grid_y') + 10, global_manager),
-        'width': scaling.scale_width(europe_button_width, global_manager),
-        'height': scaling.scale_height(europe_button_height, global_manager),
+        'coordinates': scaling.scale_coordinates(global_manager.get('europe_grid_x') - europe_button_width - 25, global_manager.get('europe_grid_y') + 10),
+        'width': scaling.scale_width(europe_button_width),
+        'height': scaling.scale_height(europe_button_height),
         'keybind_id': pygame.K_e,
         'modes': ['strategic'],
         'image_id': 'buttons/european_hq_button.png',
@@ -937,29 +928,29 @@ def buttons(global_manager):
 
     europe_button_width = 60
     europe_button_height = 60
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('europe_grid_y'), global_manager))
-    input_dict['width'] = scaling.scale_width(europe_button_width, global_manager)
-    input_dict['height'] = scaling.scale_height(europe_button_height, global_manager)
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('europe_grid_y')))
+    input_dict['width'] = scaling.scale_width(europe_button_width)
+    input_dict['height'] = scaling.scale_height(europe_button_height)
     input_dict['modes'] = ['europe']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     input_dict['to_mode'] = 'strategic'
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
     europe_to_strategic_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager)
-    input_dict['width'] = scaling.scale_width(50, global_manager)
-    input_dict['height'] = scaling.scale_height(50, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 50)
+    input_dict['width'] = scaling.scale_width(50)
+    input_dict['height'] = scaling.scale_height(50)
     input_dict['modes'] = ['strategic', 'europe', 'ministers']
     input_dict['keybind_id'] = 'none'
     input_dict['to_mode'] = 'main_menu'
     to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['new_game_setup']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     new_game_setup_to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['keybind_id'] = pygame.K_q
     input_dict['image_id'] = 'buttons/european_hq_button.png'
@@ -977,10 +968,9 @@ def buttons(global_manager):
     from_trial_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
-        global_manager),
-        'width': scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager),
-        'height': scaling.scale_height(50, global_manager),
+        'coordinates': scaling.scale_coordinates(round(constants.default_display_width * 0.4), constants.default_display_height - 50),
+        'width': scaling.scale_width(round(constants.default_display_width * 0.2)),
+        'height': scaling.scale_height(50),
         'modes': ['strategic', 'europe'],
         'keybind_id': pygame.K_SPACE,
         'image_id': 'buttons/end_turn_button.png',
@@ -988,19 +978,19 @@ def buttons(global_manager):
     }
     end_turn_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('default_display_height') / 2 - 50, global_manager))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height / 2 - 50))
     input_dict['modes'] = ['main_menu']
     input_dict['keybind_id'] = pygame.K_n
     input_dict['image_id'] = 'buttons/new_game_button.png'
     input_dict['init_type'] = 'new game button'
     main_menu_new_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('default_display_height') / 2 - 300, global_manager))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height / 2 - 300))
     input_dict['modes'] = ['new_game_setup']
     input_dict['keybind_id'] = pygame.K_n
     setup_new_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('default_display_height') / 2 - 125, global_manager))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height / 2 - 125))
     input_dict['modes'] = ['main_menu']
     input_dict['keybind_id'] = pygame.K_l
     input_dict['image_id'] = 'buttons/load_game_button.png'
@@ -1011,9 +1001,9 @@ def buttons(global_manager):
     button_separation = 60 #x separation between each button
     current_button_number = 0 #tracks current button to move each one farther right
     input_dict = {
-        'coordinates': scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager),
-        'width': scaling.scale_width(50, global_manager),
-        'height': scaling.scale_height(50, global_manager),
+        'coordinates': scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20),
+        'width': scaling.scale_width(50),
+        'height': scaling.scale_height(50),
         'modes': ['strategic'],
         'keybind_id': pygame.K_a,
         'image_id': 'buttons/left_button.png',
@@ -1022,74 +1012,74 @@ def buttons(global_manager):
     left_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     current_button_number += 1
 
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
     input_dict['keybind_id'] = pygame.K_s
     input_dict['image_id'] = 'buttons/down_button.png'
     input_dict['init_type'] = 'move down button'
     down_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80)
     input_dict['keybind_id'] = pygame.K_w
     input_dict['image_id'] = 'buttons/up_button.png'
     input_dict['init_type'] = 'move up button'
     up_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     current_button_number += 1
 
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
     input_dict['keybind_id'] = pygame.K_d
     input_dict['image_id'] = 'buttons/right_button.png'
     input_dict['init_type'] = 'move right button'
     right_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager),
-        'width': scaling.scale_width(50, global_manager),
-        'height': scaling.scale_height(50, global_manager),
+        'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 125),
+        'width': scaling.scale_width(50),
+        'height': scaling.scale_height(50),
         'modes': ['strategic', 'europe', 'ministers'],
         'image_id': 'buttons/save_game_button.png',
         'init_type': 'save game button'
     }
     save_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('default_display_height') - 200, global_manager))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 200))
     input_dict['modes'] = ['strategic']
     input_dict['image_id'] = 'buttons/grid_line_button.png'
     input_dict['init_type'] = 'toggle grid lines button'
     toggle_grid_lines_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('default_display_height') - 275, global_manager))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 275))
     input_dict['modes'] = ['strategic', 'europe', 'ministers']
     input_dict['keybind_id'] = pygame.K_j
     input_dict['image_id'] = 'buttons/text_box_size_button.png'
     input_dict['init_type'] = 'expand text box button'
     expand_text_box_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = scaling.scale_coordinates(110, global_manager.get('default_display_height') - 50, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(110, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['keybind_id'] = pygame.K_TAB
     input_dict['image_id'] = 'buttons/cycle_units_button.png'
     input_dict['init_type'] = 'cycle units button'
     cycle_units_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (scaling.scale_width(55, global_manager), input_dict['coordinates'][1])
+    input_dict['coordinates'] = (scaling.scale_width(55), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic']
     del input_dict['keybind_id']
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free all button'
     free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (scaling.scale_width(165, global_manager), input_dict['coordinates'][1])
+    input_dict['coordinates'] = (scaling.scale_width(165), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['image_id'] = 'buttons/disable_sentry_mode_button.png'
     input_dict['init_type'] = 'wake up all button'
     wake_up_all_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = (scaling.scale_width(220, global_manager), input_dict['coordinates'][1])
+    input_dict['coordinates'] = (scaling.scale_width(220), input_dict['coordinates'][1])
     input_dict['image_id'] = 'buttons/execute_movement_routes_button.png'
     input_dict['init_type'] = 'execute movement routes button'
     execute_movement_routes_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    input_dict['coordinates'] = scaling.scale_coordinates(global_manager.get('default_display_width') - 50, 0, global_manager)
+    input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, 0)
     input_dict['modes'] = ['main_menu']
     input_dict['image_id'] = ['buttons/exit_european_hq_button.png']
     input_dict['init_type'] = 'generate crash button'
@@ -1108,20 +1098,20 @@ def europe_screen(global_manager):
     #max of 8 in column
     buy_button_y = 0#140
     input_dict = {
-        'width': scaling.scale_width(100, global_manager),
-        'height': scaling.scale_height(100, global_manager),
+        'width': scaling.scale_width(100),
+        'height': scaling.scale_height(100),
         'modes': ['europe'],
         'init_type': 'recruitment button'
     }
     for recruitment_index in range(len(global_manager.get('recruitment_types'))):
-        input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)), global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
         input_dict['recruitment_type'] = global_manager.get('recruitment_types')[recruitment_index]
         new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8)), global_manager),
-        'width': scaling.scale_width(100, global_manager),
-        'height': scaling.scale_height(100, global_manager),
+        'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8))),
+        'width': scaling.scale_width(100),
+        'height': scaling.scale_height(100),
         'modes': ['europe'],
         'init_type': 'buy commodity button',
         'commodity_type': 'consumer goods'
@@ -1141,9 +1131,9 @@ def ministers_screen(global_manager):
     table_height = 800
     constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/minister_table.png',
-        'coordinates': scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2), 55, global_manager),
-        'width': scaling.scale_width(table_width, global_manager),
-        'height': scaling.scale_height(table_height, global_manager),
+        'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - (table_width / 2), 55),
+        'width': scaling.scale_width(table_width),
+        'height': scaling.scale_height(table_height),
         'modes': ['ministers'],
         'init_type': 'free image'
     }, global_manager)
@@ -1151,8 +1141,8 @@ def ministers_screen(global_manager):
 
     position_icon_width = 125
     input_dict = {
-        'width': scaling.scale_width(position_icon_width, global_manager),
-        'height': scaling.scale_height(position_icon_width, global_manager),
+        'width': scaling.scale_width(position_icon_width),
+        'height': scaling.scale_height(position_icon_width),
         'modes': ['ministers'],
         'color': 'gray',
         'init_type': 'minister portrait image'
@@ -1161,38 +1151,38 @@ def ministers_screen(global_manager):
         input_dict['minister_type'] = global_manager.get('minister_types')[current_index]
         if current_index <= 3: #left side
             constants.actor_creation_manager.create_interface_element({
-                'coordinates': scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) + 10, current_index * 200 + 95, global_manager),
-                'width': scaling.scale_width(position_icon_width, global_manager),
-                'height': scaling.scale_height(position_icon_width, global_manager),
+                'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - (table_width / 2) + 10, current_index * 200 + 95),
+                'width': scaling.scale_width(position_icon_width),
+                'height': scaling.scale_height(position_icon_width),
                 'modes': ['ministers'],
                 'minister_type': global_manager.get('minister_types')[current_index],
                 'attached_label': 'none',
                 'init_type': 'minister type image'
             }, global_manager)
 
-            input_dict['coordinates'] = scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) - position_icon_width - 10, current_index * 200 + 95, global_manager)
+            input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) - (table_width / 2) - position_icon_width - 10, current_index * 200 + 95)
             constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
         else:
             constants.actor_creation_manager.create_interface_element({
-                'coordinates': scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width - 10, (current_index - 4) * 200 + 95, global_manager),
-                'width': scaling.scale_width(position_icon_width, global_manager),
-                'height': scaling.scale_height(position_icon_width, global_manager),
+                'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) + (table_width / 2) - position_icon_width - 10, (current_index - 4) * 200 + 95),
+                'width': scaling.scale_width(position_icon_width),
+                'height': scaling.scale_height(position_icon_width),
                 'modes': ['ministers'],
                 'minister_type': global_manager.get('minister_types')[current_index],
                 'attached_label': 'none',
                 'init_type': 'minister type image'
             }, global_manager)
 
-            input_dict['coordinates'] = scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200 + 95, global_manager)
+            input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200 + 95)
             constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    available_minister_display_x = global_manager.get('default_display_width')
+    available_minister_display_x = constants.default_display_width
     available_minister_display_y = 770
     cycle_input_dict = {
-        'coordinates': scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager),
-        'width': scaling.scale_width(50, global_manager),
-        'height': scaling.scale_height(50, global_manager),
+        'coordinates': scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y),
+        'width': scaling.scale_width(50),
+        'height': scaling.scale_height(50),
         'keybind_id': pygame.K_w,
         'modes': ['ministers'],
         'image_id': 'buttons/cycle_ministers_up_button.png',
@@ -1204,9 +1194,9 @@ def ministers_screen(global_manager):
     for i in range(0, 5):
         available_minister_display_y -= (position_icon_width + 10)
         current_portrait = constants.actor_creation_manager.create_interface_element({
-            'coordinates': scaling.scale_coordinates(available_minister_display_x - position_icon_width, available_minister_display_y, global_manager),
-            'width': scaling.scale_width(position_icon_width, global_manager),
-            'height': scaling.scale_height(position_icon_width, global_manager),
+            'coordinates': scaling.scale_coordinates(available_minister_display_x - position_icon_width, available_minister_display_y),
+            'width': scaling.scale_width(position_icon_width),
+            'height': scaling.scale_height(position_icon_width),
             'modes': ['ministers'],
             'init_type': 'minister portrait image',
             'color': 'gray',
@@ -1214,7 +1204,7 @@ def ministers_screen(global_manager):
         }, global_manager)
 
     available_minister_display_y -= 60                     
-    cycle_input_dict['coordinates'] = (cycle_input_dict['coordinates'][0], scaling.scale_height(available_minister_display_y, global_manager))
+    cycle_input_dict['coordinates'] = (cycle_input_dict['coordinates'][0], scaling.scale_height(available_minister_display_y))
     cycle_input_dict['keybind_id'] = pygame.K_s
     cycle_input_dict['image_id'] = 'buttons/cycle_ministers_down_button.png'
     cycle_input_dict['direction'] = 'right'
@@ -1235,7 +1225,7 @@ def trial_screen(global_manager):
     distance_to_notification = 100
     
     defense_y = trial_display_default_y
-    defense_x = (global_manager.get('default_display_width') / 2) + (distance_to_center - button_separation) + distance_to_notification
+    defense_x = (constants.default_display_width / 2) + (distance_to_center - button_separation) + distance_to_notification
     defense_current_y = 0
     defense_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': (defense_x, defense_y),
@@ -1251,9 +1241,9 @@ def trial_screen(global_manager):
     }, global_manager)
 
     defense_type_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, defense_current_y, global_manager),
-        'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
-        'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
+        'coordinates': scaling.scale_coordinates(0, defense_current_y),
+        'width': scaling.scale_width(button_separation * 2 - 5),
+        'height': scaling.scale_height(button_separation * 2 - 5),
         'modes': ['trial'],
         'minister_type': 'none',
         'attached_label': 'none',
@@ -1263,9 +1253,9 @@ def trial_screen(global_manager):
 
     defense_current_y -= button_separation * 2
     defense_portrait_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, defense_current_y, global_manager),
-        'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
-        'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
+        'coordinates': scaling.scale_coordinates(0, defense_current_y),
+        'width': scaling.scale_width(button_separation * 2 - 5),
+        'height': scaling.scale_height(button_separation * 2 - 5),
         'init_type': 'minister portrait image',
         'minister_type': 'none',
         'color': 'gray',
@@ -1274,9 +1264,9 @@ def trial_screen(global_manager):
 
     defense_current_y -= 35
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, defense_current_y, global_manager),
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(0, defense_current_y),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png',
         'message': 'Defense',
         'init_type': 'label',
@@ -1290,12 +1280,12 @@ def trial_screen(global_manager):
     defense_info_display_labels = ['minister_name', 'minister_office', 'evidence']
     for current_actor_label_type in defense_info_display_labels:
         defense_current_y -= 35
-        input_dict['coordinates'] = scaling.scale_coordinates(0, defense_current_y, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(0, defense_current_y)
         input_dict['actor_label_type'] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     prosecution_y = trial_display_default_y
-    prosecution_x = (global_manager.get('default_display_width') / 2) - (distance_to_center + button_separation) - distance_to_notification
+    prosecution_x = (constants.default_display_width / 2) - (distance_to_center + button_separation) - distance_to_notification
     prosecution_current_y = 0
 
     prosecution_info_display = constants.actor_creation_manager.create_interface_element({
@@ -1312,9 +1302,9 @@ def trial_screen(global_manager):
     }, global_manager)
 
     prosecution_type_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, prosecution_current_y, global_manager),
-        'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
-        'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
+        'coordinates': scaling.scale_coordinates(0, prosecution_current_y),
+        'width': scaling.scale_width(button_separation * 2 - 5),
+        'height': scaling.scale_height(button_separation * 2 - 5),
         'modes': ['trial'],
         'minister_type': 'none',
         'attached_label': 'none',
@@ -1324,8 +1314,8 @@ def trial_screen(global_manager):
 
     prosecution_current_y -= button_separation * 2
     prosecution_portrait_image = constants.actor_creation_manager.create_interface_element({
-        'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
-        'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
+        'width': scaling.scale_width(button_separation * 2 - 5),
+        'height': scaling.scale_height(button_separation * 2 - 5),
         'init_type': 'minister portrait image',
         'minister_type': 'none',
         'color': 'gray',
@@ -1334,8 +1324,8 @@ def trial_screen(global_manager):
 
     prosecution_current_y -= 35
     input_dict = {
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png',
         'message': 'Prosecution',
         'init_type': 'label',
@@ -1350,16 +1340,16 @@ def trial_screen(global_manager):
     prosecution_info_display_labels = ['minister_name', 'minister_office']
     for current_actor_label_type in prosecution_info_display_labels:
         prosecution_current_y -= 35
-        input_dict['coordinates'] = scaling.scale_coordinates(0, prosecution_current_y, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(0, prosecution_current_y)
         input_dict['actor_label_type'] = current_actor_label_type 
         constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     launch_trial_button_width = 150
 
     launch_trial_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300, global_manager),
-        'width': scaling.scale_width(launch_trial_button_width, global_manager),
-        'height': scaling.scale_height(launch_trial_button_width, global_manager),
+        'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300),
+        'width': scaling.scale_width(launch_trial_button_width),
+        'height': scaling.scale_height(launch_trial_button_width),
         'modes': ['trial'],
         'image_id': 'buttons/to_trial_button.png',
         'init_type': 'launch trial button'
@@ -1367,9 +1357,9 @@ def trial_screen(global_manager):
 
     bribed_judge_indicator = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/bribed_judge.png',
-        'coordinates': scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y, global_manager),
-        'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
-        'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
+        'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y),
+        'width': scaling.scale_width(button_separation * 2 - 5),
+        'height': scaling.scale_height(button_separation * 2 - 5),
         'modes': ['trial'],
         'indicator_type': 'prosecution_bribed_judge',
         'init_type': 'indicator image'
@@ -1377,9 +1367,9 @@ def trial_screen(global_manager):
 
     non_bribed_judge_indicator = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/non_bribed_judge.png',
-        'coordinates': scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y, global_manager),
-        'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
-        'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
+        'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y),
+        'width': scaling.scale_width(button_separation * 2 - 5),
+        'height': scaling.scale_height(button_separation * 2 - 5),
         'modes': ['trial'],
         'indicator_type': 'not prosecution_bribed_judge',
         'init_type': 'indicator image'
@@ -1400,13 +1390,13 @@ def new_game_setup_screen(global_manager):
     country_separation = 50
     countries_per_row = 3
     input_dict = {
-        'width': scaling.scale_width(country_image_width, global_manager),
-        'height': scaling.scale_height(country_image_height, global_manager),
+        'width': scaling.scale_width(country_image_width),
+        'height': scaling.scale_height(country_image_height),
         'modes': ['new_game_setup'],
         'init_type': 'country selection image'
     }
     for current_country in global_manager.get('country_list'):
-        input_dict['coordinates'] = scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (countries_per_row * (country_image_width + country_separation) / 2) + (country_image_width + country_separation) * (current_country_index % countries_per_row) + country_separation / 2, global_manager.get('default_display_height') / 2 + 50 - ((country_image_height + country_separation) * (current_country_index // countries_per_row)), global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) - (countries_per_row * (country_image_width + country_separation) / 2) + (country_image_width + country_separation) * (current_country_index % countries_per_row) + country_separation / 2, constants.default_display_height / 2 + 50 - ((country_image_height + country_separation) * (current_country_index // countries_per_row)))
         input_dict['country'] = current_country
         constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
         current_country_index += 1
@@ -1420,14 +1410,14 @@ def mob_interface(global_manager):
     Output:
         None
     '''
-    actor_display_top_y = global_manager.get('default_display_height') - 205 + 125 + 10
+    actor_display_top_y = constants.default_display_height - 205 + 125 + 10
     actor_display_current_y = actor_display_top_y
     global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
 
     mob_info_display = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager), #scaling.scale_coordinates(0, actor_display_current_y, global_manager),
-        'width': scaling.scale_width(400, global_manager), #scaling.scale_width(800, global_manager),
-        'height': scaling.scale_height(430, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(400),
+        'height': scaling.scale_height(430),
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
         'is_info_display': True,
@@ -1440,9 +1430,9 @@ def mob_interface(global_manager):
 
     #mob background image's tooltip
     mob_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'minimum_width': scaling.scale_width(125, global_manager),
-        'height': scaling.scale_height(125, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'minimum_width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1453,9 +1443,9 @@ def mob_interface(global_manager):
 
     #mob image
     mob_free_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(115, global_manager),
-        'height': scaling.scale_height(115, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'modes':['strategic', 'europe'],
         'actor_image_type': 'default',
         'init_type': 'actor display free image',
@@ -1464,9 +1454,9 @@ def mob_interface(global_manager):
     }, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(125, -115, global_manager),
-        'width': scaling.scale_width(35, global_manager),
-        'height': scaling.scale_height(35, global_manager),
+        'coordinates': scaling.scale_coordinates(125, -115),
+        'width': scaling.scale_width(35),
+        'height': scaling.scale_height(35),
         'modes': ['strategic', 'europe'],
         'image_id': 'buttons/remove_minister_button.png',
         'init_type': 'fire unit button',
@@ -1475,7 +1465,7 @@ def mob_interface(global_manager):
     }
     fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(actor_display_current_y + 40, global_manager))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(actor_display_current_y + 40))
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free unit slaves button'
     free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
@@ -1492,9 +1482,9 @@ def mob_interface(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-            'minimum_width': scaling.scale_width(10, global_manager),
-            'height': scaling.scale_height(30, global_manager),
+            'coordinates': scaling.scale_coordinates(0, 0),
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
             'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
@@ -1515,9 +1505,9 @@ def mob_interface(global_manager):
     tab_collection_relative_coordinates = (450, -30)
 
     global_manager.set('mob_tabbed_collection', constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1]),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'init_type': 'tabbed collection',
         'parent_collection': global_manager.get('mob_info_display'),
         'member_config': {'order_exempt': True},
@@ -1534,9 +1524,9 @@ def tile_interface(global_manager):
         None
     '''
     tile_info_display = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(775, global_manager),
-        'height': scaling.scale_height(10, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(775),
+        'height': scaling.scale_height(10),
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
         'is_info_display': True,
@@ -1545,9 +1535,9 @@ def tile_interface(global_manager):
         'parent_collection': global_manager.get('info_displays_collection'),
     }, global_manager)
 
-    separation = scaling.scale_height(3, global_manager)
+    separation = scaling.scale_height(3)
     same_tile_ordered_collection = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(120, 0, global_manager),
+        'coordinates': scaling.scale_coordinates(120, 0),
         'width': 10,
         'height': 10,
         'init_type': 'ordered collection',
@@ -1557,9 +1547,9 @@ def tile_interface(global_manager):
     }, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, separation, global_manager),
-        'width': scaling.scale_width(25, global_manager),
-        'height': scaling.scale_height(15, global_manager),
+        'coordinates': scaling.scale_coordinates(0, separation),
+        'width': scaling.scale_width(25),
+        'height': scaling.scale_height(15),
         'modes': ['strategic', 'europe'],
         'image_id': 'buttons/cycle_passengers_down_button.png',
         'init_type': 'cycle same tile button',
@@ -1568,7 +1558,7 @@ def tile_interface(global_manager):
     cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     del input_dict['member_config']
     input_dict['coordinates'] = (0, 0)
-    input_dict['height'] = scaling.scale_height(25, global_manager)
+    input_dict['height'] = scaling.scale_height(25)
     global_manager.set('same_tile_icon_list', [])
     input_dict['init_type'] = 'same tile icon'
     input_dict['image_id'] = 'buttons/default_button.png'
@@ -1577,16 +1567,16 @@ def tile_interface(global_manager):
     for i in range(0, 3): #add button to cycle through
         input_dict['index'] = i
         same_tile_icon = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
-    input_dict['height'] = scaling.scale_height(15, global_manager)
+    input_dict['height'] = scaling.scale_height(15)
     input_dict['index'] = i + 1
     input_dict['is_last'] = True
     same_tile_icon = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     #tile background image's tooltip
     tile_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'minimum_width': scaling.scale_width(125, global_manager),
-        'height': scaling.scale_height(125, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'minimum_width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
@@ -1596,9 +1586,9 @@ def tile_interface(global_manager):
     }, global_manager)
 
     tile_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(5, 5, global_manager),
-        'width': scaling.scale_width(115, global_manager),
-        'height': scaling.scale_height(115, global_manager),
+        'coordinates': scaling.scale_coordinates(5, 5),
+        'width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'default',
         'init_type': 'actor display free image',
@@ -1619,13 +1609,13 @@ def tile_interface(global_manager):
         else:
             x_displacement = 0
         input_dict = {
-            'minimum_width': scaling.scale_width(10, global_manager),
-            'height': scaling.scale_height(30, global_manager),
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
             'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
             'parent_collection': tile_info_display,
-            'member_config': {'order_x_offset': scaling.scale_width(x_displacement, global_manager)}
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
         }
         if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = 'actor display label'
@@ -1651,9 +1641,9 @@ def tile_interface(global_manager):
     tab_collection_relative_coordinates = (450, -30)
 
     global_manager.set('tile_tabbed_collection', constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1]),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'init_type': 'tabbed collection',
         'parent_collection': global_manager.get('tile_info_display'),
         'member_config': {'order_exempt': True},
@@ -1674,29 +1664,29 @@ def inventory_interface(global_manager):
     commodity_prices_width = 200
 
     global_manager.set('commodity_prices_label', constants.actor_creation_manager.create_interface_element({
-        'coordinates':scaling.scale_coordinates(commodity_prices_x, commodity_prices_y, global_manager),
-        'minimum_width':scaling.scale_width(commodity_prices_width, global_manager),
-        'height': scaling.scale_height(commodity_prices_height, global_manager),
+        'coordinates':scaling.scale_coordinates(commodity_prices_x, commodity_prices_y),
+        'minimum_width':scaling.scale_width(commodity_prices_width),
+        'height': scaling.scale_height(commodity_prices_height),
         'modes': ['europe'],
         'image_id': 'misc/commodity_prices_label.png',
         'init_type': 'commodity prices label'
     }, global_manager))
 
     input_dict = {
-        'width': scaling.scale_width(30, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'width': scaling.scale_width(30),
+        'height': scaling.scale_height(30),
         'modes': ['europe'],
         'init_type': 'commodity button'
     }
     for current_index in range(len(global_manager.get('commodity_types'))): #commodity prices in Europe
-        input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index))
         input_dict['image_id'] = 'scenery/resources/large/' + global_manager.get('commodity_types')[current_index] + '.png'
         input_dict['commodity'] = global_manager.get('commodity_types')[current_index]
         new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     mob_inventory_collection = constants.actor_creation_manager.create_interface_element({
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': global_manager.get('mob_tabbed_collection'),
         'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
@@ -1705,8 +1695,8 @@ def inventory_interface(global_manager):
     global_manager.set('mob_inventory_collection', mob_inventory_collection)
 
     input_dict = {
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png', #'misc/underline.png',
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
@@ -1722,8 +1712,8 @@ def inventory_interface(global_manager):
         new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': global_manager.get('tile_tabbed_collection'), #global_manager.get('tile_info_display'),
         'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
@@ -1731,8 +1721,8 @@ def inventory_interface(global_manager):
     }, global_manager)
 
     input_dict = {
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png', #'misc/underline.png',
         'actor_label_type': 'tile inventory capacity',
         'actor_type': 'tile',
@@ -1761,9 +1751,9 @@ def unit_organization_interface(global_manager):
     rhs_x_offset = image_height + 80
 
     unit_organization_collection = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(-30, -1 * image_height - 115, global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(-30, -1 * image_height - 115),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'init_type': 'autofill collection',
         'parent_collection': global_manager.get('mob_tabbed_collection'),
         'member_config': {'tabbed': True, 'button_image_id': 'buttons/merge_button.png', 'identifier': 'reorganization'},
@@ -1774,9 +1764,9 @@ def unit_organization_interface(global_manager):
 
     #mob background image's tooltip
     lhs_top_tooltip = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(lhs_x_offset, 0, global_manager),
-        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset, 0),
+        'minimum_width': scaling.scale_width(image_height - 10),
+        'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1788,23 +1778,23 @@ def unit_organization_interface(global_manager):
 
     #mob image
     lhs_top_mob_free_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(image_height - 10),
+        'height': scaling.scale_height(image_height - 10),
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'default',
         'default_image_id': 'mobs/default/mock_officer.png',
         'init_type': 'actor display free image',
         'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset)}
     }, global_manager)
     unit_organization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
 
     #mob background image's tooltip
     lhs_bottom_tooltip = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(lhs_x_offset, -1 * (image_height - 5), global_manager),
-        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset, -1 * (image_height - 5)),
+        'minimum_width': scaling.scale_width(image_height - 10),
+        'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1817,30 +1807,30 @@ def unit_organization_interface(global_manager):
     #mob image
     default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'left', to_front=True), actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'right', to_front=True)]
     lhs_bottom_mob_free_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(image_height - 10),
+        'height': scaling.scale_height(image_height - 10),
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'default',
         'default_image_id': default_image_id,
         'init_type': 'actor display free image',
         'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset), 'y_offset': scaling.scale_height(-1 * (image_height - 5))}
     }, global_manager)
     unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
 
     #right side
     #mob background image's tooltip
     rhs_top_tooltip = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'minimum_width': scaling.scale_width(image_height - 10),
+        'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': -0.5 * (image_height - 5)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
     }, global_manager)
     unit_organization_collection.autofill_targets['group'].append(rhs_top_tooltip)
 
@@ -1849,23 +1839,23 @@ def unit_organization_interface(global_manager):
     default_image_id.append(actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group right', to_front=True))
     default_image_id.append(actor_utility.generate_unit_component_image_id('mobs/default/mock_officer.png', 'center', to_front=True))
     rhs_top_mob_free_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(image_height - 10),
+        'height': scaling.scale_height(image_height - 10),
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'default',
         'default_image_id': default_image_id,
         'init_type': 'actor display free image',
         'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': -0.5 * (image_height - 5)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
     }, global_manager)
     unit_organization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
 
     #reorganize unit to right button
     reorganize_unit_right_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15 + 30, global_manager),
-        'width': scaling.scale_width(60, global_manager),
-        'height': scaling.scale_height(25, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15 + 30),
+        'width': scaling.scale_width(60),
+        'height': scaling.scale_height(25),
         'init_type': 'reorganize unit button',
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/cycle_units_button.png',
@@ -1876,9 +1866,9 @@ def unit_organization_interface(global_manager):
 
     #reorganize unit to left button
     reorganize_unit_left_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15, global_manager),
-        'width': scaling.scale_width(60, global_manager),
-        'height': scaling.scale_height(25, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15),
+        'width': scaling.scale_width(60),
+        'height': scaling.scale_height(25),
         'init_type': 'reorganize unit button',
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/cycle_units_reverse_button.png',
@@ -1888,9 +1878,9 @@ def unit_organization_interface(global_manager):
     }, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35/2, global_manager),
-        'width': scaling.scale_width(30, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35/2),
+        'width': scaling.scale_width(30),
+        'height': scaling.scale_height(30),
         'init_type': 'cycle autofill button',
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/reset_button.png',
@@ -1899,7 +1889,7 @@ def unit_organization_interface(global_manager):
     cycle_autofill_officer_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35/2, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35/2),
         'width': input_dict['width'], #copies most attributes from previous button
         'height': input_dict['height'],
         'init_type': input_dict['init_type'],
@@ -1939,9 +1929,9 @@ def minister_interface(global_manager):
     #minister background image
     minister_free_image_background = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/mob_background.png',
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(125, global_manager),
-        'height': scaling.scale_height(125, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
         'modes': ['ministers'],
         'init_type': 'minister background image',
         'parent_collection': minister_info_display,
@@ -1950,9 +1940,9 @@ def minister_interface(global_manager):
 
     #minister image
     minister_free_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(115, global_manager),
-        'height': scaling.scale_height(115, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'modes': ['ministers'],
         'actor_image_type': 'minister_default',
         'init_type': 'actor display free image',
@@ -1962,9 +1952,9 @@ def minister_interface(global_manager):
 
     #minister background image's tooltip
     minister_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, minister_display_current_y, global_manager),
-        'minimum_width': scaling.scale_width(125, global_manager),
-        'height': scaling.scale_height(125, global_manager),
+        'coordinates': scaling.scale_coordinates(0, minister_display_current_y),
+        'minimum_width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'minister',
@@ -1977,8 +1967,8 @@ def minister_interface(global_manager):
     #minister info images setup
 
     input_dict = {
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png',
         'actor_type': 'minister',
         'init_type': 'actor display label',
@@ -1988,7 +1978,7 @@ def minister_interface(global_manager):
     minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
-        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y)
         input_dict['actor_label_type'] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     #minister info labels setup
@@ -2019,9 +2009,9 @@ def country_interface(global_manager):
     #country background image
     country_free_image_background = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/mob_background.png',
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(125, global_manager),
-        'height': scaling.scale_height(125, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
         'modes': ['new_game_setup'],
         'init_type': 'mob background image',
         'parent_collection': country_info_display,
@@ -2030,9 +2020,9 @@ def country_interface(global_manager):
 
     #country image
     country_free_image = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'width': scaling.scale_width(115, global_manager),
-        'height': scaling.scale_height(115, global_manager),
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'modes': ['new_game_setup'],
         'actor_image_type': 'country_default',
         'init_type': 'actor display free image',
@@ -2042,8 +2032,8 @@ def country_interface(global_manager):
 
     #country background image's tooltip
     country_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(125, global_manager),
-        'height': scaling.scale_height(125, global_manager),
+        'minimum_width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'country',
@@ -2053,8 +2043,8 @@ def country_interface(global_manager):
     }, global_manager)
 
     input_dict = {
-        'minimum_width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png',
         'actor_type': 'country',
         'init_type': 'actor display label',
@@ -2064,7 +2054,7 @@ def country_interface(global_manager):
     country_info_display_labels = ['country_name', 'country_effect']
     for current_actor_label_type in country_info_display_labels:
         x_displacement = 0
-        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, 0, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, 0)
         input_dict['actor_label_type'] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 

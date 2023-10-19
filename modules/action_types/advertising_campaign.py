@@ -125,7 +125,7 @@ class advertising_campaign(action.campaign):
                     ],
                     200,
                     self.global_manager,
-                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75, self.global_manager), 'second_dimension_alignment': 'left', 'centered': True}}
+                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'left', 'centered': True}}
             ))
             return_list.append(
                 action_utility.generate_free_image_input_dict(
@@ -134,7 +134,7 @@ class advertising_campaign(action.campaign):
                     ],
                     200,
                     self.global_manager,
-                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75, self.global_manager), 'second_dimension_alignment': 'leftmost', 'centered': True}}
+                    override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'leftmost', 'centered': True}}
             ))
         return(return_list)
 

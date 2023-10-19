@@ -171,9 +171,9 @@ class building(actor):
         font_size = self.global_manager.get('font_size')
         font_name = self.global_manager.get('font_name')
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
-        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
+        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.cell.tile.x, self.cell.y, tooltip_width, tooltip_height)
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.cell.tile.x - self.tooltip_outline_width, self.cell.tile.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))

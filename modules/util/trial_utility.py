@@ -235,8 +235,8 @@ def display_evidence_roll(global_manager):
     result = global_manager.get('trial_rolls')[0]
     result_outcome_dict = {'min_success': 5, 'min_crit_success': 5, 'max_crit_fail': 0}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-    constants.actor_creation_manager.display_die(scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 140, 440, global_manager), scaling.scale_width(100, global_manager),
-        scaling.scale_height(100, global_manager), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
+    constants.actor_creation_manager.display_die(scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 140, 440), scaling.scale_width(100),
+        scaling.scale_height(100), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
     global_manager.get('notification_manager').display_notification({
         'message': text + 'Click to roll. 5+ required on at least 1 die to succeed.',
         'num_dice': 1

@@ -31,9 +31,9 @@ def generate_die_input_dict(coordinates, final_result, action, global_manager, o
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
 
     return_dict = {
-        'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], global_manager),
-        'width': scaling.scale_width(100, global_manager),
-        'height': scaling.scale_height(100, global_manager),
+        'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1]),
+        'width': scaling.scale_width(100),
+        'height': scaling.scale_height(100),
         'modes': [global_manager.get('current_game_mode')],
         'num_sides': 6,
         'result_outcome_dict': result_outcome_dict,
@@ -59,8 +59,8 @@ def generate_action_ordered_collection_input_dict(coordinates, global_manager, o
     '''
     return_dict = {
         'coordinates': coordinates,
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
         'modes': [global_manager.get('current_game_mode')],
         'init_type': 'ordered collection',
         'initial_members': [],
@@ -86,8 +86,8 @@ def generate_free_image_input_dict(image_id, default_size, global_manager, overr
     return_dict = {
         'image_id': image_id,
         'coordinates': (0, 0),
-        'width': scaling.scale_width(default_size, global_manager),
-        'height': scaling.scale_height(default_size, global_manager),
+        'width': scaling.scale_width(default_size),
+        'height': scaling.scale_height(default_size),
         'modes': [global_manager.get('current_game_mode')],
         'to_front': True,
         'init_type': 'free image'
@@ -111,8 +111,8 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
 
     portrait_background_input_dict = {
         'coordinates': (0, 0),
-        'width': scaling.scale_width(100, global_manager),
-        'height': scaling.scale_height(100, global_manager),
+        'width': scaling.scale_width(100),
+        'height': scaling.scale_height(100),
         'modes': [global_manager.get('current_game_mode')],
         'attached_minister': action.current_unit.controlling_minister,
         'minister_image_type': 'position',
@@ -121,8 +121,8 @@ def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
     
     portrait_front_input_dict = {
         'coordinates': (0, 0),
-        'width': scaling.scale_width(100, global_manager),
-        'height': scaling.scale_height(100, global_manager),
+        'width': scaling.scale_width(100),
+        'height': scaling.scale_height(100),
         'modes': [global_manager.get('current_game_mode')],
         'attached_minister': action.self.current_unit.controlling_minister,
         'minister_image_type': 'portrait',

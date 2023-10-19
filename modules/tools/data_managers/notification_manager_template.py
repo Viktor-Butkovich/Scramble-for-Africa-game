@@ -211,9 +211,9 @@ class notification_manager_template():
             extra_parameters = None
 
         input_dict = {
-            'coordinates': scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager),
-            'ideal_width': scaling.scale_width(self.notification_width, self.global_manager),
-            'minimum_height': scaling.scale_height(self.notification_height, self.global_manager),
+            'coordinates': scaling.scale_coordinates(self.notification_x, self.notification_y),
+            'ideal_width': scaling.scale_width(self.notification_width),
+            'minimum_height': scaling.scale_height(self.notification_height),
             'modes': self.notification_modes,
             'image_id': 'misc/default_notification.png',
             'message': message,

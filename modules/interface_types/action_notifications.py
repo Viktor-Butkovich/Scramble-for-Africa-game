@@ -45,11 +45,11 @@ class action_notification(notification):
                 collection_y = notification_manager.default_notification_y - (notification_manager.default_notification_height / 2)
                 self.notification_ordered_collection = constants.actor_creation_manager.create_interface_element(
                     action_utility.generate_action_ordered_collection_input_dict(
-                        scaling.scale_coordinates(-1 * column_increment + (column_increment / 2), collection_y, global_manager),
+                        scaling.scale_coordinates(-1 * column_increment + (column_increment / 2), collection_y),
                         self.global_manager,
                         override_input_dict = {'parent_collection': self.parent_collection,
-                                               'second_dimension_increment': scaling.scale_width(column_increment, global_manager),
-                                               'anchor_coordinate': scaling.scale_height(notification_manager.default_notification_height / 2, self.global_manager)
+                                               'second_dimension_increment': scaling.scale_width(column_increment),
+                                               'anchor_coordinate': scaling.scale_height(notification_manager.default_notification_height / 2)
                         }
                     ),
                     self.global_manager
@@ -245,9 +245,9 @@ class off_tile_exploration_notification(action_notification):
 
         self.notification_images.append(constants.actor_creation_manager.create_interface_element({
             'image_id': explored_terrain_image_id,
-            'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-            'width': scaling.scale_width(200, global_manager),
-            'height': scaling.scale_height(200, global_manager),
+            'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400),
+            'width': scaling.scale_width(200),
+            'height': scaling.scale_height(200),
             'modes': input_dict['modes'],
             'to_front': True,
             'init_type': 'free image'
@@ -264,9 +264,9 @@ class off_tile_exploration_notification(action_notification):
 
         self.notification_images.append(constants.actor_creation_manager.create_interface_element({
             'image_id': image_id_list,
-            'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-            'width': scaling.scale_width(200, global_manager),
-            'height': scaling.scale_height(200, global_manager),
+            'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400),
+            'width': scaling.scale_width(200),
+            'height': scaling.scale_height(200),
             'modes': input_dict['modes'],
             'to_front': True,
             'init_type': 'free image'
@@ -353,9 +353,9 @@ class trade_notification(action_notification):
                 min_y = 300
                 self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                     'image_id': 'scenery/resources/' + self.trade_result[2] + '.png',
-                    'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300, global_manager),
-                    'width': scaling.scale_width(200, global_manager),
-                    'height': scaling.scale_height(200, global_manager),
+                    'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300),
+                    'width': scaling.scale_width(200),
+                    'height': scaling.scale_height(200),
                     'modes': input_dict['modes'],
                     'to_front': True,
                     'init_type': 'free image'
@@ -366,9 +366,9 @@ class trade_notification(action_notification):
 
             self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                 'image_id': 'scenery/resources/trade/sold consumer goods.png',
-                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
-                'width': scaling.scale_width(200, global_manager),
-                'height': scaling.scale_height(200, global_manager),
+                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y),
+                'width': scaling.scale_width(200),
+                'height': scaling.scale_height(200),
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
@@ -395,9 +395,9 @@ class trade_notification(action_notification):
 
                 self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                     'image_id': button_image_id_list,
-                    'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
-                    'width': scaling.scale_width(150, global_manager),
-                    'height': scaling.scale_height(150, global_manager),
+                    'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175),
+                    'width': scaling.scale_width(150),
+                    'height': scaling.scale_height(150),
                     'modes': input_dict['modes'],
                     'to_front': True,
                     'init_type': 'free image'
@@ -619,9 +619,9 @@ class capture_slaves_notification(action_notification):
             button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
             self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                 'image_id': button_image_id_list,
-                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                'width': scaling.scale_width(200, global_manager),
-                'height': scaling.scale_height(200, global_manager),
+                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400),
+                'width': scaling.scale_width(200),
+                'height': scaling.scale_height(200),
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'

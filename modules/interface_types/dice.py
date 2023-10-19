@@ -59,8 +59,8 @@ class die(button):
         super().__init__(input_dict, global_manager)
         global_manager.get('dice_list').append(self)
         self.final_result = input_dict['final_result']
-        #self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
-        self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + self.height + 3), self.width + 6, self.height + 6) #could implement as outline rect instead, with larger outline width passed to superclass
+        #self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
+        self.highlight_Rect = pygame.Rect(self.x - 3, constants.display_height - (self.y + self.height + 3), self.width + 6, self.height + 6) #could implement as outline rect instead, with larger outline width passed to superclass
         if self.normal_die:
             self.outline_color = self.outcome_color_dict['default']
         else:

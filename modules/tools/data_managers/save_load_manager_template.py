@@ -74,10 +74,9 @@ class save_load_manager_template():
         mini_grid_width = 640
 
         self.global_manager.set('strategic_map_grid', grids.grid(False, {
-            'coordinates': scaling.scale_coordinates(self.global_manager.get('default_display_width') - (strategic_grid_width + 100), self.global_manager.get('default_display_height') - (strategic_grid_height + 25),
-                self.global_manager),
-            'width': scaling.scale_width(strategic_grid_width, self.global_manager),
-            'height': scaling.scale_height(strategic_grid_height, self.global_manager),
+            'coordinates': scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25)),
+            'width': scaling.scale_width(strategic_grid_width),
+            'height': scaling.scale_height(strategic_grid_height),
             'coordinate_width': self.global_manager.get('strategic_map_width'),
             'coordinate_height': self.global_manager.get('strategic_map_height'),
             'internal_line_color': 'black',
@@ -88,10 +87,10 @@ class save_load_manager_template():
         }, self.global_manager))
 
         self.global_manager.set('minimap_grid', grids.mini_grid(False, {
-            'coordinates': scaling.scale_coordinates(self.global_manager.get('default_display_width') - (mini_grid_width + 100),
-                self.global_manager.get('default_display_height') - (strategic_grid_height + mini_grid_height + 50), self.global_manager),
-            'width': scaling.scale_width(mini_grid_width, self.global_manager),
-            'height': scaling.scale_height(mini_grid_height,self.global_manager),
+            'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
+                constants.default_display_height - (strategic_grid_height + mini_grid_height + 50)),
+            'width': scaling.scale_width(mini_grid_width),
+            'height': scaling.scale_height(mini_grid_height),
             'coordinate_width': 5,
             'coordinate_height': 5,
             'internal_line_color': 'black',
@@ -101,13 +100,13 @@ class save_load_manager_template():
             'attached_grid': self.global_manager.get('strategic_map_grid')
         }, self.global_manager))
 
-        europe_grid_x = self.global_manager.get('europe_grid_x') #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        europe_grid_y = self.global_manager.get('europe_grid_y') #self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
+        europe_grid_x = self.global_manager.get('europe_grid_x') #constants.default_display_width - (strategic_grid_width + 340)
+        europe_grid_y = self.global_manager.get('europe_grid_y') #constants.default_display_height - (strategic_grid_height + 25)
 
         self.global_manager.set('europe_grid', grids.abstract_grid(False, {
-            'coordinates': scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager),
-            'width': scaling.scale_width(120, self.global_manager),
-            'height': scaling.scale_height(120, self.global_manager),
+            'coordinates': scaling.scale_coordinates(europe_grid_x, europe_grid_y),
+            'width': scaling.scale_width(120),
+            'height': scaling.scale_height(120),
             'internal_line_color': 'black',
             'external_line_color': 'black',
             'modes': ['strategic', 'europe'],
@@ -117,13 +116,13 @@ class save_load_manager_template():
         }, self.global_manager))
 
 
-        slave_traders_grid_x = europe_grid_x #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        slave_traders_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height - 120) #started at 25, -120 for europe grid y, -25 for space between
+        slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
+        slave_traders_grid_y = constants.default_display_height - (strategic_grid_height - 120) #started at 25, -120 for europe grid y, -25 for space between
 
         self.global_manager.set('slave_traders_grid', grids.abstract_grid(False, {
-            'coordinates': scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y, self.global_manager),
-            'width': scaling.scale_width(120, self.global_manager),
-            'height': scaling.scale_height(120, self.global_manager),
+            'coordinates': scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y),
+            'width': scaling.scale_width(120),
+            'height': scaling.scale_height(120),
             'internal_line_color': 'black',
             'external_line_color': 'black',
             'modes': ['strategic'],
@@ -309,17 +308,16 @@ class save_load_manager_template():
         strategic_grid_width = 320
         mini_grid_height = 600
         mini_grid_width = 640
-        europe_grid_x = self.global_manager.get('europe_grid_x') #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        europe_grid_y = self.global_manager.get('europe_grid_y') #self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
-        slave_traders_grid_x = europe_grid_x #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        slave_traders_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height - 120)
+        europe_grid_x = self.global_manager.get('europe_grid_x') #constants.default_display_width - (strategic_grid_width + 340)
+        europe_grid_y = self.global_manager.get('europe_grid_y') #constants.default_display_height - (strategic_grid_height + 25)
+        slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
+        slave_traders_grid_y = constants.default_display_height - (strategic_grid_height - 120)
         for current_grid_dict in saved_grid_dicts:
             input_dict = current_grid_dict
             if current_grid_dict['grid_type'] == 'strategic_map_grid':
-                input_dict['coordinates'] = scaling.scale_coordinates(self.global_manager.get('default_display_width') - (strategic_grid_width + 100), self.global_manager.get('default_display_height') - (strategic_grid_height + 25),
-                    self.global_manager)
-                input_dict['width'] = scaling.scale_width(strategic_grid_width, self.global_manager)
-                input_dict['height'] = scaling.scale_height(strategic_grid_height, self.global_manager)
+                input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25))
+                input_dict['width'] = scaling.scale_width(strategic_grid_width)
+                input_dict['height'] = scaling.scale_height(strategic_grid_height)
                 input_dict['coordinate_width'] = self.global_manager.get('strategic_map_width')
                 input_dict['coordinate_height'] = self.global_manager.get('strategic_map_height')
                 input_dict['internal_line_color'] = 'black'
@@ -331,31 +329,31 @@ class save_load_manager_template():
                 self.global_manager.set('strategic_map_grid', strategic_map_grid)
                 
             elif current_grid_dict['grid_type'] in ['europe_grid', 'slave_traders_grid']:
-                input_dict['width'] = scaling.scale_width(120, self.global_manager)
-                input_dict['height'] = scaling.scale_height(120, self.global_manager)
+                input_dict['width'] = scaling.scale_width(120)
+                input_dict['height'] = scaling.scale_height(120)
                 input_dict['internal_line_color'] = 'black'
                 input_dict['external_line_color'] = 'black'
                 input_dict['grid_line_width'] = 3
                 if current_grid_dict['grid_type'] == 'europe_grid':
                     input_dict['modes'] = ['strategic', 'europe']
-                    input_dict['coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager)
+                    input_dict['coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y)
                     input_dict['tile_image_id'] = 'locations/europe/' + self.global_manager.get('current_country').name + '.png' 
                     input_dict['name'] = 'Europe'
                     europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('europe_grid', europe_grid)
                 else:
                     input_dict['modes'] = ['strategic']
-                    input_dict['coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y, self.global_manager)
+                    input_dict['coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y)
                     input_dict['tile_image_id'] = 'locations/slave_traders/default.png' 
                     input_dict['name'] = 'Slave traders'
                     slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('slave_traders_grid', slave_traders_grid)
 
         self.global_manager.set('minimap_grid', grids.mini_grid(False, {
-            'coordinates': scaling.scale_coordinates(self.global_manager.get('default_display_width') - (mini_grid_width + 100),
-                self.global_manager.get('default_display_height') - (strategic_grid_height + mini_grid_height + 50), self.global_manager),
-            'width': scaling.scale_width(mini_grid_width, self.global_manager),
-            'height': scaling.scale_height(mini_grid_height,self.global_manager),
+            'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
+                constants.default_display_height - (strategic_grid_height + mini_grid_height + 50)),
+            'width': scaling.scale_width(mini_grid_width),
+            'height': scaling.scale_height(mini_grid_height),
             'coordinate_width': 5,
             'coordinate_height': 5,
             'internal_line_color': 'black',

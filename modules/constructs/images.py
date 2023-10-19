@@ -510,10 +510,10 @@ class free_image(image):
             None
         '''
         self.x = new_x
-        self.y = self.global_manager.get('display_height') - new_y
+        self.y = constants.display_height - new_y
         if hasattr(self, 'Rect') and self.Rect != 'none':
             self.Rect.x = self.x
-            self.Rect.y = self.global_manager.get('display_height') - (new_y + self.height)
+            self.Rect.y = constants.display_height - (new_y + self.height)
         if self.has_parent_collection:
             self.x_offset = new_x - self.parent_collection.x
             self.y_offset = new_y - self.parent_collection.y
@@ -641,8 +641,8 @@ class background_image(free_image):
         '''
         input_dict['image_id'] = 'misc/background.png'
         input_dict['coordinates'] = (0, 0)
-        input_dict['width'] = global_manager.get('display_width')
-        input_dict['height'] = global_manager.get('display_height')
+        input_dict['width'] = constants.display_width
+        input_dict['height'] = constants.display_height
         super().__init__(input_dict, global_manager)
         self.previous_safe_click_area_showing = False
 
@@ -686,7 +686,7 @@ class tooltip_free_image(free_image):
             None
         '''
         super().__init__(input_dict, global_manager)
-        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height)
+        self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + self.height), self.width, self.height)
         self.Rect.y = self.y - self.height
         self.tooltip_text = []
         self.update_tooltip()
@@ -705,9 +705,9 @@ class tooltip_free_image(free_image):
         font_name = self.global_manager.get('font_name')
         font_size = self.global_manager.get('font_size')
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -754,9 +754,9 @@ class tooltip_free_image(free_image):
             self.update_tooltip()
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
-                mouse_y = self.global_manager.get('display_height') + 10 - height
+                mouse_y = constants.display_height + 10 - height
             if beyond_screen:
-                mouse_x = self.global_manager.get('display_width') - width
+                mouse_x = constants.display_width - width
             mouse_y += y_displacement
             self.tooltip_box.x = mouse_x
             self.tooltip_box.y = mouse_y
@@ -766,7 +766,7 @@ class tooltip_free_image(free_image):
             pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
 class indicator_image(tooltip_free_image):
@@ -1048,8 +1048,8 @@ class loading_image_template(free_image):
             None
         '''
         input_dict['coordinates'] = (0, 0)
-        input_dict['width'] = global_manager.get('display_width')
-        input_dict['height'] = global_manager.get('display_height')
+        input_dict['width'] = constants.display_width
+        input_dict['height'] = constants.display_height
         input_dict['modes'] = []
         super().__init__(input_dict, global_manager)
         self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
@@ -1094,7 +1094,7 @@ class actor_image(image):
         self.image_description == image_description
         self.grid = grid
         self.outline_width = self.grid.grid_line_width + 1
-        self.outline = pygame.Rect(self.actor.x, self.global_manager.get('display_height') - (self.actor.y + self.height), self.width, self.height)
+        self.outline = pygame.Rect(self.actor.x, constants.display_height - (self.actor.y + self.height), self.width, self.height)
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
         if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
             grid_x, grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
@@ -1116,7 +1116,7 @@ class actor_image(image):
         '''
         cell_width = self.grid.get_cell_width()
         cell_height = self.grid.get_cell_height()
-        return((self.x + round(cell_width / 2), self.global_manager.get('display_height') -(self.y + round(cell_height / 2))))
+        return((self.x + round(cell_width / 2), constants.display_height -(self.y + round(cell_height / 2))))
         
     def set_image(self, new_image_description):
         '''
@@ -1208,9 +1208,9 @@ class actor_image(image):
         font_size = self.global_manager.get('font_size')
         font_name = self.global_manager.get('font_name')
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
-        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
+        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)
         self.actor.tooltip_box = self.tooltip_box
         self.tooltip_outline_width = 1
@@ -1327,13 +1327,13 @@ class button_image(actor_image):
         self.width = width
         self.height = height
         self.x = self.button.x
-        self.y = self.global_manager.get('display_height') - (self.button.y + self.height) - self.height
+        self.y = constants.display_height - (self.button.y + self.height) - self.height
         self.modes = button.modes
         self.image_id = image_id
         self.set_image(image_id)
         self.Rect = self.button.Rect
         self.outline_width = 2
-        self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline = pygame.Rect(self.x - self.outline_width, constants.display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
 
     def update_state(self, new_x, new_y, new_width, new_height):
         '''
@@ -1351,7 +1351,7 @@ class button_image(actor_image):
         self.width = new_width
         self.height = new_height
         self.outline.x = new_x - self.outline_width
-        self.outline.y = self.global_manager.get('display_height') - (new_y + new_height + self.outline_width)
+        self.outline.y = constants.display_height - (new_y + new_height + self.outline_width)
         self.outline.width = new_width + (2 * self.outline_width)
         self.outline.height = new_height + (self.outline_width * 2)
         self.set_image(self.image_id)
@@ -1394,7 +1394,7 @@ class button_image(actor_image):
         '''
         if self.button.showing:
             self.x = self.button.x
-            self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
+            self.y = constants.display_height - (self.button.y + self.height) + self.height
             self.complete_draw()
         
     def draw_tooltip(self):
@@ -1423,8 +1423,8 @@ class collection_image(button_image):
     def draw(self):
         if self.button.showing:
             self.x = self.button.x
-            self.y = self.global_manager.get('display_height') + self.height - self.button.y# + self.height
-            #self.y = self.global_manager.get('display_height') + self.button.y - (self.height * 3)
+            self.y = constants.display_height + self.height - self.button.y# + self.height
+            #self.y = constants.display_height + self.button.y - (self.height * 3)
             self.complete_draw()
 
 class tile_image(actor_image):

@@ -43,9 +43,9 @@ class instructions_page(label):
             None
         '''
         self.global_manager = global_manager
-        self.minimum_height = scaling.scale_height(self.global_manager.get('default_display_height') - 120, self.global_manager)
-        self.ideal_width = scaling.scale_width(self.global_manager.get('default_display_width') - 120, self.global_manager)
-        input_dict['coordinates'] = scaling.scale_coordinates(60, 60, self.global_manager)
+        self.minimum_height = scaling.scale_height(constants.default_display_height - 120)
+        self.ideal_width = scaling.scale_width(constants.default_display_width - 120)
+        input_dict['coordinates'] = scaling.scale_coordinates(60, 60)
         input_dict['minimum_width'] = self.ideal_width
         input_dict['height'] = self.minimum_height
         input_dict['modes'] = ['strategic', 'europe']
@@ -98,7 +98,7 @@ class instructions_page(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + 10, constants.display_height - (self.y + self.height - (text_line_index * self.font_size))))
 
     def format_message(self):
         '''

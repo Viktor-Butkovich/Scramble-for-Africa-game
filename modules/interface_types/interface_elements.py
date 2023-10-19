@@ -31,7 +31,7 @@ class interface_element():
         self.can_show_override = 'none'
         self.width = input_dict['width']
         self.height = input_dict['height']
-        self.Rect = pygame.Rect(0, self.global_manager.get('display_height') - (self.height), self.width, self.height)
+        self.Rect = pygame.Rect(0, constants.display_height - (self.height), self.width, self.height)
         self.showing = False
         self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
@@ -158,7 +158,7 @@ class interface_element():
         self.x = new_x
         self.Rect.x = self.x
         self.y = new_y
-        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
+        self.Rect.y = constants.display_height - (self.y + self.height)
         if self.has_parent_collection:
             self.x_offset = self.x - self.parent_collection.x
             self.y_offset = self.y - self.parent_collection.y
@@ -293,12 +293,12 @@ class interface_collection(interface_element):
         customize_button_size = 20
         if input_dict.get('allow_minimize', False) or input_dict.get('allow_move', False):
             self.insert_collection_above()
-            customize_button_width = scaling.scale_width(customize_button_size, global_manager)
-            customize_button_height = scaling.scale_width(customize_button_size, global_manager)
+            customize_button_width = scaling.scale_width(customize_button_size)
+            customize_button_height = scaling.scale_width(customize_button_size)
 
             if input_dict.get('allow_minimize', False):
                 constants.actor_creation_manager.create_interface_element({
-                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5),
                     'width': customize_button_width,
                     'height': customize_button_height,
                     'parent_collection': self.parent_collection,
@@ -311,7 +311,7 @@ class interface_collection(interface_element):
 
             if input_dict.get('allow_move', False):
                 constants.actor_creation_manager.create_interface_element({
-                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5),
                     'width': customize_button_width,
                     'height': customize_button_height,
                     'parent_collection': self.parent_collection,
@@ -322,7 +322,7 @@ class interface_collection(interface_element):
                 customize_button_x_offset += customize_button_size + 5
                 
                 constants.actor_creation_manager.create_interface_element({
-                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5),
                     'width': customize_button_width,
                     'height': customize_button_height,
                     'parent_collection': self.parent_collection,
@@ -584,9 +584,9 @@ class tabbed_collection(interface_collection):
         self.current_tabbed_member = None
         super().__init__(input_dict, global_manager)
         self.tabs_collection = constants.actor_creation_manager.create_interface_element({
-            'coordinates': scaling.scale_coordinates(0, 5, global_manager),
-            'width': scaling.scale_width(10, global_manager),
-            'height': scaling.scale_height(30, global_manager),
+            'coordinates': scaling.scale_coordinates(0, 5),
+            'width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
             'init_type': 'ordered collection',
             'parent_collection': self,
             'direction': 'horizontal'
@@ -625,8 +625,8 @@ class tabbed_collection(interface_collection):
 
         if member_config['tabbed']:
             constants.actor_creation_manager.create_interface_element({
-                'width': scaling.scale_width(36, self.global_manager), #20
-                'height': scaling.scale_height(36, self.global_manager),
+                'width': scaling.scale_width(36),
+                'height': scaling.scale_height(36),
                 'init_type': 'tab button',
                 'parent_collection': self.tabs_collection,
                 'image_id': member_config['button_image_id'],
@@ -653,7 +653,7 @@ class ordered_collection(interface_collection):
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'separation' = scaling.scale_height(5, global_manager): int value - Distance to set between ordered members
+                'separation' = scaling.scale_height(5): int value - Distance to set between ordered members
                 'direction' = 'vertical': string value - Direction to order members in
                 'reversed' = False: boolean value - Whether to reverse the order of members in the specified direction (top to bottom or bottom to top)
                 'second_dimension_increment' = 0: int value - Increment between each row/column of this collection - 2 elements with a difference of 1 second dimension
@@ -663,7 +663,7 @@ class ordered_collection(interface_collection):
         Output:
             None
         '''
-        self.separation = input_dict.get('separation', scaling.scale_height(5, global_manager))
+        self.separation = input_dict.get('separation', scaling.scale_height(5))
         self.direction = input_dict.get('direction', 'vertical')
         self.second_dimension_increment = input_dict.get('second_dimension_increment', 0)
         self.second_dimension_coordinates = {}

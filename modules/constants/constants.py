@@ -1,3 +1,4 @@
+import pygame
 from modules.tools.data_managers.global_manager_template import global_manager_template
 from modules.tools.data_managers.sound_manager_template import sound_manager_template
 from modules.tools.data_managers.save_load_manager_template import save_load_manager_template
@@ -5,6 +6,10 @@ from modules.tools.data_managers.flavor_text_manager_template import flavor_text
 from modules.tools.data_managers.input_manager_template import input_manager_template
 from modules.tools.data_managers.actor_creation_manager_template import actor_creation_manager_template
 from typing import Dict, List
+
+pygame.init()
+pygame.mixer.init()
+pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
 
 global_manager:global_manager_template = global_manager_template()
 sound_manager:sound_manager_template = sound_manager_template(global_manager)
@@ -67,7 +72,7 @@ transaction_descriptions: Dict[str, str] = {
 }
 transaction_types: List[str] = [current_key for current_key in transaction_descriptions]
 
-color_dict: Dict[str, tuple] = {
+color_dict: Dict[str, tuple[int, int, int]] = {
     'black': (0, 0, 0),
     'white': (255, 255, 255),
     'light gray': (230, 230, 230),
@@ -90,3 +95,9 @@ color_dict: Dict[str, tuple] = {
     'purple': (127, 0, 170),
     'transparent': (1, 1, 1)
 }
+
+default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
+default_display_height: int = 972
+resolution_finder = pygame.display.Info()
+display_width: float = resolution_finder.current_w - round(default_display_width/10)
+display_height: float = resolution_finder.current_h - round(default_display_height/10)

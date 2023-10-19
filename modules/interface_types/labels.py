@@ -29,7 +29,7 @@ class label(button):
             None
         '''
         self.global_manager = global_manager
-        self.font_size = scaling.scale_width(25, global_manager)
+        self.font_size = scaling.scale_width(25)
         self.font_name = self.global_manager.get('font_name')
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
@@ -50,8 +50,8 @@ class label(button):
             None
         '''
         self.message = new_message
-        if text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width:
-            self.width = text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
+        if text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10) > self.minimum_width:
+            self.width = text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10)
         else:
             self.width = self.minimum_width
         self.image.width = self.width
@@ -92,7 +92,7 @@ class label(button):
         '''
         if self.showing:
             super().draw(allow_show_outline=False)
-            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
 class value_label(label):
@@ -355,8 +355,8 @@ class commodity_prices_label(label):
         '''
         self.message = new_message
         for text_line in self.message:
-            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10, self.global_manager) and text_utility.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.width:
-                self.width = scaling.scale_width(text_utility.message_width(text_line, self.font_size, self.font_name), self.global_manager) + scaling.scale_width(20, self.global_manager)# + 20
+            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10) and text_utility.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10) > self.width:
+                self.width = scaling.scale_width(text_utility.message_width(text_line, self.font_size, self.font_name)) + scaling.scale_width(20)
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling
@@ -375,7 +375,7 @@ class commodity_prices_label(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
                     (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):
@@ -431,7 +431,7 @@ class multi_line_label(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
                     (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):

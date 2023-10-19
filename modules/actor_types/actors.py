@@ -483,9 +483,9 @@ class actor():
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         if below_screen:
-            mouse_y = self.global_manager.get('display_height') + 10 - height
+            mouse_y = constants.display_height + 10 - height
         if beyond_screen:
-            mouse_x = self.global_manager.get('display_width') - width
+            mouse_x = constants.display_width - width
         mouse_y += y_displacement
 
         if hasattr(self, 'images'):
@@ -496,8 +496,8 @@ class actor():
         else:
             tooltip_image = self
 
-        if (mouse_x + tooltip_image.tooltip_box.width) > self.global_manager.get('display_width'):
-            mouse_x = self.global_manager.get('display_width') - tooltip_image.tooltip_box.width
+        if (mouse_x + tooltip_image.tooltip_box.width) > constants.display_width:
+            mouse_x = constants.display_width - tooltip_image.tooltip_box.width
         tooltip_image.tooltip_box.x = mouse_x
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width
@@ -506,7 +506,7 @@ class actor():
         pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
+            self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
                 tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
     def get_image_id_list(self, override_values={}):

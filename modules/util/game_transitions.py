@@ -66,7 +66,7 @@ def set_game_mode(new_game_mode, global_manager):
         start_loading(global_manager)
         if new_game_mode == 'strategic':
             global_manager.set('current_game_mode', 'strategic')
-            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             centered_cell_x, centered_cell_y = global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('strategic_map_grid').find_cell(centered_cell_x, centered_cell_y).tile)
@@ -76,7 +76,7 @@ def set_game_mode(new_game_mode, global_manager):
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main_menu':
             global_manager.set('current_game_mode', 'main_menu')
-            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
@@ -87,7 +87,7 @@ def set_game_mode(new_game_mode, global_manager):
         elif new_game_mode == 'new_game_setup':
             global_manager.set('current_game_mode', 'new_game_setup')
         else:
-            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('current_game_mode', new_game_mode)
     for current_mob in global_manager.get('mob_list'):

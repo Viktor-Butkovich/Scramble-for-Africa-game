@@ -677,9 +677,9 @@ class button(interface_elements.interface_element):
         font_name = self.global_manager.get('font_name')
         font_size = self.global_manager.get('font_size')
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -732,8 +732,8 @@ class button(interface_elements.interface_element):
                 message = self.keybind_name
                 color = 'white'
                 textsurface = self.global_manager.get('myfont').render(message, False, constants.color_dict[color])
-                self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10, self.global_manager), (self.global_manager.get('display_height') -
-                    (self.y + self.height - scaling.scale_height(5, self.global_manager)))))
+                self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10), (constants.display_height -
+                    (self.y + self.height - scaling.scale_height(5)))))
 
     def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
         '''
@@ -752,9 +752,9 @@ class button(interface_elements.interface_element):
             self.update_tooltip()
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
-                mouse_y = self.global_manager.get('display_height') + 10 - height
+                mouse_y = constants.display_height + 10 - height
             if beyond_screen:
-                mouse_x = self.global_manager.get('display_width') - width
+                mouse_x = constants.display_width - width
             mouse_y += y_displacement
             self.tooltip_box.x = mouse_x
             self.tooltip_box.y = mouse_y
@@ -764,7 +764,7 @@ class button(interface_elements.interface_element):
             pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
     def on_rmb_click(self):
@@ -826,7 +826,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'expand text box':
             if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
-                self.global_manager.set('text_box_height', scaling.scale_height(self.global_manager.get('default_display_height') - 45, self.global_manager)) #self.height
+                self.global_manager.set('text_box_height', scaling.scale_height(constants.default_display_height - 45)) #self.height
             else:
                 self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
 
@@ -1170,7 +1170,7 @@ class button(interface_elements.interface_element):
                 self.parent_collection.move_with_mouse_config = {'moving': False}
             else:
                 x, y = pygame.mouse.get_pos()
-                y = self.global_manager.get('display_height') - y
+                y = constants.display_height - y
                 self.parent_collection.move_with_mouse_config = {
                     'moving': True, 
                     'mouse_x_offset': self.parent_collection.x - x, 
@@ -1239,7 +1239,7 @@ class button(interface_elements.interface_element):
         '''
         if self.button_type == 'move interface collection' and self.parent_collection.move_with_mouse_config['moving']:
             x, y = pygame.mouse.get_pos()
-            y = self.global_manager.get('display_height') - y
+            y = constants.display_height - y
             destination_x, destination_y = (x + self.parent_collection.move_with_mouse_config['mouse_x_offset'], y + self.parent_collection.move_with_mouse_config['mouse_y_offset'])
             self.parent_collection.set_origin(destination_x, destination_y)
 
@@ -1843,7 +1843,7 @@ class minister_portrait_image(button):
         if self.minister_type == 'none': #if available minister portrait
             if 'ministers' in self.modes:
                 self.global_manager.get('available_minister_portrait_list').append(self)
-            warning_x_offset = scaling.scale_width(-100, global_manager)
+            warning_x_offset = scaling.scale_width(-100)
         else:
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
             warning_x_offset = 0
@@ -2614,7 +2614,7 @@ class anonymous_button(button):
         self.message = button_info_dict['message']
 
         super().__init__(input_dict, global_manager)
-        self.font_size = scaling.scale_width(25, global_manager)
+        self.font_size = scaling.scale_width(25)
         self.font_name = self.global_manager.get('font_name')
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True
@@ -2644,7 +2644,7 @@ class anonymous_button(button):
         '''
         super().draw()
         if self.showing:
-            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
     def update_tooltip(self):

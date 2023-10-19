@@ -217,8 +217,8 @@ class minister():
         '''
         minister_position_icon_dict = {
             'coordinates': (0, 0),
-            'width': scaling.scale_width(100, self.global_manager),
-            'height': scaling.scale_height(100, self.global_manager),
+            'width': scaling.scale_width(100),
+            'height': scaling.scale_height(100),
             'modes': ['strategic', 'ministers', 'europe'],
             'attached_minister': self,
             'minister_image_type': 'position',

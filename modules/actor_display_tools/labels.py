@@ -39,9 +39,9 @@ class actor_display_label(label):
         input_dict['message'] = ''
         super().__init__(input_dict, global_manager)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
-        s_increment = scaling.scale_width(6, self.global_manager)
-        m_increment = scaling.scale_width(11, self.global_manager)
-        l_increment = scaling.scale_width(30, self.global_manager)
+        s_increment = scaling.scale_width(6)
+        m_increment = scaling.scale_width(11)
+        l_increment = scaling.scale_width(30)
 
         s_size = self.height + s_increment
         m_size = self.height + m_increment

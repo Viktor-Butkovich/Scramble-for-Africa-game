@@ -171,7 +171,7 @@ class grid(interface_elements.interface_element):
             int tuple: Two values representing x and y pixel coordinates of the center of the requested cell
         '''
         x, y = coordinates
-        return((int((self.width/(self.coordinate_width)) * x) + self.x + int(self.get_cell_width()/2)), (self.global_manager.get('display_height') - (int((self.height/(self.coordinate_height)) * y) + self.y + int(self.get_cell_height()/2))))
+        return((int((self.width/(self.coordinate_width)) * x) + self.x + int(self.get_cell_width()/2)), (constants.display_height - (int((self.height/(self.coordinate_height)) * y) + self.y + int(self.get_cell_height()/2))))
 
     def convert_coordinates(self, coordinates):
         '''
@@ -183,7 +183,7 @@ class grid(interface_elements.interface_element):
             int tuple: Two values representing x and y pixel coordinates of the bottom left corner of the requested cell
         '''
         x, y = coordinates
-        return((int((self.width/(self.coordinate_width)) * x) + self.x), (self.global_manager.get('display_height') - (int((self.height/(self.coordinate_height)) * y) + self.y )))
+        return((int((self.width/(self.coordinate_width)) * x) + self.x), (constants.display_height - (int((self.height/(self.coordinate_height)) * y) + self.y )))
     
     def get_height(self):
         '''
