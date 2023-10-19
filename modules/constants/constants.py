@@ -1,6 +1,12 @@
-import modules.tools.data_managers.global_manager_template as global_manager_template
+from modules.tools.data_managers.global_manager_template import global_manager_template
+from modules.tools.data_managers.sound_manager_template import sound_manager_template
+from modules.tools.data_managers.save_load_manager_template import save_load_manager_template
+from modules.tools.data_managers.flavor_text_manager_template import flavor_text_manager_template
 
-global_manager = global_manager_template.global_manager_template()
+global_manager:global_manager_template = global_manager_template()
+sound_manager:sound_manager_template = sound_manager_template(global_manager)
+save_load_manager:save_load_manager_template = save_load_manager_template(global_manager)
+flavor_text_manager:flavor_text_manager_template = flavor_text_manager_template(global_manager)
 
 building_prices = {
     'resource': 10,

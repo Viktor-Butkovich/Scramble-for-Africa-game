@@ -71,7 +71,7 @@ class minister():
                 self.global_manager.get('available_minister_list').append(self)
         else:
             self.background = random.choice(global_manager.get('weighted_backgrounds'))
-            self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
+            self.name = constants.flavor_text_manager.generate_minister_name(self.background)
             self.status_number = global_manager.get('background_status_dict')[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
@@ -1180,4 +1180,4 @@ class minister():
             None
         '''
         if len(self.voice_lines[type]) > 0:
-            self.global_manager.get('sound_manager').play_sound(self.get_voice_line(type))
+            constants.sound_manager.play_sound(self.get_voice_line(type))

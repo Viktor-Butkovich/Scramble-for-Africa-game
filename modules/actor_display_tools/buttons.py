@@ -56,7 +56,7 @@ class embark_all_passengers_button(button):
                     passenger = contained_mob
                     if passenger.is_pmob and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                         passenger.embark_vehicle(vehicle)
-                self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
         else:
             text_utility.print_to_screen('You are busy and cannot embark all passengers.', self.global_manager)
 
@@ -701,7 +701,7 @@ class embark_vehicle_button(button):
                     if vehicle.sentry_mode:
                         vehicle.set_sentry_mode(False)
                     rider.embark_vehicle(vehicle)
-                    self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                    constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
             else:
                 text_utility.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.', self.global_manager)
         else:

@@ -3,6 +3,7 @@
 import time
 from . import main_loop_utility, text_utility, actor_utility, minister_utility, scaling
 from ..actor_types import tiles
+import modules.constants.constants as constants
 
 def cycle_player_turn(global_manager, start_of_turn = False):
     '''
@@ -55,10 +56,10 @@ def set_game_mode(new_game_mode, global_manager):
     else:
         if previous_game_mode in ['main_menu', 'new_game_setup'] and not new_game_mode in ['main_menu', 'new_game_setup']: #new_game_mode in ['strategic', 'ministers', 'europe']:
             global_manager.get('event_manager').clear()
-            global_manager.get('sound_manager').play_random_music('europe')
+            constants.sound_manager.play_random_music('europe')
         elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
             global_manager.get('event_manager').clear()
-            global_manager.get('sound_manager').play_random_music('main menu')
+            constants.sound_manager.play_random_music('main menu')
 
         if not (new_game_mode == 'trial' or global_manager.get('current_game_mode') == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
             global_manager.set('previous_game_mode', global_manager.get('current_game_mode'))

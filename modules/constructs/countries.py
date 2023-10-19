@@ -1,6 +1,7 @@
 #Contains functionality for different player countries
 
 from ..util import actor_utility
+import modules.constants.constants as constants
 
 class country:
     '''
@@ -57,13 +58,13 @@ class country:
         self.global_manager.set('current_country', self)
         self.global_manager.set('current_country_name', self.name)
         
-        self.global_manager.get('flavor_text_manager').set_flavor_text('minister_first_names', 'text/names/' + self.adjective + '_first_names.csv')
-        self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
+        constants.flavor_text_manager.set_flavor_text('minister_first_names', 'text/names/' + self.adjective + '_first_names.csv')
+        constants.flavor_text_manager.allow_particles = self.allow_particles
         if self.allow_particles:
-            self.global_manager.get('flavor_text_manager').set_flavor_text('minister_particles', 'text/names/' + self.adjective + '_particles.csv')
-        self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
-        self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
-        self.global_manager.get('flavor_text_manager').set_flavor_text('minister_last_names', 'text/names/' + self.adjective + '_last_names.csv')
+            constants.flavor_text_manager.set_flavor_text('minister_particles', 'text/names/' + self.adjective + '_particles.csv')
+        constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
+        constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
+        constants.flavor_text_manager.set_flavor_text('minister_last_names', 'text/names/' + self.adjective + '_last_names.csv')
         self.global_manager.set('weighted_backgrounds', self.background_set)
         for current_recruitment_button in self.global_manager.get('recruitment_button_list'):
             if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):
@@ -71,8 +72,6 @@ class country:
         for current_flag_icon in self.global_manager.get('flag_icon_list'):
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
-        #if self.name == 'France':
-        #    self.global_manager.get('sound_manager').play_music('La Marseillaise 1', 0.08)
 
     def deselect(self):
         '''
@@ -157,9 +156,9 @@ class hybrid_country(country):
         self.global_manager.set('current_country_name', self.name)
         
         #specific text files are managed in flavor_text_manager for the time being, don't try to set to nonexistent belgium nameset
-        self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
-        self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
-        self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
+        constants.flavor_text_manager.allow_particles = self.allow_particles
+        constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
+        constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
         self.global_manager.set('weighted_backgrounds', self.background_set)
         for current_recruitment_button in self.global_manager.get('recruitment_button_list'):
             if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):

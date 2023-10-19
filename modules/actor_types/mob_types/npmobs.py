@@ -3,6 +3,7 @@
 import random
 from ..mobs import mob
 from ...util import utility, turn_management_utility
+import modules.constants.constants as constants
 
 class npmob(mob): #if enemy.turn_done
     '''
@@ -289,9 +290,9 @@ class npmob(mob): #if enemy.turn_done
                 current_image.add_to_cell()
             if self.visible():
                 if self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-                    self.global_manager.get('sound_manager').play_sound('water')
+                    constants.sound_manager.play_sound('water')
                 else:
-                    self.global_manager.get('sound_manager').play_sound('footsteps')
+                    constants.sound_manager.play_sound('footsteps')
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)

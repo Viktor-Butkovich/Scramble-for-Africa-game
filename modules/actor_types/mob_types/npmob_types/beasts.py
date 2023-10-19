@@ -3,6 +3,7 @@
 import random
 from ..npmobs import npmob
 from ....util import utility
+import modules.constants.constants as constants
 
 class beast(npmob):
     '''
@@ -162,7 +163,7 @@ class beast(npmob):
         else:
             self.show_images()
             if not on_load:
-                self.global_manager.get('sound_manager').play_sound('beasts/' + self.animal_type, 0.6)
+                constants.sound_manager.play_sound('beasts/' + self.animal_type, 0.6)
 
     def check_despawn(self):
         '''

@@ -5,6 +5,7 @@ import random
 from ..constructs import images, villages
 from ..util import utility, actor_utility, main_loop_utility
 from .actors import actor
+import modules.constants.constants as constants
 
 class tile(actor): #to do: make terrain tiles a subclass
     '''
@@ -403,18 +404,18 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.global_manager.get('player_turn') and main_loop_utility.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
             if self.name == 'Slave traders' and self.global_manager.get('slave_traders_strength') > 0:
-                if self.global_manager.get('sound_manager').previous_state != 'slave traders':
+                if constants.sound_manager.previous_state != 'slave traders':
                     self.global_manager.get('event_manager').clear()
-                    self.global_manager.get('sound_manager').play_random_music('slave traders')
+                    constants.sound_manager.play_random_music('slave traders')
             elif self.cell.village != 'none' and self.cell.visible and self.cell.village.population > 0 and not self.cell.has_intact_building('port'):
                 new_state = 'village ' + self.cell.village.get_aggressiveness_adjective()
-                if self.global_manager.get('sound_manager').previous_state != new_state: #village_peaceful/neutral/aggressive
+                if constants.sound_manager.previous_state != new_state: #village_peaceful/neutral/aggressive
                     self.global_manager.get('event_manager').clear()
-                    self.global_manager.get('sound_manager').play_random_music(new_state)
+                    constants.sound_manager.play_random_music(new_state)
             else:
-                if self.global_manager.get('sound_manager').previous_state != 'europe':
+                if constants.sound_manager.previous_state != 'europe':
                     self.global_manager.get('event_manager').clear()
-                    self.global_manager.get('sound_manager').play_random_music('europe')
+                    constants.sound_manager.play_random_music('europe')
 
 class abstract_tile(tile):
     '''

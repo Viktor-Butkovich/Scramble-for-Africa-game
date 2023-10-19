@@ -6,6 +6,7 @@ import random
 from ..constructs import images
 from ..util import utility, actor_utility
 from .actors import actor
+import modules.constants.constants as constants
 
 class mob(actor):
     '''
@@ -683,7 +684,7 @@ class mob(actor):
         elif death_type == 'violent':
             possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5']
         if len(possible_sounds) > 0:
-            self.global_manager.get('sound_manager').play_sound('voices/' + random.choice(possible_sounds), 0.5)
+            constants.sound_manager.play_sound('voices/' + random.choice(possible_sounds), 0.5)
 
     def can_move(self, x_change, y_change): #same logic as pmob without print statements
         '''
@@ -753,9 +754,9 @@ class mob(actor):
             current_image.add_to_cell()
 
         if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-            self.global_manager.get('sound_manager').play_sound('water')
+            constants.sound_manager.play_sound('water')
         else:
-            self.global_manager.get('sound_manager').play_sound('footsteps')
+            constants.sound_manager.play_sound('footsteps')
 
         if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle): #test this logic
             previous_infrastructure = previous_cell.get_intact_building('infrastructure')
@@ -788,7 +789,7 @@ class mob(actor):
                 possible_sounds = ['voices/forward march 1', 'voices/forward march 2']
                 if self.global_manager.get('current_country').name == 'Germany':
                     possible_sounds.append('voices/german forward march 1')
-                self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+                constants.sound_manager.play_sound(random.choice(possible_sounds))
 
         if self.has_canoes:
             self.update_canoes()

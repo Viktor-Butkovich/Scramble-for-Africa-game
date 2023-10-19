@@ -11,10 +11,9 @@ import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
 import modules.tools.actor_creation_tools as actor_creation_tools
 import modules.constructs.countries as countries
-import modules.tools.data_managers.save_load_manager_template as save_load_manager_template
 import modules.tools.effects as effects
-from modules.tools.data_managers import effect_manager_template, flavor_text_manager_template, input_manager_template, \
-    notification_manager_template, sound_manager_template, value_tracker_template, event_manager_template
+from modules.tools.data_managers import effect_manager_template, input_manager_template, \
+    notification_manager_template, value_tracker_template, event_manager_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
     construction, upgrade, repair, loan_search
 
@@ -46,9 +45,6 @@ def fundamental(global_manager):
     pygame.init()
     pygame.mixer.init()
     pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
-    global_manager.set('sound_manager', sound_manager_template.sound_manager_template(global_manager))
-    global_manager.set('save_load_manager', save_load_manager_template.save_load_manager_template(global_manager))
-    global_manager.set('flavor_text_manager', flavor_text_manager_template.flavor_text_manager_template(global_manager))
     global_manager.set('input_manager', input_manager_template.input_manager_template(global_manager))
     global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
 

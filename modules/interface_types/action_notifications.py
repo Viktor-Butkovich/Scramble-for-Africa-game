@@ -2,6 +2,7 @@
 
 from .notifications import notification
 from ..util import scaling, actor_utility, trial_utility, action_utility
+import modules.constants.constants as constants
 
 class action_notification(notification):
     def __init__(self, input_dict, global_manager):
@@ -142,7 +143,7 @@ class dice_rolling_notification(action_notification):
         super().__init__(input_dict, global_manager)
         if self.global_manager.get('ongoing_action_type') in ['combat', 'slave_capture']:
             if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
-                self.global_manager.get('sound_manager').play_sound('gunfire')
+                constants.sound_manager.play_sound('gunfire')
 
     def update_tooltip(self):
         '''

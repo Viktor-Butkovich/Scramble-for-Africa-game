@@ -4,6 +4,7 @@ import pygame
 import random
 from ..mobs import mob
 from ...util import text_utility, utility, actor_utility, minister_utility, game_transitions
+import modules.constants.constants as constants
 
 class pmob(mob):
     '''
@@ -293,7 +294,7 @@ class pmob(mob):
         '''
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
-                self.global_manager.get('sound_manager').play_sound('bolt_action_2')
+                constants.sound_manager.play_sound('bolt_action_2')
             if self.global_manager.get('current_country').name == 'France':
                 possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
             elif self.global_manager.get('current_country').name == 'Germany':
@@ -302,7 +303,7 @@ class pmob(mob):
                 possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
                 if self.is_vehicle and self.vehicle_type == 'ship':
                     possible_sounds.append('voices/steady she goes')
-            self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+            constants.sound_manager.play_sound(random.choice(possible_sounds))
 
     def set_automatically_replace(self, new_value):
         '''
@@ -765,7 +766,7 @@ class pmob(mob):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
             vehicle.select()
         if not self.global_manager.get('loading_save'):
-            self.global_manager.get('sound_manager').play_sound('footsteps')
+            constants.sound_manager.play_sound('footsteps')
         self.clear_automatic_route()
 
     def disembark_vehicle(self, vehicle, focus = True):
@@ -805,4 +806,4 @@ class pmob(mob):
             if self.global_manager.get('minimap_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-            self.global_manager.get('sound_manager').play_sound('footsteps')
+            constants.sound_manager.play_sound('footsteps')

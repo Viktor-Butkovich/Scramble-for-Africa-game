@@ -3,6 +3,7 @@
 import time
 from .labels import multi_line_label
 from ..util import actor_utility
+import modules.constants.constants as constants
 
 class notification(multi_line_label):
     '''
@@ -33,7 +34,7 @@ class notification(multi_line_label):
         self.in_notification = True
         self.is_action_notification = False
         self.notification_dice = 0 #by default, do not show any dice when notification shown
-        self.global_manager.get('sound_manager').play_sound('opening_letter')
+        constants.sound_manager.play_sound('opening_letter')
         self.creation_time = time.time()
         self.notification_type = input_dict['notification_type']
         self.on_remove = input_dict.get('on_remove', None)

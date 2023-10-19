@@ -84,7 +84,7 @@ class exploration(action.action):
         elif subject == 'initial':
             self.future_cell = self.current_unit.grid.find_cell(self.current_unit.x + self.x_change, self.current_unit.y + self.y_change)
             text += 'The expedition heads towards the ' + self.direction + '. /n /n'
-            text += (self.global_manager.get('flavor_text_manager').generate_flavor_text(self.action_type) + ' /n /n')
+            text += (constants.flavor_text_manager.generate_flavor_text(self.action_type) + ' /n /n')
         elif subject == 'success':
             text += '/n'
             self.public_relations_change = random.randrange(0, 3)

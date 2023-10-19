@@ -1042,7 +1042,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'new game':
             if self.global_manager.get('current_game_mode') == 'new_game_setup':
                 if not self.global_manager.get('displayed_country') == 'none':
-                    self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
+                    constants.save_load_manager.new_game(self.global_manager.get('displayed_country'))
                 else:
                     text_utility.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
             else:
@@ -1050,7 +1050,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'save game':
             if main_loop_utility.action_possible(self.global_manager):
-                self.global_manager.get('save_load_manager').save_game('save1.pickle')
+                constants.save_load_manager.save_game('save1.pickle')
                 self.global_manager.get('notification_manager').display_notification({
                     'message': 'Game successfully saved to save1.pickle /n /n',
                 })
@@ -1058,7 +1058,7 @@ class button(interface_elements.interface_element):
                 text_utility.print_to_screen('You are busy and cannot save the game', self.global_manager)
 
         elif self.button_type == 'load game':
-            self.global_manager.get('save_load_manager').load_game('save1.pickle')
+            constants.save_load_manager.load_game('save1.pickle')
 
         elif self.button_type == 'fire':
             fired_unit = self.global_manager.get('displayed_mob')

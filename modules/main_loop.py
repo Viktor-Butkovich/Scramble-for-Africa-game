@@ -3,6 +3,7 @@
 import time
 import pygame
 from .util import main_loop_utility, utility, text_utility, turn_management_utility, actor_utility
+import modules.constants.constants as constants
 
 def main_loop(global_manager):
     '''
@@ -114,7 +115,7 @@ def main_loop(global_manager):
                         global_manager.set('typing', True)
 
             elif event.type == pygame.mixer.music.get_endevent():
-                global_manager.get('sound_manager').song_done()
+                constants.sound_manager.song_done()
 
         global_manager.set('old_lmb_down', global_manager.get('lmb_down'))
         global_manager.set('old_rmb_down', global_manager.get('rmb_down'))
