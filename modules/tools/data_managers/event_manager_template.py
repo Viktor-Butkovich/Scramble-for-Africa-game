@@ -1,4 +1,5 @@
 from ...constructs import events
+import modules.constants.constants as constants
 
 class event_manager_template():
     '''

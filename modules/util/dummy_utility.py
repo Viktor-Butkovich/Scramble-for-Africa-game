@@ -1,6 +1,7 @@
 #Contains utility functions for setting up reorganization interface with correct dummy units for merge/split procedures
 
 from . import actor_utility
+import modules.constants.constants as constants
 
 def generate_autofill_actors(global_manager, search_start_index=0):
     '''
@@ -26,7 +27,7 @@ def generate_autofill_actors(global_manager, search_start_index=0):
             'in_vehicle': False,
             'in_group': False,
             'in_building': False,
-            'images': [global_manager.get('actor_creation_manager').create_dummy({
+            'images': [constants.actor_creation_manager.create_dummy({
                 'image_id': None
             }, global_manager)],
         }
@@ -77,7 +78,7 @@ def create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes, global_
     for attribute in required_dummy_attributes:
         if hasattr(unit, attribute):
             dummy_input_dict[attribute] = getattr(unit, attribute)
-    return(global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, global_manager))
+    return(constants.actor_creation_manager.create_dummy(dummy_input_dict, global_manager))
 
 def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict, global_manager):
     '''
@@ -113,7 +114,7 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict,
         image_id_list = officer.get_image_id_list()
         image_id_list.remove(officer.image_dict['default']) #group default image is empty
         dummy_input_dict['image_id_list'] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer, global_manager)
-        return_value = global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, global_manager)
+        return_value = constants.actor_creation_manager.create_dummy(dummy_input_dict, global_manager)
     return(return_value)
 
 def simulate_crew(vehicle, worker, required_dummy_attributes, dummy_input_dict, global_manager):

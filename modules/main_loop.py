@@ -17,7 +17,7 @@ def main_loop(global_manager):
     while not global_manager.get('crashed'):
         if global_manager.get('displayed_notification') == 'none':
             stopping = False
-        global_manager.get('input_manager').update_input()
+        constants.input_manager.update_input()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 global_manager.set('crashed', True)
@@ -104,8 +104,8 @@ def main_loop(global_manager):
                     global_manager.set('r_ctrl', 'up')
                 if event.key == pygame.K_RETURN:
                     if global_manager.get('typing'):
-                        if global_manager.get('input_manager').taking_input:
-                            global_manager.get('input_manager').taking_input = False
+                        if constants.input_manager.taking_input:
+                            constants.input_manager.taking_input = False
                             text_utility.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
                         else:
                             text_utility.print_to_screen(global_manager.get('message'), global_manager)

@@ -73,9 +73,9 @@ class tile(actor): #to do: make terrain tiles a subclass
         for current_image in self.images:
             outline = self.cell.Rect
             if color == 'default':
-                color = self.global_manager.get('color_dict')[self.selection_outline_color]
+                color = constants.color_dict[self.selection_outline_color]
             else:
-                color = self.global_manager.get('color_dict')[color] #converts input string to RGB tuple
+                color = constants.color_dict[color] #converts input string to RGB tuple
             pygame.draw.rect(self.global_manager.get('game_display'), color, (outline), current_image.outline_width)
 
     def draw_actor_match_outline(self, called_by_equivalent):
@@ -91,7 +91,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.images[0].can_show():
             for current_image in self.images:
                 outline = self.cell.Rect
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.actor_match_outline_color], (outline), current_image.outline_width)
+                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.actor_match_outline_color], (outline), current_image.outline_width)
                 equivalent_tile = self.get_equivalent_tile()
                 if (not equivalent_tile == 'none') and (not called_by_equivalent):
                     equivalent_tile.draw_actor_match_outline(True)

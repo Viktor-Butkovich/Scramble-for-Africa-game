@@ -3,6 +3,7 @@
 import pygame
 from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
+import modules.constants.constants as constants
 
 class choice_notification(action_notifications.action_notification):
     '''
@@ -44,7 +45,7 @@ class choice_notification(action_notifications.action_notification):
                 init_type = 'recruitment choice button'
             else:
                 init_type = 'choice button'
-            self.choice_buttons.append(global_manager.get('actor_creation_manager').create_interface_element({
+            self.choice_buttons.append(constants.actor_creation_manager.create_interface_element({
                 'coordinates': (self.x + (current_button_type_index * round(self.width / len(button_types))), self.y - button_height),
                 'width': round(self.width / len(button_types)),
                 'height': button_height,
@@ -264,7 +265,7 @@ class recruitment_choice_button(choice_button):
             input_dict['name'] = 'slave workers'
             input_dict['init_type'] = 'slaves'
             input_dict['purchased'] = True
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            constants.actor_creation_manager.create(False, input_dict, self.global_manager)
 
         elif self.recruitment_type == 'African worker village':
             self.global_manager.get('displayed_tile').cell.get_building('village').recruit_worker()
@@ -284,13 +285,13 @@ class recruitment_choice_button(choice_button):
             self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
-            worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            worker = constants.actor_creation_manager.create(False, input_dict, self.global_manager)
             if recruiter.is_vehicle:
                 recruiter.set_movement_points(0)
                 worker.crew_vehicle(recruiter)
             else:
                 recruiter.set_movement_points(0)
-                self.global_manager.get('actor_creation_manager').create_group(worker, recruiter, self.global_manager)
+                constants.actor_creation_manager.create_group(worker, recruiter, self.global_manager)
 
         else:
             input_dict['coordinates'] = (0, 0)
@@ -326,5 +327,5 @@ class recruitment_choice_button(choice_button):
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'ship'
                 
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            constants.actor_creation_manager.create(False, input_dict, self.global_manager)
         super().on_click()

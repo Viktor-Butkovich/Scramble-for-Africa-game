@@ -421,7 +421,7 @@ class construction(action.action):
                 input_dict['init_type'] = 'boat'
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
-            new_building = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            new_building = constants.actor_creation_manager.create(False, input_dict, self.global_manager)
 
             if self.building_type in ['port', 'train_station', 'resource']:
                 warehouses = self.current_unit.images[0].current_cell.get_building('warehouses')
@@ -433,7 +433,7 @@ class construction(action.action):
                     input_dict['image'] = 'misc/empty.png'
                     input_dict['name'] = 'warehouses'
                     input_dict['init_type'] = 'warehouses'
-                    self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+                    constants.actor_creation_manager.create(False, input_dict, self.global_manager)
                     
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.current_unit.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:

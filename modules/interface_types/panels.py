@@ -1,6 +1,7 @@
 #Contains functionality for panels
 
 from .buttons import button
+import modules.constants.constants as constants
 
 class panel(button):
     '''

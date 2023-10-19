@@ -2,6 +2,7 @@
 
 from ..constructs.images import free_image
 from ..util import action_utility
+import modules.constants.constants as constants
 
 class actor_display_free_image(free_image):
     '''

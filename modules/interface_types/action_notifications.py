@@ -43,7 +43,7 @@ class action_notification(notification):
                 notification_manager = self.global_manager.get('notification_manager')
                 column_increment = 120
                 collection_y = notification_manager.default_notification_y - (notification_manager.default_notification_height / 2)
-                self.notification_ordered_collection = self.global_manager.get('actor_creation_manager').create_interface_element(
+                self.notification_ordered_collection = constants.actor_creation_manager.create_interface_element(
                     action_utility.generate_action_ordered_collection_input_dict(
                         scaling.scale_coordinates(-1 * column_increment + (column_increment / 2), collection_y, global_manager),
                         self.global_manager,
@@ -59,7 +59,7 @@ class action_notification(notification):
                 for element_input_dict in self.attached_interface_elements:
                     if type(element_input_dict) == dict:
                         element_input_dict['parent_collection'] = self.notification_ordered_collection #self.parent_collection
-                        self.attached_interface_elements[index] = global_manager.get('actor_creation_manager').create_interface_element(element_input_dict, global_manager) #if given input dict, create it and add it to notification
+                        self.attached_interface_elements[index] = constants.actor_creation_manager.create_interface_element(element_input_dict, global_manager) #if given input dict, create it and add it to notification
                     else:
                         self.notification_ordered_collection.add_member(element_input_dict, member_config=element_input_dict.transfer_info_dict)
                     index += 1
@@ -243,7 +243,7 @@ class off_tile_exploration_notification(action_notification):
             new_visibility = explored_cell.visible
         image_id_list = explored_tile.get_image_id_list(force_visibility = new_visibility)
 
-        self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
+        self.notification_images.append(constants.actor_creation_manager.create_interface_element({
             'image_id': explored_terrain_image_id,
             'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             'width': scaling.scale_width(200, global_manager),
@@ -262,7 +262,7 @@ class off_tile_exploration_notification(action_notification):
         if self.current_expedition.current_action_type == 'exploration':
             explored_cell.set_visibility(True)
 
-        self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
+        self.notification_images.append(constants.actor_creation_manager.create_interface_element({
             'image_id': image_id_list,
             'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             'width': scaling.scale_width(200, global_manager),
@@ -351,7 +351,7 @@ class trade_notification(action_notification):
             if self.commodity_trade_type == 'successful_commodity_trade':
                 consumer_goods_y = 500
                 min_y = 300
-                self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
+                self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                     'image_id': 'scenery/resources/' + self.trade_result[2] + '.png',
                     'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300, global_manager),
                     'width': scaling.scale_width(200, global_manager),
@@ -364,7 +364,7 @@ class trade_notification(action_notification):
                 consumer_goods_y = 400 #either have icon at 300 and 500 or a single icon at 400
                 min_y = 400
 
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
+            self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                 'image_id': 'scenery/resources/trade/sold consumer goods.png',
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
                 'width': scaling.scale_width(200, global_manager),
@@ -393,7 +393,7 @@ class trade_notification(action_notification):
                 right_worker_dict['x_offset'] *= -1
                 button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
 
-                self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
+                self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                     'image_id': button_image_id_list,
                     'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
                     'width': scaling.scale_width(150, global_manager),
@@ -617,7 +617,7 @@ class capture_slaves_notification(action_notification):
             right_worker_dict = left_worker_dict.copy()
             right_worker_dict['x_offset'] *= -1
             button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
-            self.notification_images.append(global_manager.get('actor_creation_manager').create_interface_element({
+            self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                 'image_id': button_image_id_list,
                 'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 'width': scaling.scale_width(200, global_manager),

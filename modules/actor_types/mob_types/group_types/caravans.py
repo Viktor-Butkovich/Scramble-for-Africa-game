@@ -4,6 +4,7 @@ import random
 import math
 from ..groups import group
 from ....util import utility, actor_utility, dice_utility, market_utility
+import modules.constants.constants as constants
 
 class caravan(group):
     '''

@@ -2,6 +2,7 @@
 
 import random
 from ..util import village_name_generator, actor_utility, utility
+import modules.constants.constants as constants
 
 class village():
     '''
@@ -40,7 +41,7 @@ class village():
             self.found_rumors = input_dict['found_rumors']
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
-                self.global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
+                constants.actor_creation_manager.create(True, current_save_dict, global_manager)
         if self.global_manager.get('effect_manager').effect_active('infinite_village_workers'):
             self.available_workers = self.population
         self.cell = input_dict['cell']
@@ -127,7 +128,7 @@ class village():
         Output:
             native_warriors: Returns the created native warriors unit
         '''
-        new_warrior = self.global_manager.get('actor_creation_manager').create(False, {
+        new_warrior = constants.actor_creation_manager.create(False, {
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
             'image': 'mobs/native_warriors/default.png',
@@ -151,7 +152,7 @@ class village():
         '''
         self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
         self.change_population(-1)
-        self.global_manager.get('actor_creation_manager').create(False, {
+        constants.actor_creation_manager.create(False, {
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],

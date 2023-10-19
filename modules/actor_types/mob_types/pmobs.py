@@ -132,7 +132,7 @@ class pmob(mob):
             string init_type='cell icon': init type of actor to create
             dictionary extra_parameters=None: dictionary of any extra parameters to pass to the created actor
         '''
-        self.attached_cell_icon_list.append(self.global_manager.get('actor_creation_manager').create(False, {
+        self.attached_cell_icon_list.append(constants.actor_creation_manager.create(False, {
             'coordinates': (x, y),
             'grids': self.grids,
             'image': image_id,
@@ -503,7 +503,7 @@ class pmob(mob):
         if self.global_manager.get('show_selection_outlines'):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
 
                     if len(self.base_automatic_route) > 0:
                         start_coordinates = self.base_automatic_route[0]

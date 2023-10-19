@@ -3,6 +3,7 @@
 import pygame
 import random
 from ..util import text_utility, utility, actor_utility, scaling, market_utility
+import modules.constants.constants as constants
 
 class actor():
     '''
@@ -501,8 +502,8 @@ class actor():
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width
         tooltip_image.tooltip_outline.y = tooltip_image.tooltip_box.y - tooltip_image.tooltip_outline_width
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], tooltip_image.tooltip_outline)
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], tooltip_image.tooltip_box)
+        pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], tooltip_image.tooltip_outline)
+        pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),

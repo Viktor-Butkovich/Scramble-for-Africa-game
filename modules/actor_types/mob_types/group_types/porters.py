@@ -2,6 +2,7 @@
 
 from ..groups import group
 from ....util import actor_utility
+import modules.constants.constants as constants
 
 class porters(group):
     '''

@@ -3,6 +3,7 @@
 import random
 from ..groups import group
 from ....util import actor_utility, utility, market_utility
+import modules.constants.constants as constants
 
 class work_crew(group):
     '''

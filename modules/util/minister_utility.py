@@ -1,5 +1,7 @@
 #Contains miscellaneous functions relating to minister functionality
 
+import modules.constants.constants as constants
+
 def check_corruption(minister_type, global_manager):
     '''
     Description:

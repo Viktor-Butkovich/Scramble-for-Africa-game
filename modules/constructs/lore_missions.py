@@ -2,6 +2,7 @@
 
 import random
 from ..util import utility
+import modules.constants.constants as constants
 
 class lore_mission():
     '''

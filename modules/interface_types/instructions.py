@@ -3,6 +3,7 @@
 from .labels import label
 from .buttons import button
 from ..util import scaling, text_utility
+import modules.constants.constants as constants
 
 class instructions_button(button):
     '''

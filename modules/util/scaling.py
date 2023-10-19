@@ -1,5 +1,7 @@
 #Contains functions that scale coordinates and lengths/widths to different resolutions
 
+import modules.constants.constants as constants
+
 def scale_coordinates(x, y, global_manager):
     '''
     Description:

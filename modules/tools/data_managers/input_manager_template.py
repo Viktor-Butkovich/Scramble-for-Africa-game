@@ -1,4 +1,5 @@
 from ...util import text_utility
+import modules.constants.constants as constants
 
 class input_manager_template():
     '''

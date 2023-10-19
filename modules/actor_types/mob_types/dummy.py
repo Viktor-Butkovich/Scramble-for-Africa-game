@@ -1,6 +1,7 @@
 #Contains functionality for dummies, which replicate other objects or act as models of hypothetical objects with fake attribute values and tooltips 
 
 from .. import mobs
+import modules.constants.constants as constants
 
 class dummy(mobs.mob):
     '''

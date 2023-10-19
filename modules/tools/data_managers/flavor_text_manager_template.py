@@ -1,5 +1,5 @@
 import random
-
+import modules.constants.constants as constants
 from ...util import csv_utility
 
 class flavor_text_manager_template():

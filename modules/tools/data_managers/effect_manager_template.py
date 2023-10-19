@@ -1,3 +1,5 @@
+import modules.constants.constants as constants
+
 class effect_manager_template():
     '''
     Object that controls global effects

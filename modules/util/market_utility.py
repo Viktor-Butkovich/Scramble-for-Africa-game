@@ -2,6 +2,7 @@
 
 import random
 from . import text_utility, utility
+import modules.constants.constants as constants
 
 def adjust_prices(global_manager):
     '''

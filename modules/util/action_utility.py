@@ -1,6 +1,7 @@
 #Contains miscellaneous functions relating to action functionality
 
 from . import scaling
+import modules.constants.constants as constants
 
 def cancel_ongoing_actions(global_manager):
     '''

@@ -1,6 +1,7 @@
 #Contains functions that manage the text box and other miscellaneous text display utility
 
 import pygame
+import modules.constants.constants as constants
 
 def message_width(message, fontsize, font_name):
     '''
@@ -29,7 +30,7 @@ def get_input(solicitant, message, global_manager):
     Output:
         None
     '''
-    global_manager.get('input_manager').start_receiving_input(solicitant, message)
+    constants.input_manager.start_receiving_input(solicitant, message)
 
 def text(message, font, global_manager):
     '''
@@ -43,7 +44,7 @@ def text(message, font, global_manager):
         pygame.Surface: Rendered pygame.Surface of the inputted text
     '''
     try:
-        text_surface = font.render(message, False, global_manager.get('color_dict')['black'])
+        text_surface = font.render(message, False, constants.color_dict['black'])
     except:
         text_surface = pygame.Surface((1, 1)) #prevents error when trying to render very small text (of width 0) on very low resolutions
     return(text_surface)

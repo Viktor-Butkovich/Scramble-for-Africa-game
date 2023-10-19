@@ -2,6 +2,7 @@
 
 import pygame
 from ..util import utility, drawing_utility, text_utility, scaling
+import modules.constants.constants as constants
 
 class image():
     '''
@@ -218,8 +219,8 @@ class image_bundle(image):
         '''
         #this is running whenever image is set, even if being set to same image as another bundle
         combined_surface = pygame.Surface((self.width, self.height)) #has strange interaction with smoke effects
-        combined_surface.fill(self.global_manager.get('color_dict')['transparent'])
-        combined_surface.set_colorkey(self.global_manager.get('color_dict')['transparent'], pygame.RLEACCEL)
+        combined_surface.fill(constants.color_dict['transparent'])
+        combined_surface.set_colorkey(constants.color_dict['transparent'], pygame.RLEACCEL)
         blit_sequence = []
         for member in self.members:
             if member.image_id != 'misc/empty.png':
@@ -434,7 +435,7 @@ class bundle_image():
                 for current_green_screen_color in self.bundle.global_manager.get('green_screen_colors'):
                     if index < len(self.green_screen_colors):
                         if type(self.green_screen_colors[index]) == str: #like 'red'
-                            replace_with = self.bundle.global_manager.get('color_dict')[self.green_screen_colors[index]]
+                            replace_with = self.bundle.constants.color_dict[self.green_screen_colors[index]]
                         else: #like (255, 0, 0)
                             replace_with = self.green_screen_colors[index]
                         for x in range(width):
@@ -761,8 +762,8 @@ class tooltip_free_image(free_image):
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
             self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], self.tooltip_outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
                 self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +

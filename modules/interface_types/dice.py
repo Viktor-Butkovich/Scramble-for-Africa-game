@@ -205,9 +205,9 @@ class die(button):
                 self.roll()
             super().draw()
             if self.highlighted or not self.normal_die:
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.outline_color], self.Rect, 6)
+                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.outline_color], self.Rect, 6)
             else:
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)     
+                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], self.Rect, 6)     
 
     def remove(self):
         '''

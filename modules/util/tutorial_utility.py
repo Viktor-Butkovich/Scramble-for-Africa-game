@@ -1,5 +1,7 @@
 #Contains functions that control the display of new notifications
 
+import modules.constants.constants as constants
+
 def show_tutorial_notifications(global_manager):
     '''
     Description:

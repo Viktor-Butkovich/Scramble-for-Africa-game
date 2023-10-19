@@ -4,6 +4,7 @@ import pygame
 
 from ..interface_types.labels import label
 from ..util import utility, scaling
+import modules.constants.constants as constants
 
 class actor_display_label(label):
     '''
@@ -274,7 +275,7 @@ class actor_display_label(label):
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             
-            attached_minister_position_image = global_manager.get('actor_creation_manager').create_interface_element({
+            attached_minister_position_image = constants.actor_creation_manager.create_interface_element({
                 'coordinates': (self.x - self.height - m_increment, self.y),
                 'width': self.height + m_increment,
                 'height': self.height + m_increment,
@@ -377,7 +378,7 @@ class actor_display_label(label):
             member_config = {}
         if not 'order_y_offset' in member_config:
             member_config['order_y_offset'] = abs(input_dict['height'] - self.height) / -2
-        self.parent_collection.add_member(self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager), member_config)
+        self.parent_collection.add_member(constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager), member_config)
 
     def update_tooltip(self):
         '''
@@ -1068,7 +1069,7 @@ class commodity_display_label(actor_display_label):
 
         self.insert_collection_above()
 
-        self.commodity_image = global_manager.get('actor_creation_manager').create_interface_element({
+        self.commodity_image = constants.actor_creation_manager.create_interface_element({
             'coordinates': (self.x - self.height, self.y),
             'width': self.height,
             'height': self.height,

@@ -327,7 +327,7 @@ class battalion(group):
         village.change_aggressiveness(village_aggressiveness_increase)
         if roll_result >= self.current_min_success: #if campaign succeeded
 
-            self.global_manager.get('actor_creation_manager').create(False, {
+            constants.actor_creation_manager.create(False, {
                 'coordinates': (self.x, self.y),
                 'grids': self.grids,
                 'image': 'mobs/slave workers/default.png',

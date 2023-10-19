@@ -385,7 +385,7 @@ class cell():
         Outptu:
             None
         '''
-        self.global_manager.get('actor_creation_manager').create(False, {
+        constants.actor_creation_manager.create(False, {
             'coordinates': (self.x, self.y),
             'grids': [self.grid, self.grid.mini_grid],
             'name': 'slums',
@@ -719,7 +719,7 @@ class cell():
         green = current_color[1]
         blue = current_color[2]
         if not self.visible:
-            red, green, blue = self.global_manager.get('color_dict')['blonde']
+            red, green, blue = constants.color_dict['blonde']
         pygame.draw.rect(self.global_manager.get('game_display'), (red, green, blue), self.Rect)
         if self.tile != 'none':
             for current_image in self.tile.images:
@@ -744,7 +744,7 @@ class cell():
             color = 'white'
             font_size = round(self.width * 0.3)
             current_font = pygame.font.SysFont(self.global_manager.get('font_name'), font_size)
-            textsurface = current_font.render(message, False, self.global_manager.get('color_dict')[color])
+            textsurface = current_font.render(message, False, constants.color_dict[color])
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size
             self.global_manager.get('game_display').blit(textsurface, (text_x, text_y))

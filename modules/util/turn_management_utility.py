@@ -2,6 +2,7 @@
 
 import random
 from . import text_utility, actor_utility, trial_utility, market_utility, utility, game_transitions
+import modules.constants.constants as constants
 
 def end_turn(global_manager):
     '''
@@ -633,7 +634,7 @@ def manage_ministers(global_manager):
 
     if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
-            global_manager.get('actor_creation_manager').create_minister(False, {}, global_manager)
+            constants.actor_creation_manager.create_minister(False, {}, global_manager)
         global_manager.get('notification_manager').display_notification({
             'message': 'Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n',
         })
@@ -743,4 +744,4 @@ def manage_lore(global_manager):
     '''
     if global_manager.get('current_lore_mission') == 'none':
         if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or global_manager.get('effect_manager').effect_active('instant_lore_mission'):
-            global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)
+            constants.actor_creation_manager.create_lore_mission(False, {}, global_manager)

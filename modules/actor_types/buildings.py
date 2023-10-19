@@ -46,7 +46,7 @@ class building(actor):
         self.contained_work_crews = []        
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
-                self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
+                constants.actor_creation_manager.create(True, current_work_crew, self.global_manager).work_building(self)
             if self.can_damage():
                 self.set_damaged(input_dict['damaged'], True)
         elif self.can_damage():
@@ -970,7 +970,7 @@ class slums(building):
         Output:
             None
         '''
-        self.global_manager.get('actor_creation_manager').create(False, {
+        constants.actor_creation_manager.create(False, {
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],

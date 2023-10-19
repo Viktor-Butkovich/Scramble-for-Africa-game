@@ -1297,7 +1297,7 @@ class labor_broker_button(button):
                                         current_mob.set_sentry_mode(False)
                                     choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
                                         'source_type': 'labor broker', 'village': cost_info_list[0]}
-                                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
+                                    constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
                             else:
                                 text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ', self.global_manager)
                         else:
@@ -1930,7 +1930,7 @@ class hire_african_workers_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
-            self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
+            constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot hire a worker.', self.global_manager)
 
@@ -1990,7 +1990,7 @@ class buy_slaves_button(button):
             self.cost = self.global_manager.get('recruitment_costs')['slave workers']
             if self.global_manager.get('money_tracker').get() >= self.cost:
                 choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
-                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'slave workers', self.global_manager)
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers', self.global_manager)
             else:
                 text_utility.print_to_screen('You do not have enough money to buy slaves.', self.global_manager)
         else:

@@ -3,6 +3,7 @@
 import pygame
 from .buttons import button
 from ..util import scaling, text_utility, utility, market_utility
+import modules.constants.constants as constants
 
 class label(button):
     '''

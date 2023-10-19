@@ -2,6 +2,7 @@
 
 from .pmobs import pmob
 from ...util import actor_utility
+import modules.constants.constants as constants
 
 class officer(pmob):
     '''

@@ -3,6 +3,7 @@
 import pygame
 from . import action
 from ..util import actor_utility, action_utility
+import modules.constants.constants as constants
 
 class upgrade(action.action):
     '''

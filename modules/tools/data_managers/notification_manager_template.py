@@ -279,7 +279,7 @@ class notification_manager_template():
             del input_dict['notification_dice']
             input_dict['init_type'] = 'zoom notification'
             input_dict['target'] = notification_dict['zoom_destination']
-        new_notification = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+        new_notification = constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager)
         if notification_type == 'roll':
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()

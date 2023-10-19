@@ -5,7 +5,8 @@ import pickle
 from ...util import scaling, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility, tutorial_utility
 from ...interface_types import grids
 from . import global_manager_template
-import os
+import modules.constants.constants as constants
+
 class save_load_manager_template():
     '''
     Object that controls creating new games, saving, and loading
@@ -166,7 +167,7 @@ class save_load_manager_template():
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
 
-        self.global_manager.get('actor_creation_manager').create_initial_ministers(self.global_manager)
+        constants.actor_creation_manager.create_initial_ministers(self.global_manager)
 
         self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
 
@@ -373,11 +374,11 @@ class save_load_manager_template():
 
         #load actors
         for current_actor_dict in saved_actor_dicts:
-            self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
+            constants.actor_creation_manager.create(True, current_actor_dict, self.global_manager)
         for current_minister_dict in saved_minister_dicts:
-            self.global_manager.get('actor_creation_manager').create_minister(True, current_minister_dict, self.global_manager)
+            constants.actor_creation_manager.create_minister(True, current_minister_dict, self.global_manager)
         for current_lore_mission_dict in saved_lore_mission_dicts:
-            self.global_manager.get('actor_creation_manager').create_lore_mission(True, current_lore_mission_dict, self.global_manager)
+            constants.actor_creation_manager.create_lore_mission(True, current_lore_mission_dict, self.global_manager)
         self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('commodity_prices_label').update_label()

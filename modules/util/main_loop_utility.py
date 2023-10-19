@@ -3,6 +3,7 @@
 import pygame
 import time
 from . import scaling, text_utility, actor_utility, minister_utility, utility, traversal_utility
+import modules.constants.constants as constants
 
 def update_display(global_manager):
     '''
@@ -233,7 +234,7 @@ def draw_text_box(global_manager):
         if text_index < max_text_box_lines:
             if text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) > greatest_width:
                 greatest_width = text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
-    if global_manager.get('input_manager').taking_input:
+    if constants.input_manager.taking_input:
         if text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
             greatest_width = text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name)
     else:
@@ -241,13 +242,13 @@ def draw_text_box(global_manager):
             greatest_width = text_utility.message_width(global_manager.get('message'), font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10, global_manager)
     x, y = (0, global_manager.get('display_height') - global_manager.get('text_box_height'))
-    pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
+    pygame.draw.rect(global_manager.get('game_display'), constants.color_dict['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
     if global_manager.get('typing'):
         color = 'red'
     else:
         color = 'black'
-    pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3, global_manager)) #black text box outline
-    pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')[color], (0, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))), #input line
+    pygame.draw.rect(global_manager.get('game_display'), constants.color_dict[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3, global_manager)) #black text box outline
+    pygame.draw.line(global_manager.get('game_display'), constants.color_dict[color], (0, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))), #input line
         (text_box_width, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))))
 
     global_manager.set('text_list', text_utility.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
@@ -256,7 +257,7 @@ def draw_text_box(global_manager):
         if text_index < max_text_box_lines:
             textsurface = global_manager.get('myfont').render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
             global_manager.get('game_display').blit(textsurface,(scaling.scale_width(10, global_manager), (-1 * font_size * text_index) + global_manager.get('display_height') - ((2 * font_size) + scaling.scale_height(5, global_manager))))
-    if global_manager.get('input_manager').taking_input:
+    if constants.input_manager.taking_input:
         textsurface = global_manager.get('myfont').render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
     else:
         textsurface = global_manager.get('myfont').render(global_manager.get('message'), False, (0, 0, 0))

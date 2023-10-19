@@ -3,6 +3,7 @@
 import random
 from .buttons import button
 from ..util import main_loop_utility, text_utility, market_utility, utility, actor_utility, minister_utility
+import modules.constants.constants as constants
 
 class recruitment_button(button):
     '''
@@ -79,7 +80,7 @@ class recruitment_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             if self.global_manager.get('money_tracker').get() >= self.cost:
                 choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
-                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
             else:
                 text_utility.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
         else:

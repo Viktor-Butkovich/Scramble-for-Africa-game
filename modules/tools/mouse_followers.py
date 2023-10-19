@@ -2,6 +2,7 @@
 
 import pygame
 from ..constructs.images import free_image
+import modules.constants.constants as constants
 
 class mouse_follower(free_image):
     '''

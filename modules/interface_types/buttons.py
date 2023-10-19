@@ -49,7 +49,7 @@ class button(interface_elements.interface_element):
         if self.has_keybind:
             self.set_keybind(self.keybind_id)
         if 'color' in input_dict:
-            self.color = self.global_manager.get('color_dict')[input_dict['color']]
+            self.color = constants.color_dict[input_dict['color']]
         self.enable_shader = input_dict.get('enable_shader', False)
         self.showing_outline = False
         self.showing_background = True
@@ -724,14 +724,14 @@ class button(interface_elements.interface_element):
         #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
         if self.showing:
             if self.showing_outline and allow_show_outline:
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
+                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.outline)
             if self.showing_background and hasattr(self, 'color'):
                 pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
             self.image.draw()
             if self.has_keybind: #The key to which a button is bound will appear on the button's image
                 message = self.keybind_name
                 color = 'white'
-                textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
+                textsurface = self.global_manager.get('myfont').render(message, False, constants.color_dict[color])
                 self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10, self.global_manager), (self.global_manager.get('display_height') -
                     (self.y + self.height - scaling.scale_height(5, self.global_manager)))))
 
@@ -760,8 +760,8 @@ class button(interface_elements.interface_element):
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
             self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], self.tooltip_outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
                 self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
@@ -1289,7 +1289,7 @@ class end_turn_button(button):
         if self.parent_collection != 'none':
             image_input_dict['parent_collection'] = self.parent_collection
             image_input_dict['member_config'] = {'order_exempt': True, 'order_x_offset': 100}        
-        self.warning_image = global_manager.get('actor_creation_manager').create_interface_element(image_input_dict, global_manager)
+        self.warning_image = constants.actor_creation_manager.create_interface_element(image_input_dict, global_manager)
 
         self.warning_image.set_image('misc/enemy_turn_icon.png')
         self.warning_image.to_front = True
@@ -1524,9 +1524,9 @@ class same_tile_icon(button):
         if self.showing:
             if self.index == 0 and self.global_manager.get('displayed_tile') != 'none':
                 if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
                 else:
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
+                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.outline)
             super().draw()
 
     def update_tooltip(self):
@@ -1849,7 +1849,7 @@ class minister_portrait_image(button):
             warning_x_offset = 0
         self.global_manager.get('minister_image_list').append(self)
 
-        self.warning_image = global_manager.get('actor_creation_manager').create_interface_element({
+        self.warning_image = constants.actor_creation_manager.create_interface_element({
             'attached_image': self,
             'init_type': 'warning image',
             'parent_collection': self.insert_collection_above(),
@@ -1888,9 +1888,9 @@ class minister_portrait_image(button):
         if self.showing: #draw outline around portrait if minister selected
             showing = True
             if not self.current_minister == 'none':
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
+                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
                 if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
         super().draw()
         if showing and self.warning_image.showing:
             self.warning_image.draw()
@@ -1994,9 +1994,9 @@ class country_selection_image(button):
         '''
         if self.showing: #draw outline around portrait if country selected
             if not self.current_country == 'none':
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
+                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
                 if self.global_manager.get('displayed_country') == self.current_country and self.global_manager.get('show_selection_outlines'): 
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
         super().draw()
 
     def on_click(self):
@@ -2394,7 +2394,7 @@ class reorganize_unit_button(button):
                     elif procedure_actors['officer'].officer_type == 'evangelist' and procedure_actors['worker'].worker_type != 'religious':
                         text_utility.print_to_screen('Evangelists can only be combined with church volunteers.', self.global_manager)
                     else:
-                        self.global_manager.get('actor_creation_manager').create_group(procedure_actors['worker'], procedure_actors['officer'], self.global_manager)
+                        constants.actor_creation_manager.create_group(procedure_actors['worker'], procedure_actors['officer'], self.global_manager)
 
                 elif procedure_type == 'crew':
                     if procedure_actors['worker'].worker_type == 'religious':
@@ -2436,7 +2436,7 @@ class reorganize_unit_button(button):
         for attribute in required_dummy_attributes:
             if hasattr(unit, attribute):
                 dummy_input_dict[attribute] = getattr(unit, attribute)
-        return(self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager))
+        return(constants.actor_creation_manager.create_dummy(dummy_input_dict, self.global_manager))
 
 class cycle_autofill_button(button):
     '''

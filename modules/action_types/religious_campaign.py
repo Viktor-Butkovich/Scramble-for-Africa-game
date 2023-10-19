@@ -187,7 +187,7 @@ class religious_campaign(action.campaign):
             None
         '''
         if self.roll_result >= self.current_min_success:
-            church_volunteers = self.global_manager.get('actor_creation_manager').create(False, {
+            church_volunteers = constants.actor_creation_manager.create(False, {
                 'coordinates': (0, 0),
                 'grids': [self.global_manager.get('europe_grid')],
                 'image': 'mobs/church_volunteers/default.png',
@@ -197,7 +197,7 @@ class religious_campaign(action.campaign):
                 'worker_type': 'religious' #not european - doesn't count as a European worker for upkeep
             }, self.global_manager)
 
-            self.current_unit = self.global_manager.get('actor_creation_manager').create_group(church_volunteers, self.current_unit, self.global_manager)
+            self.current_unit = constants.actor_creation_manager.create_group(church_volunteers, self.current_unit, self.global_manager)
 
         elif self.roll_result <= self.current_max_crit_fail:
             self.current_unit.die('quit')

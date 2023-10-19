@@ -2,6 +2,7 @@
 
 import random
 from . import text_utility
+import modules.constants.constants as constants
 
 def roll(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, global_manager, result = 'none'): #optional predetermined result
     '''

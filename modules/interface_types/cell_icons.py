@@ -3,6 +3,7 @@
 from ..actor_types.actors import actor
 from ..util import utility
 from ..constructs import images
+import modules.constants.constants as constants
 
 class cell_icon(actor):
     '''

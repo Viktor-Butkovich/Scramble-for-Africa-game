@@ -1,6 +1,7 @@
 import random
 import pygame
 import os
+import modules.constants.constants as constants
 
 class sound_manager_template():
     '''

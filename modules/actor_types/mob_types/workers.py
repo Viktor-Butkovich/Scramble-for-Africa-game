@@ -5,6 +5,7 @@ from .pmobs import pmob
 from ...util import actor_utility
 from ...util import market_utility
 from ...util import text_utility
+import modules.constants.constants as constants
 
 class worker(pmob):
     '''
@@ -402,7 +403,7 @@ class slave_worker(worker):
         Output:
             None
         '''
-        new_worker = self.global_manager.get('actor_creation_manager').create(False, {
+        new_worker = constants.actor_creation_manager.create(False, {
             'coordinates': (self.x, self.y),
             'grids': self.grids,
             'modes': self.modes,

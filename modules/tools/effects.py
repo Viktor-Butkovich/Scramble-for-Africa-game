@@ -1,6 +1,7 @@
 #Contains functionality for global effects
 
 from ..util import utility
+import modules.constants.constants as constants
 
 class effect():
     def __init__(self, effect_id, effect_type, global_manager):

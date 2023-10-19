@@ -1,8 +1,8 @@
 #Contains functionality for missionaries
 
-import random
 from ..groups import group
-from ....util import actor_utility, dice_utility
+from ....util import actor_utility
+import modules.constants.constants as constants
 
 class missionaries(group):
     '''

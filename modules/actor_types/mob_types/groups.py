@@ -4,6 +4,7 @@ import random
 import math
 from .pmobs import pmob
 from ...util import actor_utility
+import modules.constants.constants as constants
 
 class group(pmob):
     '''
@@ -37,8 +38,8 @@ class group(pmob):
             self.worker = input_dict['worker']
             self.officer = input_dict['officer']
         else:
-            self.worker = global_manager.get('actor_creation_manager').create(True, input_dict['worker'], global_manager)
-            self.officer = global_manager.get('actor_creation_manager').create(True, input_dict['officer'], global_manager)
+            self.worker = constants.actor_creation_manager.create(True, input_dict['worker'], global_manager)
+            self.officer = constants.actor_creation_manager.create(True, input_dict['officer'], global_manager)
         self.group_type = 'none'
         super().__init__(from_save, input_dict, global_manager)
         self.worker.join_group()
@@ -94,7 +95,7 @@ class group(pmob):
             input_dict['init_type'] = 'slaves'
             input_dict['purchased'] = False
         previous_selected = self.global_manager.get('displayed_mob')#self.selected
-        new_worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        new_worker = constants.actor_creation_manager.create(False, input_dict, self.global_manager)
         new_worker.set_automatically_replace(self.worker.automatically_replace)
         self.worker.fire(wander = False)
         self.worker = new_worker

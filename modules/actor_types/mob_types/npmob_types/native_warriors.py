@@ -3,6 +3,7 @@
 import random
 from ..npmobs import npmob
 from ....util import utility
+import modules.constants.constants as constants
 
 class native_warriors(npmob):
     '''

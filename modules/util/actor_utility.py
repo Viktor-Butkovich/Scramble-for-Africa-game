@@ -245,7 +245,7 @@ def spawn_beast(global_manager):
     terrain_type = spawn_cell.terrain
     animal_type = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
 
-    global_manager.get('actor_creation_manager').create(False, {
+    constants.actor_creation_manager.create(False, {
         'coordinates': (spawn_cell.x, spawn_cell.y),
         'grids': [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid],
         'modes': ['strategic'],

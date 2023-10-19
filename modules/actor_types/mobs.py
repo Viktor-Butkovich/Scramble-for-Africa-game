@@ -548,7 +548,7 @@ class mob(actor):
         if self.global_manager.get('show_selection_outlines'):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
         
     def update_tooltip(self):
         '''

@@ -3,6 +3,7 @@
 import pygame
 from ..constructs import images
 from ..util import scaling, dummy_utility, utility
+import modules.constants.constants as constants
 
 class interface_element():
     '''
@@ -231,7 +232,7 @@ class interface_element():
         
             self.parent_collection.remove_member(self)
 
-        new_parent_collection = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+        new_parent_collection = constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager)
         
         new_parent_collection.add_member(self, {})
 
@@ -296,7 +297,7 @@ class interface_collection(interface_element):
             customize_button_height = scaling.scale_width(customize_button_size, global_manager)
 
             if input_dict.get('allow_minimize', False):
-                global_manager.get('actor_creation_manager').create_interface_element({
+                constants.actor_creation_manager.create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': customize_button_width,
                     'height': customize_button_height,
@@ -309,7 +310,7 @@ class interface_collection(interface_element):
                 customize_button_x_offset += customize_button_size + 5
 
             if input_dict.get('allow_move', False):
-                global_manager.get('actor_creation_manager').create_interface_element({
+                constants.actor_creation_manager.create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': customize_button_width,
                     'height': customize_button_height,
@@ -320,7 +321,7 @@ class interface_collection(interface_element):
                 }, global_manager)
                 customize_button_x_offset += customize_button_size + 5
                 
-                global_manager.get('actor_creation_manager').create_interface_element({
+                constants.actor_creation_manager.create_interface_element({
                     'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
                     'width': customize_button_width,
                     'height': customize_button_height,
@@ -333,7 +334,7 @@ class interface_collection(interface_element):
 
         for initial_member_dict in input_dict.get('initial_members', []):
             initial_member_dict['parent_collection'] = self
-            global_manager.get('actor_creation_manager').create_interface_element(initial_member_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(initial_member_dict, global_manager)
 
     def create_image(self, image_id):
         '''
@@ -582,7 +583,7 @@ class tabbed_collection(interface_collection):
         self.tabbed_members = []
         self.current_tabbed_member = None
         super().__init__(input_dict, global_manager)
-        self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element({
+        self.tabs_collection = constants.actor_creation_manager.create_interface_element({
             'coordinates': scaling.scale_coordinates(0, 5, global_manager),
             'width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
@@ -623,7 +624,7 @@ class tabbed_collection(interface_collection):
         super().add_member(new_member, member_config)
 
         if member_config['tabbed']:
-            self.global_manager.get('actor_creation_manager').create_interface_element({
+            constants.actor_creation_manager.create_interface_element({
                 'width': scaling.scale_width(36, self.global_manager), #20
                 'height': scaling.scale_height(36, self.global_manager),
                 'init_type': 'tab button',
