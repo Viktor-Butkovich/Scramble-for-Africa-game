@@ -5,6 +5,7 @@ import os
 import pygame
 import math
 from . import utility
+import modules.constants.constants as constants
 
 def reset_action_prices(global_manager):
     '''
@@ -15,8 +16,8 @@ def reset_action_prices(global_manager):
     Output:
         None
     '''
-    for current_action_type in global_manager.get('action_types'):
-        global_manager.get('action_prices')[current_action_type] = global_manager.get('base_action_prices')[current_action_type]
+    for current_action_type in constants.action_types:
+        constants.action_prices[current_action_type] = constants.base_action_prices[current_action_type]
 
 def double_action_price(global_manager, action_type):
     '''
@@ -28,7 +29,7 @@ def double_action_price(global_manager, action_type):
     Output:
         None
     '''
-    global_manager.get('action_prices')[action_type] *= 2
+    constants.action_prices[action_type] *= 2
 
 def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
     '''
@@ -50,7 +51,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
         else:
             base_price = constructor.images[0].current_cell.get_warehouses_cost()
     else:
-        base_price = global_manager.get('building_prices')[building_type]
+        base_price = constants.building_prices[building_type]
 
     if building_type in ['train', 'steamboat']:
         cost_multiplier = 1

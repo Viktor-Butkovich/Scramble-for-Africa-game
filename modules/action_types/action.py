@@ -1,6 +1,7 @@
 #Contains functionality for generic actions
 
 from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility
+import modules.constants.constants as constants
 
 class action():
     '''
@@ -42,11 +43,11 @@ class action():
         '''
         self.global_manager.get('actions')[self.action_type] = self
         self.current_unit = 'none'
-        if not self.action_type in self.global_manager.get('action_types'):
-            self.global_manager.get('action_types').append(self.action_type)
-            self.global_manager.get('transaction_types').append(self.action_type)
-        self.global_manager.get('action_prices')[self.action_type] = 5
-        self.global_manager.get('base_action_prices')[self.action_type] = 5
+        if not self.action_type in constants.action_types:
+            constants.action_types.append(self.action_type)
+            constants.transaction_types.append(self.action_type)
+        constants.action_prices[self.action_type] = 5
+        constants.base_action_prices[self.action_type] = 5
         self.roll_lists = []
         self.allow_critical_failures = True
 
@@ -109,7 +110,7 @@ class action():
         Output:
             float: Returns price of this action
         '''
-        return(self.global_manager.get('action_prices')[self.action_type])
+        return(constants.action_prices[self.action_type])
 
     def generate_notification_text(self, subject):
         '''

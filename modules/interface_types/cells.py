@@ -3,6 +3,7 @@
 import pygame
 import random
 from ..util import actor_utility
+import modules.constants.constants as constants
 
 class cell():
     '''
@@ -373,7 +374,7 @@ class cell():
         if self.has_building('resource'):
             warehouses_built -= 1
 
-        return(self.global_manager.get('building_prices')['warehouses'] * (2 ** warehouses_built)) #5 * 2^0 = 5 if none built, 5 * 2^1 = 10 if 1 built, 20, 40...
+        return(constants.building_prices['warehouses'] * (2 ** warehouses_built)) #5 * 2^0 = 5 if none built, 5 * 2^1 = 10 if 1 built, 20, 40...
     
     def create_slums(self):
         '''

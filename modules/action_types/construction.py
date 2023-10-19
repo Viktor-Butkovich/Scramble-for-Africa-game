@@ -3,6 +3,7 @@
 import pygame
 from . import action
 from ..util import action_utility, utility, actor_utility, text_utility
+import modules.constants.constants as constants
 
 class construction(action.action):
     '''
@@ -24,7 +25,7 @@ class construction(action.action):
         self.building_name = self.building_type.replace('_', ' ')
         if self.building_type == 'infrastructure':
             self.building_name = 'road' #deal with infrastructure exceptions later
-        self.global_manager.get('transaction_descriptions')['construction'] = 'construction'
+        constants.transaction_descriptions['construction'] = 'construction'
         if self.building_type == 'trading_post':
             self.requirement = 'can_trade'
         elif self.building_type == 'mission':

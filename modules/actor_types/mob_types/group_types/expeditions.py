@@ -3,8 +3,8 @@
 import time
 import random
 from ..groups import group
-from ...tiles import tile
-from ....util import actor_utility, text_utility, dice_utility
+from ....util import actor_utility, dice_utility
+import modules.constants.constants as constants
 
 class expedition(group):
     '''
@@ -156,7 +156,7 @@ class expedition(group):
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to search for artifact rumors? If successful, the coordinates of a possible location for the ' + self.global_manager.get('current_lore_mission').name + ' will be revealed. /n /n'
-        message += 'The search will cost ' + str(self.global_manager.get('action_prices')['rumor_search']) + ' money. /n /n'
+        message += 'The search will cost ' + str(constants.action_prices['rumor_search']) + ' money. /n /n'
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
         if aggressiveness_modifier < 0:
@@ -221,7 +221,7 @@ class expedition(group):
         else:
             num_dice = 1
         
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['rumor_search'] * -1, 'rumor_search')
+        self.global_manager.get('money_tracker').change(constants.action_prices['rumor_search'] * -1, 'rumor_search')
         village = self.images[0].current_cell.get_building('village')
         text = ''
         text += 'The expedition tries to find information regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
@@ -249,7 +249,7 @@ class expedition(group):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['rumor_search'], 'rumor_search', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['rumor_search'], 'rumor_search', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
@@ -271,7 +271,7 @@ class expedition(group):
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['rumor_search'], 'rumor_search')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['rumor_search'], 'rumor_search')
             roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
@@ -374,7 +374,7 @@ class expedition(group):
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to search for the ' + self.global_manager.get('current_lore_mission').name + '? '
         message += 'If successful, the ' + self.global_manager.get('current_lore_mission').name + ' will be found if it is at this location. /n /n'
-        message += 'The search will cost ' + str(self.global_manager.get('action_prices')['artifact_search']) + ' money. /n /n'
+        message += 'The search will cost ' + str(constants.action_prices['artifact_search']) + ' money. /n /n'
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
@@ -428,7 +428,7 @@ class expedition(group):
         else:
             num_dice = 1
         
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['artifact_search'] * -1, 'artifact_search')
+        self.global_manager.get('money_tracker').change(constants.action_prices['artifact_search'] * -1, 'artifact_search')
         #village = self.images[0].current_cell.get_building('village')
         text = ''
         text += 'The expedition tries to locate the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
@@ -456,7 +456,7 @@ class expedition(group):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['artifact_search'], 'artifact_search', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['artifact_search'], 'artifact_search', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
@@ -478,7 +478,7 @@ class expedition(group):
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['artifact_search'], 'artifact_search')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['artifact_search'], 'artifact_search')
             roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 

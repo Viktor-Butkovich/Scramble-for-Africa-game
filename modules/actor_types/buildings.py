@@ -4,6 +4,7 @@ import pygame
 import random
 from .actors import actor
 from ..util import utility, scaling, actor_utility, text_utility
+import modules.constants.constants as constants
 
 class building(actor):
     '''
@@ -265,7 +266,7 @@ class building(actor):
         Output:
             double: Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts or terrain
         '''
-        return(self.global_manager.get('building_prices')[self.building_type])
+        return(constants.building_prices[self.building_type])
 
     def get_repair_cost(self):
         '''

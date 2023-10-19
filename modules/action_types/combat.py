@@ -3,6 +3,7 @@
 import random
 from . import action
 from ..util import action_utility, text_utility, actor_utility, dice_utility, utility, turn_management_utility
+import modules.constants.constants as constants
 
 class combat(action.action):
     '''
@@ -20,7 +21,7 @@ class combat(action.action):
         for action_type in ['combat', 'hunting']:
             self.action_type = action_type
             super().initial_setup()
-            self.global_manager.get('transaction_descriptions')[action_type] = 'combat supplies'
+            constants.transaction_descriptions[action_type] = 'combat supplies'
         self.name = 'combat'
         self.opponent = None
         self.direction = None

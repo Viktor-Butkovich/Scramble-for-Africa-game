@@ -5,6 +5,7 @@ import time
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
     minister_utility, trial_utility, action_utility
 from . import interface_elements
+import modules.constants.constants as constants
 
 class button(interface_elements.interface_element):
     '''
@@ -408,7 +409,7 @@ class button(interface_elements.interface_element):
                               'Costs all remaining movement points, at least 1'])
 
         elif self.button_type == 'capture slaves':
-            self.set_tooltip(['Attempts to capture villagers as slaves for ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money',
+            self.set_tooltip(['Attempts to capture villagers as slaves for ' + str(constants.action_prices['slave_capture']) + ' money',
                               'Can only be done in a village',
                               'Regardless the capture\'s success, this may increase the village\'s aggressiveness and/or decrease public opinion',
                               'Has higher success chance and lower risk when aggressiveness is low',
@@ -425,7 +426,7 @@ class button(interface_elements.interface_element):
                 intro = 'Attempts to search this village for rumors of a lore mission artifact\'s location for '
             else:
                 intro = 'Attempts to search this village for rumors of the location of the ' + self.global_manager.get('current_lore_mission').name + ' for '
-            self.set_tooltip([intro + str(self.global_manager.get('action_prices')['rumor_search']) + ' money',
+            self.set_tooltip([intro + str(constants.action_prices['rumor_search']) + ' money',
                               'Can only be done in a village',
                               'If successful, reveals the coordinates of a possible location for the current lore mission\'s artifact',
                               'Has higher success chance and lower risk when a mission is present',
@@ -436,7 +437,7 @@ class button(interface_elements.interface_element):
                 intro = 'Attempts to search for a lore mission\'s artifact at a location revealed by rumors for '
             else:
                 intro = 'Attempts to search for the ' + self.global_manager.get('current_lore_mission').name + ' at a location revealed by rumors for '
-            self.set_tooltip([intro + str(self.global_manager.get('action_prices')['rumor_search']) + ' money',
+            self.set_tooltip([intro + str(constants.action_prices['rumor_search']) + ' money',
                               'Can only be done on a revealed possible artifact location',
                               'If successful, reveals whether this is the artifact\'s actual location, finding it and completing the lore mission if it is present',
                               'Costs all remaining movement points, at least 1'])
@@ -462,16 +463,16 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'to trial':
             self.set_tooltip(['Opens the trial planning screen to attempt to imprison this minister for corruption',
                               'A trial has a higher success chance as more evidence of that minister\'s corruption is found',
-                              'While entering this screen is free, a trial costs ' + str(self.global_manager.get('action_prices')['trial']) + ' money once started',
+                              'While entering this screen is free, a trial costs ' + str(constants.action_prices['trial']) + ' money once started',
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
         elif self.button_type == 'active investigation':
             if self.global_manager.get('displayed_minister') !=  'none':
-                self.set_tooltip(['Orders your Prosecutor to conduct an active investigation against ' + self.global_manager.get('displayed_minister').name + ' for ' + str(self.global_manager.get('action_prices')['active_investigation']) + ' money'])
+                self.set_tooltip(['Orders your Prosecutor to conduct an active investigation against ' + self.global_manager.get('displayed_minister').name + ' for ' + str(constants.action_prices['active_investigation']) + ' money'])
 
         elif self.button_type == 'launch trial':
             self.set_tooltip(['Tries the defending minister in an attempt to remove him from office and imprison him for corruption',
-                              'Costs ' + str(self.global_manager.get('action_prices')['trial']) + ' money',
+                              'Costs ' + str(constants.action_prices['trial']) + ' money',
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
         elif self.button_type == 'fabricate evidence':
@@ -1122,13 +1123,13 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'launch trial':
             if main_loop_utility.action_possible(self.global_manager):
-                if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
+                if self.global_manager.get('money') >= constants.action_prices['trial']:
                     if self.global_manager.get('displayed_defense').corruption_evidence > 0:
                         trial_utility.start_trial(self.global_manager)
                     else:
                         text_utility.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.', self.global_manager)
                 else:
-                    text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
+                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.', self.global_manager)
             else:
                 text_utility.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
 

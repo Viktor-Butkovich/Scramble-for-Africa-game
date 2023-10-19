@@ -4,6 +4,7 @@ import pygame
 import random
 from . import action
 from ..util import action_utility, text_utility
+import modules.constants.constants as constants
 
 class conversion(action.action):
     '''
@@ -19,7 +20,7 @@ class conversion(action.action):
             None
         '''
         super().initial_setup()
-        self.global_manager.get('transaction_descriptions')[self.action_type] = 'religious conversion'
+        constants.transaction_descriptions[self.action_type] = 'religious conversion'
         self.name = 'religious conversion'
         self.current_village = None
 

@@ -3,6 +3,7 @@
 import random
 import os
 from ..util import tutorial_utility, utility, actor_utility, minister_utility, main_loop_utility, scaling
+import modules.constants.constants as constants
 
 class minister():
     '''
@@ -289,7 +290,7 @@ class minister():
         prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
         if prosecutor != 'none':
             if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
-                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('transaction_descriptions')[theft_type] + '.')
+                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + constants.transaction_descriptions[theft_type] + '.')
             difficulty = self.no_corruption_roll(6, 'minister_stealing')
             result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
             if prosecutor != self and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
@@ -303,7 +304,7 @@ class minister():
                     self.corruption_evidence += 1
                     evidence_message = ''
                     evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
-                    evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
+                    evidence_message += constants.transaction_descriptions[theft_type] + ' and has filed a piece of evidence against him. /n /n'
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
                     prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'))
@@ -737,7 +738,7 @@ class minister():
             #1/6 chance of report for each secondary, 1/2 for loyalty and main ability
         previous_values = {}
         new_values = {}
-        roll_result = prosecutor.roll(6, 4, 0, self.global_manager.get('action_prices')['active_investigation'], 'active_investigation')
+        roll_result = prosecutor.roll(6, 4, 0, constants.action_prices['active_investigation'], 'active_investigation')
         if roll_result >= 4:
             for category in self.global_manager.get('minister_types') + ['loyalty']:
                 if category == 'loyalty' or category == self.current_position: #simplify this

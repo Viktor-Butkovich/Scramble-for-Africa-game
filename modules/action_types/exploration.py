@@ -3,6 +3,7 @@
 import random
 from . import action
 from ..util import action_utility
+import modules.constants.constants as constants
 
 class exploration(action.action):
     '''
@@ -18,7 +19,7 @@ class exploration(action.action):
             None
         '''
         super().initial_setup()
-        self.global_manager.get('transaction_descriptions')[self.action_type] = 'exploration'
+        constants.transaction_descriptions[self.action_type] = 'exploration'
         self.name = 'exploration'
         self.x_change = None
         self.y_change = None

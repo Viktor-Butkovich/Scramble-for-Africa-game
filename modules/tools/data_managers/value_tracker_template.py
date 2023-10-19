@@ -1,3 +1,5 @@
+import modules.constants.constants as constants
+
 class value_tracker():
     '''
     Object that controls the value of a certain variable
@@ -40,7 +42,6 @@ class value_tracker():
         Output:
             None
         '''
-        #self.global_manager.set(self.value_key, self.get() + value_change)
         self.set(self.get() + value_change)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
@@ -95,7 +96,6 @@ class money_tracker(value_tracker):
             None
         '''
         self.transaction_history = {}
-        self.transaction_types = global_manager.get('transaction_types')
         self.reset_transaction_history()
         super().__init__('money', initial_value, 'none', 'none', global_manager)
 
@@ -109,7 +109,7 @@ class money_tracker(value_tracker):
             None
         '''
         self.transaction_history = {}
-        for current_transaction_type in self.transaction_types:
+        for current_transaction_type in constants.transaction_types:
             self.transaction_history[current_transaction_type] = 0
 
     def change(self, value_change, change_type = 'misc.'):
@@ -157,21 +157,21 @@ class money_tracker(value_tracker):
         notification_text = 'Financial report: /n /n'
         notification_text += 'Revenue: /n'
         total_revenue = 0
-        for transaction_type in self.transaction_types:
+        for transaction_type in constants.transaction_types:
             if self.transaction_history[transaction_type] > 0:
-                notification_text += '  ' + self.global_manager.get('transaction_descriptions')[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                notification_text += '  ' + constants.transaction_descriptions[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
                 total_revenue += self.transaction_history[transaction_type]
         if total_revenue == 0:
             notification_text += '  None /n'
         
         notification_text += '/nExpenses: /n'
         total_expenses = 0
-        for transaction_type in self.transaction_types:
+        for transaction_type in constants.transaction_types:
             if self.transaction_history[transaction_type] < 0:
                 #if transaction_type == 'misc. expenses':
                 #    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
                 #else:
-                notification_text += '  ' + self.global_manager.get('transaction_descriptions')[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                notification_text += '  ' + constants.transaction_descriptions[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
                 total_expenses += self.transaction_history[transaction_type]
         if total_expenses == 0:
             notification_text += '  None /n'

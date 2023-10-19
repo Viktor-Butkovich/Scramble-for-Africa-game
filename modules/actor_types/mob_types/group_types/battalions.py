@@ -4,6 +4,7 @@ import time
 import random
 from ..groups import group
 from ....util import actor_utility, utility, dice_utility
+import modules.constants.constants as constants
 
 class battalion(group):
     '''
@@ -137,7 +138,7 @@ class battalion(group):
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to capture slaves? If successful, captures 1 of the village\'s population as a unit of slave workers. /n /n'
         message += 'Regardless of success, this may increase the village\'s aggressiveness and/or decrease public opinion. /n /n'
-        message += 'The attack will cost ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money. /n /n '
+        message += 'The attack will cost ' + str(constants.action_prices['slave_capture']) + ' money. /n /n '
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
         if aggressiveness_modifier < 0:
@@ -193,8 +194,8 @@ class battalion(group):
         else:
             num_dice = 1
 
-        if not self.global_manager.get('action_prices')['slave_capture'] == 0:
-            self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['slave_capture'] * -1, 'slave_capture')
+        if not constants.action_prices['slave_capture'] == 0:
+            self.global_manager.get('money_tracker').change(constants.action_prices['slave_capture'] * -1, 'slave_capture')
         self.global_manager.get('evil_tracker').change(3)
         village = self.images[0].current_cell.get_building('village')
         text = ''
@@ -224,7 +225,7 @@ class battalion(group):
 
         minister_corrupt = self.controlling_minister.check_corruption()
         if minister_corrupt:
-            self.controlling_minister.steal_money(self.global_manager.get('action_prices')['slave_capture'], 'slave_capture')
+            self.controlling_minister.steal_money(constants.action_prices['slave_capture'], 'slave_capture')
             
         if self.veteran:
             if minister_corrupt:

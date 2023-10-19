@@ -1,5 +1,6 @@
 import random
 from . import utility, scaling, game_transitions, minister_utility, dice_utility, actor_utility
+import modules.constants.constants as constants
 
 def start_trial(global_manager): #called by launch trial button in middle of trial screen
     '''
@@ -15,7 +16,7 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     message = 'Are you sure you want to start a trial against ' + defense.name + '? You have ' + str(defense.corruption_evidence) + ' pieces of evidence to use. /n /n'
     message += 'Your prosecutor may roll 1 die for each piece of evidence, and the trial is successful if a 5+ is rolled on any of the evidence dice. /n /n'
     message += 'However, the defense may spend from their personal savings (perhaps stolen from your company) to hire lawyers and negate some of the evidence. /n /n'
-    message += 'Along with any money paid for bribery or fabricated evidence, a trial fee of ' + str(global_manager.get('action_prices')['trial']) + ' money is also required. /n /n'
+    message += 'Along with any money paid for bribery or fabricated evidence, a trial fee of ' + str(constants.action_prices['trial']) + ' money is also required. /n /n'
 
     choice_info_dict = {}
     global_manager.set('ongoing_action', True)
@@ -121,8 +122,8 @@ def trial(global_manager): #called by choice notification button
     Output:
         None
     '''
-    price = global_manager.get('action_prices')['trial']
-    global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial')
+    price = constants.action_prices['trial']
+    global_manager.get('money_tracker').change(-1 * constants.action_prices['trial'], 'trial')
     actor_utility.double_action_price(global_manager, 'trial')
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')

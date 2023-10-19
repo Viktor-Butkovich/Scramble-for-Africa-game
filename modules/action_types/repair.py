@@ -2,6 +2,7 @@
 
 from . import action
 from ..util import actor_utility, action_utility
+import modules.constants.constants as constants
 
 class repair(action.action):
     '''
@@ -22,7 +23,8 @@ class repair(action.action):
         del self.global_manager.get('actions')[self.action_type]
         self.global_manager.get('actions')['repair_' + self.building_type] = self
         self.current_building = 'none'
-        self.global_manager.get('transaction_descriptions')[self.action_type] = 'repairs'
+        
+        constants.transaction_descriptions[self.action_type] = 'repairs'
         self.name = 'repair'
         self.allow_critical_failures = False
 

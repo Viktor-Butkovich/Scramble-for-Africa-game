@@ -5,6 +5,7 @@ import time
 import os
 import logging
 import json
+import modules.constants.constants as constants
 import modules.util.scaling as scaling
 import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
@@ -806,68 +807,8 @@ def transactions(global_manager):
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
     global_manager.set('base_upgrade_price', 20) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
     global_manager.set('consumer_goods_starting_price', 1)
-
-    global_manager.set('building_prices',
-        {
-        'resource': 10,
-        'road': 5,
-        'railroad': 15,
-        'road_bridge': 50,
-        'railroad_bridge': 150,
-        'port': 15,
-        'train_station': 10,
-        'trading_post': 5,
-        'mission': 5,
-        'fort': 5,
-        'warehouses': 5,
-        'train': 10,
-        'steamboat': 10
-       } 
-    )
-    
-    global_manager.set('base_action_prices',
-        {
-        'trade': 0,
-        'loan': 5,
-        'slave_capture': 5,
-        'trial': 5,
-        'active_investigation': 5,
-        'rumor_search': 5,
-        'artifact_search': 5,
-        'track_beasts': 0
-        }
-    )
-    global_manager.set('action_types', [current_key for current_key in global_manager.get('base_action_prices')])
-    global_manager.set('action_prices', {})
     actor_utility.reset_action_prices(global_manager)
 
-    global_manager.set('transaction_descriptions',
-        {
-        'trade': 'trading with natives',
-        'loan': 'loans',
-        'slave_capture': 'capturing slaves',
-        'trial': 'trial fees',
-        'active_investigation': 'investigations',
-        'rumor_search': 'artifact rumor searches',
-        'artifact_search': 'artifact searches',
-        'production': 'production',
-        'bribery': 'bribery',
-        'loan_interest': 'loan interest',
-        'inventory_attrition': 'missing commodities',
-        'sold_commodities': 'commodity sales',
-        'worker_upkeep': 'worker upkeep',
-        'subsidies': 'subsidies',
-        'trial_compensation': 'trial compensation',
-        'fabricated_evidence': 'fabricated evidence',
-        'consumer_goods': 'consumer goods',
-        'unit_recruitment': 'unit recruitment',
-        'attrition_replacements': 'attrition replacements',
-        'misc_revenue': 'misc',
-        'misc_expenses': 'misc',
-        'none': 'miscellaneous company activities',
-        }
-    )
-    global_manager.set('transaction_types', [current_key for current_key in global_manager.get('transaction_descriptions')])
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
     actor_utility.set_slave_traders_strength(0, global_manager)
 

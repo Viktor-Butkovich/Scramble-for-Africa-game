@@ -3,6 +3,7 @@
 import pygame
 from . import action
 from ..util import action_utility, text_utility, market_utility
+import modules.constants.constants as constants
 
 class loan_search(action.campaign):
     '''
@@ -18,7 +19,7 @@ class loan_search(action.campaign):
             None
         '''
         super().initial_setup()
-        self.global_manager.get('transaction_descriptions')[self.action_type] = 'loan searches'
+        constants.transaction_descriptions[self.action_type] = 'loan searches'
         self.name = 'loan search'
         self.target_commodity = 'none'
         self.current_proposed_loan = {}

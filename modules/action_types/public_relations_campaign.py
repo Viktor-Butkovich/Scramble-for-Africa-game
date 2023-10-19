@@ -4,6 +4,7 @@ import pygame
 import random
 from . import action
 from ..util import action_utility, text_utility
+import modules.constants.constants as constants
 
 class public_relations_campaign(action.campaign):
     '''
@@ -19,7 +20,7 @@ class public_relations_campaign(action.campaign):
             None
         '''
         super().initial_setup()
-        self.global_manager.get('transaction_descriptions')[self.action_type] = 'public relations campaigning'
+        constants.transaction_descriptions[self.action_type] = 'public relations campaigning'
         self.name = 'public relations campaign'
 
     def button_setup(self, initial_input_dict):

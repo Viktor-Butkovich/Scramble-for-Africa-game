@@ -3,6 +3,7 @@
 import random
 from ..interface_types.buttons import button
 from ..util import main_loop_utility, utility, actor_utility, minister_utility, trial_utility, text_utility, game_transitions
+import modules.constants.constants as constants
 
 class embark_all_passengers_button(button):
     '''
@@ -991,7 +992,7 @@ class trade_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
-                if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trade']:
+                if self.global_manager.get('money') >= constants.action_prices['trade']:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_building('village'):
                         if current_cell.get_building('village').population > 0:
@@ -1009,7 +1010,7 @@ class trade_button(button):
                     else:
                         text_utility.print_to_screen('Trading is only possible in a village.', self.global_manager)
                 else:
-                    text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trade']) + ' money needed to trade with a village.', self.global_manager)
+                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trade']) + ' money needed to trade with a village.', self.global_manager)
             else:
                 text_utility.print_to_screen('Trading requires all remaining movement points, at least 1', self.global_manager)
         else:
@@ -1066,7 +1067,7 @@ class rumor_search_button(button):
             if main_loop_utility.action_possible(self.global_manager):
                 current_mob = self.global_manager.get('displayed_mob')
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['rumor_search']:
+                    if self.global_manager.get('money') >= constants.action_prices['rumor_search']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
@@ -1085,7 +1086,7 @@ class rumor_search_button(button):
                         else:
                             text_utility.print_to_screen('Searching for rumors is only possible in a village.', self.global_manager)
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['rumor_search']) + ' money needed to attempt a rumor search.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['rumor_search']) + ' money needed to attempt a rumor search.', self.global_manager)
                 else:
                     text_utility.print_to_screen('A rumor search requires all remaining movement points, at least 1.', self.global_manager)
             else:
@@ -1144,7 +1145,7 @@ class artifact_search_button(button):
             if main_loop_utility.action_possible(self.global_manager):
                 current_mob = self.global_manager.get('displayed_mob')
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['artifact_search']:
+                    if self.global_manager.get('money') >= constants.action_prices['artifact_search']:
                         if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
                             if current_mob.ministers_appointed():
                                 if current_mob.sentry_mode:
@@ -1153,7 +1154,7 @@ class artifact_search_button(button):
                         else:
                             text_utility.print_to_screen('You have not found any rumors indicating that the ' + self.global_manager.get('current_lore_mission').name + ' may be at this location.', self.global_manager)
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['artifact_search']) + ' money needed to attempt a artifact search.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['artifact_search']) + ' money needed to attempt a artifact search.', self.global_manager)
                 else:
                     text_utility.print_to_screen('An artifact search requires all remaining movement points, at least 1.', self.global_manager)
             else:
@@ -1211,7 +1212,7 @@ class capture_slaves_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
-                if self.global_manager.get('money') >= self.global_manager.get('action_prices')['slave_capture']:
+                if self.global_manager.get('money') >= constants.action_prices['slave_capture']:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_building('village'):
                         if current_cell.get_building('village').population > 0:
@@ -1224,7 +1225,7 @@ class capture_slaves_button(button):
                     else:
                         text_utility.print_to_screen('Capturing slaves is only possible in a village.', self.global_manager)
                 else:
-                    text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money needed to attempt to capture slaves.', self.global_manager)
+                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['slave_capture']) + ' money needed to attempt to capture slaves.', self.global_manager)
             else:
                 text_utility.print_to_screen('Capturing slaves requires all remaining movement points, at least 1.', self.global_manager)
         else:
@@ -1384,13 +1385,13 @@ class track_beasts_button(button):
             current_mob = self.global_manager.get('displayed_mob')
             if self.global_manager.get('strategic_map_grid') in current_mob.grids:
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['track_beasts']:
+                    if self.global_manager.get('money') >= constants.action_prices['track_beasts']:
                         if current_mob.ministers_appointed():
                             if current_mob.sentry_mode:
                                 current_mob.set_sentry_mode(False)
                             current_mob.track_beasts()
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['track_beasts']) + ' money needed to track beasts.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['track_beasts']) + ' money needed to track beasts.', self.global_manager)
                 else:
                     text_utility.print_to_screen('Tracking beasts requires 1 movement point.', self.global_manager)
             else:
@@ -1649,7 +1650,7 @@ class to_trial_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
+            if self.global_manager.get('money') >= constants.action_prices['trial']:
                 if minister_utility.positions_filled(self.global_manager):
                     if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
                         defense = self.global_manager.get('displayed_minister')
@@ -1661,7 +1662,7 @@ class to_trial_button(button):
                 else:
                     game_transitions.force_minister_appointment(self.global_manager)
             else:
-                text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
+                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.', self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
 
@@ -1716,16 +1717,16 @@ class active_investigation_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money') >= self.global_manager.get('action_prices')['active_investigation']:
+            if self.global_manager.get('money') >= constants.action_prices['active_investigation']:
                 if minister_utility.positions_filled(self.global_manager):
-                    cost = self.global_manager.get('action_prices')['active_investigation']
+                    cost = constants.action_prices['active_investigation']
                     self.global_manager.get('money_tracker').change(-1 * cost, 'active_investigation')
                     self.global_manager.get('displayed_minister').attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
                     actor_utility.double_action_price(self.global_manager, 'active_investigation')
                 else:
                     game_transitions.force_minister_appointment(self.global_manager)
             else:
-                text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['active_investigation']) + ' money needed to start an active investigation.', self.global_manager)
+                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['active_investigation']) + ' money needed to start an active investigation.', self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot start an active investigation.', self.global_manager)
 

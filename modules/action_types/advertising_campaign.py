@@ -4,6 +4,7 @@ import pygame
 import random
 from . import action
 from ..util import action_utility, text_utility, market_utility, scaling, game_transitions
+import modules.constants.constants as constants
 
 class advertising_campaign(action.campaign):
     '''
@@ -19,7 +20,7 @@ class advertising_campaign(action.campaign):
             None
         '''
         super().initial_setup()
-        self.global_manager.get('transaction_descriptions')[self.action_type] = 'advertising'
+        constants.transaction_descriptions[self.action_type] = 'advertising'
         self.name = 'advertising campaign'
         self.target_commodity = 'none'
 
