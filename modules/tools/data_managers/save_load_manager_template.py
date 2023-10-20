@@ -22,6 +22,8 @@ class save_load_manager_template():
             None
         '''
         self.global_manager = global_manager
+        self.copied_globals = []
+        self.copied_constants = []
         self.set_copied_elements()
 
     def set_copied_elements(self):
@@ -33,30 +35,31 @@ class save_load_manager_template():
         Output:
             None
         '''
-        self.copied_elements = []
-        self.copied_elements.append('money')
-        self.copied_elements.append('turn')
-        self.copied_elements.append('public_opinion')
-        self.copied_elements.append('evil')
-        self.copied_elements.append('fear')
-        self.copied_elements.append('commodity_prices')
-        self.copied_elements.append('african_worker_upkeep')
-        self.copied_elements.append('european_worker_upkeep')
-        self.copied_elements.append('slave_worker_upkeep')
-        self.copied_elements.append('recruitment_costs')
-        self.copied_elements.append('minister_appointment_tutorial_completed')
-        self.copied_elements.append('exit_minister_screen_tutorial_completed')
-        self.copied_elements.append('current_game_mode')
-        self.copied_elements.append('transaction_history')
-        self.copied_elements.append('previous_financial_report')
-        self.copied_elements.append('num_wandering_workers')
-        self.copied_elements.append('prosecution_bribed_judge')
-        self.copied_elements.append('sold_commodities')
-        self.copied_elements.append('action_prices')
-        self.copied_elements.append('current_country_name')
-        self.copied_elements.append('slave_traders_strength')
-        self.copied_elements.append('slave_traders_natural_max_strength')
-        self.copied_elements.append('completed_lore_mission_types')
+        self.copied_globals = []
+        self.copied_globals.append('money')
+        self.copied_globals.append('turn')
+        self.copied_globals.append('public_opinion')
+        self.copied_globals.append('evil')
+        self.copied_globals.append('fear')
+        self.copied_globals.append('commodity_prices')
+        self.copied_globals.append('african_worker_upkeep')
+        self.copied_globals.append('european_worker_upkeep')
+        self.copied_globals.append('slave_worker_upkeep')
+        self.copied_globals.append('recruitment_costs')
+        self.copied_globals.append('minister_appointment_tutorial_completed')
+        self.copied_globals.append('exit_minister_screen_tutorial_completed')
+        self.copied_globals.append('current_game_mode')
+        self.copied_globals.append('transaction_history')
+        self.copied_globals.append('previous_financial_report')
+        self.copied_globals.append('num_wandering_workers')
+        self.copied_globals.append('prosecution_bribed_judge')
+        self.copied_globals.append('sold_commodities')
+        self.copied_globals.append('current_country_name')
+        self.copied_globals.append('slave_traders_strength')
+        self.copied_globals.append('slave_traders_natural_max_strength')
+        self.copied_globals.append('completed_lore_mission_types')
+
+        self.copied_constants = ['action_prices']
         
     def new_game(self, country):
         '''
@@ -216,9 +219,12 @@ class save_load_manager_template():
         file_path = 'save_games/' + file_path
         saved_global_manager = global_manager_template.global_manager_template()
         self.global_manager.set('transaction_history', self.global_manager.get('money_tracker').transaction_history)
-        for current_element in self.copied_elements: #save necessary data into new global manager
+        for current_element in self.copied_globals: #save necessary data into new global manager
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
-
+        
+        saved_constants = {}
+        for current_element in self.copied_constants:
+            saved_constants[current_element] = getattr(constants, current_element)
 
         saved_grid_dicts = []
         for current_grid in self.global_manager.get('grid_list'):
@@ -254,6 +260,7 @@ class save_load_manager_template():
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
+            pickle.dump(saved_constants, handle)
             pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
@@ -280,6 +287,7 @@ class save_load_manager_template():
             file_path = 'save_games/' + file_path
             with open(file_path, 'rb') as handle:
                 new_global_manager = pickle.load(handle)
+                saved_constants = pickle.load(handle)
                 saved_grid_dicts = pickle.load(handle)
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
@@ -290,9 +298,11 @@ class save_load_manager_template():
             return()
 
         #load variables
-        for current_element in self.copied_elements:
-            if not current_element == 'current_game_mode':
+        for current_element in self.copied_globals:
+            if current_element != 'current_game_mode':
                 self.global_manager.set(current_element, new_global_manager.get(current_element))
+        for current_element in self.copied_constants:
+            setattr(constants, current_element, self.copied_constants[current_element])
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))

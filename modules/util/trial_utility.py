@@ -1,6 +1,7 @@
 import random
 from . import utility, scaling, game_transitions, minister_utility, dice_utility, actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def start_trial(global_manager): #called by launch trial button in middle of trial screen
     '''
@@ -11,8 +12,8 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     Output:
         None
     '''
-    defense = global_manager.get('displayed_defense')
-    prosecution = global_manager.get('displayed_prosecution')
+    defense = status.displayed_defense
+    prosecution = status.displayed_prosecution
     message = 'Are you sure you want to start a trial against ' + defense.name + '? You have ' + str(defense.corruption_evidence) + ' pieces of evidence to use. /n /n'
     message += 'Your prosecutor may roll 1 die for each piece of evidence, and the trial is successful if a 5+ is rolled on any of the evidence dice. /n /n'
     message += 'However, the defense may spend from their personal savings (perhaps stolen from your company) to hire lawyers and negate some of the evidence. /n /n'
@@ -43,8 +44,8 @@ def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
             'corruption_evidence': int value - Base amount of evidence in the case before lawyers intervene
             'effective_evidence': int value - Amount of evidence that is not cancelled out by defense lawyers
     '''
-    defense = global_manager.get('displayed_defense')
-    prosecutor = global_manager.get('displayed_prosecution')
+    defense = status.displayed_defense
+    prosecutor = status.displayed_prosecution
     max_defense_fund = 0.75 * (defense.stolen_money + defense.personal_savings) #pay up to 75% of savings
     building_defense = True
     num_lawyers = 0
@@ -125,8 +126,8 @@ def trial(global_manager): #called by choice notification button
     price = constants.action_prices['trial']
     global_manager.get('money_tracker').change(-1 * constants.action_prices['trial'], 'trial')
     actor_utility.double_action_price(global_manager, 'trial')
-    defense = global_manager.get('displayed_defense')
-    prosecution = global_manager.get('displayed_prosecution')
+    defense = status.displayed_defense
+    prosecution = status.displayed_prosecution
     prosecutor_corrupt = prosecution.check_corruption()
     if prosecutor_corrupt:
         prosecution.steal_money(price, 'trial')
@@ -262,8 +263,8 @@ def complete_trial(final_roll, global_manager):
     Output:
         None
     '''
-    prosecution = global_manager.get('displayed_prosecution')
-    defense = global_manager.get('displayed_defense')
+    prosecution = status.displayed_prosecution
+    defense = status.displayed_defense
     game_transitions.set_game_mode('ministers', global_manager)
     if final_roll >= 5:
         confiscated_money = defense.stolen_money / 2.0
@@ -281,7 +282,7 @@ def complete_trial(final_roll, global_manager):
         })
         
         defense.appoint('none')
-        minister_utility.calibrate_minister_info_display(global_manager, 'none')
+        minister_utility.calibrate_minister_info_display(global_manager, None)
         defense.respond('prison')
         defense.remove_complete()
         global_manager.get('fear_tracker').change(1)

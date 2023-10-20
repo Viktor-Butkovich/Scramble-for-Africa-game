@@ -2,6 +2,7 @@
 
 from . import actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def generate_autofill_actors(global_manager, search_start_index=0):
     '''
@@ -15,8 +16,8 @@ def generate_autofill_actors(global_manager, search_start_index=0):
         would be involved in the determined merge/split procedure
     '''
     return_dict = {'worker': 'none', 'officer': 'none', 'group': 'none', 'procedure': 'none'}
-    displayed_mob = global_manager.get('displayed_mob')
-    if displayed_mob != 'none' and displayed_mob.is_pmob:
+    displayed_mob = status.displayed_mob
+    if displayed_mob and displayed_mob.is_pmob:
 
         required_dummy_attributes = ['name', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
                               'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 

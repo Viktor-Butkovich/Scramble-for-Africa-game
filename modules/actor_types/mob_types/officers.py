@@ -3,6 +3,7 @@
 from .pmobs import pmob
 from ...util import actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class officer(pmob):
     '''
@@ -38,7 +39,7 @@ class officer(pmob):
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
         if not from_save:
             self.veteran = False
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_officer changing
             self.selection_sound()
         else:
@@ -90,7 +91,7 @@ class officer(pmob):
         self.veteran = True
         self.set_name('veteran ' + self.name)
         self.update_image_bundle()
-        if self.global_manager.get('displayed_mob') == self:
+        if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with veteran icon
 
     def load_veteran(self):
@@ -103,7 +104,7 @@ class officer(pmob):
             None
         '''
         self.promote()
-        if self.global_manager.get('displayed_mob') == self:
+        if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def can_show_tooltip(self):
@@ -149,7 +150,7 @@ class officer(pmob):
         self.show_images()
         #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()

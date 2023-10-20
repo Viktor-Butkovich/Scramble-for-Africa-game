@@ -1,10 +1,10 @@
 #Contains functionality for expeditions
 
-import time
 import random
 from ..groups import group
 from ....util import actor_utility, dice_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class expedition(group):
     '''
@@ -112,7 +112,7 @@ class expedition(group):
         current_cell = self.images[0].current_cell
         for current_direction in ['up', 'down', 'left', 'right']:
             target_cell = current_cell.adjacent_cells[current_direction]
-            if (not target_cell == 'none') and (not target_cell.visible):
+            if target_cell and not target_cell.visible:
                 if current_cell.terrain == 'water' or target_cell.terrain == 'water': #if on water, discover all adjacent undiscovered tiles. Also, discover all adjacent water tiles, regardless of if currently on water
                     if current_cell.terrain == 'water':
                         text = 'From the water, the expedition has discovered a '
@@ -557,7 +557,7 @@ class expedition(group):
                 self.global_manager.get('current_lore_mission').remove_complete()
             else:
                 location.set_proven_false(True)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.global_manager.get('displayed_tile')) #updates tile display without question mark
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), status.displayed_tile) #updates tile display without question mark
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         elif roll_result <= self.current_max_crit_fail:

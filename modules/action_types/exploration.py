@@ -61,7 +61,7 @@ class exploration(action.action):
             None
         '''
         message = []
-        if self.global_manager.get('displayed_mob').can_explore:
+        if status.displayed_mob.can_explore:
             message.append('Press to attempt to explore in the ' + tooltip_info_dict['direction'])
             message.append('Attempting to explore would cost ' + str(self.get_price()) + ' money and all remaining movement points, at least 1')
         else:

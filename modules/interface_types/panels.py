@@ -2,6 +2,7 @@
 
 from .buttons import button
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class panel(button):
     '''
@@ -100,6 +101,6 @@ class safe_click_panel(panel):
         '''
         if super().can_show():
             for parameter in ['displayed_mob', 'displayed_tile', 'displayed_minister', 'displayed_country']:
-                if self.global_manager.get(parameter) != 'none':
+                if getattr(status, parameter):
                     return(True)
         return(False)

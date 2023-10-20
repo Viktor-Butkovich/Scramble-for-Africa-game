@@ -5,6 +5,7 @@ import random
 from . import action
 from ..util import action_utility, text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class conversion(action.action):
     '''
@@ -145,9 +146,9 @@ class conversion(action.action):
         Output:
             boolean: Returns whether a button linked to this action should be drawn
         '''
-        return(super().can_show() and 
-               self.global_manager.get('displayed_mob').is_group and
-               self.global_manager.get('displayed_mob').group_type == 'missionaries'
+        return(super().can_show() and
+               status.displayed_mob.is_group and
+               status.displayed_mob.group_type == 'missionaries'
         )
 
     def on_click(self, unit):

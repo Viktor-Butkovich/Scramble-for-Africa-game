@@ -6,6 +6,7 @@ from ..constructs import images, villages
 from ..util import utility, actor_utility, main_loop_utility
 from .actors import actor
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class tile(actor): #to do: make terrain tiles a subclass
     '''
@@ -131,7 +132,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory[commodity] += change
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
-            if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
+            if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
 
     def set_inventory(self, commodity, new_value):
@@ -148,7 +149,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory[commodity] = new_value
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile.inventory[commodity] = new_value
-            if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
+            if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
 
     def get_main_grid_coordinates(self):
@@ -177,13 +178,13 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.grid == self.global_manager.get('minimap_grid'):
             main_x, main_y = self.grid.get_main_grid_coordinates(self.x, self.y)
             attached_cell = self.grid.attached_grid.find_cell(main_x, main_y)
-            if not attached_cell == 'none':
+            if attached_cell:
                 return(attached_cell.tile)
             return('none')
         elif self.grid == self.global_manager.get('strategic_map_grid'):
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
             equivalent_cell = self.grid.mini_grid.find_cell(mini_x, mini_y)
-            if not equivalent_cell == 'none':
+            if equivalent_cell:
                 return(equivalent_cell.tile)
             else:
                 return('none')

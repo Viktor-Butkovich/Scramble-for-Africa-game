@@ -1,6 +1,7 @@
 #Contains miscellaneous functions relating to minister functionality
 
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def check_corruption(minister_type, global_manager):
     '''
@@ -34,8 +35,13 @@ def calibrate_minister_info_display(global_manager, new_minister):
     Output:
         None
     '''
-    global_manager.set('displayed_minister', new_minister)
-    global_manager.get('minister_info_display').calibrate(new_minister)
+    if new_minister == 'none':
+        print(0/0)
+    status.displayed_minister = new_minister
+    target = 'none'
+    if status.displayed_minister:
+        target = new_minister
+    global_manager.get('minister_info_display').calibrate(target)
 
 def calibrate_trial_info_display(global_manager, info_display, new_minister):
     '''
@@ -49,13 +55,18 @@ def calibrate_trial_info_display(global_manager, info_display, new_minister):
     Output:
         None
     '''
+    if new_minister == 'none':
+        print(0/0)
     if type(info_display) == list:
         return
-    info_display.calibrate(new_minister)
+    target = 'none'
+    if new_minister:
+        target = new_minister
+    info_display.calibrate(target)
     if info_display == global_manager.get('defense_info_display'):
-        global_manager.set('displayed_defense', new_minister)
+        status.displayed_defense = target
     elif info_display == global_manager.get('prosecution_info_display'):
-        global_manager.set('displayed_prosecution', new_minister)
+        status.displayed_prosecution = target
 
 def trial_setup(defense, prosecution, global_manager):
     '''
@@ -67,8 +78,15 @@ def trial_setup(defense, prosecution, global_manager):
     Output:
         None
     '''
-    calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display'), defense)
-    calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), prosecution)
+    target = 'none'
+    if defense:
+        target = defense
+    calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display'), target)
+
+    target = 'none'
+    if prosecution:
+        target = prosecution
+    calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), target)
     
 def update_available_minister_display(global_manager):
     '''

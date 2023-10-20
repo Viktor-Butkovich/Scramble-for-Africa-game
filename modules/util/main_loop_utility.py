@@ -4,6 +4,7 @@ import pygame
 import time
 from . import scaling, text_utility, actor_utility, minister_utility, utility, traversal_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def update_display(global_manager):
     '''
@@ -24,13 +25,12 @@ def update_display(global_manager):
         #could modify with a layer dictionary to display elements on different layers - currently, drawing elements in order of collection creation is working w/o overlap
         # issues
 
-        displayed_tile = global_manager.get('displayed_tile')
-        if displayed_tile != 'none':
+        displayed_tile = status.displayed_tile
+        if displayed_tile:
             displayed_tile.draw_actor_match_outline(False)
 
-        displayed_mob = global_manager.get('displayed_mob')
-        if displayed_mob != 'none':
-            displayed_mob.draw_outline()
+        if status.displayed_mob:
+            status.displayed_mob.draw_outline()
 
         for current_mob in global_manager.get('mob_list'):
             if current_mob.can_show_tooltip():
@@ -297,19 +297,19 @@ def manage_rmb_down(clicked_button, global_manager):
     elif global_manager.get('drawing_automatic_route'):
         stopping = True
         global_manager.set('drawing_automatic_route', False)
-        if len(global_manager.get('displayed_mob').base_automatic_route) > 1:
-            destination_coordinates = (global_manager.get('displayed_mob').base_automatic_route[-1][0], global_manager.get('displayed_mob').base_automatic_route[-1][1])
-            if global_manager.get('displayed_mob').is_vehicle and global_manager.get('displayed_mob').vehicle_type == 'train' and not global_manager.get('strategic_map_grid').find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
-                global_manager.get('displayed_mob').clear_automatic_route()
+        if len(status.displayed_mob.base_automatic_route) > 1:
+            destination_coordinates = (status.displayed_mob.base_automatic_route[-1][0], status.displayed_mob.base_automatic_route[-1][1])
+            if status.displayed_mob.is_vehicle and status.displayed_mob.vehicle_type == 'train' and not global_manager.get('strategic_map_grid').find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
+                status.displayed_mob.clear_automatic_route()
                 text_utility.print_to_screen('A train\'s automatic route must start and end at a train station.', global_manager)
                 text_utility.print_to_screen('The invalid route has been erased.', global_manager)
             else:
                 text_utility.print_to_screen('Route saved', global_manager)
         else:
-            global_manager.get('displayed_mob').clear_automatic_route()
+            status.displayed_mob.clear_automatic_route()
             text_utility.print_to_screen('The created route must go between at least 2 tiles', global_manager)
-        global_manager.get('minimap_grid').calibrate(global_manager.get('displayed_mob').x, global_manager.get('displayed_mob').y)
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('displayed_mob').images[0].current_cell.tile)
+        global_manager.get('minimap_grid').calibrate(status.displayed_mob.x, status.displayed_mob.y)
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.displayed_mob.images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
@@ -335,31 +335,31 @@ def manage_lmb_down(clicked_button, global_manager):
                             if current_cell.visible:
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_mob = True
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
                                     current_cell.contained_mobs[0].select()
                                     if current_cell.contained_mobs[0].is_pmob:
                                         current_cell.contained_mobs[0].selection_sound()
                                     if current_grid == global_manager.get('minimap_grid'):
                                         main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
                                         main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
-                                        if not main_cell == 'none':
+                                        if main_cell:
                                             main_tile = main_cell.tile
                                             if not main_tile == 'none':
                                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
                                     else:
                                         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
             if selected_mob:
-                unit = global_manager.get('displayed_mob')
-                if unit != 'none' and unit.grids[0] == global_manager.get('minimap_grid').attached_grid:
+                unit = status.displayed_mob
+                if unit and unit.grids[0] == global_manager.get('minimap_grid').attached_grid:
                     global_manager.get('minimap_grid').calibrate(unit.x, unit.y)
             else:
                 if global_manager.get('current_game_mode') == 'ministers':
-                    minister_utility.calibrate_minister_info_display(global_manager, 'none')
+                    minister_utility.calibrate_minister_info_display(global_manager, None)
                 elif global_manager.get('current_game_mode') == 'new_game_setup':
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), None, override_exempt=True)
                 else:
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), 'none', override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), None, override_exempt=True)
                 click_move_minimap(global_manager)
                 
         elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
@@ -403,7 +403,7 @@ def manage_lmb_down(clicked_button, global_manager):
                         if current_cell.grid.is_abstract_grid:
                             text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
                         else:
-                            displayed_mob = global_manager.get('displayed_mob')
+                            displayed_mob = status.displayed_mob
                             if current_cell.grid.is_mini_grid:
                                 target_tile = current_cell.tile.get_equivalent_tile()
                                 if target_tile == 'none':

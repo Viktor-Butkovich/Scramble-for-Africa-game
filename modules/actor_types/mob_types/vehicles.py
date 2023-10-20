@@ -67,7 +67,7 @@ class vehicle(pmob):
             self.remove_from_turn_queue()
         if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             self.select()
 
     def set_crew(self, new_crew): #continue adding set_crew
@@ -85,7 +85,7 @@ class vehicle(pmob):
         else:
             self.has_crew = True
         self.update_image_bundle()
-        if self.global_manager.get('displayed_mob') == self:
+        if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def get_image_id_list(self, override_values={}):

@@ -2,8 +2,9 @@
 
 import pygame
 from ..constructs import images
-from ..util import scaling, dummy_utility, utility
+from ..util import scaling, utility, dummy_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class interface_element():
     '''
@@ -361,7 +362,9 @@ class interface_collection(interface_element):
                 else:
                     member.calibrate(new_actor)
         if self.is_info_display:
-            self.global_manager.set('displayed_' + self.actor_type, new_actor)
+            if new_actor == 'none':
+                new_actor = None
+            setattr(status, 'displayed_' + self.actor_type, new_actor)
 
     def add_member(self, new_member, member_config=None):
         '''
@@ -497,7 +500,7 @@ class interface_collection(interface_element):
             boolean: Returns True if this button can appear under current conditions, otherwise returns False
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if self.is_info_display and self.global_manager.get('displayed_' + self.actor_type) == 'none':
+        if self.is_info_display and getattr(status, 'displayed_' + self.actor_type) == None:
             return(False)
         else:
             return(result and not self.minimized)

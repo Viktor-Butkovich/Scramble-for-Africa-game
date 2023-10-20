@@ -46,7 +46,7 @@ class cell():
         self.set_terrain('clear')
         self.contained_mobs = []
         self.reset_buildings()
-        self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
+        self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        
         if not save_dict == 'none': #if from save
             self.save_dict = save_dict
             if constants.effect_manager.effect_active('remove_fog_of_war'):
@@ -392,7 +392,7 @@ class cell():
             'modes': ['strategic'],
             'init_type': 'slums'
         }, self.global_manager)
-        if self.tile == self.global_manager.get('displayed_tile'):
+        if self.tile == status.displayed_tile:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.tile) #update tile display to show new building
 
     def has_vehicle(self, vehicle_type, is_worker = False):

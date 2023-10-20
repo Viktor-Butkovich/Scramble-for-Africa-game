@@ -4,6 +4,7 @@ import pygame
 from . import action
 from ..util import actor_utility, action_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class upgrade(action.action):
     '''
@@ -73,8 +74,8 @@ class upgrade(action.action):
             None
         '''
         message = []
-        unit = self.global_manager.get('displayed_mob') 
-        if unit != 'none':
+        unit = status.displayed_mob 
+        if unit != None:
             self.current_building = unit.images[0].current_cell.get_intact_building(self.upgraded_building_type)
             actor_utility.update_descriptions(self.global_manager, self.building_type)
             if self.building_type == 'warehouse_level':
@@ -133,7 +134,7 @@ class upgrade(action.action):
         '''
         building = self.current_building
         if building == 'none':
-            building = self.global_manager.get('displayed_mob').images[0].current_cell.get_intact_building(self.upgraded_building_type)
+            building = status.displayed_mob.images[0].current_cell.get_intact_building(self.upgraded_building_type)
         return(building.get_upgrade_cost())
 
     def can_show(self):
@@ -145,7 +146,7 @@ class upgrade(action.action):
         Output:
             boolean: Returns whether a button linked to this action should be drawn
         '''
-        unit = self.global_manager.get('displayed_mob')
+        unit = status.displayed_mob
         building = unit.images[0].current_cell.get_intact_building(self.upgraded_building_type)
         can_show = (super().can_show() and unit.is_group and getattr(unit, self.requirement)
                         and building != 'none' and building.can_upgrade(self.building_type))

@@ -6,6 +6,7 @@ import pygame
 import math
 from . import utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def reset_action_prices(global_manager):
     '''
@@ -46,7 +47,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
     if building_type == 'infrastructure':
         building_type = building_name.replace(' ', '_') #road, railroad, road_bridge, or railroad_bridge
     if building_type == 'warehouses':
-        if constructor == 'none':
+        if constructor == None:
             base_price = 5
         else:
             base_price = constructor.images[0].current_cell.get_warehouses_cost()
@@ -55,7 +56,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
 
     if building_type in ['train', 'steamboat']:
         cost_multiplier = 1
-    elif constructor == 'none' or not global_manager.get('strategic_map_grid') in constructor.grids:
+    elif constructor == None or not global_manager.get('strategic_map_grid') in constructor.grids:
         cost_multiplier = 1
     else:
         terrain = constructor.images[0].current_cell.terrain
@@ -354,27 +355,33 @@ def calibrate_actor_info_display(global_manager, info_display, new_actor, overri
     Input:
         global_manager_template global_manager: Object that accesses shared variables
         interface_collection info_display: Collection of interface elements to calibrate to the inputted actor
-        string new_actor: The new mob or tile that is displayed
+        actor new_actor: The new mob or tile that is displayed
         boolean override_exempt=False: Whether to calibrate interface elements that are normally exempt, such as the reorganization interface
     Output:
         None
     '''
+    if new_actor == 'none':
+        print(0/0)
     if info_display == global_manager.get('tile_info_display'):
         for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
             current_same_tile_icon.reset()
-        global_manager.set('displayed_tile', new_actor)
-        if new_actor != 'none':
+        status.displayed_tile = new_actor
+        if new_actor:
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
 
     elif info_display == global_manager.get('mob_info_display'):
-        global_manager.set('displayed_mob', new_actor)
-        if new_actor != 'none' and new_actor.images[0].current_cell.tile == global_manager.get('displayed_tile'):
+        status.displayed_mob = new_actor
+        if new_actor and new_actor.images[0].current_cell.tile == status.displayed_tile:
             for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
                 current_same_tile_icon.reset()
 
     elif info_display == global_manager.get('country_info_display'):
-        global_manager.set('displayed_country', new_actor)
-    info_display.calibrate(new_actor, override_exempt)
+        status.displayed_country = new_actor
+
+    target = 'none'
+    if new_actor:
+        target = new_actor
+    info_display.calibrate(target, override_exempt)
 
 def get_migration_destinations(global_manager):
     '''

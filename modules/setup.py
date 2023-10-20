@@ -111,14 +111,6 @@ def misc(global_manager):
     global_manager.set('dice_list', [])
     global_manager.set('draw_list', [])
 
-    global_manager.set('displayed_mob', 'none')
-    global_manager.set('displayed_tile', 'none')
-    global_manager.set('displayed_minister', 'none')
-    global_manager.set('displayed_country', 'none')
-    global_manager.set('displayed_defense', 'none')
-    global_manager.set('displayed_prosecution', 'none')
-    global_manager.set('displayed_notification', 'none')
-
     pygame.key.set_repeat(300, 200)
     global_manager.set('crashed', False)
     global_manager.set('lmb_down', False)

@@ -33,3 +33,5 @@ except Exception: #displays error message and records error message in crash log
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
+# find a way to pack/unpack particular constant values for save/load - currently based on a saved global manager
+# add strategic map grid and slave traders grid to status - save/load currently does not work

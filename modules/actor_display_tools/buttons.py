@@ -4,6 +4,7 @@ import random
 from ..interface_types.buttons import button
 from ..util import main_loop_utility, utility, actor_utility, minister_utility, trial_utility, text_utility, game_transitions
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class embark_all_passengers_button(button):
     '''
@@ -43,7 +44,7 @@ class embark_all_passengers_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            vehicle = self.global_manager.get('displayed_mob')
+            vehicle = status.displayed_mob
             can_embark = True
             if self.vehicle_type == 'train':
                 if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
@@ -71,7 +72,7 @@ class embark_all_passengers_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.has_crew: #do not show if ship does not have crew
                 return(False)
             if (not self.vehicle_type == displayed_mob.vehicle_type) and (not displayed_mob.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
@@ -117,7 +118,7 @@ class disembark_all_passengers_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            vehicle = self.global_manager.get('displayed_mob')
+            vehicle = status.displayed_mob
             can_disembark = True
             if self.vehicle_type == 'train':
                 if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
@@ -143,7 +144,7 @@ class disembark_all_passengers_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            vehicle = self.global_manager.get('displayed_mob')
+            vehicle = status.displayed_mob
             if not vehicle.has_crew: #do not show if ship does not have crew
                 return(False)
             if (not self.vehicle_type == vehicle.vehicle_type) and (not vehicle.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
@@ -189,7 +190,7 @@ class enable_sentry_mode_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 return(False)
             elif displayed_mob.sentry_mode:
@@ -206,7 +207,7 @@ class enable_sentry_mode_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):   
-            displayed_mob = self.global_manager.get('displayed_mob')      
+            displayed_mob = status.displayed_mob      
             displayed_mob.set_sentry_mode(True)
             if (constants.effect_manager.effect_active('promote_on_sentry') 
             and (displayed_mob.is_group or displayed_mob.is_officer) 
@@ -253,7 +254,7 @@ class disable_sentry_mode_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 return(False)
             elif not displayed_mob.sentry_mode:
@@ -270,7 +271,7 @@ class disable_sentry_mode_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            displayed_mob = self.global_manager.get('displayed_mob')     
+            displayed_mob = status.displayed_mob     
             displayed_mob.set_sentry_mode(False)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
         else:
@@ -316,7 +317,7 @@ class enable_automatic_replacement_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 return(False)
             elif displayed_mob.is_vehicle:
@@ -341,7 +342,7 @@ class enable_automatic_replacement_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):     
-            displayed_mob = self.global_manager.get('displayed_mob')    
+            displayed_mob = status.displayed_mob    
             if self.target_type == 'unit':
                 target = displayed_mob
             elif self.target_type == 'worker':
@@ -392,7 +393,7 @@ class disable_automatic_replacement_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 return(False)
             elif displayed_mob.is_vehicle:
@@ -417,7 +418,7 @@ class disable_automatic_replacement_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if self.target_type == 'unit':
                 target = displayed_mob
             elif self.target_type == 'worker':
@@ -466,7 +467,7 @@ class end_unit_turn_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 return(False)
             elif not displayed_mob in self.global_manager.get('player_turn_queue'):
@@ -483,7 +484,7 @@ class end_unit_turn_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            self.global_manager.get('displayed_mob').remove_from_turn_queue()
+            status.displayed_mob.remove_from_turn_queue()
             game_transitions.cycle_player_turn(self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot end this unit\'s turn.', self.global_manager)
@@ -663,7 +664,7 @@ class embark_vehicle_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 result = False
             elif displayed_mob.in_vehicle or displayed_mob.is_vehicle:
@@ -686,7 +687,7 @@ class embark_vehicle_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
                 vehicle = displayed_mob.images[0].current_cell.get_vehicle(self.vehicle_type)
                 rider = displayed_mob
@@ -746,7 +747,7 @@ class cycle_passengers_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if not displayed_mob.is_vehicle:
                 return(False)
             elif not len(displayed_mob.contained_mobs) > 3: #only show if vehicle with 3+ passengers
@@ -764,7 +765,7 @@ class cycle_passengers_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             moved_mob = displayed_mob.contained_mobs.pop(0)
             displayed_mob.contained_mobs.append(moved_mob)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob) #updates mob info display list to show changed passenger order
@@ -811,7 +812,7 @@ class cycle_work_crews_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_tile = self.global_manager.get('displayed_tile')
+            displayed_tile = status.displayed_tile
             if displayed_tile.cell.contained_buildings['resource'] == 'none':
                 self.previous_showing_result = False
                 return(False)
@@ -834,7 +835,7 @@ class cycle_work_crews_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            displayed_tile = self.global_manager.get('displayed_tile')
+            displayed_tile = status.displayed_tile
             moved_mob = displayed_tile.cell.contained_buildings['resource'].contained_work_crews.pop(0)
             displayed_tile.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), displayed_tile) #updates tile info display list to show changed work crew order
@@ -867,8 +868,8 @@ class work_crew_to_building_button(button):
             None
         '''
         self.building_type = input_dict['building_type']
-        self.attached_work_crew = 'none'
-        self.attached_building = 'none'
+        self.attached_work_crew = None
+        self.attached_building = None
         input_dict['button_type'] = 'worker to resource'
         super().__init__(input_dict, global_manager)
 
@@ -881,11 +882,13 @@ class work_crew_to_building_button(button):
         Output:
             None
         '''
-        self.attached_work_crew = self.global_manager.get('displayed_mob')
-        if self.attached_work_crew != 'none' and self.attached_work_crew.is_work_crew:
+        self.attached_work_crew = status.displayed_mob
+        if self.attached_work_crew and self.attached_work_crew.is_work_crew:
             self.attached_building = self.attached_work_crew.images[0].current_cell.get_intact_building(self.building_type)
+            if self.attached_building == 'none':
+                self.attached_building = None
         else:
-            self.attached_building = 'none'
+            self.attached_building = None
     
     def can_show(self, skip_parent_collection=False):
         '''
@@ -897,7 +900,7 @@ class work_crew_to_building_button(button):
             boolean: Returns False if the selected mob is not a work crew, otherwise returns same as superclass
         '''
         self.update_info()
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.attached_work_crew != 'none' and self.attached_work_crew.is_work_crew)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.attached_work_crew and self.attached_work_crew.is_work_crew)
     
     def update_tooltip(self):
         '''
@@ -908,12 +911,12 @@ class work_crew_to_building_button(button):
         Output:
             None
         '''
-        if not (self.attached_work_crew == 'none' or self.attached_building == 'none'):
+        if self.attached_work_crew and self.attached_building:
             if self.building_type == 'resource':
                 self.set_tooltip(['Assigns the selected work crew to the ' + self.attached_building.name + ', producing ' + self.attached_building.resource_type + ' over time.'])
             else:
                 self.set_tooltip(['placeholder'])
-        elif not self.attached_work_crew == 'none':
+        elif self.attached_work_crew:
             if self.building_type == 'resource':
                 self.set_tooltip(['Assigns the selected work crew to a resource building, producing commodities over time.'])
         else:
@@ -929,7 +932,7 @@ class work_crew_to_building_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if not self.attached_building == 'none':
+            if self.attached_building:
                 if self.attached_building.scale > len(self.attached_building.contained_work_crews): #if has extra space
                     if self.attached_work_crew.sentry_mode:
                         self.attached_work_crew.set_sentry_mode(False)
@@ -978,7 +981,7 @@ class trade_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of trading, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_trade)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_mob.can_trade)
 
     def on_click(self):
         '''
@@ -990,7 +993,7 @@ class trade_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            current_mob = self.global_manager.get('displayed_mob')
+            current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= constants.action_prices['trade']:
                     current_cell = current_mob.images[0].current_cell
@@ -1052,7 +1055,7 @@ class rumor_search_button(button):
         Output:
             boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_explore)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_mob.can_explore)
 
     def on_click(self):
         '''
@@ -1065,7 +1068,7 @@ class rumor_search_button(button):
         '''
         if not self.global_manager.get('current_lore_mission') == 'none':
             if main_loop_utility.action_possible(self.global_manager):
-                current_mob = self.global_manager.get('displayed_mob')
+                current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= constants.action_prices['rumor_search']:
                         current_cell = current_mob.images[0].current_cell
@@ -1130,7 +1133,7 @@ class artifact_search_button(button):
         Output:
             boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_explore)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_mob.can_explore)
 
     def on_click(self):
         '''
@@ -1143,7 +1146,7 @@ class artifact_search_button(button):
         '''
         if self.global_manager.get('current_lore_mission') != 'none':
             if main_loop_utility.action_possible(self.global_manager):
-                current_mob = self.global_manager.get('displayed_mob')
+                current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= constants.action_prices['artifact_search']:
                         if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
@@ -1198,7 +1201,7 @@ class capture_slaves_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_battalion)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_mob.is_battalion)
 
     def on_click(self):
         '''
@@ -1210,7 +1213,7 @@ class capture_slaves_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            current_mob = self.global_manager.get('displayed_mob')
+            current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= constants.action_prices['slave_capture']:
                     current_cell = current_mob.images[0].current_cell
@@ -1268,7 +1271,7 @@ class labor_broker_button(button):
             boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if displayed_mob.is_officer and displayed_mob.officer_type != 'evangelist':
                 return(True)
             elif displayed_mob.is_vehicle and not (displayed_mob.can_swim_ocean or displayed_mob.has_crew):
@@ -1285,7 +1288,7 @@ class labor_broker_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            current_mob = self.global_manager.get('displayed_mob')
+            current_mob = status.displayed_mob
             if self.global_manager.get('strategic_map_grid') in current_mob.grids:
                 if current_mob.images[0].current_cell.has_intact_building('port'):
                     cost_info_list = self.get_cost()
@@ -1324,7 +1327,7 @@ class labor_broker_button(button):
         lowest_cost = 0
         for current_village in self.global_manager.get('village_list'):
             if current_village.population > 0:
-                distance = int(utility.find_object_distance(current_village, self.global_manager.get('displayed_mob')))
+                distance = int(utility.find_object_distance(current_village, status.displayed_mob))
                 cost = (5 * current_village.aggressiveness) + distance
                 if cost < lowest_cost or lowest_cost_village == 'none':
                     lowest_cost_village = current_village
@@ -1370,7 +1373,7 @@ class track_beasts_button(button):
         Output:
             boolean: Returns False if the selected mob is not a safari, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_group and self.global_manager.get('displayed_mob').is_safari)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_mob.is_group and status.displayed_mob.is_safari)
 
     def on_click(self):
         '''
@@ -1382,7 +1385,7 @@ class track_beasts_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            current_mob = self.global_manager.get('displayed_mob')
+            current_mob = status.displayed_mob
             if self.global_manager.get('strategic_map_grid') in current_mob.grids:
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= constants.action_prices['track_beasts']:
@@ -1437,7 +1440,7 @@ class switch_theatre_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            current_mob = self.global_manager.get('displayed_mob')
+            current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
                 if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
                     if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
@@ -1466,7 +1469,7 @@ class switch_theatre_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of traveling between theatres, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_pmob and self.global_manager.get('displayed_mob').can_travel())
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_mob.is_pmob and status.displayed_mob.can_travel())
 
 class appoint_minister_button(button):
     '''
@@ -1505,8 +1508,8 @@ class appoint_minister_button(button):
             boolean: Returns same as superclass if the minister office that this button is attached to is open, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_minister = self.global_manager.get('displayed_minister')
-            if (not displayed_minister == 'none') and displayed_minister.current_position == 'none': #if there is an available minister displayed
+            displayed_minister = status.displayed_minister
+            if displayed_minister and displayed_minister.current_position == 'none': #if there is an available minister displayed
                 if self.global_manager.get('current_ministers')[self.appoint_type] == 'none': #if the position that this button appoints is available
                     return(True)
         return(False)
@@ -1521,7 +1524,7 @@ class appoint_minister_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            appointed_minister = self.global_manager.get('displayed_minister')
+            appointed_minister = status.displayed_minister
             if not appointed_minister.just_removed:
                 appointed_minister.respond('first hired')
             appointed_minister.appoint(self.appoint_type)
@@ -1564,8 +1567,8 @@ class remove_minister_button(button):
             boolean: Returns same as superclass if the selected minister is currently in an office, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_minister = self.global_manager.get('displayed_minister')
-            if (not displayed_minister == 'none') and (not displayed_minister.current_position == 'none'): #if there is an available minister displayed
+            displayed_minister = status.displayed_minister
+            if displayed_minister and displayed_minister.current_position != 'none': #if there is an available minister displayed
                 return(True)
         return(False)
 
@@ -1580,7 +1583,7 @@ class remove_minister_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            appointed_minister = self.global_manager.get('displayed_minister')
+            appointed_minister = status.displayed_minister
             public_opinion_penalty = appointed_minister.status_number
             text = 'Are you sure you want to remove ' + appointed_minister.name + ' from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n.'
             text += 'Removing ' + appointed_minister.name + ' from office would incur a small public opinion penalty of ' + str(public_opinion_penalty) + ', even if he were reappointed. /n /n'
@@ -1634,8 +1637,8 @@ class to_trial_button(button):
             boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_minister = self.global_manager.get('displayed_minister')
-            if (not displayed_minister == 'none') and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
+            displayed_minister = status.displayed_minister
+            if displayed_minister and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
                 return(True)
         return(False)
 
@@ -1653,7 +1656,7 @@ class to_trial_button(button):
             if self.global_manager.get('money') >= constants.action_prices['trial']:
                 if minister_utility.positions_filled(self.global_manager):
                     if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
-                        defense = self.global_manager.get('displayed_minister')
+                        defense = status.displayed_minister
                         prosecution = self.global_manager.get('current_ministers')['Prosecutor']
                         game_transitions.set_game_mode('trial', self.global_manager)
                         minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
@@ -1701,8 +1704,8 @@ class active_investigation_button(button):
             boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_minister = self.global_manager.get('displayed_minister')
-            if displayed_minister != 'none' and displayed_minister.current_position != 'Prosecutor':
+            displayed_minister = status.displayed_minister
+            if displayed_minister and displayed_minister.current_position != 'Prosecutor':
                 return(True)
         return(False)
 
@@ -1721,7 +1724,7 @@ class active_investigation_button(button):
                 if minister_utility.positions_filled(self.global_manager):
                     cost = constants.action_prices['active_investigation']
                     self.global_manager.get('money_tracker').change(-1 * cost, 'active_investigation')
-                    self.global_manager.get('displayed_minister').attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
+                    status.displayed_minister.attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
                     actor_utility.double_action_price(self.global_manager, 'active_investigation')
                 else:
                     game_transitions.force_minister_appointment(self.global_manager)
@@ -1764,7 +1767,7 @@ class fabricate_evidence_button(button):
         Output:
             Returns the cost of fabricating another piece of evidence
         '''
-        defense = self.global_manager.get('displayed_defense')
+        defense = status.displayed_defense
         return(trial_utility.get_fabricated_evidence_cost(defense.fabricated_evidence))
 
     def on_click(self):
@@ -1779,8 +1782,8 @@ class fabricate_evidence_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             if self.global_manager.get('money') >= self.get_cost():
                 self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
-                defense = self.global_manager.get('displayed_defense')
-                prosecutor = self.global_manager.get('displayed_prosecution')
+                defense = status.displayed_defense
+                prosecutor = status.displayed_prosecution
                 prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that evidence has been successfully fabricated for ' + str(self.get_cost()) +
                     ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
                 defense.fabricated_evidence += 1
@@ -1855,7 +1858,7 @@ class bribe_judge_button(button):
                 if not self.global_manager.get('prosecution_bribed_judge'):
                     self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
                     self.global_manager.set('prosecution_bribed_judge', True)
-                    prosecutor = self.global_manager.get('displayed_prosecution')
+                    prosecutor = status.displayed_prosecution
                     prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that the judge has been successfully bribed for ' + str(self.get_cost()) +
                         ' money. /n /nThis may provide a bonus in the next trial this turn. /n /n')
                 else:
@@ -1907,14 +1910,14 @@ class hire_african_workers_button(button):
             boolean: Returns same as superclass if a village/slum with available workers is displayed, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.global_manager.get('displayed_tile') == 'none':
+            if status.displayed_tile:
                 if self.hire_source_type == 'village':
-                    attached_village = self.global_manager.get('displayed_tile').cell.get_building('village')
+                    attached_village = status.displayed_tile.cell.get_building('village')
                     if not attached_village == 'none':
                         if attached_village.can_recruit_worker():
                             return(True)
                 elif self.hire_source_type == 'slums':
-                    attached_slums = self.global_manager.get('displayed_tile').cell.contained_buildings['slums']
+                    attached_slums = status.displayed_tile.cell.contained_buildings['slums']
                     if not attached_slums == 'none':
                         return(True)
         return(False)
@@ -1971,10 +1974,9 @@ class buy_slaves_button(button):
             boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.global_manager.get('displayed_tile') == 'none':
-                if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
-                    if self.global_manager.get('slave_traders_strength') > 0:
-                        return(True)
+            if status.displayed_tile and status.displayed_tile.cell.grid == self.global_manager.get('slave_traders_grid'):
+                if self.global_manager.get('slave_traders_strength') > 0:
+                    return(True)
         return(False)
 
     def on_click(self):
@@ -2034,7 +2036,7 @@ class automatic_route_button(button):
             boolean: Returns whether this button should be drawn
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            attached_mob = self.global_manager.get('displayed_mob')
+            attached_mob = status.displayed_mob
             if attached_mob.inventory_capacity > 0 and (not (attached_mob.is_group and attached_mob.can_trade)) and (not (attached_mob.is_vehicle and attached_mob.crew == 'none')):
                 if self.button_type in ['clear automatic route', 'follow automatic route']:
                     if len(attached_mob.base_automatic_route) > 0:
@@ -2054,7 +2056,7 @@ class automatic_route_button(button):
         Output:
             None
         '''
-        attached_mob = self.global_manager.get('displayed_mob')
+        attached_mob = status.displayed_mob
         if main_loop_utility.action_possible(self.global_manager):
             if self.global_manager.get('strategic_map_grid') in attached_mob.grids:
                 if self.button_type == 'clear automatic route':

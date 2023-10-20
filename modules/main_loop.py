@@ -4,6 +4,7 @@ import time
 import pygame
 from .util import main_loop_utility, utility, text_utility, turn_management_utility, actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def main_loop(global_manager):
     '''
@@ -15,7 +16,7 @@ def main_loop(global_manager):
         None
     '''
     while not global_manager.get('crashed'):
-        if global_manager.get('displayed_notification') == 'none':
+        if status.displayed_notification == None:
             stopping = False
         constants.input_manager.update_input()
         for event in pygame.event.get():

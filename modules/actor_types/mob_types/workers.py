@@ -57,7 +57,7 @@ class worker(pmob):
         self.update_image_bundle()
         if not from_save:
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
         self.global_manager.get('money_label').check_for_updates()
@@ -197,7 +197,7 @@ class worker(pmob):
         self.remove_from_turn_queue()
         vehicle.add_to_turn_queue()
         if not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             vehicle.select()
 
     def uncrew_vehicle(self, vehicle):
@@ -220,7 +220,7 @@ class worker(pmob):
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
         vehicle.remove_from_turn_queue()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
         vehicle.select()
         self.add_to_turn_queue()
         self.update_image_bundle()

@@ -4,6 +4,7 @@ import random
 from . import action
 from ..util import action_utility, text_utility, actor_utility, dice_utility, utility, turn_management_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class combat(action.action):
     '''
@@ -54,7 +55,7 @@ class combat(action.action):
             None
         '''
         message = []
-        final_movement_cost = self.global_manager.get('displayed_mob').get_movement_cost(tooltip_info_dict['x_change'], tooltip_info_dict['y_change'])
+        final_movement_cost = status.displayed_mob.get_movement_cost(tooltip_info_dict['x_change'], tooltip_info_dict['y_change'])
         message.append('Attacking an enemy unit costs 5 money and requires only 1 movement point, but staying in the enemy\'s tile afterward would require the usual movement')
         text = 'Staying afterward would cost ' + str(final_movement_cost - 1) + ' more movement point' + utility.generate_plural(final_movement_cost - 1) + ' because the adjacent tile has ' + tooltip_info_dict['adjacent_cell'].terrain + ' terrain '
         if tooltip_info_dict['local_cell'].has_walking_connection(tooltip_info_dict['adjacent_cell']):

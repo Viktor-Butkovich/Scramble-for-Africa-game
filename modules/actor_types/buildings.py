@@ -5,6 +5,7 @@ import random
 from .actors import actor
 from ..util import utility, scaling, actor_utility, text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class building(actor):
     '''
@@ -358,7 +359,7 @@ class infrastructure_building(building):
             down_cell = self.grids[0].find_cell(self.x, self.y - 1)
             left_cell = self.grids[0].find_cell(self.x - 1, self.y)
             right_cell = self.grids[0].find_cell(self.x + 1, self.y)
-            if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')):
+            if (not (up_cell == None or down_cell == None)) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')):
                 self.connected_cells = [up_cell, down_cell]
                 if self.is_road:
                     self.image_dict['default'] = self.connection_image_dict['vertical_road_bridge']
@@ -412,7 +413,7 @@ class infrastructure_building(building):
         if self.cell.terrain != 'water':
             for direction in ['up', 'down', 'left', 'right']:
                 adjacent_cell = self.cell.adjacent_cells[direction]
-                if adjacent_cell != 'none':
+                if adjacent_cell:
                     own_tile_infrastructure = self.cell.get_intact_building('infrastructure')
                     adjacent_cell_infrastructure = adjacent_cell.get_intact_building('infrastructure')
                     if adjacent_cell_infrastructure != 'none':
@@ -896,7 +897,7 @@ class slums(building):
             'large': 'buildings/slums/large.png'
         }
         super().__init__(from_save, input_dict, global_manager)
-        if self.cell.tile == self.global_manager.get('displayed_tile'):
+        if self.cell.tile == status.displayed_tile:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile) #show self after creation
 
     def get_image_id_list(self, override_values={}):
@@ -956,7 +957,7 @@ class slums(building):
         if self.available_workers < 0:
             self.available_workers = 0
         self.cell.tile.update_image_bundle()
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed population value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
         if self.available_workers == 0:
             self.remove_complete()

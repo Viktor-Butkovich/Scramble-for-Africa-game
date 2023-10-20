@@ -5,6 +5,7 @@ import random
 from . import action
 from ..util import action_utility, text_utility, actor_utility, market_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class suppress_slave_trade(action.action):
     '''
@@ -127,7 +128,7 @@ class suppress_slave_trade(action.action):
             boolean: Returns whether a button linked to this action should be drawn
         '''
         return(super().can_show() and 
-               self.global_manager.get('displayed_mob').is_battalion
+               status.displayed_mob.is_battalion
         )
 
     def on_click(self, unit):
@@ -210,4 +211,4 @@ class suppress_slave_trade(action.action):
         super().complete()
 
         if self.global_manager.get('slave_traders_strength') <= 0:
-            self.global_manager.get('displayed_tile').select() #sets music to switch from slave traders music
+            status.displayed_tile.select() #sets music to switch from slave traders music

@@ -79,7 +79,7 @@ class battalion(group):
         else:
             adjacent_cell = local_cell.adjacent_cells[direction]
             
-        if not adjacent_cell == 'none':
+        if adjacent_cell:
             if (not post_attack) and self.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking non-beast
                 cost = 1
             elif (not post_attack) and self.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none': #if safari attacking beast

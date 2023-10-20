@@ -4,6 +4,7 @@ import random
 import os
 from ..util import tutorial_utility, utility, actor_utility, minister_utility, main_loop_utility, scaling
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class minister():
     '''
@@ -553,7 +554,7 @@ class minister():
                 current_minister_type_image.calibrate(self)
             elif current_minister_type_image.minister_type == old_position:
                 current_minister_type_image.calibrate('none')
-        if self.global_manager.get('displayed_minister') == self:
+        if status.displayed_minister == self:
             minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
 
         minister_utility.update_available_minister_display(self.global_manager)
@@ -605,7 +606,7 @@ class minister():
             self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
             if not (constants.creating_new_game or self.initializing):
                 self.update_tooltip()
-            if self.global_manager.get('displayed_minister') == self:
+            if status.displayed_minister == self:
                 minister_utility.calibrate_minister_info_display(self.global_manager, self)
 
     def voice_setup(self, from_save=False):
@@ -690,7 +691,7 @@ class minister():
             self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
             if not (constants.creating_new_game or self.initializing):
                 self.update_tooltip()
-            if self.global_manager.get('displayed_minister') == self:
+            if status.displayed_minister == self:
                 minister_utility.calibrate_minister_info_display(self.global_manager, self)
 
     def get_average_apparent_skill(self):

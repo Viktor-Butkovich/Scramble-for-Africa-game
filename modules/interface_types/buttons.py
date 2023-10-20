@@ -135,14 +135,14 @@ class button(interface_elements.interface_element):
                 
             tooltip_text = []
 
-            current_mob = self.global_manager.get('displayed_mob')
-            if current_mob != 'none':
+            current_mob = status.displayed_mob
+            if current_mob:
                 movement_cost = current_mob.get_movement_cost(x_change, y_change)
                 local_cell = current_mob.images[0].current_cell
                 adjacent_cell = local_cell.adjacent_cells[non_cardinal_direction]
                 local_infrastructure = local_cell.get_intact_building('infrastructure')
                 
-                if not adjacent_cell == 'none':
+                if adjacent_cell:
                     passed = False
                     if (current_mob.can_walk and not adjacent_cell.terrain == 'water') or local_cell.has_walking_connection(adjacent_cell): #if walking unit moving onto land or along bridge
                         passed = True
@@ -254,7 +254,7 @@ class button(interface_elements.interface_element):
                               'Press this when instructions are opened to close them'])
 
         elif self.button_type == 'merge':
-            if self.global_manager.get('displayed_mob') != 'none' and self.global_manager.get('displayed_mob').is_officer and self.global_manager.get('displayed_mob').officer_type == 'evangelist':
+            if status.displayed_mob and status.displayed_mob.is_officer and status.displayed_mob.officer_type == 'evangelist':
                 self.set_tooltip(['Merges this evangelist with church volunteers in the same tile to form a group of missionaries',
                                   'Requires that an evangelist is selected in the same tile as church volunteers'])
             else:
@@ -357,7 +357,7 @@ class button(interface_elements.interface_element):
             tooltip_text = ['Cycles through this ' + self.vehicle_type + '\'s passengers']
             tooltip_text.append('Passengers: ' )
             if self.showing:
-                for current_passenger in self.global_manager.get('displayed_mob').contained_mobs:
+                for current_passenger in status.displayed_mob.contained_mobs:
                     tooltip_text.append('    ' + current_passenger.name)
             self.set_tooltip(tooltip_text)
             
@@ -365,7 +365,7 @@ class button(interface_elements.interface_element):
             tooltip_text = ['Cycles through this  building\'s work crews']
             tooltip_text.append('Work crews: ' )
             if self.showing:
-                for current_work_crew in self.global_manager.get('displayed_tile').cell.get_building('resource').contained_work_crews:
+                for current_work_crew in status.displayed_tile.cell.get_building('resource').contained_work_crews:
                     tooltip_text.append('    ' + current_work_crew.name)
             self.set_tooltip(tooltip_text)
             
@@ -373,13 +373,13 @@ class button(interface_elements.interface_element):
             tooltip_text = ['Cycles through this tile\'s units']
             tooltip_text.append('Units: ' )
             if self.showing:
-                for current_mob in self.global_manager.get('displayed_tile').cell.contained_mobs:
+                for current_mob in status.displayed_tile.cell.contained_mobs:
                     tooltip_text.append('    ' + current_mob.name)
             self.set_tooltip(tooltip_text)
             
         elif self.button_type == 'build train':
             actor_utility.update_descriptions(self.global_manager, 'train')
-            cost = actor_utility.get_building_cost(self.global_manager, self.global_manager.get('displayed_mob'), 'train')
+            cost = actor_utility.get_building_cost(self.global_manager, status.displayed_mob, 'train')
             self.set_tooltip(['Orders parts for and attempts to assemble a train in this unit\'s tile for ' + str(cost) + ' money',
                               'Can only be assembled on a train station',
                               'Costs all remaining movement points, at least 1',
@@ -387,7 +387,7 @@ class button(interface_elements.interface_element):
             
         elif self.button_type == 'build steamboat':
             actor_utility.update_descriptions(self.global_manager, 'steamboat')
-            cost = actor_utility.get_building_cost(self.global_manager, self.global_manager.get('displayed_mob'), 'train')
+            cost = actor_utility.get_building_cost(self.global_manager, status.displayed_mob, 'train')
             self.set_tooltip(['Orders parts for and attempts to assemble a steamboat in this unit\'s tile for ' + str(cost) + ' money',
                               'Can only be assembled on a port',
                               'Costs all remaining movement points, at least 1',
@@ -468,8 +468,8 @@ class button(interface_elements.interface_element):
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
         elif self.button_type == 'active investigation':
-            if self.global_manager.get('displayed_minister') !=  'none':
-                self.set_tooltip(['Orders your Prosecutor to conduct an active investigation against ' + self.global_manager.get('displayed_minister').name + ' for ' + str(constants.action_prices['active_investigation']) + ' money'])
+            if status.displayed_minister:
+                self.set_tooltip(['Orders your Prosecutor to conduct an active investigation against ' + status.displayed_minister.name + ' for ' + str(constants.action_prices['active_investigation']) + ' money'])
 
         elif self.button_type == 'launch trial':
             self.set_tooltip(['Tries the defending minister in an attempt to remove him from office and imprison him for corruption',
@@ -801,8 +801,8 @@ class button(interface_elements.interface_element):
                 y_change = -1
             if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
-                    current_mob = self.global_manager.get('displayed_mob')
-                    if current_mob != 'none':
+                    current_mob = status.displayed_mob
+                    if current_mob:
                         if self.global_manager.get('current_game_mode') == 'strategic':
                             if current_mob.can_move(x_change, y_change):
                                 current_mob.move(x_change, y_change)
@@ -861,7 +861,7 @@ class button(interface_elements.interface_element):
                             if progressed:
                                 moved_units[unit_type] += 1
                             current_pmob.remove_from_turn_queue()
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), status.displayed_mob) #updates mob info display if automatic route changed anything
 
                     types_moved = 0
                     text = ''
@@ -912,13 +912,13 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
             if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
-                    displayed_mob = self.global_manager.get('displayed_mob')
-                    displayed_tile = self.global_manager.get('displayed_tile')
+                    displayed_mob = status.displayed_mob
+                    displayed_tile = status.displayed_tile
                     commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
                     num_commodity = 1
                     if self.button_type == 'drop all commodity':
                         num_commodity = displayed_mob.get_inventory(commodity)
-                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                    if displayed_mob and displayed_tile:
                         if displayed_mob in displayed_tile.cell.contained_mobs:
                             can_drop_off = True
                             if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
@@ -942,13 +942,13 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
             if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
-                    displayed_mob = self.global_manager.get('displayed_mob')
-                    displayed_tile = self.global_manager.get('displayed_tile')
+                    displayed_mob = status.displayed_mob
+                    displayed_tile = status.displayed_tile
                     commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
                     num_commodity = 1
                     if self.button_type == 'pick up all commodity':
                         num_commodity = displayed_tile.get_inventory(commodity)
-                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                    if displayed_mob and displayed_tile:
                         if displayed_mob in displayed_tile.cell.contained_mobs:
                             if displayed_mob.can_hold_commodities:
                                 can_pick_up = True
@@ -1042,8 +1042,8 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'new game':
             if self.global_manager.get('current_game_mode') == 'new_game_setup':
-                if not self.global_manager.get('displayed_country') == 'none':
-                    constants.save_load_manager.new_game(self.global_manager.get('displayed_country'))
+                if status.displayed_country:
+                    constants.save_load_manager.new_game(status.displayed_country)
                 else:
                     text_utility.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
             else:
@@ -1062,11 +1062,11 @@ class button(interface_elements.interface_element):
             constants.save_load_manager.load_game('save1.pickle')
 
         elif self.button_type == 'fire':
-            fired_unit = self.global_manager.get('displayed_mob')
+            fired_unit = status.displayed_mob
             fired_unit.fire()
 
         elif self.button_type == 'free':
-            displayed_mob = self.global_manager.get('displayed_mob')
+            displayed_mob = status.displayed_mob
             if displayed_mob.is_group:
                 displayed_mob.replace_worker('African')
             elif displayed_mob.is_worker:
@@ -1125,7 +1125,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'launch trial':
             if main_loop_utility.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= constants.action_prices['trial']:
-                    if self.global_manager.get('displayed_defense').corruption_evidence > 0:
+                    if status.displayed_defense.corruption_evidence > 0:
                         trial_utility.start_trial(self.global_manager)
                     else:
                         text_utility.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.', self.global_manager)
@@ -1146,12 +1146,12 @@ class button(interface_elements.interface_element):
                 for current_pmob in self.global_manager.get('pmob_list'):
                     if current_pmob.sentry_mode:
                         current_pmob.set_sentry_mode(False)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob'))
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), status.displayed_mob)
             else:
                 text_utility.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
         elif self.button_type == 'confirm remove minister':
-            removed_minister = self.global_manager.get('displayed_minister')
+            removed_minister = status.displayed_minister
             removed_minister.just_removed = True
             removed_minister.appoint('none')
             public_opinion_penalty = removed_minister.status_number
@@ -1246,7 +1246,7 @@ class button(interface_elements.interface_element):
 
         if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
-                if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
+                if status.displayed_mob == None or (not status.displayed_mob.is_pmob):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
                 if status.europe_grid in self.attached_label.actor.grids and self.attached_label.current_commodity != 'consumer goods':
@@ -1359,7 +1359,7 @@ class cycle_same_tile_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            cycled_tile = self.global_manager.get('displayed_tile')
+            cycled_tile = status.displayed_tile
             moved_mob = cycled_tile.cell.contained_mobs.pop(0)
             cycled_tile.cell.contained_mobs.append(moved_mob)
             cycled_tile.cell.contained_mobs[0].select()
@@ -1380,9 +1380,8 @@ class cycle_same_tile_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            displayed_tile = self.global_manager.get('displayed_tile')
-            if not displayed_tile == 'none':
-                if len(displayed_tile.cell.contained_mobs) >= 4:
+            displayed_tile = status.displayed_tile
+            if displayed_tile and len(displayed_tile.cell.contained_mobs) >= 4:
                     return(True)
         return(False)
 
@@ -1466,7 +1465,7 @@ class same_tile_icon(button):
             boolean: Returns False if there is no tile selected or if the selected tile has not been explored, otherwise returns same as superclass
         '''
         self.update()
-        return(self.global_manager.get('displayed_tile') != 'none' and self.global_manager.get('displayed_tile').cell.visible
+        return(status.displayed_tile and status.displayed_tile.cell.visible
                and len(self.old_contained_mobs) > self.index and super().can_show())
 
     def can_show_tooltip(self):
@@ -1489,9 +1488,9 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if (self.global_manager.get('displayed_tile') != 'none' and self.global_manager.get('displayed_tile').cell.visible and super().can_show()):
-            displayed_tile = self.global_manager.get('displayed_tile')
-            if displayed_tile != 'none':
+        if (status.displayed_tile and status.displayed_tile.cell.visible and super().can_show()):
+            displayed_tile = status.displayed_tile
+            if displayed_tile:
                 new_contained_mobs = displayed_tile.cell.contained_mobs
                 if (new_contained_mobs != self.old_contained_mobs) or self.resetting:
                     self.resetting = False
@@ -1523,8 +1522,8 @@ class same_tile_icon(button):
             None
         '''
         if self.showing:
-            if self.index == 0 and self.global_manager.get('displayed_tile') != 'none':
-                if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
+            if self.index == 0 and status.displayed_tile:
+                if status.displayed_tile.cell.contained_mobs[0].selected:
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
                 else:
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.outline)
@@ -1619,11 +1618,10 @@ class fire_unit_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.attached_mob == self.global_manager.get('displayed_mob'):
-                self.attached_mob = self.global_manager.get('displayed_mob')
-            if not self.attached_mob == 'none':
-                if self.attached_mob.is_pmob:
-                    return(True)
+            if self.attached_mob != status.displayed_mob:
+                self.attached_mob = status.displayed_mob
+            if self.attached_mob and self.attached_mob.is_pmob:
+                return(True)
         return(False)
 
     def update_tooltip(self):
@@ -1702,9 +1700,9 @@ class free_unit_slaves_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.attached_mob == self.global_manager.get('displayed_mob'):
-                self.attached_mob = self.global_manager.get('displayed_mob')
-            if not self.attached_mob == 'none':
+            if not self.attached_mob == status.displayed_mob:
+                self.attached_mob = status.displayed_mob
+            if self.attached_mob:
                 if self.attached_mob.is_pmob:
                     if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
                         return(True)
@@ -1772,7 +1770,7 @@ class switch_game_mode_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             if self.to_mode == 'ministers' and 'trial' in self.modes:
-                defense = self.global_manager.get('displayed_defense')
+                defense = status.displayed_defense
                 if defense.fabricated_evidence > 0:
                     text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
                     text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
@@ -1890,7 +1888,7 @@ class minister_portrait_image(button):
             showing = True
             if not self.current_minister == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
-                if self.global_manager.get('displayed_minister') == self.current_minister and constants.show_selection_outlines: 
+                if status.displayed_minister == self.current_minister and constants.show_selection_outlines: 
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
         super().draw()
         if showing and self.warning_image.showing:
@@ -1996,7 +1994,7 @@ class country_selection_image(button):
         if self.showing: #draw outline around portrait if country selected
             if not self.current_country == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
-                if self.global_manager.get('displayed_country') == self.current_country and constants.show_selection_outlines: 
+                if status.displayed_country == self.current_country and constants.show_selection_outlines: 
                     pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
         super().draw()
 
@@ -2167,7 +2165,7 @@ class commodity_button(button):
                         can_advertise = True
                         break
                 if can_advertise:
-                    self.global_manager.get('actions')['advertising_campaign'].start(self.global_manager.get('displayed_mob'), self.commodity)
+                    self.global_manager.get('actions')['advertising_campaign'].start(status.displayed_mob, self.commodity)
                 else:
                     text_utility.print_to_screen('You cannot advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
 
@@ -2480,13 +2478,13 @@ class cycle_autofill_button(button):
             boolean: Returns True if this button can appear, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if self.parent_collection.autofill_actors[self.autofill_target_type] != self.global_manager.get('displayed_mob'):
+            if self.parent_collection.autofill_actors[self.autofill_target_type] != status.displayed_mob:
                 if self.parent_collection.autofill_actors[self.autofill_target_type] != 'none':
                     if not self.parent_collection.autofill_actors[self.autofill_target_type].is_dummy:
                         if self.autofill_target_type == 'worker':
-                            return(self.global_manager.get('displayed_mob').images[0].current_cell.has_worker(required_number=2))
+                            return(status.displayed_mob.images[0].current_cell.has_worker(required_number=2))
                         elif self.autofill_target_type == 'officer':
-                            return(self.global_manager.get('displayed_mob').images[0].current_cell.has_officer(required_number=2))
+                            return(status.displayed_mob.images[0].current_cell.has_officer(required_number=2))
                         #allow cycling autofill if current autofill is a real, non-selected mob and there is at least 1 alternative
                         #it makes no sense to cycle a dummy mob for a real one in the same tile, and the selected mob is locked and can't be cycled
         return(False)
@@ -2501,9 +2499,9 @@ class cycle_autofill_button(button):
         Output:
             None
         '''
-        current_cell =  self.global_manager.get('displayed_mob').images[0].current_cell
+        current_cell =  status.displayed_mob.images[0].current_cell
         self.parent_collection.search_start_index = current_cell.contained_mobs.index(self.parent_collection.autofill_actors[self.autofill_target_type]) + 1
-        self.parent_collection.calibrate(self.global_manager.get('displayed_mob'))
+        self.parent_collection.calibrate(status.displayed_mob)
         #start autofill search for corresponding target type at index right after the current target actor
 
 
@@ -2571,7 +2569,7 @@ class action_button(button):
         Output:
             None
         '''
-        self.corresponding_action.on_click(self.global_manager.get('displayed_mob'))
+        self.corresponding_action.on_click(status.displayed_mob)
 
 class anonymous_button(button):
     '''

@@ -1,5 +1,6 @@
 from ...util import scaling, text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class notification_manager_template():
     '''
@@ -119,7 +120,7 @@ class notification_manager_template():
             None
         '''
         valid_transfer = False
-        if self.global_manager.get('displayed_notification') == 'none':
+        if status.displayed_notification == None:
             if self.notification_queue:
                 if transferred_interface_elements and (self.notification_queue[0].get('notification_type', 'none') in ['action', 'roll'] or 'choices' in self.notification_queue[0]):
                     valid_transfer = True
@@ -143,7 +144,7 @@ class notification_manager_template():
             None
         '''
         self.lock = new_lock
-        if (not new_lock) and self.global_manager.get('displayed_notification') == 'none':
+        if (not new_lock) and status.displayed_notification == None:
             self.handle_next_notification()
 
     def display_notification(self, input_dict, insert_index=None): #default, exploration, or roll
@@ -156,7 +157,7 @@ class notification_manager_template():
         Output:
             None
         '''
-        if self.locked or self.notification_queue or self.global_manager.get('displayed_notification') != 'none':
+        if self.locked or self.notification_queue or status.displayed_notification:
             if insert_index != None:
                 self.notification_queue.insert(insert_index, input_dict)
             else:

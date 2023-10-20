@@ -238,12 +238,12 @@ class grid(interface_elements.interface_element):
             int x: x coordinate for the grid location of the requested cell
             int y: y coordinate for the grid location of the requested cell
         Output:
-            string/cell: Returns this grid's cell that occupies the inputted coordinates, or 'none' if there are no cells at the inputted coordinates
+            None/cell: Returns this grid's cell that occupies the inputted coordinates, or None if there are no cells at the inputted coordinates
         '''
         if x >= 0 and x < self.coordinate_width and y >= 0 and y < self.coordinate_height:
             return(self.cell_list[x][y])
         else:
-            return('none')
+            return(None)
 
     def choose_cell(self, requirements_dict):
         '''

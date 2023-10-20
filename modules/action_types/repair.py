@@ -3,6 +3,7 @@
 from . import action
 from ..util import actor_utility, action_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class repair(action.action):
     '''
@@ -76,8 +77,8 @@ class repair(action.action):
             None
         '''
         message = []
-        unit = self.global_manager.get('displayed_mob') 
-        if unit != 'none':
+        unit = status.displayed_mob 
+        if unit != None:
             self.current_building = unit.images[0].current_cell.get_building(self.building_type)
             message.append('Attempts to repair this tile\'s ' + self.current_building.name + ' for ' + str(self.get_price()) + ' money')
             if self.building_type in ['port', 'train_station', 'resource']:
@@ -121,7 +122,7 @@ class repair(action.action):
         '''
         building = self.current_building
         if building == 'none':
-            building = self.global_manager.get('displayed_mob').images[0].current_cell.get_building(self.building_type)
+            building = status.displayed_mob.images[0].current_cell.get_building(self.building_type)
         return(building.get_repair_cost())
 
     def can_show(self):
@@ -133,7 +134,7 @@ class repair(action.action):
         Output:
             boolean: Returns whether a button linked to this action should be drawn
         '''
-        unit = self.global_manager.get('displayed_mob')
+        unit = status.displayed_mob
         building = unit.images[0].current_cell.get_building(self.building_type)
         can_show = (super().can_show() and unit.is_group and getattr(unit, self.requirement)
                         and building != 'none' and building.damaged)

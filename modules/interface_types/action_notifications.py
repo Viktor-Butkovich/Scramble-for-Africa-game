@@ -3,6 +3,7 @@
 from .notifications import notification
 from ..util import scaling, actor_utility, trial_utility, action_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class action_notification(notification):
     def __init__(self, input_dict, global_manager):
@@ -142,7 +143,7 @@ class dice_rolling_notification(action_notification):
         '''
         super().__init__(input_dict, global_manager)
         if self.global_manager.get('ongoing_action_type') in ['combat', 'slave_capture']:
-            if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
+            if status.displayed_mob.is_pmob and (status.displayed_mob.is_battalion or status.displayed_mob.is_safari):
                 constants.sound_manager.play_sound('gunfire')
 
     def update_tooltip(self):
@@ -229,7 +230,7 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        self.current_expedition = global_manager.get('displayed_mob')
+        self.current_expedition = status.displayed_mob
         self.notification_images = []
         
         explored_cell = self.current_expedition.destination_cells.pop(0)
@@ -297,7 +298,7 @@ class off_tile_exploration_notification(action_notification):
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         else:
-            current_expedition = self.global_manager.get('displayed_mob')
+            current_expedition = status.displayed_mob
             self.global_manager.get('minimap_grid').calibrate(current_expedition.x, current_expedition.y)
         for current_image in self.notification_images:
             current_image.remove_complete()

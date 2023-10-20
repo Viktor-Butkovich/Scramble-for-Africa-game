@@ -164,8 +164,8 @@ class advertising_campaign(action.campaign):
             boolean: Returns whether a button linked to this action should be drawn
         '''
         return(super().can_show() and 
-               self.global_manager.get('displayed_mob').is_officer and
-               self.global_manager.get('displayed_mob').officer_type == 'merchant'
+               status.displayed_mob.is_officer and
+               status.displayed_mob.officer_type == 'merchant'
         )
 
     def on_click(self, unit):

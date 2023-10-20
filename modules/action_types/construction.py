@@ -4,6 +4,7 @@ import pygame
 from . import action
 from ..util import action_utility, utility, actor_utility, text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class construction(action.action):
     '''
@@ -112,16 +113,15 @@ class construction(action.action):
         if self.building_type in ['train_station', 'port', 'resource']:
             message.append('Also upgrades this tile\'s warehouses by 9 inventory capacity, or creates new warehouses if none are present')
         
-        unit = self.global_manager.get('displayed_mob') 
-        base_cost = actor_utility.get_building_cost(self.global_manager, 'none', self.building_type, self.building_name)
-        cost = actor_utility.get_building_cost(self.global_manager, unit, self.building_type, self.building_name)
+        base_cost = actor_utility.get_building_cost(self.global_manager, None, self.building_type, self.building_name)
+        cost = actor_utility.get_building_cost(self.global_manager, status.displayed_mob, self.building_type, self.building_name)
         
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
         if self.building_type in ['train', 'steamboat']:
             message.append('Unlike buildings, the cost of vehicle assembly is not impacted by local terrain')
 
-        if unit != 'none' and self.global_manager.get('strategic_map_grid') in unit.grids:
-            terrain = unit.images[0].current_cell.terrain
+        if status.displayed_mob and self.global_manager.get('strategic_map_grid') in status.displayed_mob.grids:
+            terrain = status.displayed_mob.images[0].current_cell.terrain
             message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
         return(message)
 
@@ -200,10 +200,9 @@ class construction(action.action):
         Output:
             boolean: Returns whether a button linked to this action should be drawn
         '''
-        unit = self.global_manager.get('displayed_mob')
-        can_show = (super().can_show() and unit.is_group and getattr(unit, self.requirement))
+        can_show = (super().can_show() and status.displayed_mob.is_group and getattr(status.displayed_mob, self.requirement))
         if can_show and not self.building_type in ['train', 'steamboat']:
-            can_show = (self.building_type == 'infrastructure') or (not unit.images[0].current_cell.has_building(self.building_type))
+            can_show = (self.building_type == 'infrastructure') or (not status.displayed_mob.images[0].current_cell.has_building(self.building_type))
         if can_show:
             self.update_info()
         return(can_show)
@@ -218,7 +217,7 @@ class construction(action.action):
             None
         '''
         if self.building_type == 'resource':
-            cell = self.global_manager.get('displayed_mob').images[0].current_cell
+            cell = status.displayed_mob.images[0].current_cell
             if cell.resource != self.attached_resource:
                 if cell.resource in self.global_manager.get('collectable_resources'): #if not natives or none
                     self.attached_resource = cell.resource
@@ -234,7 +233,7 @@ class construction(action.action):
                 self.button.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
 
         elif self.building_type == 'infrastructure':
-            cell = self.global_manager.get('displayed_mob').images[0].current_cell
+            cell = status.displayed_mob.images[0].current_cell
             if not cell.has_building('infrastructure'):
                 if cell.terrain == 'water' and cell.y > 0:
                     new_name = 'road bridge'
@@ -291,10 +290,10 @@ class construction(action.action):
                     down_cell = current_cell.grid.find_cell(current_cell.x, current_cell.y - 1)
                     left_cell = current_cell.grid.find_cell(current_cell.x - 1, current_cell.y)
                     right_cell = current_cell.grid.find_cell(current_cell.x + 1, current_cell.y)
-                    if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')): #if vertical bridge
+                    if (not (up_cell == None or down_cell == None)) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')): #if vertical bridge
                         if up_cell.visible and down_cell.visible:
                             return_value = True
-                    elif (not (left_cell == 'none' or right_cell == 'none')) and (not (left_cell.terrain == 'water' or right_cell.terrain == 'water')): #if horizontal bridge
+                    elif (not (left_cell == None or right_cell == None)) and (not (left_cell.terrain == 'water' or right_cell.terrain == 'water')): #if horizontal bridge
                         if left_cell.visible and right_cell.visible:
                             return_value = True
                 if not return_value:

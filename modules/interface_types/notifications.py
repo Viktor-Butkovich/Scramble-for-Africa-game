@@ -4,6 +4,7 @@ import time
 from .labels import multi_line_label
 from ..util import actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class notification(multi_line_label):
     '''
@@ -29,7 +30,7 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        global_manager.set('displayed_notification', self)
+        status.displayed_notification = self
         super().__init__(input_dict, global_manager)
         self.in_notification = True
         self.is_action_notification = False
@@ -88,8 +89,8 @@ class notification(multi_line_label):
             None
         '''
         super().remove()
-        if self.global_manager.get('displayed_notification') == self:
-            self.global_manager.set('displayed_notification', 'none')
+        if status.displayed_notification == self:
+            status.displayed_notification = None
         if self.on_remove:
             self.on_remove()
 

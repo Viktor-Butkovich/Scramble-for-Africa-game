@@ -61,7 +61,7 @@ class native_warriors(npmob):
             possible_directions = [] #only directions that can be retreated in
             for direction in available_directions:
                 cell = self.images[0].current_cell.grid.find_cell(self.x - direction[0], self.y - direction[1])
-                if not cell == 'none':
+                if cell:
                     if not cell.has_pmob() and not cell.y == 0: #can't retreat to ocean or into player units
                         possible_directions.append(direction)
             if len(possible_directions) > 0:

@@ -5,6 +5,7 @@ import random
 from ..mobs import mob
 from ...util import text_utility, utility, actor_utility, minister_utility, game_transitions
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class pmob(mob):
     '''
@@ -69,7 +70,7 @@ class pmob(mob):
             actor_utility.deselect_all(self.global_manager)
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
                 self.select()
         self.attached_cell_icon_list = []
 
@@ -151,7 +152,7 @@ class pmob(mob):
         '''
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
-        if self == self.global_manager.get('displayed_mob'):
+        if self == status.displayed_mob:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def calculate_automatic_route(self):
@@ -280,7 +281,7 @@ class pmob(mob):
         '''
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
-        if self == self.global_manager.get('displayed_mob'):
+        if self == status.displayed_mob:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def selection_sound(self):
@@ -318,10 +319,10 @@ class pmob(mob):
             text_utility.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
             return()
         self.automatically_replace = new_value
-        displayed_mob = self.global_manager.get('displayed_mob')
+        displayed_mob = status.displayed_mob
         if self == displayed_mob:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
-        elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
+        elif displayed_mob and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
 
     def get_image_id_list(self, override_values={}):
@@ -356,12 +357,12 @@ class pmob(mob):
             self.update_image_bundle()
             if new_value == True:
                 self.remove_from_turn_queue()
-                if self.global_manager.get('displayed_mob') == self:
+                if status.displayed_mob == self:
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with sentry icon
             else:
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
-            if self == self.global_manager.get('displayed_mob'):
+            if self == status.displayed_mob:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def add_to_turn_queue(self):
@@ -612,7 +613,7 @@ class pmob(mob):
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] += change
-            if self.global_manager.get('displayed_mob') == self:
+            if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def set_inventory(self, commodity, new_value):
@@ -627,7 +628,7 @@ class pmob(mob):
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
-            if self.global_manager.get('displayed_mob') == self:
+            if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def fire(self):
@@ -763,7 +764,7 @@ class pmob(mob):
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             vehicle.select()
         if not self.global_manager.get('loading_save'):
             constants.sound_manager.play_sound('footsteps')
@@ -801,7 +802,7 @@ class pmob(mob):
 
         self.add_to_turn_queue()
         if focus:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             self.select()
             if self.global_manager.get('minimap_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)

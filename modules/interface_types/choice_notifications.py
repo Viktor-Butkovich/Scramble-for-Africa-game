@@ -269,13 +269,13 @@ class recruitment_choice_button(choice_button):
             constants.actor_creation_manager.create(False, input_dict, self.global_manager)
 
         elif self.recruitment_type == 'African worker village':
-            self.global_manager.get('displayed_tile').cell.get_building('village').recruit_worker()
+            status.displayed_tile.cell.get_building('village').recruit_worker()
 
         elif self.recruitment_type == 'African worker slums':
-            self.global_manager.get('displayed_tile').cell.get_building('slums').recruit_worker()
+            status.displayed_tile.cell.get_building('slums').recruit_worker()
 
         elif self.recruitment_type == 'African worker labor broker':
-            recruiter = self.global_manager.get('displayed_mob')
+            recruiter = status.displayed_mob
             input_dict['coordinates'] = (recruiter.x, recruiter.y)
             input_dict['grids'] = recruiter.grids
             input_dict['image'] = 'mobs/African workers/default.png'
