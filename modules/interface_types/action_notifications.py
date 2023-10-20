@@ -274,7 +274,7 @@ class off_tile_exploration_notification(action_notification):
         }, global_manager))
 
         global_manager.get('public_opinion_tracker').change(public_opinion_increase)
-        global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
+        status.minimap_grid.calibrate(explored_cell.x, explored_cell.y)
         super().__init__(input_dict, global_manager)
 
     def remove(self):
@@ -299,7 +299,7 @@ class off_tile_exploration_notification(action_notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         else:
             current_expedition = status.displayed_mob
-            self.global_manager.get('minimap_grid').calibrate(current_expedition.x, current_expedition.y)
+            status.minimap_grid.calibrate(current_expedition.x, current_expedition.y)
         for current_image in self.notification_images:
             current_image.remove_complete()
         

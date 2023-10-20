@@ -121,8 +121,8 @@ class zoom_notification(notification):
         '''
         super().__init__(input_dict, global_manager)
         target = input_dict['target']
-        if self.global_manager.get('strategic_map_grid') in target.grids:
-            self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
+        if status.strategic_map_grid in target.grids:
+            status.minimap_grid.calibrate(target.x, target.y)
         if target.actor_type == 'tile':
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), target)
             if not target.cell.grid.mini_grid == 'none':

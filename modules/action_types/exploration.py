@@ -4,6 +4,7 @@ import random
 from . import action
 from ..util import action_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class exploration(action.action):
     '''
@@ -189,12 +190,12 @@ class exploration(action.action):
                 if self.current_unit.can_move(self.x_change, self.y_change): #checks for npmobs in explored tile
                     self.current_unit.move(self.x_change, self.y_change)
                 else:
-                    self.global_manager.get('minimap_grid').calibrate(self.current_unit.x, self.current_unit.y) #changes minimap to show unexplored tile without moving
+                    status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y) #changes minimap to show unexplored tile without moving
             else:
                 self.global_manager.get('notification_manager').display_notification({
                     'message': 'This unit\'s ' + str(self.initial_movement_points) + ' remaining movement points are not enough to move into the newly explored tile. /n /n',
                 })
-                self.global_manager.get('minimap_grid').calibrate(self.current_unit.x, self.current_unit.y)
+                status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y)
         self.current_unit.set_movement_points(0)
         self.current_unit.clear_attached_cell_icons()
         super().complete()

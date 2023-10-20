@@ -120,7 +120,7 @@ class construction(action.action):
         if self.building_type in ['train', 'steamboat']:
             message.append('Unlike buildings, the cost of vehicle assembly is not impacted by local terrain')
 
-        if status.displayed_mob and self.global_manager.get('strategic_map_grid') in status.displayed_mob.grids:
+        if status.displayed_mob and status.strategic_map_grid in status.displayed_mob.grids:
             terrain = status.displayed_mob.images[0].current_cell.terrain
             message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
         return(message)
@@ -331,7 +331,7 @@ class construction(action.action):
                     text_utility.print_to_screen('This tile already contains a railroad.', self.global_manager)
                 else:
                     text_utility.print_to_screen('This tile already contains a ' + self.building_type + ' building.', self.global_manager)
-            elif not self.global_manager.get('strategic_map_grid') in unit.grids:
+            elif not status.strategic_map_grid in unit.grids:
                 text_utility.print_to_screen('This building can only be built in Africa.', self.global_manager)
             elif not (current_cell.terrain != 'water' or self.building_name in ['road bridge', 'railroad bridge']):
                 text_utility.print_to_screen('This building cannot be built in water.', self.global_manager)

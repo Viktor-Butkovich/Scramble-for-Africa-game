@@ -175,13 +175,13 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             tile: tile on the corresponding tile on the grid attached to this tile's grid
         '''
-        if self.grid == self.global_manager.get('minimap_grid'):
+        if self.grid == status.minimap_grid:
             main_x, main_y = self.grid.get_main_grid_coordinates(self.x, self.y)
             attached_cell = self.grid.attached_grid.find_cell(main_x, main_y)
             if attached_cell:
                 return(attached_cell.tile)
             return('none')
-        elif self.grid == self.global_manager.get('strategic_map_grid'):
+        elif self.grid == status.strategic_map_grid:
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
             equivalent_cell = self.grid.mini_grid.find_cell(mini_x, mini_y)
             if equivalent_cell:
@@ -251,7 +251,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.set_image(override_image)
         else:
             self.set_image(self.get_image_id_list())
-        if self.grid == self.global_manager.get('strategic_map_grid'):
+        if self.grid == status.strategic_map_grid:
             equivalent_tile = self.get_equivalent_tile()
             if equivalent_tile != 'none':
                 equivalent_tile.update_image_bundle(override_image=override_image)

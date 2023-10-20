@@ -6,8 +6,10 @@ from modules.constructs.countries import country
 from modules.interface_types.notifications import notification
 
 
+strategic_map_grid:grid = None
+minimap_grid:grid = None
 europe_grid:grid = None
-#create strategic map and slave traders grids
+slave_traders_grid:grid = None
 
 displayed_mob: mob = None
 displayed_tile: tile = None

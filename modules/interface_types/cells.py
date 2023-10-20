@@ -142,7 +142,7 @@ class cell():
         Output:
             boolean: Returns whether attrition should happen here based on this cell's terrain and buildings
         '''
-        if self.grid in [status.europe_grid, self.global_manager.get('slave_traders_grid')]: #no attrition in Europe or with slave traders
+        if self.grid in [status.europe_grid, status.slave_traders_grid]: #no attrition in Europe or with slave traders
             if attrition_type == 'health':
                 return(False)
             elif attrition_type == 'inventory': #losing inventory in warehouses and such is uncommon but not impossible in Europe, but no health attrition in Europe

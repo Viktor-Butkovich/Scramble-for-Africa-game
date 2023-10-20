@@ -334,7 +334,7 @@ class expedition(group):
         if success: #if campaign succeeded
             if not location == 'none':
                 coordinates = (location.x, location.y)
-                self.destination_cells = [self.global_manager.get('strategic_map_grid').find_cell(coordinates[0], coordinates[1])]
+                self.destination_cells = [status.strategic_map_grid.find_cell(coordinates[0], coordinates[1])]
                 self.public_opinion_increases = [0]
                 location.set_revealed(True)
                 village.found_rumors = True

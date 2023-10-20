@@ -56,7 +56,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
 
     if building_type in ['train', 'steamboat']:
         cost_multiplier = 1
-    elif constructor == None or not global_manager.get('strategic_map_grid') in constructor.grids:
+    elif constructor == None or not status.strategic_map_grid in constructor.grids:
         cost_multiplier = 1
     else:
         terrain = constructor.images[0].current_cell.terrain
@@ -236,7 +236,7 @@ def spawn_beast(global_manager):
     Output:
         None
     '''
-    spawn_cell = global_manager.get('strategic_map_grid').choose_cell({
+    spawn_cell = status.strategic_map_grid.choose_cell({
         'ocean_allowed': False,
         'allowed_terrains': global_manager.get('terrain_list') + ['water'],
         'nearby_buildings_allowed': True
@@ -248,7 +248,7 @@ def spawn_beast(global_manager):
 
     constants.actor_creation_manager.create(False, {
         'coordinates': (spawn_cell.x, spawn_cell.y),
-        'grids': [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid],
+        'grids': [status.strategic_map_grid, status.strategic_map_grid.mini_grid],
         'modes': ['strategic'],
         'animal_type': animal_type,
         'adjective': random.choice(global_manager.get('animal_adjectives')),
@@ -344,7 +344,7 @@ def get_random_ocean_coordinates(global_manager):
     Output:
         int tuple: Two values representing x and y coordinates
     '''
-    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
+    start_x = random.randrange(0, status.strategic_map_grid.coordinate_width)
     start_y = 0
     return(start_x, start_y)
 
@@ -548,8 +548,8 @@ def set_slave_traders_strength(new_strength, global_manager):
     if new_strength < 0:
         new_strength = 0
     global_manager.set('slave_traders_strength', new_strength)
-    if global_manager.has('slave_traders_grid'):
-        slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0][0].tile
+    if status.slave_traders_grid != None:
+        slave_traders_tile = status.slave_traders_grid.cell_list[0][0].tile
         slave_traders_tile.update_image_bundle()
 
 def generate_unit_component_image_id(base_image, component, to_front=False):

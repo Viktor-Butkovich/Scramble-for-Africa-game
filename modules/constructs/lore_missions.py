@@ -3,6 +3,7 @@
 import random
 from ..util import utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class lore_mission():
     '''
@@ -241,7 +242,7 @@ class possible_artifact_location():
         '''
         if (not hasattr(self, 'revealed')) or new_revealed != self.revealed:
             self.revealed = new_revealed
-            host_tile = self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile
+            host_tile = status.strategic_map_grid.find_cell(self.x, self.y).tile
             if self.revealed:
                 host_tile.hosted_images.append(self)
             else:

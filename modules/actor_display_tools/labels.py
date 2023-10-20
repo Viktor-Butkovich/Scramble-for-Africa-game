@@ -5,6 +5,7 @@ import pygame
 from ..interface_types.labels import label
 from ..util import utility, scaling
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class actor_display_label(label):
     '''
@@ -808,7 +809,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'canoes' and not self.actor.has_canoes:
             return(False)
-        elif self.actor_label_type == 'slave_traders_strength' and self.actor.grid != self.global_manager.get('slave_traders_grid'):
+        elif self.actor_label_type == 'slave_traders_strength' and self.actor.grid != status.slave_traders_grid:
             return(False)
         elif self.actor_label_type == 'loyalty' and self.actor.apparent_corruption_description == 'unknown':
             return(False)

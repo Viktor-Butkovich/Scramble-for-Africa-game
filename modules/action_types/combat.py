@@ -435,8 +435,8 @@ class combat(action.action):
             self.pre_start(self.current_unit) #do action set up if defense skipped to middle stage
             if self.current_unit.sentry_mode:
                 self.current_unit.set_sentry_mode(False)
-            if self.global_manager.get('strategic_map_grid') in self.current_unit.grids:
-                self.global_manager.get('minimap_grid').calibrate(self.current_unit.x, self.current_unit.y)
+            if status.strategic_map_grid in self.current_unit.grids:
+                status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y)
                 self.current_unit.select()
                 self.current_unit.move_to_front()
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.current_unit) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications

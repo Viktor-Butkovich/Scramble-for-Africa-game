@@ -77,7 +77,7 @@ class save_load_manager_template():
         mini_grid_height = 600
         mini_grid_width = 640
 
-        self.global_manager.set('strategic_map_grid', grids.grid(False, {
+        status.strategic_map_grid = grids.grid(False, {
             'coordinates': scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25)),
             'width': scaling.scale_width(strategic_grid_width),
             'height': scaling.scale_height(strategic_grid_height),
@@ -88,9 +88,9 @@ class save_load_manager_template():
             'modes': ['strategic'],
             'strategic_grid': True,
             'grid_line_width': 2
-        }, self.global_manager))
+        }, self.global_manager)
 
-        self.global_manager.set('minimap_grid', grids.mini_grid(False, {
+        status.minimap_grid = grids.mini_grid(False, {
             'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
                 constants.default_display_height - (strategic_grid_height + mini_grid_height + 50)),
             'width': scaling.scale_width(mini_grid_width),
@@ -101,8 +101,8 @@ class save_load_manager_template():
             'external_line_color': 'bright red',
             'modes': ['strategic'],
             'grid_line_width': 3,
-            'attached_grid': self.global_manager.get('strategic_map_grid')
-        }, self.global_manager))
+            'attached_grid': status.strategic_map_grid
+        }, self.global_manager)
 
         europe_grid_x = self.global_manager.get('europe_grid_x') #constants.default_display_width - (strategic_grid_width + 340)
         europe_grid_y = self.global_manager.get('europe_grid_y') #constants.default_display_height - (strategic_grid_height + 25)
@@ -123,7 +123,7 @@ class save_load_manager_template():
         slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
         slave_traders_grid_y = constants.default_display_height - (strategic_grid_height - 120) #started at 25, -120 for europe grid y, -25 for space between
 
-        self.global_manager.set('slave_traders_grid', grids.abstract_grid(False, {
+        status.slave_traders_grid = grids.abstract_grid(False, {
             'coordinates': scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y),
             'width': scaling.scale_width(120),
             'height': scaling.scale_height(120),
@@ -133,11 +133,11 @@ class save_load_manager_template():
             'tile_image_id': 'locations/slave_traders/default.png', 
             'grid_line_width': 3,
             'name': 'Slave traders'
-        }, self.global_manager))
+        }, self.global_manager)
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager, from_save=False)
-        self.global_manager.get('minimap_grid').calibrate(2, 2)
+        status.minimap_grid.calibrate(2, 2)
 
         game_transitions.set_game_mode('ministers', self.global_manager)
 
@@ -302,7 +302,7 @@ class save_load_manager_template():
             if current_element != 'current_game_mode':
                 self.global_manager.set(current_element, new_global_manager.get(current_element))
         for current_element in self.copied_constants:
-            setattr(constants, current_element, self.copied_constants[current_element])
+            setattr(constants, current_element, saved_constants[current_element])
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
@@ -336,8 +336,7 @@ class save_load_manager_template():
                 input_dict['modes'] = ['strategic']
                 input_dict['strategic_grid'] = True
                 input_dict['grid_line_width'] = 2
-                strategic_map_grid = grids.grid(True, input_dict, self.global_manager)
-                self.global_manager.set('strategic_map_grid', strategic_map_grid)
+                status.strategic_map_grid = grids.grid(True, input_dict, self.global_manager)
                 
             elif current_grid_dict['grid_type'] in ['europe_grid', 'slave_traders_grid']:
                 input_dict['width'] = scaling.scale_width(120)
@@ -356,10 +355,9 @@ class save_load_manager_template():
                     input_dict['coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y)
                     input_dict['tile_image_id'] = 'locations/slave_traders/default.png' 
                     input_dict['name'] = 'Slave traders'
-                    slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
-                    self.global_manager.set('slave_traders_grid', slave_traders_grid)
+                    status.slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
 
-        self.global_manager.set('minimap_grid', grids.mini_grid(False, {
+        status.minimap_grid = grids.mini_grid(False, {
             'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
                 constants.default_display_height - (strategic_grid_height + mini_grid_height + 50)),
             'width': scaling.scale_width(mini_grid_width),
@@ -370,8 +368,8 @@ class save_load_manager_template():
             'external_line_color': 'bright red',
             'modes': ['strategic'],
             'grid_line_width': 3,
-            'attached_grid': strategic_map_grid
-        }, self.global_manager))
+            'attached_grid': status.strategic_map_grid
+        }, self.global_manager)
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager, from_save=True)
@@ -391,7 +389,7 @@ class save_load_manager_template():
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('commodity_prices_label').update_label()
         
-        self.global_manager.get('minimap_grid').calibrate(2, 2)
+        status.minimap_grid.calibrate(2, 2)
         if not new_global_manager.get('current_game_mode') == 'strategic':
             game_transitions.set_game_mode(new_global_manager.get('current_game_mode'), self.global_manager)
 

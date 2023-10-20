@@ -594,11 +594,11 @@ class mob(actor):
                 tooltip_list.append('This unit is currently disorganized, giving a combat penalty until its next turn')
 
         if not self.end_turn_destination == 'none':
-            if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
+            if self.end_turn_destination.cell.grid == status.strategic_map_grid:
                 tooltip_list.append('This unit has been issued an order to travel to (' + str(self.end_turn_destination.cell.x) + ', ' + str(self.end_turn_destination.cell.y) + ') in Africa at the end of the turn')
             elif self.end_turn_destination.cell.grid == status.europe_grid:
                 tooltip_list.append('This unit has been issued an order to travel to Europe at the end of the turn')
-            elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
+            elif self.end_turn_destination.cell.grid == status.slave_traders_grid:
                 tooltip_list.append('This unit has been issued an order to travel to the slave traders at the end of the turn')
                 
         if self.is_npmob and self.npmob_type == 'beast':
@@ -743,7 +743,7 @@ class mob(actor):
             current_image.remove_from_cell()
         self.x += x_change
         self.y += y_change
-        self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        status.minimap_grid.calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
 
@@ -866,7 +866,7 @@ class mob(actor):
         '''
         for current_image in self.images:
             if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
-                if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
+                if not (current_image.grid == status.minimap_grid and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
                     return(True)
         return(False)
 

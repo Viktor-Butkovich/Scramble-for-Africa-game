@@ -1289,7 +1289,7 @@ class labor_broker_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = status.displayed_mob
-            if self.global_manager.get('strategic_map_grid') in current_mob.grids:
+            if status.strategic_map_grid in current_mob.grids:
                 if current_mob.images[0].current_cell.has_intact_building('port'):
                     cost_info_list = self.get_cost()
                     if not cost_info_list == 'none':
@@ -1386,7 +1386,7 @@ class track_beasts_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = status.displayed_mob
-            if self.global_manager.get('strategic_map_grid') in current_mob.grids:
+            if status.strategic_map_grid in current_mob.grids:
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= constants.action_prices['track_beasts']:
                         if current_mob.ministers_appointed():
@@ -1442,7 +1442,7 @@ class switch_theatre_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
-                if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
+                if not (status.strategic_map_grid in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
                     if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
                         if current_mob.sentry_mode:
                             current_mob.set_sentry_mode(False)
@@ -1974,7 +1974,7 @@ class buy_slaves_button(button):
             boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if status.displayed_tile and status.displayed_tile.cell.grid == self.global_manager.get('slave_traders_grid'):
+            if status.displayed_tile and status.displayed_tile.cell.grid == status.slave_traders_grid:
                 if self.global_manager.get('slave_traders_strength') > 0:
                     return(True)
         return(False)
@@ -2058,7 +2058,7 @@ class automatic_route_button(button):
         '''
         attached_mob = status.displayed_mob
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('strategic_map_grid') in attached_mob.grids:
+            if status.strategic_map_grid in attached_mob.grids:
                 if self.button_type == 'clear automatic route':
                     attached_mob.clear_automatic_route()
                     

@@ -228,7 +228,7 @@ def main_loop(global_manager):
                         
                 elif current_enemy.npmob_type == 'native_warriors' and current_enemy.creation_turn == global_manager.get('turn'): #if unit just created
                     spawn_cell = current_enemy.grids[0].find_cell(current_enemy.x, current_enemy.y)
-                    if (global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y) == (current_enemy.x, current_enemy.y) and spawn_cell.visible: #if camera just moved to spawn location to show spawning
+                    if (status.minimap_grid.center_x, status.minimap_grid.center_y) == (current_enemy.x, current_enemy.y) and spawn_cell.visible: #if camera just moved to spawn location to show spawning
                         spawning = True
                         current_enemy.show_images()
                         current_enemy.select()
@@ -237,7 +237,7 @@ def main_loop(global_manager):
                     else: #if camera did not move to spawn location
                         spawning = True
                         if spawn_cell.visible: #if spawn location visible but camera hasn't moved there yet, move camera there
-                            global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                            status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                         else: #if spawn location not visible, end turn
                             current_enemy.show_images()
                             current_enemy.turn_done = True 
@@ -255,9 +255,9 @@ def main_loop(global_manager):
                         if current_enemy.visible():
                             if not current_enemy.selected:
                                 current_enemy.select()
-                                global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                                status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                             else:
-                                global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                                status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                         else:
                             actor_utility.deselect_all(global_manager)
                     else:
@@ -274,7 +274,7 @@ def main_loop(global_manager):
                         current_enemy.turn_done = True
                     elif current_enemy.visible(): #if unit will do an action, move the camera to it and select it
                         current_enemy.select()
-                        global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                        status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                                                                      
                 elif current_enemy.creation_turn == global_manager.get('turn') and not spawning: #if enemy visible but just spawned, end turn
                     did_nothing = True

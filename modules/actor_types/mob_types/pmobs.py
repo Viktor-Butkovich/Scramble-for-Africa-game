@@ -804,7 +804,7 @@ class pmob(mob):
         if focus:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             self.select()
-            if self.global_manager.get('minimap_grid') in self.grids:
-                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+            if status.minimap_grid in self.grids:
+                status.minimap_grid.calibrate(self.x, self.y)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
             constants.sound_manager.play_sound('footsteps')

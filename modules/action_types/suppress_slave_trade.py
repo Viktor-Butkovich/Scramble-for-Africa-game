@@ -141,7 +141,7 @@ class suppress_slave_trade(action.action):
             None
         '''
         if super().on_click(unit):
-            if unit.images[0].current_cell.grid != self.global_manager.get('slave_traders_grid'):
+            if unit.images[0].current_cell.grid != status.slave_traders_grid:
                 text_utility.print_to_screen('Suppressing the slave trade is only possible in the slave traders tile.', self.global_manager)
             elif self.global_manager.get('slave_traders_strength') <= 0:
                 text_utility.print_to_screen('The slave trade has already been eradicated.', self.global_manager)

@@ -29,7 +29,7 @@ class actor():
         global_manager.get('actor_list').append(self)
         self.modes = input_dict['modes']
         if self.from_save:
-            self.grid = self.global_manager.get(input_dict['grid_type'])
+            self.grid = getattr(status, input_dict['grid_type'])
             self.grids = [self.grid]
             if self.grid.mini_grid != 'none':
                 self.grids.append(self.grid.mini_grid)
@@ -96,7 +96,7 @@ class actor():
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['modes'] = self.modes
         for grid_type in self.global_manager.get('grid_types_list'):
-            if getattr(constants, grid_type) == self.grid:
+            if getattr(status, grid_type) == self.grid:
                 save_dict['grid_type'] = grid_type
             #if self.global_manager.get(grid_type) == self.grid:
             #    save_dict['grid_type'] = grid_type
@@ -355,11 +355,11 @@ class actor():
                 was_word = 'was'
             else:
                 was_word = 'were'
-            if self.global_manager.get('strategic_map_grid') in self.grids:
+            if status.strategic_map_grid in self.grids:
                 location_message = 'at (' + str(self.x) + ', ' + str(self.y) + ')'
             elif status.europe_grid in self.grids:
                 location_message = 'in Europe'
-            elif self.global_manager.get('slave_traders_grid') in self.grids:
+            elif status.slave_traders_grid in self.grids:
                 location_message = 'in the Arab slave markets'
             
             if self.actor_type == 'tile':

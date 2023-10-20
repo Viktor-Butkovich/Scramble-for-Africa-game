@@ -69,7 +69,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('current_game_mode', 'strategic')
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
-            centered_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
+            centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
             if centered_cell.tile != 'none':
                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), centered_cell.tile)
                 #calibrate tile info to minimap center
@@ -141,14 +141,14 @@ def create_strategic_map(global_manager, from_save=False):
                 'modes': ['strategic'],
                 'show_terrain': True,
             }
-            if (not from_save) and current_grid == global_manager.get('strategic_map_grid'):
+            if (not from_save) and current_grid == status.strategic_map_grid:
                 current_grid.generate_terrain()
             for cell in current_grid.get_flat_cell_list():
-                if (not from_save) and current_grid == global_manager.get('strategic_map_grid') and (cell.y == 0 or cell.y == 1):
+                if (not from_save) and current_grid == status.strategic_map_grid and (cell.y == 0 or cell.y == 1):
                     cell.set_visibility(True)
                 input_dict['coordinates'] = (cell.x, cell.y)
                 tiles.tile(False, input_dict, global_manager)
-            if current_grid == global_manager.get('strategic_map_grid'):
+            if current_grid == status.strategic_map_grid:
                 current_grid.set_resources()
 
 def start_loading(global_manager):

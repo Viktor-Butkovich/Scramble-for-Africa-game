@@ -288,8 +288,8 @@ def manage_rmb_down(clicked_button, global_manager):
                                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
                             constants.show_selection_outlines = True
                             constants.last_selection_outline_switch = constants.current_time
-                            if global_manager.get('minimap_grid') in moved_mob.grids:
-                                global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
+                            if status.minimap_grid in moved_mob.grids:
+                                status.minimap_grid.calibrate(moved_mob.x, moved_mob.y)
                             moved_mob.select()
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
@@ -299,7 +299,7 @@ def manage_rmb_down(clicked_button, global_manager):
         global_manager.set('drawing_automatic_route', False)
         if len(status.displayed_mob.base_automatic_route) > 1:
             destination_coordinates = (status.displayed_mob.base_automatic_route[-1][0], status.displayed_mob.base_automatic_route[-1][1])
-            if status.displayed_mob.is_vehicle and status.displayed_mob.vehicle_type == 'train' and not global_manager.get('strategic_map_grid').find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
+            if status.displayed_mob.is_vehicle and status.displayed_mob.vehicle_type == 'train' and not status.strategic_map_grid.find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
                 status.displayed_mob.clear_automatic_route()
                 text_utility.print_to_screen('A train\'s automatic route must start and end at a train station.', global_manager)
                 text_utility.print_to_screen('The invalid route has been erased.', global_manager)
@@ -308,7 +308,7 @@ def manage_rmb_down(clicked_button, global_manager):
         else:
             status.displayed_mob.clear_automatic_route()
             text_utility.print_to_screen('The created route must go between at least 2 tiles', global_manager)
-        global_manager.get('minimap_grid').calibrate(status.displayed_mob.x, status.displayed_mob.y)
+        status.minimap_grid.calibrate(status.displayed_mob.x, status.displayed_mob.y)
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.displayed_mob.images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
@@ -339,9 +339,9 @@ def manage_lmb_down(clicked_button, global_manager):
                                     current_cell.contained_mobs[0].select()
                                     if current_cell.contained_mobs[0].is_pmob:
                                         current_cell.contained_mobs[0].selection_sound()
-                                    if current_grid == global_manager.get('minimap_grid'):
-                                        main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                        main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
+                                    if current_grid == status.minimap_grid:
+                                        main_x, main_y = status.minimap_grid.get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = status.strategic_map_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                        main_cell = status.strategic_map_grid.find_cell(main_x, main_y)
                                         if main_cell:
                                             main_tile = main_cell.tile
                                             if not main_tile == 'none':
@@ -350,8 +350,8 @@ def manage_lmb_down(clicked_button, global_manager):
                                         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
             if selected_mob:
                 unit = status.displayed_mob
-                if unit and unit.grids[0] == global_manager.get('minimap_grid').attached_grid:
-                    global_manager.get('minimap_grid').calibrate(unit.x, unit.y)
+                if unit and unit.grids[0] == status.minimap_grid.attached_grid:
+                    status.minimap_grid.calibrate(unit.x, unit.y)
             else:
                 if global_manager.get('current_game_mode') == 'ministers':
                     minister_utility.calibrate_minister_info_display(global_manager, None)
@@ -372,12 +372,12 @@ def manage_lmb_down(clicked_button, global_manager):
                         if current_cell.grid.is_abstract_grid:
                             target_cell = current_cell
                         else:
-                            target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y) #center
+                            target_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y) #center
                         if not current_grid in chooser.grids:
                             stopping = False
                             if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
                                 destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
-                                if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                                if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < status.strategic_map_grid.coordinate_width: #or is harbor
                                     text_utility.print_to_screen('You can only send ships to coastal waters and coastal ports.', global_manager)
                                     stopping = True
                             chose_destination = True
@@ -411,7 +411,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                 target_cell = target_tile.cell
                             else:
                                 target_cell = current_cell
-                            #target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
+                            #target_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
                             destination_x, destination_y = (target_cell.x, target_cell.y)#target_cell.tile.get_main_grid_coordinates()
                             previous_destination_x, previous_destination_y = displayed_mob.base_automatic_route[-1]
                             if utility.find_coordinate_distance((destination_x, destination_y), (previous_destination_x, previous_destination_y)) == 1:
@@ -461,12 +461,12 @@ def click_move_minimap(global_manager):
         if current_grid.showing:
             for current_cell in current_grid.get_flat_cell_list():
                 if current_cell.touching_mouse():
-                    if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
+                    if current_grid == status.minimap_grid: #if minimap clicked, calibrate to corresponding place on main map
                         if not current_cell.terrain == 'none': #if off map, do not move minimap there
                             main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                            global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                    elif current_grid == global_manager.get('strategic_map_grid'):
-                        global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                            status.minimap_grid.calibrate(main_x, main_y)
+                    elif current_grid == status.strategic_map_grid:
+                        status.minimap_grid.calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
                         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_grid.cell_list[0][0].tile)
                     breaking = True

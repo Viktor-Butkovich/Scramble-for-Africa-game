@@ -67,7 +67,7 @@ class grid(interface_elements.interface_element):
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
         save_dict = {}
-        if self.global_manager.get('strategic_map_grid') == self:
+        if status.strategic_map_grid == self:
             save_dict['grid_type'] = 'strategic_map_grid'
         else:
             save_dict['grid_type'] = 'default'
@@ -709,7 +709,7 @@ class abstract_grid(grid):
         save_dict = super().to_save_dict()
         if status.europe_grid == self:
             save_dict['grid_type'] = 'europe_grid'
-        elif self.global_manager.get('slave_traders_grid') == self:
+        elif status.slave_traders_grid == self:
             save_dict['grid_type'] = 'slave_traders_grid'
         else:
             save_dict['grid_type'] = 'default'
