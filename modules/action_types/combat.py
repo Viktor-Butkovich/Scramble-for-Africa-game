@@ -373,7 +373,7 @@ class combat(action.action):
             None
         '''
         if super().start(unit):
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
                 'choices': [
                     {
@@ -427,7 +427,7 @@ class combat(action.action):
         Output:
             None
         '''
-        self.global_manager.get('notification_manager').set_lock(True)
+        constants.notification_manager.set_lock(True)
         self.defending = combat_info_dict.get('defending', False)
         self.opponent = combat_info_dict.get('opponent', self.opponent)
         self.current_unit = combat_info_dict.get('current_unit', self.current_unit)
@@ -456,7 +456,7 @@ class combat(action.action):
 
         price = self.process_payment()
 
-        insert_index = len(self.global_manager.get('notification_manager').notification_queue)
+        insert_index = len(constants.notification_manager.notification_queue)
         #roll messages should be inserted between any previously queued notifications and any minister messages that appear as a result of the roll
 
         self.current_roll_modifier = self.generate_current_roll_modifier(opponent=False)
@@ -492,7 +492,7 @@ class combat(action.action):
             self.roll_result = max(roll_list[0], self.roll_result)
         self.total_roll_result = self.roll_result + self.current_roll_modifier - (self.opponent_roll_result + self.opponent_roll_modifier)
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': self.generate_notification_text('initial'),
             'notification_type': 'action',
             'audio': self.generate_audio('initial'),
@@ -503,20 +503,20 @@ class combat(action.action):
         text = self.generate_notification_text('modifier_breakdown')
         roll_message = self.generate_notification_text('roll_message')
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + roll_message,
             'notification_type': 'action',
             'transfer_interface_elements': True
         }, insert_index=insert_index + 1)
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'notification_type': 'roll',
             'transfer_interface_elements': True,
             'audio': self.generate_audio('roll_started')
         }, insert_index=insert_index + 2)
 
-        self.global_manager.get('notification_manager').set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
+        constants.notification_manager.set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
 
         for roll_list in self.roll_lists:
             text += roll_list[1]
@@ -536,7 +536,7 @@ class combat(action.action):
         text += 'Overall result: /n'
         text += str(self.roll_result + self.current_roll_modifier) + ' - ' + str(self.opponent_roll_result + self.opponent_roll_modifier) + ' = ' + str(self.total_roll_result) + ': ' + description + ' /n /n'
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'transfer_interface_elements': True,
@@ -555,7 +555,7 @@ class combat(action.action):
 
         text += self.generate_notification_text(result)
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements(result)
@@ -604,7 +604,7 @@ class combat(action.action):
                 if len(combat_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.current_unit.retreat() #attacker retreats in draw or if more defenders remaining
                 elif self.current_unit.movement_points < self.current_unit.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
-                    self.global_manager.get('notification_manager').display_notification({
+                    constants.notification_manager.display_notification({
                         'message': 'While the attack was successful, this unit did not have the ' + str(self.current_unit.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
                     })
                     self.current_unit.retreat()

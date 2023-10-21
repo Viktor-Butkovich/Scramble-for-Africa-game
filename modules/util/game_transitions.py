@@ -111,7 +111,7 @@ def set_game_mode(new_game_mode, global_manager):
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), None)
 
     if constants.startup_complete and not new_game_mode in ['main_menu', 'new_game_setup']:
-        global_manager.get('notification_manager').update_notification_layout()
+        constants.notification_manager.update_notification_layout()
 
 def create_strategic_map(global_manager, from_save=False):
     '''
@@ -183,7 +183,7 @@ def to_main_menu(global_manager, override = False):
         current_grid.remove_complete()
     for current_village in global_manager.get('village_list'):
         current_village.remove_complete()
-    for current_minister in global_manager.get('minister_list'):
+    for current_minister in status.minister_list:
         current_minister.remove_complete()
     for current_lore_mission in global_manager.get('lore_mission_list'):
         current_lore_mission.remove_complete()
@@ -196,10 +196,10 @@ def to_main_menu(global_manager, override = False):
     global_manager.set('message', '')
     global_manager.set('player_turn_queue', [])
     global_manager.set('current_lore_mission', 'none')
-    if not global_manager.get('current_instructions_page') == 'none':
-        global_manager.get('current_instructions_page').remove_complete()
-        global_manager.set('current_instructions_page', 'none')
-    if not global_manager.get('current_country') == 'none':
+    if status.current_instructions_page:
+        status.current_instructions_page.remove_complete()
+        status.current_instructions_page = None
+    if global_manager.get('current_country') != 'none':
         global_manager.get('current_country').deselect()
     for current_completed_lore_type in global_manager.get('completed_lore_mission_types'):
         global_manager.get('lore_types_effects_dict')[current_completed_lore_type].remove()
@@ -216,7 +216,7 @@ def force_minister_appointment(global_manager):
         None
     '''
     set_game_mode('ministers', global_manager)
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': 'You cannot do that until all minister positions have been appointed. /n /n',
         'notification_type': 'default'
     })

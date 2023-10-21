@@ -169,7 +169,7 @@ class battalion(group):
         self.current_roll_modifier = 0
         self.global_manager.set('ongoing_action', True)
         self.global_manager.set('ongoing_action_type', 'slave_capture')
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': message,
             'choices': ['start capture slaves', 'stop capture slaves'],
             'extra_parameters': choice_info_dict
@@ -201,26 +201,26 @@ class battalion(group):
         text += 'The battalion tries to capture the natives as slaves. /n /n'
 
         if not self.veteran:    
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed. /n /n',
                 'num_dice': num_dice,
                 'notification_type': 'slave_capture'
             })
         else:
             text += ('The veteran major can roll twice and pick the higher result. /n /n')
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed. /n /n',
                 'num_dice': num_dice,
                 'notification_type': 'slave_capture'
             })
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
             'notification_type': 'roll'
         })
 
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        die_x = constants.notification_manager.notification_x - 140
 
         minister_corrupt = self.controlling_minister.check_corruption()
         if minister_corrupt:
@@ -267,7 +267,7 @@ class battalion(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'slave_capture'
@@ -298,12 +298,12 @@ class battalion(group):
             text += '/nRumors of your company\'s brutal treatment of the natives reaches Europe, decreasing public opinion by ' + str(-1 * public_opinion_decrease) + '. /n'
 
         if roll_result >= self.current_min_success:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + '/nClick to remove this notification.',
                 'notification_type': 'final_slave_capture'
             })
         else:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
             })
         self.global_manager.set('capture_slaves_result', [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])

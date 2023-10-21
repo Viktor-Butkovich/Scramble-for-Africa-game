@@ -97,7 +97,7 @@ class pmob(mob):
         if self.end_turn_destination == 'none':
             save_dict['end_turn_destination'] = 'none'
         else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
-            for grid_type in self.global_manager.get('grid_types_list'):
+            for grid_type in constants.grid_types_list:
                 if self.end_turn_destination.grid == self.global_manager.get(grid_type):
                     save_dict['end_turn_destination_grid_type'] = grid_type
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
@@ -442,7 +442,7 @@ class pmob(mob):
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text,
                     'zoom_destination': self.images[0].current_cell.tile,
                 })
@@ -452,7 +452,7 @@ class pmob(mob):
             self.death_sound('violent')
         else:
             if show_notification:
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')',
                     'zoom_destination': self.images[0].current_cell.tile,
                 })
@@ -504,7 +504,7 @@ class pmob(mob):
         if constants.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
-                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+                    pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
 
                     if len(self.base_automatic_route) > 0:
                         start_coordinates = self.base_automatic_route[0]

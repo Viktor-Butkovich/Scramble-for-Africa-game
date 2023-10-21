@@ -48,7 +48,7 @@ class notification_manager_template():
         next_line = ''
         next_word = ''
         font_size = 25
-        font_name = self.global_manager.get('font_name')
+        font_name = constants.font_name
         for index in range(len(message)):
             if not ((not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n'): #don't add if /n
                 if not (index > 0 and message[index - 1] + message[index] == '/n'): #if on n after /, skip
@@ -83,8 +83,8 @@ class notification_manager_template():
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = 25 #scaling.scale_height(25, self.global_manager) #self.global_manager.get('font_size') #25
-        font_name = self.global_manager.get('font_name')
+        font_size = 25 #scaling.scale_height(25, self.global_manager) #constants.font_size #25
+        font_name = constants.font_name
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
             if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n'): #don't add if /n
@@ -176,7 +176,7 @@ class notification_manager_template():
         '''
         message = notification_dict['message'] #message should be the only required parameter
 
-        height = len(self.format_message(message)) * (self.global_manager.get('default_font_size') + 10) #maybe font size is being scaled incorrectly here?
+        height = len(self.format_message(message)) * (constants.default_font_size + 10) #maybe font size is being scaled incorrectly here?
         self.update_notification_layout(height)
 
         if 'notification_type' in notification_dict:

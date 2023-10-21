@@ -158,7 +158,7 @@ class suppress_slave_trade(action.action):
             None
         '''
         if super().start(unit):
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
                 'choices': [
                     {
@@ -201,7 +201,7 @@ class suppress_slave_trade(action.action):
                 for current_pmob in self.global_manager.get('pmob_list'):
                     if current_pmob.is_worker and current_pmob.worker_type == 'slave':
                         current_pmob.set_automatically_replace(False)
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text,
                 })
             constants.public_opinion_tracker.change(self.public_opinion_increase)

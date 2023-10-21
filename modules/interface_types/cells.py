@@ -720,7 +720,7 @@ class cell():
         blue = current_color[2]
         if not self.visible:
             red, green, blue = constants.color_dict['blonde']
-        pygame.draw.rect(self.global_manager.get('game_display'), (red, green, blue), self.Rect)
+        pygame.draw.rect(constants.game_display, (red, green, blue), self.Rect)
         if self.tile != 'none':
             for current_image in self.tile.images:
                 current_image.draw()
@@ -743,11 +743,11 @@ class cell():
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)
-            current_font = pygame.font.SysFont(self.global_manager.get('font_name'), font_size)
+            current_font = pygame.font.SysFont(constants.font_name, font_size)
             textsurface = current_font.render(message, False, constants.color_dict[color])
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size
-            self.global_manager.get('game_display').blit(textsurface, (text_x, text_y))
+            constants.game_display.blit(textsurface, (text_x, text_y))
 
     def touching_mouse(self):
         '''

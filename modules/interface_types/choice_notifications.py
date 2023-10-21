@@ -164,7 +164,7 @@ class choice_button(buttons.button):
             self.message = input_dict['button_type'].capitalize()
         super().__init__(input_dict, global_manager)
         self.font_size = scaling.scale_width(25)
-        self.font_name = self.global_manager.get('font_name')
+        self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True
 
@@ -191,7 +191,7 @@ class choice_button(buttons.button):
         '''
         super().draw()
         if self.showing:
-            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
+            constants.game_display.blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
     def update_tooltip(self):

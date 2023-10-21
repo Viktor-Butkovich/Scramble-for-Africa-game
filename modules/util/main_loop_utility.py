@@ -47,9 +47,9 @@ def update_display(global_manager):
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
         notification_tooltip_button = 'none'
-        for current_button in global_manager.get('button_list'):
+        for current_button in status.button_list:
             if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-                if current_button.in_notification and current_button != global_manager.get('current_instructions_page'):
+                if current_button.in_notification and current_button != status.current_instructions_page:
                     notification_tooltip_button = current_button
                 else:
                     possible_tooltip_drawers = [current_button]
@@ -66,11 +66,10 @@ def update_display(global_manager):
 
         global_manager.get('mouse_follower').draw()
             
-        if global_manager.get('current_instructions_page') != 'none':
-            instructions_page = global_manager.get('current_instructions_page')
-            instructions_page.draw()
-            if instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-                possible_tooltip_drawers = [instructions_page] #instructions have priority over everything
+        if status.current_instructions_page:
+            status.current_instructions_page.draw()
+            if status.current_instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+                possible_tooltip_drawers = [status.current_instructions_page] #instructions have priority over everything
         if (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) != pygame.mouse.get_pos():
             constants.mouse_moved_time = constants.current_time
             old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
@@ -140,7 +139,7 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
         None
     '''
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
-    font_size = scaling.scale_width(global_manager.get('font_size'))
+    font_size = scaling.scale_width(constants.font_size)
     y_displacement = scaling.scale_width(30) #estimated mouse size
     x_displacement = 0
     if possible_tooltip_drawers_length == 0:
@@ -166,13 +165,13 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
         width = 0
         for possible_tooltip_drawer in possible_tooltip_drawers:
             possible_tooltip_drawer.update_tooltip()
-            if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
+            if possible_tooltip_drawer == status.current_instructions_page:
                 height += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     height += font_size
                 width = possible_tooltip_drawer.tooltip_box.width
                 stopping = True
-            if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
+            if (possible_tooltip_drawer in status.button_list and possible_tooltip_drawer.in_notification) and not stopping:
                 height += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     height += font_size
@@ -196,13 +195,13 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
         
         stopping = False
         for possible_tooltip_drawer in possible_tooltip_drawers:
-            if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
+            if possible_tooltip_drawer == status.current_instructions_page:
                 possible_tooltip_drawer.draw_tooltip(below_screen, beyond_screen, height, width, y_displacement)
                 y_displacement += scaling.unscale_width(font_size)
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += scaling.unscale_width(font_size)
                 stopping = True
-            if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
+            if (possible_tooltip_drawer in status.button_list and possible_tooltip_drawer.in_notification) and not stopping:
                 possible_tooltip_drawer.draw_tooltip(below_screen, beyond_screen, height, width, y_displacement)
                 y_displacement += scaling.unscale_width(font_size)
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
@@ -226,10 +225,10 @@ def draw_text_box(global_manager):
         None
     '''
     greatest_width = scaling.scale_width(300)
-    max_screen_lines = (scaling.scale_height(constants.default_display_height // global_manager.get('font_size'))) - 1
-    max_text_box_lines = (scaling.scale_height(global_manager.get('text_box_height') // global_manager.get('font_size'))) - 1
-    font_name = global_manager.get('font_name')
-    font_size = global_manager.get('font_size')
+    max_screen_lines = (scaling.scale_height(constants.default_display_height // constants.font_size)) - 1
+    max_text_box_lines = (scaling.scale_height(global_manager.get('text_box_height') // constants.font_size)) - 1
+    font_name = constants.font_name
+    font_size = constants.font_size
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
             if text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) > greatest_width:
@@ -242,26 +241,26 @@ def draw_text_box(global_manager):
             greatest_width = text_utility.message_width(global_manager.get('message'), font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10)
     x, y = (0, constants.display_height - global_manager.get('text_box_height'))
-    pygame.draw.rect(global_manager.get('game_display'), constants.color_dict['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
+    pygame.draw.rect(constants.game_display, constants.color_dict['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
     if global_manager.get('typing'):
         color = 'red'
     else:
         color = 'black'
-    pygame.draw.rect(global_manager.get('game_display'), constants.color_dict[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3)) #black text box outline
-    pygame.draw.line(global_manager.get('game_display'), constants.color_dict[color], (0, constants.display_height - (font_size + scaling.scale_height(5))), #input line
+    pygame.draw.rect(constants.game_display, constants.color_dict[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3)) #black text box outline
+    pygame.draw.line(constants.game_display, constants.color_dict[color], (0, constants.display_height - (font_size + scaling.scale_height(5))), #input line
         (text_box_width, constants.display_height - (font_size + scaling.scale_height(5))))
 
     global_manager.set('text_list', text_utility.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
     
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
-            textsurface = global_manager.get('myfont').render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
-            global_manager.get('game_display').blit(textsurface,(scaling.scale_width(10), (-1 * font_size * text_index) + constants.display_height - ((2 * font_size) + scaling.scale_height(5))))
+            textsurface = constants.myfont.render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
+            constants.game_display.blit(textsurface,(scaling.scale_width(10), (-1 * font_size * text_index) + constants.display_height - ((2 * font_size) + scaling.scale_height(5))))
     if constants.input_manager.taking_input:
-        textsurface = global_manager.get('myfont').render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
+        textsurface = constants.myfont.render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
     else:
-        textsurface = global_manager.get('myfont').render(global_manager.get('message'), False, (0, 0, 0))
-    global_manager.get('game_display').blit(textsurface,(scaling.scale_width(10), constants.display_height - (font_size + scaling.scale_height(5))))
+        textsurface = constants.myfont.render(global_manager.get('message'), False, (0, 0, 0))
+    constants.game_display.blit(textsurface,(scaling.scale_width(10), constants.display_height - (font_size + scaling.scale_height(5))))
 
 def manage_rmb_down(clicked_button, global_manager):
     '''

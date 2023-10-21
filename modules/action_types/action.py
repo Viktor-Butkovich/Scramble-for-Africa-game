@@ -227,7 +227,7 @@ class action():
         '''
         self.pre_start(unit)
         if self.current_min_success > 6:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': self.generate_notification_text('confirmation') + self.generate_notification_text('impossible'),
             })
             return(False)
@@ -258,7 +258,7 @@ class action():
         Output:
             None
         '''
-        self.global_manager.get('notification_manager').set_lock(True)
+        constants.notification_manager.set_lock(True)
         self.roll_result = 0
         self.current_unit.set_movement_points(0)
 
@@ -284,21 +284,21 @@ class action():
         text = self.generate_notification_text('initial')
         roll_message = self.generate_notification_text('roll_message')
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + roll_message,
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements('dice'),
             'transfer_interface_elements': True
         }, insert_index=0)
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'notification_type': 'roll',
             'transfer_interface_elements': True,
             'audio': self.generate_audio('roll_started')
         }, insert_index=1)
 
-        self.global_manager.get('notification_manager').set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
+        constants.notification_manager.set_lock(False) #locks notifications so that corruption messages will occur after the roll notification
 
         for roll_list in self.roll_lists:
             text += roll_list[1]
@@ -318,7 +318,7 @@ class action():
             text += 'The higher result, ' + str(self.roll_result) + ': ' + result_outcome_dict[self.roll_result] + ', was used. /n'
         else:
             text += '/n'
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'transfer_interface_elements': True,
@@ -337,7 +337,7 @@ class action():
 
         text += self.generate_notification_text(result)
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements(result)

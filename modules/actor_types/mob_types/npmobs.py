@@ -158,7 +158,7 @@ class npmob(mob): #if enemy.turn_done
             
         noncombatants = current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': 'The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
             })
             current_noncombatant.die()
@@ -179,7 +179,7 @@ class npmob(mob): #if enemy.turn_done
         
         for current_building in current_cell.get_intact_buildings():
             if current_building.can_damage():
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': 'The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
                 })
                 current_building.set_damaged(True)

@@ -1,17 +1,17 @@
 #Manages initial game setup in a semi-modular order
 
 import pygame
-import time
 import os
 import logging
 import json
 import modules.constants.constants as constants
+import modules.constants.status as status
 import modules.util.scaling as scaling
 import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
 import modules.constructs.countries as countries
 import modules.tools.effects as effects
-from modules.tools.data_managers import effect_manager_template, notification_manager_template, value_tracker_template, event_manager_template
+from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
     construction, upgrade, repair, loan_search
 
@@ -31,33 +31,6 @@ def setup(*args):
     constants.startup_complete = True
     constants.creating_new_game = False
 
-def fundamental(global_manager):
-    '''
-    Description:
-        Initializes pygame and most manager objects and defines screen size, times, fonts, and colors
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        None
-    '''
-    global_manager.set('font_name', 'times new roman')
-    global_manager.set('default_font_size', 15)
-    global_manager.set('font_size', scaling.scale_height(15))
-    global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
-
-    global_manager.set('default_music_volume', 0.5)
-
-    global_manager.set('game_display', pygame.display.set_mode((constants.display_width, constants.display_height)))
-
-    pygame.display.set_caption('SFA')
-    global_manager.set('green_screen_colors', 
-        [
-        (62, 82, 82),
-        (70, 70, 92),
-        (110, 107, 3)
-        ]
-    )
-
 def misc(global_manager):
     '''
     Description:
@@ -67,22 +40,16 @@ def misc(global_manager):
     Output:
         None
     '''
-    global_manager.set('rendered_images', {})
-    global_manager.set('button_list', [])
-    global_manager.set('recruitment_button_list', [])
-    global_manager.set('current_instructions_page', 'none')
-    global_manager.set('current_instructions_page_index', 0)
-    global_manager.set('instructions_list', [])
+    constants.font_size = scaling.scale_height(15)
+    constants.myfont = pygame.font.SysFont(constants.font_name, constants.font_size)
+
     #page 1
     instructions_message = 'Placeholder instructions, use += to add'
-    global_manager.get('instructions_list').append(instructions_message)
+    status.instructions_list.append(instructions_message)
 
-    global_manager.set('minister_list', [])
-    global_manager.set('available_minister_list', [])
     global_manager.set('country_list', [])
     global_manager.set('flag_icon_list', [])
     global_manager.set('grid_list', [])
-    global_manager.set('grid_types_list', ['strategic_map_grid', 'europe_grid', 'slave_traders_grid'])
     global_manager.set('text_list', [])
     global_manager.set('free_image_list', [])
     global_manager.set('minister_image_list', [])
@@ -134,7 +101,7 @@ def misc(global_manager):
     global_manager.set('r_ctrl', 'up')
     global_manager.set('l_ctrl', 'up')
     global_manager.set('ctrl', 'up')
-    old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
+    old_mouse_x, old_mouse_y = pygame.mouse.get_pos() #used in tooltip drawing timing
     global_manager.set('old_mouse_x', old_mouse_x)
     global_manager.set('old_mouse_y', old_mouse_y)
     global_manager.set('available_minister_left_index', -2) #so that first index is in middle
@@ -186,7 +153,7 @@ def misc(global_manager):
     global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses'])
     global_manager.set('upgrade_types', ['scale', 'efficiency', 'warehouse_level'])
 
-    global_manager.set('notification_manager', notification_manager_template.notification_manager_template(global_manager))
+    constants.notification_manager = notification_manager_template.notification_manager_template(global_manager)
 
     global_manager.set('current_advertised_commodity', 'none')
     global_manager.set('current_sound_file_index', 0)

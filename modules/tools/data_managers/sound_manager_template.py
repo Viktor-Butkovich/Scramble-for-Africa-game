@@ -73,7 +73,7 @@ class sound_manager_template():
             None
         '''
         if volume < 0: #negative volume value -> use default
-            volume = self.global_manager.get('default_music_volume')
+            volume = constants.default_music_volume
         pygame.mixer.music.load('sounds/music/' + file_name + '.wav')
         pygame.mixer.music.set_volume(volume)
         pygame.mixer.music.play(0) #music loops when loop argument is -1
@@ -88,7 +88,7 @@ class sound_manager_template():
         Output:
             None
         '''
-        original_volume = self.global_manager.get('default_music_volume')
+        original_volume = constants.default_music_volume
         pygame.mixer.music.set_volume(original_volume)
         time_passed = 0
         if pygame.mixer.music.get_busy(): #only delay starting music for fade out if there is any current music to fade out
@@ -117,7 +117,7 @@ class sound_manager_template():
             None
         '''
         constants.event_manager.clear()
-        original_volume = self.global_manager.get('default_music_volume')
+        original_volume = constants.default_music_volume
         pygame.mixer.music.set_volume(0)
         time_passed = 0
         for i in range(-5, 6):

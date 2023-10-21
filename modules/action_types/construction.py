@@ -349,7 +349,7 @@ class construction(action.action):
             None
         '''
         if super().start(unit):
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
                 'choices': [
                     {

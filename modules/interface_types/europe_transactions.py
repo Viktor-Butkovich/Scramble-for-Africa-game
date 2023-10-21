@@ -48,7 +48,7 @@ class recruitment_button(button):
             else:
                 self.recruitment_name += ' '
         self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
-        global_manager.get('recruitment_button_list').append(self)
+        status.recruitment_button_list.append(self)
         if self.recruitment_name in ['European workers']:
             image_id_list = ['mobs/default/button.png']
             left_worker_dict = {
@@ -115,6 +115,18 @@ class recruitment_button(button):
             self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('list_descriptions')[self.recruitment_type])
         else:
             self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('list_descriptions')[self.recruitment_type])
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        status.recruitment_button_list = utility.remove_from_list(status.recruitment_button_list, self)
 
 class buy_commodity_button(button):
     '''

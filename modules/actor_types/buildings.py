@@ -169,8 +169,8 @@ class building(actor):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
-        font_size = self.global_manager.get('font_size')
-        font_name = self.global_manager.get('font_name')
+        font_size = constants.font_size
+        font_name = constants.font_name
         for text_line in tooltip_text:
             if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
                 tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)

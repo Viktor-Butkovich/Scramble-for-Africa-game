@@ -37,7 +37,7 @@ class minister():
         self.initializing = True
         self.actor_type = 'minister' #used for actor display labels and images
         self.global_manager = global_manager
-        self.global_manager.get('minister_list').append(self)
+        status.minister_list.append(self)
         self.tooltip_text = []
         self.portrait_section_types = ['base_skin', 'mouth', 'nose', 'eyes', 'hair', 'outfit', 'facial_hair', 'hat', 'portrait']
         self.portrait_sections = {}
@@ -69,7 +69,7 @@ class minister():
             if not self.current_position == 'none':
                 self.appoint(self.current_position)
             else:
-                self.global_manager.get('available_minister_list').append(self)
+                status.available_minister_list.append(self)
         else:
             self.background = random.choice(global_manager.get('weighted_backgrounds'))
             self.name = constants.flavor_text_manager.generate_minister_name(self.background)
@@ -82,7 +82,7 @@ class minister():
             self.voice_setup()
             self.interests_setup()
             self.corruption_setup()
-            self.global_manager.get('available_minister_list').append(self)
+            status.available_minister_list.append(self)
             self.portrait_sections_setup()
             self.stolen_money = 0
             self.corruption_evidence = 0
@@ -242,7 +242,7 @@ class minister():
         Output:
             None
         '''
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to remove this notification. /n /n',
             'notification_type': 'action',
             'audio': audio,
@@ -543,12 +543,12 @@ class minister():
         for current_pmob in self.global_manager.get('pmob_list'):
             current_pmob.update_controlling_minister()
         if not new_position == 'none': #if appointing
-            self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
-            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 3:
-                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display up because available minister was removed
+            status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
+            if self.global_manager.get('available_minister_left_index') >= len(status.available_minister_list) - 3:
+                self.global_manager.set('available_minister_left_index', len(status.available_minister_list) - 3) #move available minister display up because available minister was removed
         else:
-            self.global_manager.get('available_minister_list').append(self)
-            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display to newly fired minister
+            status.available_minister_list.append(self)
+            self.global_manager.set('available_minister_left_index', len(status.available_minister_list) - 3) #move available minister display to newly fired minister
         for current_minister_type_image in self.global_manager.get('minister_image_list'):
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
@@ -993,8 +993,8 @@ class minister():
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'
-        self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
-        self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
+        status.minister_list = utility.remove_from_list(status.minister_list, self)
+        status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
         minister_utility.update_available_minister_display(self.global_manager)
 
     def respond(self, event):

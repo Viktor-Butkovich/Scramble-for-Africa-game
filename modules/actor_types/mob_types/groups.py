@@ -208,7 +208,7 @@ class group(pmob):
                 if self.in_vehicle:
                     worker.embark_vehicle(zoom_destination)
 
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
                 'zoom_destination': zoom_destination,
             })
@@ -231,7 +231,7 @@ class group(pmob):
                 if self.in_vehicle:
                     officer.embark_vehicle(zoom_destination)
 
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
                 'zoom_destination': zoom_destination,
             })

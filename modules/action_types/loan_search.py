@@ -130,7 +130,7 @@ class loan_search(action.campaign):
             None
         '''
         if super().start(unit):
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
                 'attached_interface_elements': self.generate_attached_interface_elements('dice'),
                 'transfer_interface_elements': True,
@@ -195,7 +195,7 @@ class loan_search(action.campaign):
             result = 'success'
             self.roll_result = 5
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': self.generate_notification_text(result),
             'choices': [
                 {

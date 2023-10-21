@@ -4,6 +4,7 @@ from .labels import label
 from .buttons import button
 from ..util import scaling, text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class instructions_button(button):
     '''
@@ -18,13 +19,12 @@ class instructions_button(button):
         Output:
             None
         '''
-        if self.global_manager.get('current_instructions_page') == 'none':
+        if status.current_instructions_page == None:
             display_instructions_page(0, self.global_manager)
         else:
-            if not self.global_manager.get('current_instructions_page') == 'none':
-                self.global_manager.get('current_instructions_page').remove_complete()
-                self.global_manager.set('current_instructions_page', 'none')
-            self.global_manager.set('current_instructions_page_index', 0)
+            status.current_instructions_page.remove_complete()
+            status.current_instructions_page = None
+            constants.current_instructions_page_index = 0
 
 class instructions_page(label):
     '''
@@ -61,13 +61,13 @@ class instructions_page(label):
         Output:
             None
         '''
-        if not self.global_manager.get('current_instructions_page_index') == len(self.global_manager.get('instructions_list')) - 1:
-            self.global_manager.set('current_instructions_page_index', self.global_manager.get('current_instructions_page_index') + 1)
-            self.global_manager.set('current_instructions_page_text', self.global_manager.get('instructions_list')[self.global_manager.get('current_instructions_page_index')])
-            self.global_manager.set('current_instructions_page', instructions_page(self.global_manager.get('current_instructions_page_text')), self.global_manager) #create a new page and remove this one
+        if constants.current_instructions_page_index != len(status.instructions_list) - 1:
+            constants.current_instructions_page_index += 1
+            constants.current_instructions_page_text = status.instructions_list[constants.current_instructions_page_index]
+            status.current_instructions_page = instructions_page(constants.current_instructions_page_text, self.global_manager)
             self.remove_complete()
         else:
-            self.global_manager.set('current_instructions_page', 'none')
+            status.current_instructions_page = None
             self.remove_complete()
 
     def set_label(self, new_message):
@@ -98,7 +98,7 @@ class instructions_page(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + 10, constants.display_height - (self.y + self.height - (text_line_index * self.font_size))))
+                constants.game_display.blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + 10, constants.display_height - (self.y + self.height - (text_line_index * self.font_size))))
 
     def format_message(self):
         '''
@@ -125,7 +125,7 @@ class instructions_page(label):
         new_message.append(next_line)
         new_message.append('Click to go to the next instructions page.')
         new_message.append('Press the display instructions button on the right side of the screen again to close the instructions.')
-        new_message.append('Page ' + str(self.global_manager.get('current_instructions_page_index') + 1))
+        new_message.append('Page ' + str(constants.current_instructions_page_index + 1))
         
         self.message = new_message
         
@@ -151,6 +151,6 @@ def display_instructions_page(page_number, global_manager):
     Output:
         None
     '''
-    global_manager.set('current_instructions_page_index', page_number)
-    global_manager.set('current_instructions_page_text', global_manager.get('instructions_list')[page_number])
-    global_manager.set('current_instructions_page', instructions_page(global_manager.get('current_instructions_page_text'), global_manager))
+    constants.current_instructions_page_index = page_number
+    constants.current_instructions_page_text = status.instructions_list[page_number]
+    status.current_instructions_page = instructions_page(constants.current_instructions_page_text, global_manager)

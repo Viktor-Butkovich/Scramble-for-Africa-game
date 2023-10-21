@@ -76,7 +76,7 @@ class notification(multi_line_label):
             self.parent_collection.remove_recursive(complete=False)
         else:
             self.remove()
-        self.global_manager.get('notification_manager').handle_next_notification()
+        constants.notification_manager.handle_next_notification()
 
     def remove(self):
         '''

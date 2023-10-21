@@ -7,7 +7,7 @@ if (Test-Path SFA_exe) {
 mkdir SFA_exe
 Copy-Item -Path $PWD\*  -Destination "SFA_exe" -Recurse -Exclude @("*SFA_exe", ".git", "__pycache__", ".gitignore", "__init__.py", "Instructions.docx", "README.txt", "scripts")
 cd SFA_exe
-py -m PyInstaller --onefile Scramble_for_Africa.py --icon=graphics/misc/SFA.ico
+py -m PyInstaller --onefile Scramble_for_Africa.py --noconsole --icon=graphics/misc/SFA.ico
 Move-Item -Path dist/Scramble_for_Africa.exe
 rm Scramble_for_Africa.spec -force
 rmdir build -force -Recurse

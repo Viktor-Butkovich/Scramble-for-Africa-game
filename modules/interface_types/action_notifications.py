@@ -41,7 +41,7 @@ class action_notification(notification):
                 self.parent_collection.can_show_override = self
                 self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
 
-                notification_manager = self.global_manager.get('notification_manager')
+                notification_manager = constants.notification_manager
                 column_increment = 120
                 collection_y = notification_manager.default_notification_y - (notification_manager.default_notification_height / 2)
                 self.notification_ordered_collection = constants.actor_creation_manager.create_interface_element(
@@ -101,7 +101,7 @@ class action_notification(notification):
             self.parent_collection.remove_recursive(complete=False)
         else:
             self.remove()
-        self.global_manager.get('notification_manager').handle_next_notification(transferred_interface_elements=transferred_interface_elements)
+        constants.notification_manager.handle_next_notification(transferred_interface_elements=transferred_interface_elements)
 
     def format_message(self):
         '''
@@ -246,7 +246,7 @@ class off_tile_exploration_notification(action_notification):
 
         self.notification_images.append(constants.actor_creation_manager.create_interface_element({
             'image_id': explored_terrain_image_id,
-            'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400),
+            'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 225, 400),
             'width': scaling.scale_width(200),
             'height': scaling.scale_height(200),
             'modes': input_dict['modes'],
@@ -265,7 +265,7 @@ class off_tile_exploration_notification(action_notification):
 
         self.notification_images.append(constants.actor_creation_manager.create_interface_element({
             'image_id': image_id_list,
-            'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400),
+            'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 225, 400),
             'width': scaling.scale_width(200),
             'height': scaling.scale_height(200),
             'modes': input_dict['modes'],
@@ -289,11 +289,11 @@ class off_tile_exploration_notification(action_notification):
         super().remove(handle_next_notification=False)
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')
-        notification_manager = self.global_manager.get('notification_manager')
+        notification_manager = constants.notification_manager
         
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1:
+        if len(constants.notification_manager.notification_queue) == 1:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
@@ -354,7 +354,7 @@ class trade_notification(action_notification):
                 min_y = 300
                 self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                     'image_id': 'scenery/resources/' + self.trade_result[2] + '.png',
-                    'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300),
+                    'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 200, 300),
                     'width': scaling.scale_width(200),
                     'height': scaling.scale_height(200),
                     'modes': input_dict['modes'],
@@ -367,7 +367,7 @@ class trade_notification(action_notification):
 
             self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                 'image_id': 'scenery/resources/trade/sold consumer goods.png',
-                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y),
+                'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 200, consumer_goods_y),
                 'width': scaling.scale_width(200),
                 'height': scaling.scale_height(200),
                 'modes': input_dict['modes'],
@@ -396,7 +396,7 @@ class trade_notification(action_notification):
 
                 self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                     'image_id': button_image_id_list,
-                    'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175),
+                    'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 175, min_y - 175),
                     'width': scaling.scale_width(150),
                     'height': scaling.scale_height(150),
                     'modes': input_dict['modes'],
@@ -459,7 +459,7 @@ class trial_notification(action_notification):
         else:
             trial_utility.complete_trial(previous_roll, self.global_manager)
 
-        notification_manager = self.global_manager.get('notification_manager')
+        notification_manager = constants.notification_manager
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
         if len(notification_manager.notification_queue) > 0:
@@ -507,10 +507,10 @@ class rumor_search_notification(action_notification):
             None
         '''
         super().remove(handle_next_notification=False)
-        notification_manager = self.global_manager.get('notification_manager')
+        notification_manager = constants.notification_manager
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
+        if len(constants.notification_manager.notification_queue) == 1 and not constants.notification_manager.notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             self.global_manager.get('rumor_search_result')[0].complete_rumor_search()
             
@@ -562,7 +562,7 @@ class artifact_search_notification(action_notification):
             None
         '''
         super().remove(handle_next_notification=False)
-        notification_manager = self.global_manager.get('notification_manager')
+        notification_manager = constants.notification_manager
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
         if len(notification_manager.notification_queue) > 0 and notification_manager.notification_type_queue[0] in ['final_artifact_search', 'default'] and not self.is_last: #if roll failed or succeeded and about to complete
@@ -620,7 +620,7 @@ class capture_slaves_notification(action_notification):
             button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
             self.notification_images.append(constants.actor_creation_manager.create_interface_element({
                 'image_id': button_image_id_list,
-                'coordinates': scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400),
+                'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 225, 400),
                 'width': scaling.scale_width(200),
                 'height': scaling.scale_height(200),
                 'modes': input_dict['modes'],
@@ -640,10 +640,10 @@ class capture_slaves_notification(action_notification):
             None
         '''
         super().remove(handle_next_notification=False)
-        notification_manager = self.global_manager.get('notification_manager')
+        notification_manager = constants.notification_manager
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
+        if len(constants.notification_manager.notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             self.global_manager.get('capture_slaves_result')[0].complete_capture_slaves()
             

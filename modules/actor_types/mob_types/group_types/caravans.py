@@ -100,7 +100,7 @@ class caravan(group):
         message += 'In each trade, the merchant trades 1 of his ' + str(self.get_inventory('consumer goods')) + ' consumer goods for items that may or may not be valuable. /n /n'
         message += 'Trading may also convince villagers to become available for hire as workers. '
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': message,
             'choices': ['start trading', 'stop trading'],
             'extra_parameters': choice_info_dict
@@ -128,24 +128,24 @@ class caravan(group):
         text = ('The merchant attempts to convince the villagers to trade. /n /n')
         if self.veteran:
             text += ('The veteran merchant can roll twice and pick the higher result. /n /n')
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'trade'
             })
         else:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'trade'
             })
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
             'notification_type': 'roll'
         })
 
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        die_x = constants.notification_manager.notification_x - 140
 
         roll_result = 0
         if self.veteran:
@@ -184,7 +184,7 @@ class caravan(group):
             roll_result = roll_list[0]
 
         self.global_manager.set('trade_result', [self, roll_result])
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'final_trade'
@@ -197,7 +197,7 @@ class caravan(group):
                 text += '/nThe merchant negotiated well enough to become a veteran. /n'
                 trade_type = 'trade_promotion'
 
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + '/nThe villagers are willing to trade ' + str(self.trades_remaining) + ' time' + utility.generate_plural(self.trades_remaining) + ' with this caravan. /n /nThe merchant has ' + str(self.get_inventory('consumer goods')) +
                 ' consumer goods to sell. /n /nClick to start trading. /n /n',
                 'notification_type': trade_type
@@ -208,7 +208,7 @@ class caravan(group):
             text += 'The merchant has ' + str(self.get_inventory('consumer goods')) + ' consumer goods to sell. /n /n'
             text += 'Do you want to start trading consumer goods for items that may or may not be valuable?'
 
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
                 'choices': ['trade', 'stop trading'],
                 'extra_parameters': choice_info_dict
@@ -218,12 +218,12 @@ class caravan(group):
             text += '/nThe villagers are not willing to trade with this caravan. /n'
             if roll_result <= self.current_max_crit_fail:
                 text += ' /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n /n'
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text + ' /nClick to close this notification. ',
                     'notification_type': 'stop_trade_attacked'
                 })
             else:
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text + ' /nClick to close this notification. ',
                     'notification_type': 'stop_trade'
                 })
@@ -259,25 +259,25 @@ class caravan(group):
         text = ('The merchant attempts to find valuable commodities in return for consumer goods. /n /n')
         if self.veteran:
             text += ('The veteran merchant can roll twice and pick the higher result. /n /n')
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'trade'
             })
         else:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'trade'
             })
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
             'notification_type': 'roll'
         })
 
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        die_x = constants.notification_manager.notification_x - 140
 
         roll_result = 0
         if self.veteran:
@@ -310,7 +310,7 @@ class caravan(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'final_trade'
@@ -334,7 +334,7 @@ class caravan(group):
             text += 'The villagers are willing to trade ' + str(self.trades_remaining) + ' more time' + utility.generate_plural(self.trades_remaining) + ' with this caravan. /n /n'
             text += 'The merchant has ' + str(num_consumer_goods) + ' more consumer goods to sell /n /n'
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text,
             'notification_type': 'notification_type'
         })
@@ -344,7 +344,7 @@ class caravan(group):
             choice_info_dict = {'caravan': self, 'village': village, 'type': 'trade'}
             text += 'The villagers are willing to trade ' + str(self.trades_remaining) + ' more time' + utility.generate_plural(self.trades_remaining) + ' with this caravan. /n /n'
             text += 'Do you want to trade consumer goods for items that may or may not be valuable?'
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
                 'choices': ['trade', 'stop trading'],
                 'extra_parameters': choice_info_dict
@@ -355,7 +355,7 @@ class caravan(group):
             if num_consumer_goods <= 0: #consumer goods are actually lost when user clicks out of
                 text += 'The merchant does not have any more consumer goods to sell. /n /n'
 
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to close this notification. ',
                 'notification_type': 'stop_trade'
             })

@@ -33,7 +33,7 @@ def main_loop(global_manager):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
                     main_loop_utility.debug_print(global_manager)
-                for current_button in global_manager.get('button_list'):
+                for current_button in status.button_list:
                     if current_button.showing and not global_manager.get('typing'):
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:
@@ -88,7 +88,7 @@ def main_loop(global_manager):
                         break
                         
             elif event.type == pygame.KEYUP:
-                for current_button in global_manager.get('button_list'):
+                for current_button in status.button_list:
                     if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:# and current_button.showing:
@@ -130,8 +130,8 @@ def main_loop(global_manager):
             if not global_manager.get('rmb_down'): #if user just released rmb
                 clicked_button = False
                 stopping = False
-                if global_manager.get('current_instructions_page') == 'none':
-                    for current_button in global_manager.get('button_list'):#here
+                if status.current_instructions_page == None:
+                    for current_button in status.button_list:#here
                         if current_button.touching_mouse() and current_button.showing and (current_button.in_notification) and not stopping: #if notification, click before other buttons
                             current_button.on_rmb_click()
                             current_button.on_rmb_release()
@@ -139,12 +139,12 @@ def main_loop(global_manager):
                             stopping = True
                             break
                 else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing:
-                        global_manager.get('current_instructions_page').on_rmb_click()
+                    if status.current_instructions_page.touching_mouse() and status.current_instructions_page.showing:
+                        status.current_instructions_page.on_rmb_click()
                         clicked_button = True
                         stopping = True
                 if not stopping:
-                    for current_button in global_manager.get('button_list'):
+                    for current_button in status.button_list:
                         if current_button.touching_mouse() and current_button.showing:
                             current_button.on_rmb_click()
                             current_button.on_rmb_release()
@@ -156,8 +156,8 @@ def main_loop(global_manager):
                 clicked_button = False #if any button, including a panel, is clicked, do not deselect units
                 allow_on_click = True #certain buttons, like panels, allow clicking on another button at the same time
                 stopping = False
-                if global_manager.get('current_instructions_page') == 'none':
-                    for current_button in global_manager.get('button_list'):#here
+                if status.current_instructions_page == None:
+                    for current_button in status.button_list:#here
                         if current_button.touching_mouse() and current_button.showing and (current_button.in_notification) and not stopping: #if notification, click before other buttons
                             current_button.on_click()
                             current_button.on_release()
@@ -166,15 +166,15 @@ def main_loop(global_manager):
                             stopping = True
                             break
                 else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing: #if instructions, click before other buttons
-                        global_manager.get('current_instructions_page').on_click()
+                    if status.current_instructions_page.touching_mouse() and status.current_instructions_page.showing: #if instructions, click before other buttons
+                        status.current_instructions_page.on_click()
                         clicked_button = True
                         allow_on_click = False
                         stopping = True
                         break
 
                 if not stopping:
-                    for current_button in global_manager.get('button_list'):
+                    for current_button in status.button_list:
                         if current_button.touching_mouse() and current_button.showing and allow_on_click: #only click 1 button at a time
                             if current_button.on_click(): #if on_click has return value, nothing happened - allow other buttons to click but do not deselect units
                                 allow_on_click = True
@@ -186,13 +186,13 @@ def main_loop(global_manager):
                 main_loop_utility.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
-            for current_button in global_manager.get('button_list'):
+            for current_button in status.button_list:
                 if current_button.touching_mouse() and current_button.showing:
                     current_button.showing_outline = True
                 elif not current_button.being_pressed:
                     current_button.showing_outline = False
         else:
-            for current_button in global_manager.get('button_list'):
+            for current_button in status.button_list:
                 if current_button.has_released:
                     current_button.showing_outline = False
 

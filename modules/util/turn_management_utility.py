@@ -304,7 +304,7 @@ def manage_financial_report(global_manager):
         None
     '''
     financial_report_text = constants.money_tracker.prepare_financial_report()
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': financial_report_text,
     })
     global_manager.set('previous_financial_report', financial_report_text)
@@ -454,7 +454,7 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
                 current_line = str(wandering_num_migrated_dict[wandering_destination]) + ' wandering worker' + utility.generate_plural(wandering_num_migrated_dict[wandering_destination]) + ' settled in the slums surrounding your '
                 current_line += wandering_destination_dict[wandering_destination] + ' at (' + str(wandering_destination_coordinates_dict[wandering_destination][0]) + ', ' + str(wandering_destination_coordinates_dict[wandering_destination][1]) + ').'
                 migration_report_text += current_line + ' /n'
-            global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': migration_report_text,
             })
     
@@ -520,7 +520,7 @@ def manage_villages(global_manager):
                 current_village.change_aggressiveness(1)
             if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
                 text = 'The previously pacified village at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
-                global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text,
                     'zoom_destination': current_village.cell.tile,
                 })
@@ -583,7 +583,7 @@ def manage_ministers(global_manager):
         None
     '''
     removed_ministers = []
-    for current_minister in global_manager.get('minister_list'):
+    for current_minister in status.minister_list:
         removing_minister = False
         if current_minister.just_removed and current_minister.current_position == 'none':
             current_minister.respond('fired')
@@ -633,10 +633,10 @@ def manage_ministers(global_manager):
             current_minister.appoint('none')
         current_minister.remove()
 
-    if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
-        while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
+    if (len(status.minister_list) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(status.minister_list) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
+        while len(status.minister_list) < global_manager.get('minister_limit'):
             constants.actor_creation_manager.create_minister(False, {}, global_manager)
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': 'Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n',
         })
     first_roll = random.randrange(1, 7)
@@ -654,7 +654,7 @@ def manage_minister_rumors(global_manager):
     Output:
         None
     '''
-    for current_minister in global_manager.get('minister_list'):
+    for current_minister in status.minister_list:
         if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
             current_minister.attempt_rumor('loyalty', 'none')
         for skill_type in global_manager.get('minister_types'):
@@ -681,7 +681,7 @@ def game_end_check(global_manager):
         global_manager.set('game_over', True)
         text = ''
         text += 'Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER'
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text,
             'choices': ['confirm main menu', 'quit'],
         })

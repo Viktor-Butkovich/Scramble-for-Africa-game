@@ -1,4 +1,5 @@
 import pygame
+from typing import Dict, List
 from modules.tools.data_managers.global_manager_template import global_manager_template
 from modules.tools.data_managers.sound_manager_template import sound_manager_template
 from modules.tools.data_managers.save_load_manager_template import save_load_manager_template
@@ -7,14 +8,21 @@ from modules.tools.data_managers.input_manager_template import input_manager_tem
 from modules.tools.data_managers.actor_creation_manager_template import actor_creation_manager_template
 from modules.tools.data_managers.event_manager_template import event_manager_template
 from modules.tools.data_managers.effect_manager_template import effect_manager_template
+from modules.tools.data_managers.notification_manager_template import notification_manager_template
 from modules.tools.data_managers.value_tracker_template import value_tracker_template, public_opinion_tracker_template, money_tracker_template
 from modules.interface_types.labels import money_label_template
-
-from typing import Dict, List
 
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
+pygame.display.set_caption('SFA')
+
+default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
+default_display_height: int = 972
+resolution_finder = pygame.display.Info()
+display_width: float = resolution_finder.current_w - round(default_display_width/10)
+display_height: float = resolution_finder.current_h - round(default_display_height/10)
+game_display: pygame.Surface = pygame.display.set_mode((display_width, display_height))
 
 global_manager:global_manager_template = global_manager_template()
 sound_manager:sound_manager_template = sound_manager_template(global_manager)
@@ -24,6 +32,7 @@ input_manager:input_manager_template = input_manager_template(global_manager)
 actor_creation_manager:actor_creation_manager_template = actor_creation_manager_template()
 event_manager:event_manager_template = event_manager_template(global_manager)
 effect_manager:effect_manager_template = effect_manager_template(global_manager)
+notification_manager:notification_manager_template = None #requires additional setup before initialization
 
 turn: int = 0
 turn_tracker: value_tracker_template = None
@@ -51,14 +60,20 @@ show_minimap_outlines: bool = False
 mouse_moved_time: float = 0.0
 end_turn_wait_time: float = 0.8
 
-default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
-default_display_height: int = 972
-resolution_finder = pygame.display.Info()
-display_width: float = resolution_finder.current_w - round(default_display_width/10)
-display_height: float = resolution_finder.current_h - round(default_display_height/10)
+font_name: str = 'times new roman'
+default_font_size: int = 15
+font_size: float = None
+myfont: pygame.font.SysFont = None
+
+default_music_volume: float = 0.5
+
+current_instructions_page_index: int = 0
+current_instructions_page_text: str = ''
 
 startup_complete: bool = False
 creating_new_game: bool = False
+
+grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid']
 
 building_prices: Dict[str, int] = {
     'resource': 10,
@@ -137,3 +152,9 @@ color_dict: Dict[str, tuple[int, int, int]] = {
     'purple': (127, 0, 170),
     'transparent': (1, 1, 1)
 }
+
+green_screen_colors: List[tuple[int, int, int]] = [
+    (62, 82, 82),
+    (70, 70, 92),
+    (110, 107, 3)
+]

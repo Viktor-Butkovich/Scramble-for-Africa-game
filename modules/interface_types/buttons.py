@@ -44,7 +44,7 @@ class button(interface_elements.interface_element):
         super().__init__(input_dict, global_manager)
         self.has_released = True
         self.button_type = input_dict['button_type']
-        self.global_manager.get('button_list').append(self)
+        status.button_list.append(self)
         self.keybind_id = input_dict.get('keybind_id', 'none')
         self.has_keybind = self.keybind_id != 'none'
         if self.has_keybind:
@@ -675,8 +675,8 @@ class button(interface_elements.interface_element):
         if self.has_keybind:
             self.tooltip_text.append('Press ' + self.keybind_name + ' to use.')
         tooltip_width = 0#50
-        font_name = self.global_manager.get('font_name')
-        font_size = self.global_manager.get('font_size')
+        font_name = constants.font_name
+        font_size = constants.font_size
         for text_line in tooltip_text:
             if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
                 tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
@@ -725,15 +725,15 @@ class button(interface_elements.interface_element):
         #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
         if self.showing:
             if self.showing_outline and allow_show_outline:
-                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.outline)
+                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
             if self.showing_background and hasattr(self, 'color'):
-                pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
+                pygame.draw.rect(constants.game_display, self.color, self.Rect)
             self.image.draw()
             if self.has_keybind: #The key to which a button is bound will appear on the button's image
                 message = self.keybind_name
                 color = 'white'
-                textsurface = self.global_manager.get('myfont').render(message, False, constants.color_dict[color])
-                self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10), (constants.display_height -
+                textsurface = constants.myfont.render(message, False, constants.color_dict[color])
+                constants.game_display.blit(textsurface, (self.x + scaling.scale_width(10), (constants.display_height -
                     (self.y + self.height - scaling.scale_height(5)))))
 
     def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
@@ -761,12 +761,12 @@ class button(interface_elements.interface_element):
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
             self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], self.tooltip_outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.tooltip_box)
+            pygame.draw.rect(constants.game_display, constants.color_dict['black'], self.tooltip_outline)
+            pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
-                    (text_line_index * self.global_manager.get('font_size'))))
+                constants.game_display.blit(text_utility.text(text_line, constants.myfont, self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
+                    (text_line_index * constants.font_size)))
 
     def on_rmb_click(self):
         '''
@@ -996,7 +996,7 @@ class button(interface_elements.interface_element):
                 else:
                     if not self.global_manager.get('current_game_mode') == 'strategic':
                         game_transitions.set_game_mode('strategic', self.global_manager)
-                    for current_minister in self.global_manager.get('minister_list'):
+                    for current_minister in status.minister_list:
                         if current_minister.just_removed and current_minister.current_position == 'none':
                             text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
                             current_minister.display_message(text)
@@ -1004,13 +1004,13 @@ class button(interface_elements.interface_element):
                         if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
                             text = 'The warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
                             text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
-                            self.global_manager.get('notification_manager').display_notification({
+                            constants.notification_manager.display_notification({
                                 'message': text,
                                 'zoom_destination': current_cell.tile,
                             })
                     choice_info_dict = {'type': 'end turn'}
 
-                    self.global_manager.get('notification_manager').display_notification({
+                    constants.notification_manager.display_notification({
                         'message': 'Are you sure you want to end your turn? ',
                         'choices': ['end turn', 'none'],
                         'extra_parameters': choice_info_dict
@@ -1052,7 +1052,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'save game':
             if main_loop_utility.action_possible(self.global_manager):
                 constants.save_load_manager.save_game('save1.pickle')
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': 'Game successfully saved to save1.pickle /n /n',
                 })
             else:
@@ -1088,7 +1088,7 @@ class button(interface_elements.interface_element):
             if num_freed > 0:
                 message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
                 message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': message,
                 })
             else:
@@ -1227,7 +1227,7 @@ class button(interface_elements.interface_element):
             None
         '''
         super().remove()
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        status.button_list = utility.remove_from_list(status.button_list, self)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1524,9 +1524,9 @@ class same_tile_icon(button):
         if self.showing:
             if self.index == 0 and status.displayed_tile:
                 if status.displayed_tile.cell.contained_mobs[0].selected:
-                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
+                    pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
                 else:
-                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.outline)
+                    pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
             super().draw()
 
     def update_tooltip(self):
@@ -1600,7 +1600,7 @@ class fire_unit_button(button):
                     elif self.attached_mob.worker_type == 'slave':
                         message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
 
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': message,
                     'choices': ['fire', 'cancel']
                 })
@@ -1683,7 +1683,7 @@ class free_unit_slaves_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
                 message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': message,
                     'choices': ['free', 'cancel']
                 })
@@ -1774,17 +1774,17 @@ class switch_game_mode_button(button):
                 if defense.fabricated_evidence > 0:
                     text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
                     text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
-                    self.global_manager.get('notification_manager').display_notification({
+                    constants.notification_manager.display_notification({
                         'message': text,
                     })
                 if self.global_manager.get('prosecution_bribed_judge'):
                     text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
-                    self.global_manager.get('notification_manager').display_notification({
+                    constants.notification_manager.display_notification({
                         'message': text,
                     })
             
             if self.to_mode == 'main_menu':
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': 'Are you sure you want to exit to the main menu without saving? /n /n',
                     'choices': ['confirm main menu', 'none']
                 })
@@ -1887,9 +1887,9 @@ class minister_portrait_image(button):
         if self.showing: #draw outline around portrait if minister selected
             showing = True
             if not self.current_minister == 'none':
-                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
+                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.Rect) #draw white background
                 if status.displayed_minister == self.current_minister and constants.show_selection_outlines: 
-                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
+                    pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
         super().draw()
         if showing and self.warning_image.showing:
             self.warning_image.draw()
@@ -1908,7 +1908,7 @@ class minister_portrait_image(button):
                 if self.current_minister != 'none':
                     self.current_minister.play_voice_line('acknowledgement')
                 if self in self.global_manager.get('available_minister_portrait_list'): #if available minister portrait
-                    own_index = self.global_manager.get('available_minister_list').index(self.current_minister)
+                    own_index = status.available_minister_list.index(self.current_minister)
                     self.global_manager.set('available_minister_left_index', own_index - 2)
                     minister_utility.update_available_minister_display(self.global_manager)
                 else: #if cabinet portrait
@@ -1993,9 +1993,9 @@ class country_selection_image(button):
         '''
         if self.showing: #draw outline around portrait if country selected
             if not self.current_country == 'none':
-                pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.Rect) #draw white background
+                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.Rect) #draw white background
                 if status.displayed_country == self.current_country and constants.show_selection_outlines: 
-                    pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['bright green'], self.outline)
+                    pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
         super().draw()
 
     def on_click(self):
@@ -2088,7 +2088,7 @@ class cycle_available_ministers_button(button):
             else:
                 return(False)
         elif self.direction == 'right': #left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
-            if not self.global_manager.get('available_minister_left_index') + 4 > len(self.global_manager.get('available_minister_list')):
+            if not self.global_manager.get('available_minister_left_index') + 4 > len(status.available_minister_list):
                 return(super().can_show(skip_parent_collection=skip_parent_collection))
             else:
                 return(False)
@@ -2231,7 +2231,7 @@ class show_previous_financial_report_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': self.global_manager.get('previous_financial_report'),
             })
         else:
@@ -2614,7 +2614,7 @@ class anonymous_button(button):
 
         super().__init__(input_dict, global_manager)
         self.font_size = scaling.scale_width(25)
-        self.font_name = self.global_manager.get('font_name')
+        self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True
 
@@ -2643,7 +2643,7 @@ class anonymous_button(button):
         '''
         super().draw()
         if self.showing:
-            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
+            constants.game_display.blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
     def update_tooltip(self):

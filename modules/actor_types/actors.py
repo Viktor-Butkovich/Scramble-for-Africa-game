@@ -95,7 +95,7 @@ class actor():
         
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['modes'] = self.modes
-        for grid_type in self.global_manager.get('grid_types_list'):
+        for grid_type in constants.grid_types_list:
             if getattr(status, grid_type) == self.grid:
                 save_dict['grid_type'] = grid_type
             #if self.global_manager.get(grid_type) == self.grid:
@@ -293,7 +293,7 @@ class actor():
             #this part of function only reached if no inventory attrition was triggered
             if self.actor_type == 'mob' and self.is_pmob and self.is_group and self.group_type == 'porters' and (not self.veteran) and random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6: #1/36 chance of porters promoting on successful inventory attrition roll
                 self.promote()
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': 'By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.',
                 })
 
@@ -505,12 +505,12 @@ class actor():
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width
         tooltip_image.tooltip_outline.y = tooltip_image.tooltip_box.y - tooltip_image.tooltip_outline_width
-        pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], tooltip_image.tooltip_outline)
-        pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], tooltip_image.tooltip_box)
+        pygame.draw.rect(constants.game_display, constants.color_dict['black'], tooltip_image.tooltip_outline)
+        pygame.draw.rect(constants.game_display, constants.color_dict['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
-                tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+            constants.game_display.blit(text_utility.text(text_line, constants.myfont, self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
+                tooltip_image.tooltip_box.y + (text_line_index * constants.font_size)))
 
     def get_image_id_list(self, override_values={}):
         '''

@@ -6,7 +6,7 @@ from modules.setup import *
 
 try:
     #global_manager = global_manager_template.global_manager_template() #manages a dictionary of what would be global variables passed between functions and classes
-    setup(debug_tools, fundamental, misc, terrains, commodities, def_ministers, def_countries, transactions, actions, lore, value_trackers, buttons, europe_screen,
+    setup(debug_tools, misc, terrains, commodities, def_ministers, def_countries, transactions, actions, lore, value_trackers, buttons, europe_screen,
             ministers_screen, trial_screen, new_game_setup_screen, mob_interface, tile_interface, unit_organization_interface, inventory_interface, minister_interface,
             country_interface
     )
@@ -33,5 +33,3 @@ except Exception: #displays error message and records error message in crash log
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# find a way to pack/unpack particular constant values for save/load - currently based on a saved global manager
-# add strategic map grid and slave traders grid to status - save/load currently does not work

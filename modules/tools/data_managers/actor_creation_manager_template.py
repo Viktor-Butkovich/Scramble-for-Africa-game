@@ -430,7 +430,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         actor_utility.update_descriptions(global_manager, recruitment_type)
         message += global_manager.get('string_descriptions')[recruitment_type]
         
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': message,
             'choices': ['recruitment', 'none'],
             'extra_parameters': choice_info_dict

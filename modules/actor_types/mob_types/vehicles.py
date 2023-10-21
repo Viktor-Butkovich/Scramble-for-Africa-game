@@ -157,7 +157,7 @@ class vehicle(pmob):
                                 current_sub_mob.death_sound('violent')
                             else:
                                 non_replaced_attrition.append(current_sub_mob)
-                            self.global_manager.get('notification_manager').display_notification({
+                            constants.notification_manager.display_notification({
                                 'message': text,
                                 'zoom_destination': self,
                             })
@@ -182,7 +182,7 @@ class vehicle(pmob):
             self.temp_disable_movement()
         else:
             crew.attrition_death(False)
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text,
             'zoom_destination': self,
         })

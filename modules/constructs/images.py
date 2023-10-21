@@ -3,6 +3,7 @@
 import pygame
 from ..util import utility, drawing_utility, text_utility, scaling
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class image():
     '''
@@ -420,8 +421,8 @@ class bundle_image():
         if self.is_offset and self.has_green_screen:
             for current_green_screen_color in self.green_screen_colors:
                 key += str(current_green_screen_color)
-        if key in self.bundle.global_manager.get('rendered_images'): #if image already loaded, use it
-            self.image = self.bundle.global_manager.get('rendered_images')[key]
+        if key in status.rendered_images: #if image already loaded, use it
+            self.image = status.rendered_images[key]
         else: #if image not loaded, load it and add it to the loaded images
             try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                 self.image = pygame.image.load(full_image_id)
@@ -432,7 +433,7 @@ class bundle_image():
             if self.is_offset and self.has_green_screen:
                 width, height = self.image.get_size()
                 index = 0
-                for current_green_screen_color in self.bundle.global_manager.get('green_screen_colors'):
+                for current_green_screen_color in constants.green_screen_colors:
                     if index < len(self.green_screen_colors):
                         if type(self.green_screen_colors[index]) == str: #like 'red'
                             replace_with = self.bundle.constants.color_dict[self.green_screen_colors[index]]
@@ -444,7 +445,7 @@ class bundle_image():
                                 if current_color[0] == current_green_screen_color[0] and current_color[1] == current_green_screen_color[1] and current_color[2] == current_green_screen_color[2]:
                                     self.image.set_at((x, y), (replace_with[0], replace_with[1], replace_with[2], current_color[3])) #preserves alpha value
                     index += 1
-            self.bundle.global_manager.get('rendered_images')[key] = self.image
+            status.rendered_images[key] = self.image
 
 class free_image(image):
     '''
@@ -599,15 +600,15 @@ class free_image(image):
                 if isinstance(new_image, str): #if set to string image path
                     self.contains_bundle = False
                     full_image_id = 'graphics/' + self.image_id
-                    if full_image_id in self.global_manager.get('rendered_images'):
-                        self.image = self.global_manager.get('rendered_images')[full_image_id]
+                    if full_image_id in status.rendered_images:
+                        self.image = status.rendered_images[full_image_id]
                     else:
                         try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                             self.image = pygame.image.load(full_image_id)
                         except:
                             print(full_image_id)
                             self.image = pygame.image.load(full_image_id)
-                        self.global_manager.get('rendered_images')[full_image_id] = self.image
+                        status.rendered_images[full_image_id] = self.image
                     self.image = pygame.transform.scale(self.image, (self.width, self.height))
                 else: #if set to image path list
                     self.contains_bundle = True
@@ -702,8 +703,8 @@ class tooltip_free_image(free_image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 0
-        font_name = self.global_manager.get('font_name')
-        font_size = self.global_manager.get('font_size')
+        font_name = constants.font_name
+        font_size = constants.font_size
         for text_line in tooltip_text:
             if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
                 tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
@@ -762,12 +763,12 @@ class tooltip_free_image(free_image):
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
             self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['black'], self.tooltip_outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), constants.color_dict['white'], self.tooltip_box)
+            pygame.draw.rect(constants.game_display, constants.color_dict['black'], self.tooltip_outline)
+            pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
-                    (text_line_index * self.global_manager.get('font_size'))))
+                constants.game_display.blit(text_utility.text(text_line, constants.myfont, self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
+                    (text_line_index * constants.font_size)))
 
 class indicator_image(tooltip_free_image):
     '''
@@ -1143,15 +1144,15 @@ class actor_image(image):
             if isinstance(self.image_id, str): #if set to string image path
                 self.contains_bundle = False
                 full_image_id = 'graphics/' + self.image_id
-                if full_image_id in self.global_manager.get('rendered_images'):
-                    self.image = self.global_manager.get('rendered_images')[full_image_id]
+                if full_image_id in status.rendered_images:
+                    self.image = status.rendered_images[full_image_id]
                 else:
                     try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                         self.image = pygame.image.load(full_image_id)
                     except:
                         print(full_image_id)
                         self.image = pygame.image.load(full_image_id)
-                    self.global_manager.get('rendered_images')[full_image_id] = self.image
+                    status.rendered_images[full_image_id] = self.image
                 self.image = pygame.transform.scale(self.image, (self.width, self.height))
             else: #if set to image path list
                 self.contains_bundle = True
@@ -1205,8 +1206,8 @@ class actor_image(image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
-        font_size = self.global_manager.get('font_size')
-        font_name = self.global_manager.get('font_name')
+        font_size = constants.font_size
+        font_name = constants.font_name
         for text_line in tooltip_text:
             if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
                 tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
@@ -1369,15 +1370,15 @@ class button_image(actor_image):
         if isinstance(self.image_id, str): #if set to string image path
             self.contains_bundle = False
             full_image_id = 'graphics/' + self.image_id
-            if full_image_id in self.global_manager.get('rendered_images'):
-                self.image = self.global_manager.get('rendered_images')[full_image_id]
+            if full_image_id in status.rendered_images:
+                self.image = status.rendered_images[full_image_id]
             else:
                 try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                     self.image = pygame.image.load(full_image_id)
                 except:
                     print(full_image_id)
                     self.image = pygame.image.load(full_image_id)
-                self.global_manager.get('rendered_images')[full_image_id] = self.image
+                status.rendered_images[full_image_id] = self.image
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
         else: #if set to image path list
             self.contains_bundle = True

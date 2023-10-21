@@ -26,7 +26,7 @@ def display_image(image, x, y, global_manager):
     Output:
         None
     '''
-    global_manager.get('game_display').blit(image, (x, y))
+    constants.game_display.blit(image, (x, y))
 
 def display_image_angle(image, x, y, angle, global_manager):
     '''
@@ -44,4 +44,4 @@ def display_image_angle(image, x, y, angle, global_manager):
     topleft = (x, y)
     rotated_image = pygame.transform.rotate(image, angle)
     new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
-    global_manager.get('game_display').blit(rotated_image, new_rect.topleft)
+    constants.game_display.blit(rotated_image, new_rect.topleft)

@@ -106,7 +106,7 @@ class work_crew(group):
                             self.promote()
                             message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
                             message += ') has become a veteran and will be more successful in future production attempts.'
-                            self.global_manager.get('notification_manager').display_notification({
+                            constants.notification_manager.display_notification({
                                 'message': message,
                                 'zoom_destination': building.cell.tile,
                             })

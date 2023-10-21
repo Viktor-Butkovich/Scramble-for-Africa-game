@@ -135,7 +135,7 @@ class expedition(group):
                     self.public_opinion_increases.append(public_opinion_increase)
                     self.global_manager.set('ongoing_action', True)
                     self.global_manager.set('ongoing_action_type', 'exploration')
-                    self.global_manager.get('notification_manager').display_notification({
+                    constants.notification_manager.display_notification({
                         'message': text,
                         'notification_type': 'off_tile_exploration'
                     })
@@ -189,14 +189,14 @@ class expedition(group):
         self.current_roll_modifier = 0
         if self.current_min_success > 6:
             message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. Decrease the village\'s aggressiveness to decrease the roll\'s difficulty. /n /n'
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': message,
             })
         else:
             self.global_manager.set('ongoing_action', True)
             self.global_manager.set('ongoing_action_type', 'rumor_search')
 
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': message,
                 'choices': ['start rumor search', 'stop rumor search'],
                 'extra_parameters': choice_info_dict
@@ -227,26 +227,26 @@ class expedition(group):
         text += 'The expedition tries to find information regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
 
         if not self.veteran:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'rumor_search'
             })
         else:
             text += ('The veteran explorer can roll twice and pick the higher result. /n /n')
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'rumor_search'
             })
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
             'notification_type': 'roll'
         })
 
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        die_x = constants.notification_manager.notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['rumor_search'], 'rumor_search', 2)
@@ -278,7 +278,7 @@ class expedition(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'rumor_search'
@@ -304,13 +304,13 @@ class expedition(group):
             text += ' /nThe explorer is now a veteran and will be more successful in future ventures. /n'
             
         if roll_result >= self.current_min_success:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + '/nClick to remove this notification.',
                 'notification_type': 'final_rumor_search'
             })
             success = True
         else:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
             })
             success = False
@@ -342,7 +342,7 @@ class expedition(group):
                 text = 'The villagers tell rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
                 self.global_manager.set('ongoing_action', True)
                 self.global_manager.set('ongoing_action_type', 'rumor_search')
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text,
                     'notification_type': 'off_tile_exploration'
                 })
@@ -398,13 +398,13 @@ class expedition(group):
         self.current_roll_modifier = 0
         if self.current_min_success > 6:
             message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. /n /n'
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': message,
             })
         else:
             self.global_manager.set('ongoing_action', True)
             self.global_manager.set('ongoing_action_type', 'artifact_search')
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': message,
                 'choices': ['start artifact search', 'stop artifact search'],
                 'extra_parameters': choice_info_dict
@@ -434,26 +434,26 @@ class expedition(group):
         text += 'The expedition tries to locate the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
 
         if not self.veteran:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'artifact_search'
             })
         else:
             text += ('The veteran explorer can roll twice and pick the higher result. /n /n')
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.',
                 'num_dice': num_dice,
                 'notification_type': 'artifact_search'
             })
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Rolling... ',
             'num_dice': num_dice,
             'notification_type': 'roll'
         })
 
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        die_x = constants.notification_manager.notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['artifact_search'], 'artifact_search', 2)
@@ -485,7 +485,7 @@ class expedition(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        self.global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
             'notification_type': 'artifact_search'
@@ -512,13 +512,13 @@ class expedition(group):
             text += ' /nThe explorer is now a veteran and will be more successful in future ventures. /n'
             
         if roll_result >= self.current_min_success:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text + '/nClick to remove this notification.',
                 'notification_type': 'final_artifact_search'
             })
             success = True
         else:
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
             })
             success = False
@@ -549,7 +549,7 @@ class expedition(group):
                     text += 'Completing a mission in the ' + lore_type + ' category has given your company a permanent ' + self.global_manager.get('lore_types_effect_descriptions_dict')[lore_type] + '. /n /n'
                     self.global_manager.get('completed_lore_mission_types').append(lore_type)
                     self.global_manager.get('lore_types_effects_dict')[lore_type].apply()
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': text,
                 })
                 constants.money_tracker.change(prize_money)

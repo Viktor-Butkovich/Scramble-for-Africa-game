@@ -23,7 +23,7 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     global_manager.set('ongoing_action', True)
     global_manager.set('ongoing_action_type', 'trial')
 
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': message,
         'choices': ['start trial', 'stop trial'],
         'extra_parameters': choice_info_dict
@@ -198,7 +198,7 @@ def trial(global_manager): #called by choice notification button
     else:
         text += '+ 0 judge bias '
     text += '= ' + str(effective_evidence) + ' evidence rolls /n /n'
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': text,
         'audio': 'trial starting'
     })
@@ -214,7 +214,7 @@ def trial(global_manager): #called by choice notification button
         global_manager.get('trial_rolls').append(current_roll)
 
     if len(global_manager.get('trial_rolls')) == 0:
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': 'As you have no evidence rolls remaining, you automatically lose the trial. /n /n',
         })
         complete_trial(1, global_manager)
@@ -236,19 +236,19 @@ def display_evidence_roll(global_manager):
     result = global_manager.get('trial_rolls')[0]
     result_outcome_dict = {'min_success': 5, 'min_crit_success': 5, 'max_crit_fail': 0}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-    constants.actor_creation_manager.display_die(scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 140, 440), scaling.scale_width(100),
+    constants.actor_creation_manager.display_die(scaling.scale_coordinates(constants.notification_manager.notification_x - 140, 440), scaling.scale_width(100),
         scaling.scale_height(100), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': text + 'Click to roll. 5+ required on at least 1 die to succeed.',
         'num_dice': 1
     })
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': text + 'Rolling... ',
         'num_dice': 1,
         'notification_type': 'roll'
     })
     results = dice_utility.roll_to_list(6, 'Evidence roll', 5, 5, 0, global_manager, result)
-    global_manager.get('notification_manager').display_notification({
+    constants.notification_manager.display_notification({
         'message': text + results[1],
         'notification_type': 'trial'
     })
@@ -276,7 +276,7 @@ def complete_trial(final_roll, global_manager):
         else:
             text += 'Authorities searched ' + defense.name + '\'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. '
             text += ' /n /n'
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text,
             'audio': 'guilty'
         })
@@ -287,7 +287,7 @@ def complete_trial(final_roll, global_manager):
         defense.remove_complete()
         constants.fear_tracker.change(1)
         text = 'Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n'
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text,
         })
 
@@ -321,7 +321,7 @@ def complete_trial(final_roll, global_manager):
 
         defense.fabricated_evidence = 0
         defense.corruption_evidence = remaining_evidence
-        global_manager.get('notification_manager').display_notification({
+        constants.notification_manager.display_notification({
             'message': text,
             'audio': 'not guilty'
         })

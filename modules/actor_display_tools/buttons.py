@@ -1595,7 +1595,7 @@ class remove_minister_button(button):
                     text += appointed_minister.name + ' is of high social status, and firing him would reflect particularly poorly on your company. /n /n'
             elif appointed_minister.status_number == 1:
                 text += appointed_minister.name + ' is of low social status, and firing him would have a relatively minimal impact on your company\'s reputation. /n /n'
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
                 'choices': ['confirm remove minister', 'none']
             })
@@ -1655,7 +1655,7 @@ class to_trial_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             if constants.money >= constants.action_prices['trial']:
                 if minister_utility.positions_filled(self.global_manager):
-                    if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
+                    if len(status.minister_list) > 8: #if any available appointees
                         defense = status.displayed_minister
                         prosecution = self.global_manager.get('current_ministers')['Prosecutor']
                         game_transitions.set_game_mode('trial', self.global_manager)

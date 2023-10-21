@@ -99,7 +99,7 @@ def update_available_minister_display(global_manager):
     '''
     available_minister_portrait_list = global_manager.get('available_minister_portrait_list')
     available_minister_left_index = global_manager.get('available_minister_left_index')
-    available_minister_list = global_manager.get('available_minister_list')
+    available_minister_list = status.available_minister_list
     for current_index in range(len(available_minister_portrait_list)):
         minister_index = available_minister_left_index + current_index
         if minister_index < len(available_minister_list) and minister_index >= 0:

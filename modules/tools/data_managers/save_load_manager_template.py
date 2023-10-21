@@ -204,7 +204,7 @@ class save_load_manager_template():
             self.global_manager.set('minister_appointment_tutorial_completed', True)
             self.global_manager.set('exit_minister_screen_tutorial_completed', True)
             for current_minister_position_index in range(len(self.global_manager.get('minister_types'))):
-                self.global_manager.get('minister_list')[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
+                status.minister_list[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
             game_transitions.set_game_mode('strategic', self.global_manager)
         constants.creating_new_game = False
         
@@ -249,7 +249,7 @@ class save_load_manager_template():
             saved_actor_dicts.append(current_loan.to_save_dict())
 
         saved_minister_dicts = []        
-        for current_minister in self.global_manager.get('minister_list'):
+        for current_minister in status.minister_list:
             saved_minister_dicts.append(current_minister.to_save_dict())
             if constants.effect_manager.effect_active('show_corruption_on_save'):
                 print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +

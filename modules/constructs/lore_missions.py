@@ -64,7 +64,7 @@ class lore_mission():
             self.artifact_location = random.choice(self.possible_artifact_locations)
             text = 'A new ' + self.lore_type + ' mission has been issued by the ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society'
             text += ' to find the ' + self.name + '. /n /n'
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': text,
             })
 

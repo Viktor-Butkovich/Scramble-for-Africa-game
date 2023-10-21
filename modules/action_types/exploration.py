@@ -157,7 +157,7 @@ class exploration(action.action):
             None
         '''
         if super().start(unit):
-            self.global_manager.get('notification_manager').display_notification({
+            constants.notification_manager.display_notification({
                 'message': action_utility.generate_risk_message(self, unit) + self.generate_notification_text('confirmation'),
                 'choices': [
                     {
@@ -192,7 +192,7 @@ class exploration(action.action):
                 else:
                     status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y) #changes minimap to show unexplored tile without moving
             else:
-                self.global_manager.get('notification_manager').display_notification({
+                constants.notification_manager.display_notification({
                     'message': 'This unit\'s ' + str(self.initial_movement_points) + ' remaining movement points are not enough to move into the newly explored tile. /n /n',
                 })
                 status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y)
