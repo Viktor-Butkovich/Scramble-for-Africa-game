@@ -91,7 +91,7 @@ class mob(actor):
             if constants.creating_new_game:
                 self.creation_turn = 0
             else:
-                self.creation_turn = self.global_manager.get('turn')
+                self.creation_turn = constants.turn
 
     def image_variants_setup(self, from_save, input_dict):
         '''

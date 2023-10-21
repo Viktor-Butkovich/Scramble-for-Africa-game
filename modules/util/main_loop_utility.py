@@ -83,11 +83,11 @@ def update_display(global_manager):
 
     if constants.effect_manager.effect_active('track_fps'):
         current_time = time.time()
-        global_manager.set('frames_this_second', global_manager.get('frames_this_second') + 1)
-        if current_time > global_manager.get('last_fps_update') + 1:
-            global_manager.get('fps_tracker').set(global_manager.get('frames_this_second'))
-            global_manager.set('frames_this_second', 0)
-            global_manager.set('last_fps_update', current_time)
+        constants.frames_this_second += 1
+        if current_time > constants.last_fps_update + 1 and constants.startup_complete:
+            constants.fps_tracker.set(constants.frames_this_second)
+            constants.frames_this_second = 0
+            constants.last_fps_update = current_time
 
 def action_possible(global_manager):
     '''

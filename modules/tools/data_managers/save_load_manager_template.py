@@ -36,11 +36,6 @@ class save_load_manager_template():
             None
         '''
         self.copied_globals = []
-        self.copied_globals.append('money')
-        self.copied_globals.append('turn')
-        self.copied_globals.append('public_opinion')
-        self.copied_globals.append('evil')
-        self.copied_globals.append('fear')
         self.copied_globals.append('commodity_prices')
         self.copied_globals.append('african_worker_upkeep')
         self.copied_globals.append('european_worker_upkeep')
@@ -59,7 +54,13 @@ class save_load_manager_template():
         self.copied_globals.append('slave_traders_natural_max_strength')
         self.copied_globals.append('completed_lore_mission_types')
 
-        self.copied_constants = ['action_prices']
+        self.copied_constants = []
+        self.copied_constants.append('action_prices')
+        self.copied_constants.append('turn')
+        self.copied_constants.append('public_opinion')
+        self.copied_constants.append('money')
+        self.copied_constants.append('evil')
+        self.copied_constants.append('fear')
         
     def new_game(self, country):
         '''
@@ -156,13 +157,13 @@ class save_load_manager_template():
             else:
                 market_utility.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
-        self.global_manager.get('money_tracker').reset_transaction_history()
-        self.global_manager.get('money_tracker').set(500)
-        self.global_manager.get('turn_tracker').set(0)
-        self.global_manager.get('public_opinion_tracker').set(50)
-        self.global_manager.get('money_tracker').change(0) #updates projected income display
-        self.global_manager.get('evil_tracker').set(0)
-        self.global_manager.get('fear_tracker').set(1)
+        constants.money_tracker.reset_transaction_history()
+        constants.money_tracker.set(500)
+        constants.turn_tracker.set(0)
+        constants.public_opinion_tracker.set(50)
+        constants.money_tracker.change(0) #updates projected income display
+        constants.evil_tracker.set(0)
+        constants.fear_tracker.set(1)
 
         self.global_manager.set('slave_traders_natural_max_strength', 10) #regenerates to natural strength, can increase indefinitely when slaves are purchased
         actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_natural_max_strength'), self.global_manager)
@@ -218,7 +219,7 @@ class save_load_manager_template():
         '''
         file_path = 'save_games/' + file_path
         saved_global_manager = global_manager_template.global_manager_template()
-        self.global_manager.set('transaction_history', self.global_manager.get('money_tracker').transaction_history)
+        self.global_manager.set('transaction_history', constants.money_tracker.transaction_history)
         for current_element in self.copied_globals: #save necessary data into new global manager
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
         
@@ -303,16 +304,17 @@ class save_load_manager_template():
                 self.global_manager.set(current_element, new_global_manager.get(current_element))
         for current_element in self.copied_constants:
             setattr(constants, current_element, saved_constants[current_element])
-        self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
-        self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
-        self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
-        self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
-        self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
-        self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
+        constants.money_tracker.set(constants.money)
+        constants.money_tracker.transaction_history = self.global_manager.get('transaction_history')
+        constants.turn_tracker.set(constants.turn)
+        constants.public_opinion_tracker.set(constants.public_opinion)
+        constants.evil_tracker.set(constants.evil)
+        constants.fear_tracker.set(constants.fear)
+
         self.global_manager.get(self.global_manager.get('current_country_name')).select() #selects the country object with the same identifier as the saved country name
 
         text_utility.print_to_screen('', self.global_manager)
-        text_utility.print_to_screen('Turn ' + str(self.global_manager.get('turn')), self.global_manager)
+        text_utility.print_to_screen('Turn ' + str(constants.turn), self.global_manager)
 
         #load grids
         strategic_grid_height = 300

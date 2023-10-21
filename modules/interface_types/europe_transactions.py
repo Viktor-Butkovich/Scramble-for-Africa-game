@@ -79,7 +79,7 @@ class recruitment_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money_tracker').get() >= self.cost:
+            if constants.money_tracker.get() >= self.cost:
                 choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
                 constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
             else:
@@ -161,10 +161,10 @@ class buy_commodity_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
-            if self.global_manager.get('money_tracker').get() >= self.cost:
+            if constants.money_tracker.get() >= self.cost:
                 if minister_utility.positions_filled(self.global_manager):
                     status.europe_grid.cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
-                    self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
+                    constants.money_tracker.change(-1 * self.cost, 'consumer_goods')
                     text_utility.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)
                     if random.randrange(1, 7) == 1: #1/6 chance
                         market_utility.change_price('consumer goods', 1, self.global_manager)

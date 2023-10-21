@@ -221,7 +221,7 @@ class expedition(group):
         else:
             num_dice = 1
         
-        self.global_manager.get('money_tracker').change(constants.action_prices['rumor_search'] * -1, 'rumor_search')
+        constants.money_tracker.change(constants.action_prices['rumor_search'] * -1, 'rumor_search')
         village = self.images[0].current_cell.get_building('village')
         text = ''
         text += 'The expedition tries to find information regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
@@ -428,7 +428,7 @@ class expedition(group):
         else:
             num_dice = 1
         
-        self.global_manager.get('money_tracker').change(constants.action_prices['artifact_search'] * -1, 'artifact_search')
+        constants.money_tracker.change(constants.action_prices['artifact_search'] * -1, 'artifact_search')
         #village = self.images[0].current_cell.get_building('village')
         text = ''
         text += 'The expedition tries to locate the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
@@ -552,8 +552,8 @@ class expedition(group):
                 self.global_manager.get('notification_manager').display_notification({
                     'message': text,
                 })
-                self.global_manager.get('money_tracker').change(prize_money)
-                self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
+                constants.money_tracker.change(prize_money)
+                constants.public_opinion_tracker.change(public_opinion_increase)
                 self.global_manager.get('current_lore_mission').remove_complete()
             else:
                 location.set_proven_false(True)

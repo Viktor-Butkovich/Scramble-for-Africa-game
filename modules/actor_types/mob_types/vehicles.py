@@ -174,7 +174,7 @@ class vehicle(pmob):
         Output:
             None
         '''
-        self.global_manager.get('evil_tracker').change(3)
+        constants.evil_tracker.change(3)
         text = 'The ' + crew.name + ' crewing the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
         if crew.automatically_replace:
             text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found. /n /n'

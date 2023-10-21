@@ -1075,7 +1075,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'free all':
             actor_utility.deselect_all(self.global_manager)
             pmob_list = utility.copy_list(self.global_manager.get('pmob_list')) #alllows iterating through each unit without any issues from removing from list during iteration
-            old_public_opinion = self.global_manager.get('public_opinion')
+            old_public_opinion = constants.public_opinion
             num_freed = 0
             for current_pmob in pmob_list:
                 if current_pmob.is_group and current_pmob.worker.worker_type == 'slave':
@@ -1084,7 +1084,7 @@ class button(interface_elements.interface_element):
                 elif current_pmob.is_worker and (not current_pmob.in_group) and current_pmob.worker_type == 'slave':
                     num_freed += 1
                     current_pmob.free_and_replace()
-            public_opinion_increase = self.global_manager.get('public_opinion') - old_public_opinion
+            public_opinion_increase = constants.public_opinion - old_public_opinion
             if num_freed > 0:
                 message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
                 message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
@@ -1124,7 +1124,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'launch trial':
             if main_loop_utility.action_possible(self.global_manager):
-                if self.global_manager.get('money') >= constants.action_prices['trial']:
+                if constants.money >= constants.action_prices['trial']:
                     if status.displayed_defense.corruption_evidence > 0:
                         trial_utility.start_trial(self.global_manager)
                     else:
@@ -1155,7 +1155,7 @@ class button(interface_elements.interface_element):
             removed_minister.just_removed = True
             removed_minister.appoint('none')
             public_opinion_penalty = removed_minister.status_number
-            self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+            constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
 
         elif self.button_type == 'generate crash':
             print(1/0)

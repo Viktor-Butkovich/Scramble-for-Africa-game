@@ -48,7 +48,7 @@ def change_price(changed_commodity, num_change, global_manager):
     if global_manager.get('commodity_prices')[changed_commodity] < 1:
         global_manager.get('commodity_prices')[changed_commodity] = 1
     global_manager.get('commodity_prices_label').update_label()
-    global_manager.get('money_label').check_for_updates()
+    constants.money_label.check_for_updates()
 
 def set_price(changed_commodity, new_value, global_manager):
     '''
@@ -83,7 +83,7 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     #for i in range(num_sold):
     #    seller.change_inventory(sold_commodity, -1)
     seller.change_inventory(sold_commodity, -1 * num_sold)
-    global_manager.get('money_label').check_for_updates()
+    constants.money_label.check_for_updates()
 
 def calculate_total_sale_revenue(global_manager):
     '''
@@ -121,7 +121,7 @@ def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
             if changed_price >= global_manager.get('min_' + worker_type.lower() + '_worker_upkeep'):
                 global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
                 text_utility.print_to_screen('Adding ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker to the labor pool decreased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
-        global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()
 
 def attempt_slave_recruitment_cost_change(change_type, global_manager):
     '''
@@ -156,7 +156,7 @@ def calculate_subsidies(global_manager, projected = False):
     Output:
         double: Returns the company's subsidies for the turn
     '''
-    public_opinion = global_manager.get('public_opinion')
+    public_opinion = constants.public_opinion
     if projected:
         if public_opinion < 50:
             public_opinion += 1
@@ -166,7 +166,7 @@ def calculate_subsidies(global_manager, projected = False):
         public_opinion += random.randrange(-10, 11)
         
     subsidies = public_opinion / 5
-    for i in range(599, round(global_manager.get('money')), 100): #remove 10% of subsidies for each 100 money over 500
+    for i in range(599, round(constants.money), 100): #remove 10% of subsidies for each 100 money over 500
         subsidies *= 0.9
     if subsidies < 1:
         subsidies = 0
@@ -256,9 +256,9 @@ class loan():
         self.total_to_pay = self.interest * self.remaining_duration
         self.global_manager.get('loan_list').append(self)
         if not from_save:
-            self.global_manager.get('money_tracker').change(self.principal, 'loan')
+            constants.money_tracker.change(self.principal, 'loan')
             text_utility.print_to_screen('You have accepted a ' + str(self.principal) + ' money loan with interest payments of ' + str(self.interest) + '/turn for ' + str(self.remaining_duration) + ' turns.', self.global_manager)
-            global_manager.get('money_label').check_for_updates()
+            constants.money_label.check_for_updates()
 
     def to_save_dict(self):
         '''
@@ -289,7 +289,7 @@ class loan():
         Output:
             None
         '''
-        self.global_manager.get('money_tracker').change(-1 * self.interest, 'loan_interest')
+        constants.money_tracker.change(-1 * self.interest, 'loan_interest')
         self.remaining_duration -= 1
         self.total_to_pay -= self.interest
         if self.total_to_pay <= 0:

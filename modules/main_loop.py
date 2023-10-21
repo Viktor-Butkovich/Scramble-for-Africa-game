@@ -226,7 +226,7 @@ def main_loop(global_manager):
                         current_enemy.remove_complete()
                         removed = True
                         
-                elif current_enemy.npmob_type == 'native_warriors' and current_enemy.creation_turn == global_manager.get('turn'): #if unit just created
+                elif current_enemy.npmob_type == 'native_warriors' and current_enemy.creation_turn == constants.turn: #if unit just created
                     spawn_cell = current_enemy.grids[0].find_cell(current_enemy.x, current_enemy.y)
                     if (status.minimap_grid.center_x, status.minimap_grid.center_y) == (current_enemy.x, current_enemy.y) and spawn_cell.visible: #if camera just moved to spawn location to show spawning
                         spawning = True
@@ -249,7 +249,7 @@ def main_loop(global_manager):
                     moving = True
                     
                 elif current_enemy.selected: #if enemy is selected and did not just spawn, move it while minimap follows
-                    if not current_enemy.creation_turn == global_manager.get('turn'): #don't do anything on first turn, but still move camera to spawn location if visible
+                    if not current_enemy.creation_turn == constants.turn: #don't do anything on first turn, but still move camera to spawn location if visible
                         current_enemy.end_turn_move() #do_turn()
                         moving = True
                         if current_enemy.visible():
@@ -263,7 +263,7 @@ def main_loop(global_manager):
                     else:
                         current_enemy.turn_done = True
                     
-                if (not (removed or spawning)) and (not current_enemy.creation_turn == global_manager.get('turn')) and current_enemy.visible(): #if unit visible and not selected, start its turn
+                if (not (removed or spawning)) and (not current_enemy.creation_turn == constants.turn) and current_enemy.visible(): #if unit visible and not selected, start its turn
                     if current_enemy.npmob_type == 'native_warriors' and current_enemy.find_closest_target() == 'none' and not current_enemy.despawning: #if native warriors have no target, they stand still and no movement is shown
                         did_nothing = True
                         current_enemy.turn_done = True
@@ -276,7 +276,7 @@ def main_loop(global_manager):
                         current_enemy.select()
                         status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                                                                      
-                elif current_enemy.creation_turn == global_manager.get('turn') and not spawning: #if enemy visible but just spawned, end turn
+                elif current_enemy.creation_turn == constants.turn and not spawning: #if enemy visible but just spawned, end turn
                     did_nothing = True
                     current_enemy.turn_done = True
 

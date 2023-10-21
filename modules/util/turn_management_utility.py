@@ -51,7 +51,7 @@ def start_player_turn(global_manager, first_turn = False):
         None
     '''
     text_utility.print_to_screen('', global_manager)
-    text_utility.print_to_screen('Turn ' + str(global_manager.get('turn') + 1), global_manager)
+    text_utility.print_to_screen('Turn ' + str(constants.turn + 1), global_manager)
     if not first_turn:
         for current_pmob in global_manager.get('pmob_list'):
             if current_pmob.is_vehicle:
@@ -79,7 +79,7 @@ def start_player_turn(global_manager, first_turn = False):
 
     global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
     global_manager.set('enemy_combat_phase', False)
-    global_manager.get('turn_tracker').change(1)
+    constants.turn_tracker.change(1)
         
     if not first_turn:
         market_utility.adjust_prices(global_manager)#adjust_prices(global_manager)
@@ -113,7 +113,7 @@ def reset_mobs(mob_type, global_manager):
         for current_npmob in global_manager.get('npmob_list'):
             current_npmob.reset_movement_points()
             current_npmob.set_disorganized(False)
-            #if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
+            #if not current_npmob.creation_turn == constants.turn: #if not created this turn
             current_npmob.turn_done = False
             global_manager.get('enemy_turn_queue').append(current_npmob)
     else:
@@ -230,7 +230,7 @@ def manage_upkeep(global_manager):
     slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 2)
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
     total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 2)
-    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 2), 'worker_upkeep')
+    constants.money_tracker.change(round(-1 * total_upkeep, 2), 'worker_upkeep')
 
 def manage_loans(global_manager):
     '''
@@ -267,18 +267,18 @@ def manage_public_opinion(global_manager):
     Output:
         None
     '''
-    current_public_opinion = round(global_manager.get('public_opinion'))
+    current_public_opinion = round(constants.public_opinion)
     if current_public_opinion < 50:
-        global_manager.get('public_opinion_tracker').change(1)
+        constants.public_opinion_tracker.change(1)
         text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company increased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion + 1), global_manager)
     elif current_public_opinion > 50:
-        global_manager.get('public_opinion_tracker').change(-1)
+        constants.public_opinion_tracker.change(-1)
         text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1), global_manager)
-    global_manager.get('evil_tracker').change(-1)
+    constants.evil_tracker.change(-1)
     if constants.effect_manager.effect_active('show_evil'):
-        print('Evil number: ' + str(global_manager.get('evil')))
+        print('Evil number: ' + str(constants.evil))
     if constants.effect_manager.effect_active('show_fear'):
-        print('Fear number: ' + str(global_manager.get('fear')))
+        print('Fear number: ' + str(constants.fear))
     
 def manage_subsidies(global_manager):
     '''
@@ -291,7 +291,7 @@ def manage_subsidies(global_manager):
     '''
     subsidies_received = market_utility.calculate_subsidies(global_manager)
     text_utility.print_to_screen('You received ' + str(subsidies_received) + ' money in subsidies from the government based on your public opinion and colonial efforts', global_manager)
-    global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
+    constants.money_tracker.change(subsidies_received, 'subsidies')
 
 
 def manage_financial_report(global_manager):
@@ -303,12 +303,12 @@ def manage_financial_report(global_manager):
     Output:
         None
     '''
-    financial_report_text = global_manager.get('money_tracker').prepare_financial_report()
+    financial_report_text = constants.money_tracker.prepare_financial_report()
     global_manager.get('notification_manager').display_notification({
         'message': financial_report_text,
     })
     global_manager.set('previous_financial_report', financial_report_text)
-    global_manager.get('money_tracker').reset_transaction_history()
+    constants.money_tracker.reset_transaction_history()
 
 def manage_worker_price_changes(global_manager):
     '''
@@ -556,7 +556,7 @@ def manage_enemy_movement(global_manager):
         None
     '''
     for current_npmob in global_manager.get('npmob_list'):
-        if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
+        if not current_npmob.creation_turn == constants.turn: #if not created this turn
             current_npmob.end_turn_move()
 
 def manage_combat(global_manager):
@@ -590,7 +590,7 @@ def manage_ministers(global_manager):
             removing_minister = True
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or constants.effect_manager.effect_active('farm_upstate'):
+        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or constants.evil > random.randrange(0, 100))) or constants.effect_manager.effect_active('farm_upstate'):
             removed_ministers.append(current_minister)
         else: #if not retired/fired
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1: #1/36 chance to increase relevant specific skill
@@ -642,7 +642,7 @@ def manage_ministers(global_manager):
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
-        global_manager.get('fear_tracker').change(-1)
+        constants.fear_tracker.change(-1)
     manage_minister_rumors(global_manager)
 
 def manage_minister_rumors(global_manager):
@@ -677,7 +677,7 @@ def game_end_check(global_manager):
     Output:
         None
     '''
-    if global_manager.get('money') < 0:
+    if constants.money < 0:
         global_manager.set('game_over', True)
         text = ''
         text += 'Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER'
@@ -717,14 +717,14 @@ def manage_commodity_sales(global_manager):
                     individual_sell_price -= 1
                 if individual_sell_price < 1:
                     individual_sell_price = 1
-                reported_revenue += individual_sell_price#global_manager.get('money_tracker').change(individual_sell_price, 'commodity sales')
+                reported_revenue += individual_sell_price#constants.money_tracker.change(individual_sell_price, 'commodity sales')
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
                     market_utility.change_price(current_commodity, -1, global_manager)
 
             text += str(sold_commodities[current_commodity]) + ' ' + current_commodity + ' sold for ' + str(actual_revenue) + ' money (expected ' + str(expected_revenue) + ') /n /n'
 
-    global_manager.get('money_tracker').change(reported_revenue, 'sold_commodities')
+    constants.money_tracker.change(reported_revenue, 'sold_commodities')
     
     if any_sold:
         trade_minister.display_message(text)

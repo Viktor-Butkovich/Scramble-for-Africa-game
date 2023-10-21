@@ -183,7 +183,7 @@ class exploration(action.action):
             None
         '''
         if self.roll_result >= self.current_min_success:
-            self.global_manager.get('public_opinion_tracker').change(self.public_relations_change)
+            constants.public_opinion_tracker.change(self.public_relations_change)
             self.future_cell.set_visibility(True)
             if self.initial_movement_points >= self.current_unit.get_movement_cost(self.x_change, self.y_change):
                 self.current_unit.set_movement_points(self.initial_movement_points)

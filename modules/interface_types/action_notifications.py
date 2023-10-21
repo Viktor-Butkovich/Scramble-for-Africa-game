@@ -273,7 +273,7 @@ class off_tile_exploration_notification(action_notification):
             'init_type': 'free image'
         }, global_manager))
 
-        global_manager.get('public_opinion_tracker').change(public_opinion_increase)
+        constants.public_opinion_tracker.change(public_opinion_increase)
         status.minimap_grid.calibrate(explored_cell.x, explored_cell.y)
         super().__init__(input_dict, global_manager)
 

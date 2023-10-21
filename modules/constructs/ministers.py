@@ -333,7 +333,7 @@ class minister():
             print(self.current_position + ' ' + self.name + ' has now stolen a total of ' + str(self.stolen_money) + ' money.')
 
         if value > 0:
-            self.global_manager.get('evil_tracker').change(2)
+            constants.evil_tracker.change(2)
                 
     def to_save_dict(self):
         '''
@@ -867,7 +867,7 @@ class minister():
             return(False)
             
         if random.randrange(1, 7) >= self.corruption_threshold:
-            if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
+            if random.randrange(1, 7) >= constants.fear: #higher fear reduces chance of exceeding threshold and stealing
                 return(True)
             else:
                 if constants.effect_manager.effect_active('show_fear'):
@@ -1056,7 +1056,7 @@ class minister():
         elif event == 'fired':
             multiplier = random.randrange(8, 13) / 10.0 #0.8-1.2
             public_opinion_change = -10 * self.status_number * multiplier #4-6 for lowborn, 32-48 for very high
-            self.global_manager.get('evil_tracker').change(2)
+            constants.evil_tracker.change(2)
             text += 'From: ' + self.name + ' /n /n'
             intro_options = ['How far our empire has fallen... ',
                              'You have made a very foolish decision in firing me. ',
@@ -1110,7 +1110,7 @@ class minister():
             if self.current_position == 'none':
                 text = self.name + ' no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n'
             else:
-                if random.randrange(0, 100) < self.global_manager.get('evil'):
+                if random.randrange(0, 100) < constants.evil:
                     tone = 'guilty'
                 else:
                     tone = 'content'
@@ -1151,7 +1151,7 @@ class minister():
                 text += random.choice(intro_options) + random.choice(middle_options) + random.choice(conclusion_options)
                 text += ' /n /n /n' + self.current_position + ' ' + self.name + ' has chosen to step down and retire. /n /n'
                 text += 'Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n'
-        self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
+        constants.public_opinion_tracker.change(public_opinion_change)
         if not text == '':
             self.display_message(text, audio)
 

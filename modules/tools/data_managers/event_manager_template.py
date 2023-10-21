@@ -90,4 +90,4 @@ class event_manager_template():
         Output:
             None
         '''
-        self.add_repeating_event(self.global_manager.get('money_tracker').change, [-20], activation_time = 1)
+        self.add_repeating_event(constants.money_tracker.change, [-20], activation_time = 1)

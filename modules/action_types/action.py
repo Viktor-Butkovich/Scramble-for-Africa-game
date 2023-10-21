@@ -92,7 +92,7 @@ class action():
         elif not (unit.movement_points >= 1):
             text_utility.print_to_screen(utility.generate_article(self.name).capitalize() + ' ' + self.name + ' requires all remaining movement points, at least 1.', self.global_manager)
             return(False)
-        elif self.global_manager.get('money') < self.get_price():
+        elif constants.money < self.get_price():
             text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.', self.global_manager)
             return(False)
         elif not (unit.ministers_appointed()):
@@ -246,7 +246,7 @@ class action():
             float: Returns the amount paid
         '''
         price = self.get_price()
-        self.global_manager.get('money_tracker').change(price * -1, self.action_type)
+        constants.money_tracker.change(price * -1, self.action_type)
         return(price)
 
     def middle(self):

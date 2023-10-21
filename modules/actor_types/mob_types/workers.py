@@ -60,7 +60,7 @@ class worker(pmob):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
-        self.global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()
         #self.update_image_bundle()
 
     def replace(self, attached_group = 'none'):
@@ -105,7 +105,7 @@ class worker(pmob):
                 text_utility.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
                 
         elif self.worker_type == 'slave':
-            self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1, 'attrition_replacements')
+            constants.money_tracker.change(self.global_manager.get('recruitment_costs')['slave workers'] * -1, 'attrition_replacements')
             actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') + 1, self.global_manager)
             #self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
             text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
@@ -115,9 +115,9 @@ class worker(pmob):
                 text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.', self.global_manager)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
-                current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
-                resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                current_public_opinion = constants.public_opinion_tracker.get()
+                constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
+                resulting_public_opinion = constants.public_opinion_tracker.get()
                 if not resulting_public_opinion == current_public_opinion:
                     text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
 
@@ -156,9 +156,9 @@ class worker(pmob):
             text_utility.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.', self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
         elif self.worker_type in ['European', 'religious']:
-            current_public_opinion = self.global_manager.get('public_opinion')
-            self.global_manager.get('public_opinion_tracker').change(-1)
-            resulting_public_opinion = self.global_manager.get('public_opinion')
+            current_public_opinion = constants.public_opinion
+            constants.public_opinion_tracker.change(-1)
+            resulting_public_opinion = constants.public_opinion
             if not current_public_opinion == resulting_public_opinion:
                 text_utility.print_to_screen('Firing ' + self.name + ' reflected poorly on your company and reduced your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
 
@@ -273,7 +273,7 @@ class worker(pmob):
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') - 1)
         elif self.worker_type == 'African':
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
-        self.global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()
 
     def image_variants_setup(self, from_save, input_dict):
         '''
@@ -340,27 +340,27 @@ class slave_worker(worker):
             if input_dict['purchased']: #as opposed to captured
                 if not constants.effect_manager.effect_active('no_slave_trade_penalty'):
                     public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
-                    current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-                    self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
-                    resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                    current_public_opinion = constants.public_opinion_tracker.get()
+                    constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
+                    resulting_public_opinion = constants.public_opinion_tracker.get()
                     if not resulting_public_opinion == current_public_opinion:
                         text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
                 market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
-                self.global_manager.get('evil_tracker').change(6)
+                constants.evil_tracker.change(6)
                 actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') + 1, self.global_manager)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
-                current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
-                resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                current_public_opinion = constants.public_opinion_tracker.get()
+                constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
+                resulting_public_opinion = constants.public_opinion_tracker.get()
                 if not resulting_public_opinion == current_public_opinion:
                     text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
-                self.global_manager.get('evil_tracker').change(6)
+                constants.evil_tracker.change(6)
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
-        self.global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()
         if self.global_manager.get('slave_traders_strength') <= 0:
             self.automatically_replace = False
 
@@ -384,15 +384,15 @@ class slave_worker(worker):
         '''
         market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
         public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average
-        current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-        self.global_manager.get('public_opinion_tracker').change(public_opinion_bonus)
-        resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+        current_public_opinion = constants.public_opinion_tracker.get()
+        constants.public_opinion_tracker.change(public_opinion_bonus)
+        resulting_public_opinion = constants.public_opinion_tracker.get()
         if not resulting_public_opinion == current_public_opinion:
             text_utility.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
         if wander:
             text_utility.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
-        self.global_manager.get('evil_tracker').change(-2)
+        constants.evil_tracker.change(-2)
 
     def free_and_replace(self):
         '''
@@ -430,7 +430,7 @@ class slave_worker(worker):
         '''
         super().remove()
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') - 1)
-        self.global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()
 
 class church_volunteers(worker):
     '''
@@ -473,4 +473,4 @@ class church_volunteers(worker):
         '''
         super().remove()
         self.global_manager.set('num_church_volunteers', self.global_manager.get('num_church_volunteers') - 1)
-        self.global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()

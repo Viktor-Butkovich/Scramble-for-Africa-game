@@ -124,7 +124,7 @@ def trial(global_manager): #called by choice notification button
         None
     '''
     price = constants.action_prices['trial']
-    global_manager.get('money_tracker').change(-1 * constants.action_prices['trial'], 'trial')
+    constants.money_tracker.change(-1 * constants.action_prices['trial'], 'trial')
     actor_utility.double_action_price(global_manager, 'trial')
     defense = status.displayed_defense
     prosecution = status.displayed_prosecution
@@ -272,7 +272,7 @@ def complete_trial(final_roll, global_manager):
         if confiscated_money > 0:
             text += 'While most of ' + defense.name + '\'s money was spent on the trial or unaccounted for, authorities managed to confiscate ' + str(confiscated_money) + ' money, which has been given to your company as compensation. '
             text += ' /n /n'
-            global_manager.get('money_tracker').change(confiscated_money, 'trial_compensation')
+            constants.money_tracker.change(confiscated_money, 'trial_compensation')
         else:
             text += 'Authorities searched ' + defense.name + '\'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. '
             text += ' /n /n'
@@ -285,7 +285,7 @@ def complete_trial(final_roll, global_manager):
         minister_utility.calibrate_minister_info_display(global_manager, None)
         defense.respond('prison')
         defense.remove_complete()
-        global_manager.get('fear_tracker').change(1)
+        constants.fear_tracker.change(1)
         text = 'Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n'
         global_manager.get('notification_manager').display_notification({
             'message': text,

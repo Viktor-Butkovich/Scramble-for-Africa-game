@@ -1,22 +1,20 @@
 import modules.constants.constants as constants
 
-class value_tracker():
+class value_tracker_template():
     '''
     Object that controls the value of a certain variable
     '''
-    def __init__(self, value_key, initial_value, min_value, max_value, global_manager):
+    def __init__(self, value_key, initial_value, min_value, max_value):
         '''
         Description:
             Initializes this object
         Input:
             string value_key: Key used to access this tracker's variable in the global manager
             any type initial_value: Value that this tracker's variable is set to when initialized
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
-        self.global_manager.set(value_key, initial_value)
+        setattr(constants, value_key, initial_value)
         self.value_label = 'none'
         self.value_key = value_key
         self.min_value = min_value
@@ -31,7 +29,7 @@ class value_tracker():
         Output:
             any type: Value of this tracker's variable
         '''
-        return(self.global_manager.get(self.value_key))
+        return(getattr(constants, self.value_key))
 
     def change(self, value_change):
         '''
@@ -55,17 +53,17 @@ class value_tracker():
         Output:
             None
         '''
-        self.global_manager.set(self.value_key, new_value)
+        setattr(constants, self.value_key, new_value)
         if not self.min_value == 'none':
             if self.get() < self.min_value:
-                self.global_manager.set(self.value_key, self.min_value)
+                setattr(constants, self.value_key, self.min_value)
         if not self.max_value == 'none':
             if self.get() > self.max_value:
-                self.global_manager.set(self.value_key, self.max_value)
+                 setattr(constants, self.value_key, self.max_value)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
-class public_opinion_tracker(value_tracker):
+class public_opinion_tracker_template(value_tracker_template):
     '''
     Value tracker that tracks public opinion
     '''
@@ -79,25 +77,24 @@ class public_opinion_tracker(value_tracker):
             None
         '''
         super().change(value_change)
-        self.global_manager.get('money_label').check_for_updates()
+        constants.money_label.check_for_updates()
 
-class money_tracker(value_tracker):
+class money_tracker_template(value_tracker_template):
     '''
     Value tracker that tracks money and causes the game to be lost when money runs out
     '''
-    def __init__(self, initial_value, global_manager):
+    def __init__(self, initial_value):
         '''
         Description:
             Initializes this object
         Input:
             any type initial_value: Value that the money variable is set to when initialized
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.transaction_history = {}
         self.reset_transaction_history()
-        super().__init__('money', initial_value, 'none', 'none', global_manager)
+        super().__init__('money', initial_value, 'none', 'none')
 
     def reset_transaction_history(self):
         '''

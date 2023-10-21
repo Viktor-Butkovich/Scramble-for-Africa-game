@@ -147,7 +147,7 @@ class public_relations_campaign(action.campaign):
             None
         '''
         if self.roll_result >= self.current_min_success:
-            self.global_manager.get('public_opinion_tracker').change(self.public_relations_change)
+            constants.public_opinion_tracker.change(self.public_relations_change)
         elif self.roll_result <= self.current_max_crit_fail:
             self.current_unit.die('quit')
         super().complete()

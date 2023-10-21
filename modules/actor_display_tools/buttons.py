@@ -995,7 +995,7 @@ class trade_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
-                if self.global_manager.get('money') >= constants.action_prices['trade']:
+                if constants.money >= constants.action_prices['trade']:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_building('village'):
                         if current_cell.get_building('village').population > 0:
@@ -1070,7 +1070,7 @@ class rumor_search_button(button):
             if main_loop_utility.action_possible(self.global_manager):
                 current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= constants.action_prices['rumor_search']:
+                    if constants.money >= constants.action_prices['rumor_search']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
@@ -1148,7 +1148,7 @@ class artifact_search_button(button):
             if main_loop_utility.action_possible(self.global_manager):
                 current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= constants.action_prices['artifact_search']:
+                    if constants.money >= constants.action_prices['artifact_search']:
                         if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
                             if current_mob.ministers_appointed():
                                 if current_mob.sentry_mode:
@@ -1215,7 +1215,7 @@ class capture_slaves_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
-                if self.global_manager.get('money') >= constants.action_prices['slave_capture']:
+                if constants.money >= constants.action_prices['slave_capture']:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_building('village'):
                         if current_cell.get_building('village').population > 0:
@@ -1294,7 +1294,7 @@ class labor_broker_button(button):
                     cost_info_list = self.get_cost()
                     if not cost_info_list == 'none':
                         if current_mob.movement_points >= 1:
-                            if self.global_manager.get('money_tracker').get() >= cost_info_list[1]:
+                            if constants.money_tracker.get() >= cost_info_list[1]:
                                 if current_mob.ministers_appointed():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
@@ -1388,7 +1388,7 @@ class track_beasts_button(button):
             current_mob = status.displayed_mob
             if status.strategic_map_grid in current_mob.grids:
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= constants.action_prices['track_beasts']:
+                    if constants.money >= constants.action_prices['track_beasts']:
                         if current_mob.ministers_appointed():
                             if current_mob.sentry_mode:
                                 current_mob.set_sentry_mode(False)
@@ -1653,7 +1653,7 @@ class to_trial_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money') >= constants.action_prices['trial']:
+            if constants.money >= constants.action_prices['trial']:
                 if minister_utility.positions_filled(self.global_manager):
                     if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
                         defense = status.displayed_minister
@@ -1720,10 +1720,10 @@ class active_investigation_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money') >= constants.action_prices['active_investigation']:
+            if constants.money >= constants.action_prices['active_investigation']:
                 if minister_utility.positions_filled(self.global_manager):
                     cost = constants.action_prices['active_investigation']
-                    self.global_manager.get('money_tracker').change(-1 * cost, 'active_investigation')
+                    constants.money_tracker.change(-1 * cost, 'active_investigation')
                     status.displayed_minister.attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
                     actor_utility.double_action_price(self.global_manager, 'active_investigation')
                 else:
@@ -1780,8 +1780,8 @@ class fabricate_evidence_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money') >= self.get_cost():
-                self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
+            if constants.money >= self.get_cost():
+                constants.money_tracker.change(-1 * self.get_cost(), 'trial')
                 defense = status.displayed_defense
                 prosecutor = status.displayed_prosecution
                 prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that evidence has been successfully fabricated for ' + str(self.get_cost()) +
@@ -1854,9 +1854,9 @@ class bribe_judge_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money') >= self.get_cost():
+            if constants.money >= self.get_cost():
                 if not self.global_manager.get('prosecution_bribed_judge'):
-                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
+                    constants.money_tracker.change(-1 * self.get_cost(), 'trial')
                     self.global_manager.set('prosecution_bribed_judge', True)
                     prosecutor = status.displayed_prosecution
                     prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that the judge has been successfully bribed for ' + str(self.get_cost()) +
@@ -1990,7 +1990,7 @@ class buy_slaves_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             self.cost = self.global_manager.get('recruitment_costs')['slave workers']
-            if self.global_manager.get('money_tracker').get() >= self.cost:
+            if constants.money_tracker.get() >= self.cost:
                 choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
                 constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers', self.global_manager)
             else:

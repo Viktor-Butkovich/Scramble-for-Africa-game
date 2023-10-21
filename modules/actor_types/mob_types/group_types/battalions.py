@@ -194,8 +194,8 @@ class battalion(group):
             num_dice = 1
 
         if not constants.action_prices['slave_capture'] == 0:
-            self.global_manager.get('money_tracker').change(constants.action_prices['slave_capture'] * -1, 'slave_capture')
-        self.global_manager.get('evil_tracker').change(3)
+            constants.money_tracker.change(constants.action_prices['slave_capture'] * -1, 'slave_capture')
+        constants.evil_tracker.change(3)
         village = self.images[0].current_cell.get_building('village')
         text = ''
         text += 'The battalion tries to capture the natives as slaves. /n /n'

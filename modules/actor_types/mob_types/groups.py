@@ -90,7 +90,7 @@ class group(pmob):
             input_dict['init_type'] = 'workers'
             input_dict['worker_type'] = 'African'
         elif new_worker_type == 'slaves':
-            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
+            constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
             input_dict['image'] = 'mobs/slave workers/default.png'
             input_dict['name'] = 'slave workers'
             input_dict['init_type'] = 'slaves'
@@ -174,7 +174,7 @@ class group(pmob):
         Output:
             None
         '''
-        self.global_manager.get('evil_tracker').change(3)
+        constants.evil_tracker.change(3)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle

@@ -122,7 +122,7 @@ class value_label(label):
         input_dict['message'] = 'none'
         super().__init__(input_dict, global_manager)
         self.display_name = text_utility.remove_underscores(self.value_name) #public_opinion to public opinion
-        self.tracker = self.global_manager.get(self.value_name + '_tracker')
+        self.tracker = getattr(constants, self.value_name + '_tracker')
         self.tracker.value_label = self
         self.update_label(self.tracker.get())
 
@@ -159,7 +159,7 @@ class value_label(label):
             tooltip_text.append(text)
         self.set_tooltip(tooltip_text)
 
-class money_label(value_label):
+class money_label_template(value_label):
     '''
     Special type of value label that tracks money
     '''
@@ -212,7 +212,7 @@ class money_label(value_label):
         Output:
             None
         '''
-        self.update_label(self.global_manager.get(self.tracker.value_key))
+        self.update_label(getattr(constants, self.tracker.value_key))
     
     def update_tooltip(self):
         '''

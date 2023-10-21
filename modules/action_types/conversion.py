@@ -210,7 +210,7 @@ class conversion(action.action):
         '''
         if self.roll_result >= self.current_min_success:
             self.current_village.change_aggressiveness(-1)
-            self.global_manager.get('public_opinion_tracker').change(self.public_relations_change)
+            constants.public_opinion_tracker.change(self.public_relations_change)
         super().complete()
         if self.roll_result <= self.current_max_crit_fail:
             warrior = self.current_village.spawn_warrior()

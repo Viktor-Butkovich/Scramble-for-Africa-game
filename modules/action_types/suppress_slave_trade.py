@@ -193,7 +193,7 @@ class suppress_slave_trade(action.action):
                 for i in range(num_freed_slaves):
                     self.public_opinion_increase += 4 + random.randrange(-3, 4) #1-7 each
                     market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
-                    self.global_manager.get('evil_tracker').change(-2)
+                    constants.evil_tracker.change(-2)
                     self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
                 text = 'The slave trade has been eradicated. /n /n'
                 text += str(num_freed_slaves) + ' freed slaves have entered the labor pool, increasing public opinion by ' + str(self.public_opinion_increase - initial_public_opinion_increase) + '. /n /n'
@@ -204,7 +204,7 @@ class suppress_slave_trade(action.action):
                 self.global_manager.get('notification_manager').display_notification({
                     'message': text,
                 })
-            self.global_manager.get('public_opinion_tracker').change(self.public_opinion_increase)
+            constants.public_opinion_tracker.change(self.public_opinion_increase)
         elif self.roll_result <= self.current_max_crit_fail:
             self.current_unit.die()
 

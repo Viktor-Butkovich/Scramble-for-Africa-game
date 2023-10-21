@@ -581,12 +581,12 @@ class combat(action.action):
                         self.opponent.set_hidden(True)
                 else: #return to original tile if non-defenseless enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
                     self.opponent.retreat()
-                self.global_manager.get('public_opinion_tracker').change(self.public_opinion_change)
+                constants.public_opinion_tracker.change(self.public_opinion_change)
             else:
                 self.current_unit.retreat()
                 self.current_unit.set_disorganized(True)
                 if not self.opponent.npmob_type == 'beast':
-                    self.global_manager.get('evil_tracker').change(4)
+                    constants.evil_tracker.change(4)
 
         elif self.total_roll_result <= 1: #draw
             if self.defending:
@@ -594,7 +594,7 @@ class combat(action.action):
             else:
                 self.current_unit.retreat()
                 if not self.opponent.npmob_type == 'beast':
-                    self.global_manager.get('evil_tracker').change(4)
+                    constants.evil_tracker.change(4)
 
         else: #victory
             if self.defending:
@@ -610,9 +610,9 @@ class combat(action.action):
                     self.current_unit.retreat()
                 self.opponent.die()
                 if self.opponent.npmob_type != 'beast':
-                    self.global_manager.get('evil_tracker').change(8)
+                    constants.evil_tracker.change(8)
                 else:
-                    self.global_manager.get('public_opinion_tracker').change(self.public_relations_change)
+                    constants.public_opinion_tracker.change(self.public_relations_change)
 
         if not self.defending:
             self.current_unit.set_movement_points(0)

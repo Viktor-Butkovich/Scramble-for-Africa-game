@@ -7,6 +7,8 @@ from modules.tools.data_managers.input_manager_template import input_manager_tem
 from modules.tools.data_managers.actor_creation_manager_template import actor_creation_manager_template
 from modules.tools.data_managers.event_manager_template import event_manager_template
 from modules.tools.data_managers.effect_manager_template import effect_manager_template
+from modules.tools.data_managers.value_tracker_template import value_tracker_template, public_opinion_tracker_template, money_tracker_template
+from modules.interface_types.labels import money_label_template
 
 from typing import Dict, List
 
@@ -22,6 +24,22 @@ input_manager:input_manager_template = input_manager_template(global_manager)
 actor_creation_manager:actor_creation_manager_template = actor_creation_manager_template()
 event_manager:event_manager_template = event_manager_template(global_manager)
 effect_manager:effect_manager_template = effect_manager_template(global_manager)
+
+turn: int = 0
+turn_tracker: value_tracker_template = None
+public_opinion: int = 0
+public_opinion_tracker: public_opinion_tracker_template = None
+money: float = 0
+money_tracker: money_tracker_template = None
+money_label: money_label_template = None
+evil: int = 0
+evil_tracker: value_tracker_template = None
+fear: int = 0
+fear_tracker: value_tracker_template = None
+fps: int = 0
+fps_tracker: value_tracker_template = None
+frames_this_second: int = 0
+last_fps_update: float = 0.0
 
 loading: bool = True
 loading_start_time: float = 0.0

@@ -40,11 +40,6 @@ def fundamental(global_manager):
     Output:
         None
     '''
-    if constants.effect_manager.effect_active('track_fps'):
-        global_manager.set('fps', 0)
-        global_manager.set('frames_this_second', 0)
-        global_manager.set('last_fps_update', time.time())
-
     global_manager.set('font_name', 'times new roman')
     global_manager.set('default_font_size', 15)
     global_manager.set('font_size', scaling.scale_height(15))
@@ -819,7 +814,7 @@ def value_trackers(global_manager):
         'init_type': 'ordered collection'
     }, global_manager)
 
-    global_manager.set('turn_tracker', value_tracker_template.value_tracker('turn', 0, 'none', 'none', global_manager))
+    constants.turn_tracker = value_tracker_template.value_tracker_template('turn', 0, 'none', 'none')
     constants.actor_creation_manager.create_interface_element({
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
@@ -831,7 +826,7 @@ def value_trackers(global_manager):
         'member_config': {'order_x_offset': scaling.scale_width(275), 'order_overlap': True}
     }, global_manager)
 
-    global_manager.set('public_opinion_tracker', value_tracker_template.public_opinion_tracker('public_opinion', 0, 0, 100, global_manager))
+    constants.public_opinion_tracker = value_tracker_template.public_opinion_tracker_template('public_opinion', 0, 0, 100)
     constants.actor_creation_manager.create_interface_element({
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
@@ -842,8 +837,8 @@ def value_trackers(global_manager):
         'parent_collection': value_trackers_ordered_collection
     }, global_manager)
 
-    global_manager.set('money_tracker', value_tracker_template.money_tracker(100, global_manager))
-    global_manager.set('money_label', constants.actor_creation_manager.create_interface_element({
+    constants.money_tracker = value_tracker_template.money_tracker_template(100)
+    constants.money_label =  constants.actor_creation_manager.create_interface_element({
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial'],
@@ -851,10 +846,10 @@ def value_trackers(global_manager):
         'init_type': 'money label',
         'parent_collection': value_trackers_ordered_collection,
         'member_config': {'index': 1} #should appear before public opinion in collection but relies on public opinion existing
-    }, global_manager))
+    }, global_manager)
 
     if constants.effect_manager.effect_active('track_fps'):
-        global_manager.set('fps_tracker', value_tracker_template.value_tracker('fps', 0, 0, 'none', global_manager))
+        constants.fps_tracker = value_tracker_template.value_tracker_template('fps', 0, 0, 'none')
         constants.actor_creation_manager.create_interface_element({
             'minimum_width': scaling.scale_width(10),
             'height': scaling.scale_height(30),
@@ -875,9 +870,9 @@ def value_trackers(global_manager):
         'init_type': 'show previous financial report button'
     }, global_manager)
     
-    global_manager.set('evil_tracker', value_tracker_template.value_tracker('evil', 0, 0, 100, global_manager))
+    constants.evil_tracker = value_tracker_template.value_tracker_template('evil', 0, 0, 100)
     
-    global_manager.set('fear_tracker', value_tracker_template.value_tracker('fear', 1, 1, 6, global_manager))
+    constants.fear_tracker = value_tracker_template.value_tracker_template('fear', 1, 1, 6)
 
 def buttons(global_manager):
     '''
