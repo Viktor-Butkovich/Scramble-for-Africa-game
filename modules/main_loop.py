@@ -23,14 +23,8 @@ def main_loop(global_manager):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 flags.crashed = True
-            if global_manager.get('r_shift') == 'down' or global_manager.get('l_shift') == 'down':
-                global_manager.set('capital', True)
-            else:
-                global_manager.set('capital', False)
-            if global_manager.get('r_ctrl') == 'down' or global_manager.get('l_ctrl') == 'down':
-                global_manager.set('ctrl', True)
-            else:
-                global_manager.set('ctrl', False)
+            flags.capital = flags.r_shift or flags.l_shift
+            flags.ctrl = flags.r_ctrl or flags.l_ctrl
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
                     main_loop_utility.debug_print(global_manager)
@@ -54,22 +48,22 @@ def main_loop(global_manager):
                         current_button.confirming = False
                         current_button.being_pressed = False
                 if event.key == pygame.K_RSHIFT:
-                    global_manager.set('r_shift', 'down')
+                    flags.r_shift = True
                 if event.key == pygame.K_LSHIFT:
-                    global_manager.set('l_shift', 'down')
+                    flags.l_shift = True
                 if event.key == pygame.K_RCTRL:
-                    global_manager.set('r_ctrl', 'down')
+                    flags.r_ctrl = True
                 if event.key == pygame.K_LCTRL:
-                    global_manager.set('l_ctrl', 'down')
+                    flags.l_ctrl = True
                 if event.key == pygame.K_ESCAPE:
                     flags.typing = False
-                    global_manager.set('message', '')
+                    constants.message = ''
                 if event.key == pygame.K_SPACE:
                     if flags.typing:
-                        global_manager.set('message', utility.add_to_message(global_manager.get('message'), ' ')) #add space to message and set message to it
+                        constants.message += ' '
                 if event.key == pygame.K_BACKSPACE:
                     if flags.typing:
-                        global_manager.set('message', global_manager.get('message')[:-1]) #remove last character from message and set message to it
+                        constants.message = constants.message[:-1] #remove last character from message and set message to it
 
                 key_codes = [pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p]
                 key_codes += [pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u, pygame.K_v, pygame.K_w, pygame.K_x, pygame.K_y, pygame.K_z]
@@ -81,10 +75,11 @@ def main_loop(global_manager):
                     correct_key = False
                     if event.key == key_codes[key_index]:
                         correct_key = True
-                        if flags.typing and not global_manager.get('capital'):
-                            global_manager.set('message', utility.add_to_message(global_manager.get('message'), lowercase_key_values[key_index]))
-                        elif flags.typing and global_manager.get('capital'):
-                            global_manager.set('message', utility.add_to_message(global_manager.get('message'), uppercase_key_values[key_index]))
+                        if flags.typing:
+                            if flags.capital:
+                                constants.message += uppercase_key_values[key_index]
+                            else:
+                                constants.message += lowercase_key_values[key_index]
                     if correct_key:
                         break
                         
@@ -97,22 +92,22 @@ def main_loop(global_manager):
                                 current_button.has_released = True
                                 current_button.being_pressed = False
                 if event.key == pygame.K_RSHIFT:
-                    global_manager.set('r_shift', 'up')
+                    flags.r_shift = False
                 if event.key == pygame.K_LSHIFT:
-                    global_manager.set('l_shift', 'up')
+                    flags.l_shift = False
                 if event.key == pygame.K_LCTRL:
-                    global_manager.set('l_ctrl', 'up')
+                    flags.l_ctrl = False
                 if event.key == pygame.K_RCTRL:
-                    global_manager.set('r_ctrl', 'up')
+                    flags.r_ctrl = False
                 if event.key == pygame.K_RETURN:
                     if flags.typing:
                         if constants.input_manager.taking_input:
                             constants.input_manager.taking_input = False
-                            text_utility.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
+                            text_utility.print_to_screen('Response: ' + constants.message, global_manager)
                         else:
-                            text_utility.print_to_screen(global_manager.get('message'), global_manager)
+                            text_utility.print_to_screen(constants.message, global_manager)
                         flags.typing = False
-                        global_manager.set('message', '')
+                        constants.message = ''
                     else:
                         flags.typing = True
 

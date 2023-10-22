@@ -98,9 +98,9 @@ def action_possible(global_manager):
     Output:
         boolean: Returns False if the player is in an ongoing event that prevents other actions from being taken, otherwise returns True
     '''
-    if global_manager.get('ongoing_action'):
+    if flags.ongoing_action:
         return(False)
-    elif global_manager.get('game_over'):
+    elif flags.game_over:
         return(False)
     elif flags.making_choice:
         return(False)
@@ -233,11 +233,11 @@ def draw_text_box(global_manager):
             if text_utility.message_width(status.text_list[-text_index - 1], font_size, font_name) > greatest_width:
                 greatest_width = text_utility.message_width(status.text_list[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
     if constants.input_manager.taking_input:
-        if text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
-            greatest_width = text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name)
+        if text_utility.message_width('Response: ' + constants.message, font_size, font_name) > greatest_width: #manages width of user input
+            greatest_width = text_utility.message_width('Response: ' + constants.message, font_size, font_name)
     else:
-        if text_utility.message_width(global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
-            greatest_width = text_utility.message_width(global_manager.get('message'), font_size, font_name)
+        if text_utility.message_width(constants.message, font_size, font_name) > greatest_width: #manages width of user input
+            greatest_width = text_utility.message_width(constants.message, font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10)
     x, y = (0, constants.display_height - global_manager.get('text_box_height'))
     pygame.draw.rect(constants.game_display, constants.color_dict['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
@@ -256,9 +256,9 @@ def draw_text_box(global_manager):
             textsurface = constants.myfont.render(status.text_list[(-1 * text_index) - 1], False, (0, 0, 0))
             constants.game_display.blit(textsurface,(scaling.scale_width(10), (-1 * font_size * text_index) + constants.display_height - ((2 * font_size) + scaling.scale_height(5))))
     if constants.input_manager.taking_input:
-        textsurface = constants.myfont.render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
+        textsurface = constants.myfont.render('Response: ' + constants.message, False, (0, 0, 0))
     else:
-        textsurface = constants.myfont.render(global_manager.get('message'), False, (0, 0, 0))
+        textsurface = constants.myfont.render(constants.message, False, (0, 0, 0))
     constants.game_display.blit(textsurface,(scaling.scale_width(10), constants.display_height - (font_size + scaling.scale_height(5))))
 
 def manage_rmb_down(clicked_button, global_manager):
@@ -361,7 +361,6 @@ def manage_lmb_down(clicked_button, global_manager):
                 click_move_minimap(global_manager)
                 
         elif (not clicked_button) and flags.choosing_destination: #if clicking to move somewhere
-            chooser = global_manager.get('choosing_destination_info_dict')['chooser']
             for current_grid in status.grid_list: #destination_grids:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
@@ -371,7 +370,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             target_cell = current_cell
                         else:
                             target_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y) #center
-                        if not current_grid in chooser.grids:
+                        if not current_grid in status.displayed_mob.grids:
                             stopping = False
                             if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
                                 destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
@@ -380,16 +379,15 @@ def manage_lmb_down(clicked_button, global_manager):
                                     stopping = True
                             chose_destination = True
                             if not stopping:
-                                chooser.end_turn_destination = target_cell.tile
+                                status.displayed_mob.end_turn_destination = target_cell.tile
                                 flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately once destination is chosen
-                                chooser.remove_from_turn_queue()
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), chooser)
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), chooser.images[0].current_cell.tile)
+                                status.displayed_mob.remove_from_turn_queue()
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), status.displayed_mob)
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.displayed_mob.images[0].current_cell.tile)
                         else: #cannot move to same continent
                             text_utility.print_to_screen('You can only send ships to other theatres.', global_manager)
             flags.choosing_destination = False
-            global_manager.set('choosing_destination_info_dict', {})
             
         elif (not clicked_button) and flags.choosing_advertised_commodity:
             flags.choosing_advertised_commodity = False

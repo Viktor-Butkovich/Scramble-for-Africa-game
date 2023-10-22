@@ -21,8 +21,8 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     message += 'Along with any money paid for bribery or fabricated evidence, a trial fee of ' + str(constants.action_prices['trial']) + ' money is also required. /n /n'
 
     choice_info_dict = {}
-    global_manager.set('ongoing_action', True)
-    global_manager.set('ongoing_action_type', 'trial')
+    flags.ongoing_action = True
+    status.ongoing_action_type = 'trial'
 
     constants.notification_manager.display_notification({
         'message': message,
@@ -328,5 +328,5 @@ def complete_trial(final_roll, global_manager):
         })
         minister_utility.calibrate_minister_info_display(global_manager, defense)
     flags.prosecution_bribed_judge = False
-    global_manager.set('ongoing_action', False)
-    global_manager.set('ongoing_action_type', 'none')
+    flags.ongoing_action = False
+    status.ongoing_action_type = None

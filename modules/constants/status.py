@@ -9,7 +9,6 @@ from modules.interface_types.notifications import notification
 from modules.interface_types.buttons import button
 from modules.interface_types.instructions import instructions_page
 from modules.interface_types.dice import die
-from modules.interface_types.interface_elements import interface_collection
 from modules.constructs.images import free_image
 from modules.actor_types.actors import actor
 from modules.actor_types.buildings import building, slums, resource_building
@@ -65,3 +64,4 @@ dice_list: List[die] = []
 draw_list: List[Any] = []
 
 current_instructions_page: instructions_page = None
+ongoing_action_type: str = None

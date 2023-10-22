@@ -67,6 +67,7 @@ default_music_volume: float = 0.5
 
 current_instructions_page_index: int = 0
 current_instructions_page_text: str = ''
+message: str = ''
 
 grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid']
 

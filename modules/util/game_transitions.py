@@ -194,7 +194,7 @@ def to_main_menu(global_manager, override = False):
     status.displayed_mob = None
     status.displayed_tile = None
     global_manager.set('end_turn_selected_mob', 'none')
-    global_manager.set('message', '')
+    constants.message = ''
     status.player_turn_queue = []
     global_manager.set('current_lore_mission', 'none')
     if status.current_instructions_page:

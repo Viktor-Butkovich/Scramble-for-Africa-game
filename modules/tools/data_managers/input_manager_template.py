@@ -72,6 +72,6 @@ class input_manager_template():
         '''
         if self.send_input_to == 'do something':
             if received_input == 'done':
-                self.flags.crashed = True
+                flags.crashed = True
             else:
                 text_utility.print_to_screen('I didn\'t understand that.')

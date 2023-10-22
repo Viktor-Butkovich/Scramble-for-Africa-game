@@ -91,18 +91,6 @@ def print_to_previous_message(message, global_manager):
     '''
     status.text_list[-1] = status.text_list[-1] + message
 
-    
-def clear_message(global_manager):
-    '''
-    Description:
-        Deletes the text box line that is currently being typed
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        None
-    '''
-    global_manager.set('message', '')
-
 def remove_underscores(message):
     '''
     Description:

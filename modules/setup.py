@@ -48,19 +48,6 @@ def misc(global_manager):
     instructions_message = 'Placeholder instructions, use += to add'
     status.instructions_list.append(instructions_message)
 
-    global_manager.set('message', '')
-    global_manager.set('choosing_destination_info_dict', {})
-
-    global_manager.set('ongoing_action', False)
-    global_manager.set('ongoing_action_type', 'none')
-    global_manager.set('game_over', False)
-
-    global_manager.set('r_shift', 'up')
-    global_manager.set('l_shift', 'up')
-    global_manager.set('capital', False)
-    global_manager.set('r_ctrl', 'up')
-    global_manager.set('l_ctrl', 'up')
-    global_manager.set('ctrl', 'up')
     old_mouse_x, old_mouse_y = pygame.mouse.get_pos() #used in tooltip drawing timing
     global_manager.set('old_mouse_x', old_mouse_x)
     global_manager.set('old_mouse_y', old_mouse_y)

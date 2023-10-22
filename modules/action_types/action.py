@@ -2,6 +2,8 @@
 
 from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility
 import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class action():
     '''
@@ -232,8 +234,8 @@ class action():
             })
             return(False)
         else:
-            self.global_manager.set('ongoing_action', True)
-            self.global_manager.set('ongoing_action_type', self.action_type)
+            flags.ongoing_action = True
+            status.ongoing_action_type = self.action_type
             return(True)
 
     def process_payment(self):

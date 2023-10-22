@@ -169,8 +169,8 @@ class battalion(group):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'battalion': self,'type': 'start capture slaves'}
         self.current_roll_modifier = 0
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'slave_capture')
+        flags.ongoing_action = True
+        status.ongoing_action_type = 'slave_capture'
         constants.notification_manager.display_notification({
             'message': message,
             'choices': ['start capture slaves', 'stop capture slaves'],
@@ -347,8 +347,8 @@ class battalion(group):
             warrior = village.spawn_warrior()
             warrior.show_images()
             warrior.attack_on_spawn()
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
+        flags.ongoing_action = False
+        status.ongoing_action_type = None
 
 class safari(battalion):
     '''

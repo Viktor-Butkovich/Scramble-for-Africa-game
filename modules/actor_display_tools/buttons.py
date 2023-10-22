@@ -1453,7 +1453,6 @@ class switch_theatre_button(button):
                         current_mob.clear_automatic_route()
                         current_mob.end_turn_destination = 'none'
                         flags.choosing_destination = True
-                        self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
                 else:
                     text_utility.print_to_screen('You are inland and cannot cross the ocean.', self.global_manager) 
             else:

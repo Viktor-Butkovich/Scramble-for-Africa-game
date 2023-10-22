@@ -821,7 +821,7 @@ class button(interface_elements.interface_element):
             else:
                 text_utility.print_to_screen('You are busy and cannot move.', self.global_manager)
         elif self.button_type == 'toggle grid lines':
-            constants.effect_manager.set_effect('hide_grid_lines', utility.toggle(constants.effect_manager.effect_active('hide_grid_lines')))
+            constants.effect_manager.set_effect('hide_grid_lines', not constants.effect_manager.effect_active('hide_grid_lines'))
 
         elif self.button_type == 'toggle text box':
             flags.show_text_box = not flags.show_text_box
@@ -1136,11 +1136,11 @@ class button(interface_elements.interface_element):
                 text_utility.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
 
         elif self.button_type == 'confirm main menu':
-            self.global_manager.set('game_over', False)
+            flags.game_over = False
             game_transitions.to_main_menu(self.global_manager)
 
         elif self.button_type == 'quit':
-            self.flags.crashed = True
+            flags.crashed = True
 
         elif self.button_type == 'wake up all':
             if main_loop_utility.action_possible(self.global_manager):
@@ -1162,7 +1162,7 @@ class button(interface_elements.interface_element):
             print(1/0)
 
         elif self.button_type == 'minimize interface collection':
-            self.attached_collection.minimized = utility.toggle(self.attached_collection.minimized)
+            self.attached_collection.minimized = not self.attached_collection.minimized
             if not self.attached_collection.minimized:
                 #If any movement within the collection occurred while minimized, makes sure all newly shown elements are at their correct locations
                 self.attached_collection.set_origin(self.parent_collection.x, self.parent_collection.y)

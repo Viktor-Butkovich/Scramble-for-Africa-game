@@ -444,8 +444,8 @@ class combat(action.action):
         else:
             self.current_unit.clear_attached_cell_icons()
             self.current_unit.move(self.x_change, self.y_change, True)
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'combat')
+        flags.ongoing_action = True
+        status.ongoing_action_type = 'combat'
 
         self.roll_lists = []
         if self.current_unit.veteran:

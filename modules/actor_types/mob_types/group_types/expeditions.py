@@ -134,8 +134,8 @@ class expedition(group):
                     
                     self.destination_cells.append(target_cell)
                     self.public_opinion_increases.append(public_opinion_increase)
-                    self.global_manager.set('ongoing_action', True)
-                    self.global_manager.set('ongoing_action_type', 'exploration')
+                    flags.ongoing_action = True
+                    status.ongoing_action_type = 'exploration'
                     constants.notification_manager.display_notification({
                         'message': text,
                         'notification_type': 'off_tile_exploration'
@@ -194,8 +194,8 @@ class expedition(group):
                 'message': message,
             })
         else:
-            self.global_manager.set('ongoing_action', True)
-            self.global_manager.set('ongoing_action_type', 'rumor_search')
+            flags.ongoing_action = True
+            status.ongoing_action_type = 'rumor_search'
 
             constants.notification_manager.display_notification({
                 'message': message,
@@ -341,8 +341,8 @@ class expedition(group):
                 village.found_rumors = True
 
                 text = 'The villagers tell rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
-                self.global_manager.set('ongoing_action', True)
-                self.global_manager.set('ongoing_action_type', 'rumor_search')
+                flags.ongoing_action = True
+                status.ongoing_action_type = 'rumor_search'
                 constants.notification_manager.display_notification({
                     'message': text,
                     'notification_type': 'off_tile_exploration'
@@ -355,8 +355,8 @@ class expedition(group):
             warrior.show_images()
             warrior.attack_on_spawn()
         else:
-            self.global_manager.set('ongoing_action', False)
-            self.global_manager.set('ongoing_action_type', 'none')
+            flags.ongoing_action = False
+            status.ongoing_action_type = None
 
     def start_artifact_search(self):
         '''
@@ -403,8 +403,8 @@ class expedition(group):
                 'message': message,
             })
         else:
-            self.global_manager.set('ongoing_action', True)
-            self.global_manager.set('ongoing_action_type', 'artifact_search')
+            flags.ongoing_action = True
+            status.ongoing_action_type = 'artifact_search'
             constants.notification_manager.display_notification({
                 'message': message,
                 'choices': ['start artifact search', 'stop artifact search'],
@@ -563,5 +563,5 @@ class expedition(group):
                 self.promote()
         elif roll_result <= self.current_max_crit_fail:
             self.die()
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
+        flags.ongoing_action = False
+        status.ongoing_action_type = None

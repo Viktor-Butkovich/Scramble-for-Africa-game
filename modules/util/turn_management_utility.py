@@ -679,7 +679,7 @@ def game_end_check(global_manager):
         None
     '''
     if constants.money < 0:
-        global_manager.set('game_over', True)
+        flags.game_over = True
         text = ''
         text += 'Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER'
         constants.notification_manager.display_notification({

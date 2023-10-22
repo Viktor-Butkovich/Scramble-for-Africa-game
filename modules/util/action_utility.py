@@ -2,6 +2,8 @@
 
 from . import scaling
 import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 def cancel_ongoing_actions(global_manager):
     '''
@@ -12,8 +14,8 @@ def cancel_ongoing_actions(global_manager):
     Output:
         None
     '''
-    global_manager.set('ongoing_action', False)
-    global_manager.set('ongoing_action_type', 'none')
+    flags.ongoing_action = False
+    status.ongoing_action_type = None
 
 def generate_die_input_dict(coordinates, final_result, action, global_manager, override_input_dict=None):
     '''

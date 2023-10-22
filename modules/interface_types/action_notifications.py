@@ -4,6 +4,7 @@ from .notifications import notification
 from ..util import scaling, actor_utility, trial_utility, action_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class action_notification(notification):
     def __init__(self, input_dict, global_manager):
@@ -142,7 +143,7 @@ class dice_rolling_notification(action_notification):
             None
         '''
         super().__init__(input_dict, global_manager)
-        if self.global_manager.get('ongoing_action_type') in ['combat', 'slave_capture']:
+        if status.ongoing_action_type in ['combat', 'slave_capture']:
             if status.displayed_mob.is_pmob and (status.displayed_mob.is_battalion or status.displayed_mob.is_safari):
                 constants.sound_manager.play_sound('gunfire')
 
@@ -258,8 +259,8 @@ class off_tile_exploration_notification(action_notification):
             image_id_list.append(actor_utility.generate_resource_icon(explored_tile, global_manager))
         image_id_list.append('misc/tile_outline.png')
         #although global manager sets to busy here, calling object should also set to busy so that you can't click off before notification appears if another notification is opened when this one is queued
-        global_manager.set('ongoing_action', True)
-        global_manager.set('ongoing_action_type', self.current_expedition.current_action_type)
+        flags.ongoing_action = True
+        status.ongoing_action_type = self.current_expedition.current_action_type
         if self.current_expedition.current_action_type == 'exploration':
             explored_cell.set_visibility(True)
 
@@ -287,8 +288,8 @@ class off_tile_exploration_notification(action_notification):
             None
         '''
         super().remove(handle_next_notification=False)
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
+        flags.ongoing_action = False
+        status.ongoing_action_type = None
         notification_manager = constants.notification_manager
         
         if len(notification_manager.notification_queue) >= 1:
@@ -431,8 +432,8 @@ class trade_notification(action_notification):
             warrior.show_images()
             warrior.attack_on_spawn()
         if self.stops_trade:
-            self.global_manager.set('ongoing_action', False)
-            self.global_manager.set('ongoing_action_type', 'none')
+            flags.ongoing_action = False
+            status.ongoing_action_type = None
 
 class trial_notification(action_notification):
     '''

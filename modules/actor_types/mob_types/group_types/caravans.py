@@ -5,6 +5,8 @@ import math
 from ..groups import group
 from ....util import utility, actor_utility, dice_utility, market_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class caravan(group):
     '''
@@ -58,8 +60,8 @@ class caravan(group):
         '''
         village = self.images[0].current_cell.get_building('village')
         choice_info_dict = {'caravan': self, 'village': village, 'type': 'start trading'}
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'trade')
+        flags.ongoing_action = True
+        status.ongoing_action_type = 'trade'
         message = 'Are you sure you want to attempt to trade with the village of ' + village.name + '? /n /n'
 
         self.current_roll_modifier = 0
