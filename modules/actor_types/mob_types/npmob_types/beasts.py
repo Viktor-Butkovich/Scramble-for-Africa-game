@@ -4,6 +4,7 @@ import random
 from ..npmobs import npmob
 from ....util import utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class beast(npmob):
     '''
@@ -33,7 +34,7 @@ class beast(npmob):
             None
         '''
         self.hidden = False
-        global_manager.get('beast_list').append(self)
+        status.beast_list.append(self)
         self.animal_type = input_dict['animal_type']
         self.adjective = input_dict['adjective']
         if self.adjective == 'king':
@@ -187,7 +188,7 @@ class beast(npmob):
             None
         '''
         super().remove()
-        self.global_manager.set('beast_list', utility.remove_from_list(self.global_manager.get('beast_list'), self))
+        status.beast_list = utility.remove_from_list(status.beast_list, self)
 
     def damage_buildings(self):
         '''

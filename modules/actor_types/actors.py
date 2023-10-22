@@ -26,7 +26,7 @@ class actor():
         '''
         self.global_manager = global_manager
         self.from_save = from_save
-        global_manager.get('actor_list').append(self)
+        status.actor_list.append(self)
         self.modes = input_dict['modes']
         if self.from_save:
             self.grid = getattr(status, input_dict['grid_type'])
@@ -440,7 +440,7 @@ class actor():
         Output:
             None
         '''
-        self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
+        status.actor_list = utility.remove_from_list(status.actor_list, self)
 
     def touching_mouse(self):
         '''

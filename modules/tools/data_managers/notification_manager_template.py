@@ -282,7 +282,7 @@ class notification_manager_template():
             input_dict['target'] = notification_dict['zoom_destination']
         new_notification = constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager)
         if notification_type == 'roll':
-            for current_die in self.global_manager.get('dice_list'):
+            for current_die in status.dice_list:
                 current_die.start_rolling()
 
         if 'audio' in notification_dict and notification_dict['audio'] != 'none':

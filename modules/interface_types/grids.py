@@ -8,6 +8,7 @@ from . import cells, interface_elements
 from ..util import actor_utility, utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class grid(interface_elements.interface_element):
     '''
@@ -36,7 +37,7 @@ class grid(interface_elements.interface_element):
             None
         '''
         super().__init__(input_dict, global_manager)
-        self.global_manager.get('grid_list').append(self)
+        status.grid_list.append(self)
         self.grid_line_width = input_dict['grid_line_width']
         self.from_save = from_save
         self.is_mini_grid = False
@@ -143,7 +144,7 @@ class grid(interface_elements.interface_element):
         pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
         pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
         pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
-        if (not self.mini_grid == 'none') and constants.show_minimap_outlines:
+        if (not self.mini_grid == 'none') and flags.show_minimap_outlines:
             mini_map_outline_color = self.mini_grid.external_line_color
             left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
             right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1
@@ -498,7 +499,7 @@ class grid(interface_elements.interface_element):
             None
         '''
         super().remove()
-        self.global_manager.set('grid_list', utility.remove_from_list(self.global_manager.get('grid_list'), self))
+        status.grid_list = utility.remove_from_list(status.grid_list, self)
         
 class mini_grid(grid):
     '''
@@ -560,7 +561,7 @@ class mini_grid(grid):
                     current_cell.set_resource('none', update_image_bundle=False)
                     current_cell.reset_buildings()
                     current_cell.tile.update_image_bundle()
-            for current_mob in self.global_manager.get('mob_list'):
+            for current_mob in status.mob_list:
                 if current_mob.images[0].current_cell != 'none':
                     for current_image in current_mob.images:
                         if current_image.grid == self:

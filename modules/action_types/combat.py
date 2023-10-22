@@ -5,6 +5,7 @@ from . import action
 from ..util import action_utility, text_utility, actor_utility, dice_utility, utility, turn_management_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class combat(action.action):
     '''
@@ -621,7 +622,7 @@ class combat(action.action):
         
         super().complete()
 
-        if len(self.global_manager.get('attacker_queue')) > 0:
-            self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-        elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
+        if len(status.attacker_queue) > 0:
+            status.attacker_queue.pop(0).attempt_local_combat()
+        elif flags.enemy_combat_phase: #if enemy combat phase done, go to player turn
             turn_management_utility.start_player_turn(self.global_manager)

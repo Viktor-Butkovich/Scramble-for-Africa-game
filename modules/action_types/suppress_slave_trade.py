@@ -198,7 +198,7 @@ class suppress_slave_trade(action.action):
                 text = 'The slave trade has been eradicated. /n /n'
                 text += str(num_freed_slaves) + ' freed slaves have entered the labor pool, increasing public opinion by ' + str(self.public_opinion_increase - initial_public_opinion_increase) + '. /n /n'
                 text += 'Slaves are no longer able to be purchased, and existing slave units will no longer be automatically replaced. /n /n'
-                for current_pmob in self.global_manager.get('pmob_list'):
+                for current_pmob in status.pmob_list:
                     if current_pmob.is_worker and current_pmob.worker_type == 'slave':
                         current_pmob.set_automatically_replace(False)
                 constants.notification_manager.display_notification({

@@ -7,6 +7,7 @@ from ..util import utility, actor_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class mob(actor):
     '''
@@ -65,7 +66,7 @@ class mob(actor):
         self.status_icons = []
         for current_grid in self.grids:
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
-        global_manager.get('mob_list').append(self)
+        status.mob_list.append(self)
         self.set_name(input_dict['name'])
         self.can_swim = False #if can enter water areas without ships in them
         self.can_swim_river = False
@@ -88,7 +89,7 @@ class mob(actor):
         else:
             self.reset_movement_points()
             self.update_tooltip()
-            if constants.creating_new_game:
+            if flags.creating_new_game:
                 self.creation_turn = 0
             else:
                 self.creation_turn = constants.turn
@@ -513,7 +514,7 @@ class mob(actor):
         actor_utility.deselect_all(self.global_manager)
         self.selected = True
         self.global_manager.set('end_turn_selected_mob', self) #tells game to select this unit at the end of the turn because it was selected most recently
-        constants.show_selection_outlines = True
+        flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
@@ -540,7 +541,7 @@ class mob(actor):
         Output:
             None
         '''
-        if constants.show_selection_outlines:
+        if flags.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
@@ -642,7 +643,7 @@ class mob(actor):
         for current_image in self.images:
             current_image.remove_from_cell()
         super().remove()
-        self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+        status.mob_list = utility.remove_from_list(status.mob_list, self)
         for current_status_icon in self.status_icons:
             current_status_icon.remove_complete()
         self.status_icons = []

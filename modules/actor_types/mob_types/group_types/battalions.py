@@ -5,6 +5,8 @@ import random
 from ..groups import group
 from ....util import actor_utility, utility, dice_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class battalion(group):
     '''
@@ -100,8 +102,8 @@ class battalion(group):
         Output:
             None
         '''
-        constants.show_selection_outlines = True
-        constants.show_minimap_outlines = True
+        flags.show_selection_outlines = True
+        flags.show_minimap_outlines = True
         constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately when selected
         if not self.global_manager.get('actions')['combat'].on_click(
             self,
@@ -398,7 +400,7 @@ class safari(battalion):
         beasts_found = []
         ambush_list = []
         if result >= 4:
-            for current_beast in self.global_manager.get('beast_list'):
+            for current_beast in status.beast_list:
                 if current_beast.hidden:
                     if utility.find_grid_distance(self, current_beast) <= 1: #if different by 1 in x or y or at same coordinates
                         beast_cell = self.grids[0].find_cell(current_beast.x, current_beast.y)

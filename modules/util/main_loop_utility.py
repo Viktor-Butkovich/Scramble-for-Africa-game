@@ -5,6 +5,7 @@ import time
 from . import scaling, text_utility, actor_utility, minister_utility, utility, traversal_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 def update_display(global_manager):
     '''
@@ -15,13 +16,13 @@ def update_display(global_manager):
     Output:
         None
     '''
-    if constants.loading:
-        constants.loading_start_time -= 1 #end load timer faster once program starts repeating this part
+    if flags.loading:
+        flags.loading_start_time -= 1 #end load timer faster once program starts repeating this part
         draw_loading_screen(global_manager)
     else:
         possible_tooltip_drawers = []
 
-        traversal_utility.draw_interface_elements(global_manager.get('independent_interface_elements'), global_manager)
+        traversal_utility.draw_interface_elements(status.independent_interface_elements, global_manager)
         #could modify with a layer dictionary to display elements on different layers - currently, drawing elements in order of collection creation is working w/o overlap
         # issues
 
@@ -32,17 +33,17 @@ def update_display(global_manager):
         if status.displayed_mob:
             status.displayed_mob.draw_outline()
 
-        for current_mob in global_manager.get('mob_list'):
+        for current_mob in status.mob_list:
             if current_mob.can_show_tooltip():
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
                     if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
                         possible_tooltip_drawers.append(same_tile_mob)
 
-        for current_building in global_manager.get('building_list'):
+        for current_building in status.building_list:
             if current_building.can_show_tooltip():
                 possible_tooltip_drawers.append(current_building)
             
-        for current_actor in global_manager.get('actor_list'):
+        for current_actor in status.actor_list:
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
@@ -55,13 +56,13 @@ def update_display(global_manager):
                     possible_tooltip_drawers = [current_button]
         
         if notification_tooltip_button == 'none':
-            for current_free_image in global_manager.get('free_image_list'):
+            for current_free_image in status.free_image_list:
                 if current_free_image.can_show_tooltip():
                     possible_tooltip_drawers = [current_free_image]
         else:
             possible_tooltip_drawers = [notification_tooltip_button]
                 
-        if global_manager.get('show_text_box'):
+        if flags.show_text_box:
             draw_text_box(global_manager)
 
         global_manager.get('mouse_follower').draw()
@@ -83,7 +84,7 @@ def update_display(global_manager):
     if constants.effect_manager.effect_active('track_fps'):
         current_time = time.time()
         constants.frames_this_second += 1
-        if current_time > constants.last_fps_update + 1 and constants.startup_complete:
+        if current_time > constants.last_fps_update + 1 and flags.startup_complete:
             constants.fps_tracker.set(constants.frames_this_second)
             constants.frames_this_second = 0
             constants.last_fps_update = current_time
@@ -101,17 +102,15 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('game_over'):
         return(False)
-    elif global_manager.get('making_choice'):
+    elif flags.making_choice:
         return(False)
-    elif not global_manager.get('player_turn'):
+    elif not flags.player_turn:
         return(False)
-    elif global_manager.get('choosing_destination'):
+    elif flags.choosing_destination:
         return(False)
-    elif global_manager.get('choosing_advertised_commodity'):
+    elif flags.choosing_advertised_commodity:
         return(False)
-    elif global_manager.get('making_choice'):
-        return(False)
-    elif global_manager.get('drawing_automatic_route'):
+    elif flags.drawing_automatic_route:
         return(False)
     return(True)
 
@@ -125,8 +124,8 @@ def draw_loading_screen(global_manager):
         None
     '''
     global_manager.get('loading_image').draw() 
-    if constants.loading_start_time + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
-        constants.loading = False
+    if flags.loading_start_time + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
+        flags.loading = False
 
 def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
     '''
@@ -229,10 +228,10 @@ def draw_text_box(global_manager):
     max_text_box_lines = (scaling.scale_height(global_manager.get('text_box_height') // constants.font_size)) - 1
     font_name = constants.font_name
     font_size = constants.font_size
-    for text_index in range(len(global_manager.get('text_list'))):
+    for text_index in range(len(status.text_list)):
         if text_index < max_text_box_lines:
-            if text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) > greatest_width:
-                greatest_width = text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
+            if text_utility.message_width(status.text_list[-text_index - 1], font_size, font_name) > greatest_width:
+                greatest_width = text_utility.message_width(status.text_list[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
     if constants.input_manager.taking_input:
         if text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
             greatest_width = text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name)
@@ -242,7 +241,7 @@ def draw_text_box(global_manager):
     text_box_width = greatest_width + scaling.scale_width(10)
     x, y = (0, constants.display_height - global_manager.get('text_box_height'))
     pygame.draw.rect(constants.game_display, constants.color_dict['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
-    if global_manager.get('typing'):
+    if flags.typing:
         color = 'red'
     else:
         color = 'black'
@@ -250,11 +249,11 @@ def draw_text_box(global_manager):
     pygame.draw.line(constants.game_display, constants.color_dict[color], (0, constants.display_height - (font_size + scaling.scale_height(5))), #input line
         (text_box_width, constants.display_height - (font_size + scaling.scale_height(5))))
 
-    global_manager.set('text_list', text_utility.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
+    status.text_list = text_utility.manage_text_list(status.text_list, max_screen_lines) #number of lines
     
-    for text_index in range(len(global_manager.get('text_list'))):
+    for text_index in range(len(status.text_list)):
         if text_index < max_text_box_lines:
-            textsurface = constants.myfont.render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
+            textsurface = constants.myfont.render(status.text_list[(-1 * text_index) - 1], False, (0, 0, 0))
             constants.game_display.blit(textsurface,(scaling.scale_width(10), (-1 * font_size * text_index) + constants.display_height - ((2 * font_size) + scaling.scale_height(5))))
     if constants.input_manager.taking_input:
         textsurface = constants.myfont.render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
@@ -274,7 +273,7 @@ def manage_rmb_down(clicked_button, global_manager):
     '''
     stopping = False
     if (not clicked_button) and action_possible(global_manager):
-        for current_grid in global_manager.get('grid_list'):
+        for current_grid in status.grid_list:
             if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
@@ -285,7 +284,7 @@ def manage_rmb_down(clicked_button, global_manager):
                                 if not current_image.current_cell == 'none':
                                     while not moved_mob == current_image.current_cell.contained_mobs[0]:
                                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-                            constants.show_selection_outlines = True
+                            flags.show_selection_outlines = True
                             constants.last_selection_outline_switch = constants.current_time
                             if status.minimap_grid in moved_mob.grids:
                                 status.minimap_grid.calibrate(moved_mob.x, moved_mob.y)
@@ -293,9 +292,9 @@ def manage_rmb_down(clicked_button, global_manager):
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), moved_mob.images[0].current_cell.tile)
-    elif global_manager.get('drawing_automatic_route'):
+    elif flags.drawing_automatic_route:
         stopping = True
-        global_manager.set('drawing_automatic_route', False)
+        flags.drawing_automatic_route = False
         if len(status.displayed_mob.base_automatic_route) > 1:
             destination_coordinates = (status.displayed_mob.base_automatic_route[-1][0], status.displayed_mob.base_automatic_route[-1][1])
             if status.displayed_mob.is_vehicle and status.displayed_mob.vehicle_type == 'train' and not status.strategic_map_grid.find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
@@ -324,10 +323,10 @@ def manage_lmb_down(clicked_button, global_manager):
     Output:
         None
     '''
-    if action_possible(global_manager) or global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route'):
-        if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
+    if action_possible(global_manager) or flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route:
+        if (not clicked_button and (not (flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
             selected_mob = False
-            for current_grid in global_manager.get('grid_list'):
+            for current_grid in status.grid_list:
                 if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.get_flat_cell_list():
                         if current_cell.touching_mouse():
@@ -361,9 +360,9 @@ def manage_lmb_down(clicked_button, global_manager):
                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), None, override_exempt=True)
                 click_move_minimap(global_manager)
                 
-        elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
+        elif (not clicked_button) and flags.choosing_destination: #if clicking to move somewhere
             chooser = global_manager.get('choosing_destination_info_dict')['chooser']
-            for current_grid in global_manager.get('grid_list'): #destination_grids:
+            for current_grid in status.grid_list: #destination_grids:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         click_move_minimap(global_manager)
@@ -382,21 +381,21 @@ def manage_lmb_down(clicked_button, global_manager):
                             chose_destination = True
                             if not stopping:
                                 chooser.end_turn_destination = target_cell.tile
-                                constants.show_selection_outlines = True
+                                flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately once destination is chosen
                                 chooser.remove_from_turn_queue()
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), chooser)
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), chooser.images[0].current_cell.tile)
                         else: #cannot move to same continent
                             text_utility.print_to_screen('You can only send ships to other theatres.', global_manager)
-            global_manager.set('choosing_destination', False)
+            flags.choosing_destination = False
             global_manager.set('choosing_destination_info_dict', {})
             
-        elif (not clicked_button) and global_manager.get('choosing_advertised_commodity'):
-            global_manager.set('choosing_advertised_commodity', False)
+        elif (not clicked_button) and flags.choosing_advertised_commodity:
+            flags.choosing_advertised_commodity = False
             
-        elif (not clicked_button) and global_manager.get('drawing_automatic_route'):
-            for current_grid in global_manager.get('grid_list'): #destination_grids:
+        elif (not clicked_button) and flags.drawing_automatic_route:
+            for current_grid in status.grid_list: #destination_grids:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         if current_cell.grid.is_abstract_grid:
@@ -438,7 +437,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                                                      
                                 displayed_mob.add_to_automatic_route((destination_x, destination_y))
                                 click_move_minimap(global_manager)
-                                constants.show_selection_outlines = True
+                                flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time
                             else:
                                 text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
@@ -456,7 +455,7 @@ def click_move_minimap(global_manager):
         None
     '''
     breaking = False
-    for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
+    for current_grid in status.grid_list: #if grid clicked, move minimap to location clicked
         if current_grid.showing:
             for current_cell in current_grid.get_flat_cell_list():
                 if current_cell.touching_mouse():

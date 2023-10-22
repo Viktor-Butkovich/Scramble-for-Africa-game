@@ -42,7 +42,7 @@ class building(actor):
         if input_dict['building_type'] == 'warehouses':
             self.image_dict['damaged'] = self.image_dict['default']
         self.cell = self.grids[0].find_cell(self.x, self.y)
-        self.global_manager.get('building_list').append(self)
+        status.building_list.append(self)
         self.set_name(input_dict['name'])
         self.contained_work_crews = []        
         if from_save:
@@ -106,7 +106,7 @@ class building(actor):
         '''
         self.cell.contained_buildings[self.building_type] = 'none'
         super().remove()
-        self.global_manager.set('building_list', utility.remove_from_list(self.global_manager.get('building_list'), self))
+        status.building_list = utility.remove_from_list(status.building_list, self)
 
     def update_tooltip(self): #should be shown below mob tooltips
         '''
@@ -681,7 +681,7 @@ class resource_building(building):
         self.num_upgrades = 0
         self.ejected_work_crews = []
         super().__init__(from_save, input_dict, global_manager)
-        global_manager.get('resource_building_list').append(self)
+        status.resource_building_list.append(self)
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')
@@ -746,7 +746,7 @@ class resource_building(building):
             None
         '''
         for current_work_crew in self.ejected_work_crews:
-            if current_work_crew in self.global_manager.get('pmob_list'): #if not dead
+            if current_work_crew in status.pmob_list: #if not dead
                 current_work_crew.work_building(self)
         self.ejected_work_crews = []
 
@@ -759,7 +759,7 @@ class resource_building(building):
         Output:
             None
         '''
-        self.global_manager.set('resource_building_list', utility.remove_from_list(self.global_manager.get('resource_building_list'), self))
+        status.resource_building_list = utility.remove_from_list(status.resource_building_list, self)
         super().remove()
 
     def manage_health_attrition(self, current_cell = 'default'):
@@ -885,7 +885,7 @@ class slums(building):
         Output:
             None
         '''
-        global_manager.get('slums_list').append(self)
+        status.slums_list.append(self)
         input_dict['building_type'] = 'slums'
         self.available_workers = 0
         if from_save:
@@ -942,7 +942,7 @@ class slums(building):
             None
         '''
         super().remove()
-        self.global_manager.set('slums_list', utility.remove_from_list(self.global_manager.get('slums_list'), self))
+        status.slums_list = utility.remove_from_list(status.slums_list, self)
 
     def change_population(self, change):
         '''

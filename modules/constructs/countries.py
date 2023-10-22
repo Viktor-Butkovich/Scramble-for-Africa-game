@@ -29,7 +29,7 @@ class country:
         '''
         self.actor_type = 'country'
         self.global_manager = global_manager
-        self.global_manager.get('country_list').append(self)
+        status.country_list.append(self)
         self.tooltip_text = []
         self.name = input_dict['name']
         self.adjective = input_dict['adjective']
@@ -70,7 +70,7 @@ class country:
         for current_recruitment_button in status.recruitment_button_list:
             if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):
                 current_recruitment_button.calibrate(self)
-        for current_flag_icon in self.global_manager.get('flag_icon_list'):
+        for current_flag_icon in status.flag_icon_list:
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
 
@@ -164,6 +164,6 @@ class hybrid_country(country):
         for current_recruitment_button in status.recruitment_button_list:
             if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):
                 current_recruitment_button.calibrate(self)
-        for current_flag_icon in self.global_manager.get('flag_icon_list'):
+        for current_flag_icon in status.flag_icon_list:
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()

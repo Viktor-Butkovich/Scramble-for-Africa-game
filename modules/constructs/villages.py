@@ -50,7 +50,7 @@ class village():
         self.y = self.cell.y
         self.tiles = [] #added in set_resource for tiles
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
-            self.global_manager.get('village_list').append(self) #have more permanent fix later
+            status.village_list.append(self) #have more permanent fix later
 
     def remove_complete(self):
         '''
@@ -73,7 +73,7 @@ class village():
         Output:
             None
         '''
-        self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
+        status.village_list = utility.remove_from_list(status.village_list, self)
 
     def manage_warriors(self):
         '''

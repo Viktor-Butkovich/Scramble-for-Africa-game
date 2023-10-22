@@ -1,6 +1,7 @@
 #Contains functions to manage interface collection traversal, doing particular actions for each element with simple decision-making
 
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def draw_interface_elements(interface_elements, global_manager):
     '''
@@ -15,9 +16,9 @@ def draw_interface_elements(interface_elements, global_manager):
     for current_interface_element in interface_elements:
         collection_traversal(current_interface_element, global_manager, pretraversal_action=set_showing, alternative_action=set_not_showing, condition=check_showing,
                 posttraversal_action=update_collection)
-    for current_interface_element in global_manager.get('draw_list'):
+    for current_interface_element in status.draw_list:
         current_interface_element.draw()
-    global_manager.set('draw_list', [])
+    status.draw_list = []
 
 def collection_traversal(current_element, global_manager, **kwargs):
     '''
@@ -83,7 +84,7 @@ def update_collection(current_element, global_manager):
         if hasattr(current_element, 'members'):
             current_element.update_collection()
         if current_element.can_draw():
-            global_manager.get('draw_list').append(current_element)
+            status.draw_list.append(current_element)
 
 def set_not_showing(current_element, global_manager):
     '''

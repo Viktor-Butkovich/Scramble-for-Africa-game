@@ -6,6 +6,7 @@ from ..mobs import mob
 from ...util import text_utility, utility, actor_utility, minister_utility, game_transitions
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class pmob(mob):
     '''
@@ -41,7 +42,7 @@ class pmob(mob):
         self.sentry_mode = False
         super().__init__(from_save, input_dict, global_manager)
         self.selection_outline_color = 'bright green'
-        global_manager.get('pmob_list').append(self)
+        status.pmob_list.append(self)
         self.is_pmob = True
         self.set_controlling_minister_type('none')
         if from_save:
@@ -103,7 +104,7 @@ class pmob(mob):
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['default_name'] = self.default_name
         save_dict['sentry_mode'] = self.sentry_mode
-        save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
+        save_dict['in_turn_queue'] = (self in status.player_turn_queue)
         save_dict['base_automatic_route'] = self.base_automatic_route
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
         save_dict['automatically_replace'] = self.automatically_replace
@@ -375,7 +376,7 @@ class pmob(mob):
             None
         '''
         if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none':
-            turn_queue = self.global_manager.get('player_turn_queue')
+            turn_queue = status.player_turn_queue
             if not self in turn_queue:
                 turn_queue.append(self)
 
@@ -388,8 +389,8 @@ class pmob(mob):
         Output:
             None
         '''
-        turn_queue = self.global_manager.get('player_turn_queue')
-        self.global_manager.set('player_turn_queue', utility.remove_from_list(turn_queue, self))
+        turn_queue = status.player_turn_queue
+        status.player_turn_queue = utility.remove_from_list(status.player_turn_queue, self)
 
     def replace(self):
         '''
@@ -490,7 +491,7 @@ class pmob(mob):
                 current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.remove_from_turn_queue()
         super().remove()
-        self.global_manager.set('pmob_list', utility.remove_from_list(self.global_manager.get('pmob_list'), self)) #make a version of pmob_list without self and set pmob_list to it
+        status.pmob_list = utility.remove_from_list(status.pmob_list, self)
 
     def draw_outline(self):
         '''
@@ -501,7 +502,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if constants.show_selection_outlines:
+        if flags.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
@@ -568,7 +569,7 @@ class pmob(mob):
             self.controlling_minister = 'none'
         else:
             self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
-            for current_minister_type_image in self.global_manager.get('minister_image_list'):
+            for current_minister_type_image in status.minister_image_list:
                 if current_minister_type_image.minister_type == self.controlling_minister_type:
                     current_minister_type_image.calibrate(self.controlling_minister)
 
@@ -766,7 +767,7 @@ class pmob(mob):
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
             vehicle.select()
-        if not self.global_manager.get('loading_save'):
+        if not flags.loading_save:
             constants.sound_manager.play_sound('footsteps')
         self.clear_automatic_route()
 

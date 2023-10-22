@@ -5,6 +5,7 @@ import pygame
 from .util import main_loop_utility, utility, text_utility, turn_management_utility, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 def main_loop(global_manager):
     '''
@@ -15,13 +16,13 @@ def main_loop(global_manager):
     Output:
         None
     '''
-    while not global_manager.get('crashed'):
+    while not flags.crashed:
         if status.displayed_notification == None:
             stopping = False
         constants.input_manager.update_input()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                global_manager.set('crashed', True)
+                flags.crashed = True
             if global_manager.get('r_shift') == 'down' or global_manager.get('l_shift') == 'down':
                 global_manager.set('capital', True)
             else:
@@ -34,7 +35,7 @@ def main_loop(global_manager):
                 if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
                     main_loop_utility.debug_print(global_manager)
                 for current_button in status.button_list:
-                    if current_button.showing and not global_manager.get('typing'):
+                    if current_button.showing and not flags.typing:
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:
                                 if current_button.has_released: #if stuck on loading, don't want multiple 'key down' events to repeat on_click - shouldn't on_click again until released
@@ -61,13 +62,13 @@ def main_loop(global_manager):
                 if event.key == pygame.K_LCTRL:
                     global_manager.set('l_ctrl', 'down')
                 if event.key == pygame.K_ESCAPE:
-                    global_manager.set('typing', False)
+                    flags.typing = False
                     global_manager.set('message', '')
                 if event.key == pygame.K_SPACE:
-                    if global_manager.get('typing'):
+                    if flags.typing:
                         global_manager.set('message', utility.add_to_message(global_manager.get('message'), ' ')) #add space to message and set message to it
                 if event.key == pygame.K_BACKSPACE:
-                    if global_manager.get('typing'):
+                    if flags.typing:
                         global_manager.set('message', global_manager.get('message')[:-1]) #remove last character from message and set message to it
 
                 key_codes = [pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p]
@@ -80,16 +81,16 @@ def main_loop(global_manager):
                     correct_key = False
                     if event.key == key_codes[key_index]:
                         correct_key = True
-                        if global_manager.get('typing') and not global_manager.get('capital'):
+                        if flags.typing and not global_manager.get('capital'):
                             global_manager.set('message', utility.add_to_message(global_manager.get('message'), lowercase_key_values[key_index]))
-                        elif global_manager.get('typing') and global_manager.get('capital'):
+                        elif flags.typing and global_manager.get('capital'):
                             global_manager.set('message', utility.add_to_message(global_manager.get('message'), uppercase_key_values[key_index]))
                     if correct_key:
                         break
                         
             elif event.type == pygame.KEYUP:
                 for current_button in status.button_list:
-                    if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
+                    if not flags.typing or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:# and current_button.showing:
                                 current_button.on_release()
@@ -104,30 +105,27 @@ def main_loop(global_manager):
                 if event.key == pygame.K_RCTRL:
                     global_manager.set('r_ctrl', 'up')
                 if event.key == pygame.K_RETURN:
-                    if global_manager.get('typing'):
+                    if flags.typing:
                         if constants.input_manager.taking_input:
                             constants.input_manager.taking_input = False
                             text_utility.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
                         else:
                             text_utility.print_to_screen(global_manager.get('message'), global_manager)
-                        global_manager.set('typing', False)
+                        flags.typing = False
                         global_manager.set('message', '')
                     else:
-                        global_manager.set('typing', True)
+                        flags.typing = True
 
             elif event.type == pygame.mixer.music.get_endevent():
                 constants.sound_manager.song_done()
 
-        global_manager.set('old_lmb_down', global_manager.get('lmb_down'))
-        global_manager.set('old_rmb_down', global_manager.get('rmb_down'))
-        global_manager.set('old_mmb_down', global_manager.get('mmb_down'))
-        lmb_down, mmb_down, rmb_down = pygame.mouse.get_pressed()
-        global_manager.set('lmb_down', lmb_down)
-        global_manager.set('mmb_down', mmb_down)
-        global_manager.set('rmb_down', rmb_down)
+        global_manager.set('old_lmb_down', flags.lmb_down)
+        global_manager.set('old_rmb_down', flags.rmb_down)
+        global_manager.set('old_mmb_down', flags.mmb_down)
+        flags.lmb_down, flags.mmb_down, flags.rmb_down = pygame.mouse.get_pressed()
 
-        if not global_manager.get('old_rmb_down') == global_manager.get('rmb_down'): #if rmb changes
-            if not global_manager.get('rmb_down'): #if user just released rmb
+        if not global_manager.get('old_rmb_down') == flags.rmb_down: #if rmb changes
+            if not flags.rmb_down: #if user just released rmb
                 clicked_button = False
                 stopping = False
                 if status.current_instructions_page == None:
@@ -151,8 +149,8 @@ def main_loop(global_manager):
                             clicked_button = True
                 main_loop_utility.manage_rmb_down(clicked_button, global_manager)
 
-        if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'): #if lmb changes
-            if not global_manager.get('lmb_down'): #if user just released lmb
+        if not global_manager.get('old_lmb_down') == flags.lmb_down: #if lmb changes
+            if not flags.lmb_down: #if user just released lmb
                 clicked_button = False #if any button, including a panel, is clicked, do not deselect units
                 allow_on_click = True #certain buttons, like panels, allow clicking on another button at the same time
                 stopping = False
@@ -185,7 +183,7 @@ def main_loop(global_manager):
                             #break
                 main_loop_utility.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
 
-        if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
+        if (flags.lmb_down or flags.rmb_down):
             for current_button in status.button_list:
                 if current_button.touching_mouse() and current_button.showing:
                     current_button.showing_outline = True
@@ -196,27 +194,27 @@ def main_loop(global_manager):
                 if current_button.has_released:
                     current_button.showing_outline = False
 
-        if not constants.loading:
+        if not flags.loading:
             main_loop_utility.update_display(global_manager)
         else:
             main_loop_utility.draw_loading_screen(global_manager)
         constants.current_time = time.time()
         if constants.current_time - constants.last_selection_outline_switch > 1:
-            constants.show_selection_outlines = not constants.show_selection_outlines
+            flags.show_selection_outlines = not flags.show_selection_outlines
             constants.last_selection_outline_switch = constants.current_time
         constants.event_manager.update(constants.current_time)
-        if not global_manager.get('player_turn') and constants.previous_turn_time + constants.end_turn_wait_time <= constants.current_time: #if enough time has passed based on delay from previous movement
+        if not flags.player_turn and constants.previous_turn_time + constants.end_turn_wait_time <= constants.current_time: #if enough time has passed based on delay from previous movement
             enemy_turn_done = True
-            for enemy in global_manager.get('npmob_list'):
+            for enemy in status.npmob_list:
                 if not enemy.turn_done:
                     enemy_turn_done = False
                     break
             if enemy_turn_done:
-                global_manager.set('player_turn', True)
-                global_manager.set('enemy_combat_phase', True)
+                flags.player_turn = True
+                flags.enemy_combat_phase = True
                 turn_management_utility.manage_combat(global_manager)
             else:
-                current_enemy = global_manager.get('enemy_turn_queue')[0]
+                current_enemy = status.enemy_turn_queue[0]
                 removed = False
                 spawning = False
                 did_nothing = False
@@ -286,7 +284,7 @@ def main_loop(global_manager):
                         constants.end_turn_wait_time = 0
                     else:
                         constants.end_turn_wait_time = 1
-                    global_manager.get('enemy_turn_queue').pop(0)
+                    status.enemy_turn_queue.pop(0)
                     
                 else: #If unit visible, have short delay depending on action taken to let user see it
                     if (not spawning) and (did_nothing or not current_enemy.visible()): #do not wait if not visible or nothing to show, exception for spawning units, which may not be visible as user watches them spawn
@@ -299,7 +297,7 @@ def main_loop(global_manager):
                         constants.end_turn_wait_time = 0.5
 
                     if current_enemy.turn_done:
-                        global_manager.get('enemy_turn_queue').pop(0)
+                        status.enemy_turn_queue.pop(0)
             if constants.effect_manager.effect_active('fast_turn'):
                 constants.end_turn_wait_time = 0
             constants.previous_turn_time = time.time()

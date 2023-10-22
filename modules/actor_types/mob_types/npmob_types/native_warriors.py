@@ -4,6 +4,8 @@ import random
 from ..npmobs import npmob
 from ....util import utility
 import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class native_warriors(npmob):
     '''
@@ -42,7 +44,7 @@ class native_warriors(npmob):
         self.despawning = False
         if not from_save:
             self.set_max_movement_points(4)
-            if not constants.creating_new_game:
+            if not flags.creating_new_game:
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
             self.second_image_variant = random.randrange(0, len(self.image_variants))
         self.set_has_canoes(True)
@@ -66,14 +68,14 @@ class native_warriors(npmob):
                         possible_directions.append(direction)
             if len(possible_directions) > 0:
                 self.last_move_direction = random.choice(possible_directions)
-                if self.global_manager.get('player_turn'):
+                if flags.player_turn:
                     if self.grids[0].find_cell(self.x, self.y).get_best_combatant('pmob', self.npmob_type) == 'none':
                         self.kill_noncombatants()
                         self.damage_buildings()
                     else:
                         self.attempt_local_combat() #if spawned by failed trade or conversion during player turn, attack immediately
                 else:
-                    self.global_manager.get('attacker_queue').append(self)
+                    status.attacker_queue.append(self)
             else:
                 self.remove_complete()
                 self.origin_village.change_population(1) #despawn if pmob on tile and can't retreat anywhere

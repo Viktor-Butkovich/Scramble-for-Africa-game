@@ -7,6 +7,7 @@ from ...interface_types import grids
 from . import global_manager_template
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class save_load_manager_template():
     '''
@@ -24,6 +25,7 @@ class save_load_manager_template():
         self.global_manager = global_manager
         self.copied_globals = []
         self.copied_constants = []
+        self.copied_flags = []
         self.set_copied_elements()
 
     def set_copied_elements(self):
@@ -47,7 +49,6 @@ class save_load_manager_template():
         self.copied_globals.append('transaction_history')
         self.copied_globals.append('previous_financial_report')
         self.copied_globals.append('num_wandering_workers')
-        self.copied_globals.append('prosecution_bribed_judge')
         self.copied_globals.append('sold_commodities')
         self.copied_globals.append('current_country_name')
         self.copied_globals.append('slave_traders_strength')
@@ -61,6 +62,9 @@ class save_load_manager_template():
         self.copied_constants.append('money')
         self.copied_constants.append('evil')
         self.copied_constants.append('fear')
+
+        self.copied_flags = []
+        self.copied_flags.append('prosecution_bribed_judge')
         
     def new_game(self, country):
         '''
@@ -71,7 +75,7 @@ class save_load_manager_template():
         Output:
             None
         '''
-        constants.creating_new_game = True
+        flags.creating_new_game = True
         country.select()
         strategic_grid_height = 300
         strategic_grid_width = 320
@@ -167,8 +171,7 @@ class save_load_manager_template():
 
         self.global_manager.set('slave_traders_natural_max_strength', 10) #regenerates to natural strength, can increase indefinitely when slaves are purchased
         actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_natural_max_strength'), self.global_manager)
-        #self.global_manager.set('slave_traders_strength', )
-        self.global_manager.set('player_turn', True)
+        flags.player_turn = True
         self.global_manager.set('previous_financial_report', 'none')
 
         constants.actor_creation_manager.create_initial_ministers(self.global_manager)
@@ -187,6 +190,7 @@ class save_load_manager_template():
         actor_utility.reset_action_prices(self.global_manager)
         for current_commodity in self.global_manager.get('commodity_types'):
             self.global_manager.get('sold_commodities')[current_commodity] = 0
+        flags.prosecution_bribed_judge = False
 
         for i in range(1, random.randrange(5, 8)):
             turn_management_utility.manage_villages(self.global_manager)
@@ -206,7 +210,7 @@ class save_load_manager_template():
             for current_minister_position_index in range(len(self.global_manager.get('minister_types'))):
                 status.minister_list[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
             game_transitions.set_game_mode('strategic', self.global_manager)
-        constants.creating_new_game = False
+        flags.creating_new_game = False
         
     def save_game(self, file_path):
         '''
@@ -227,25 +231,29 @@ class save_load_manager_template():
         for current_element in self.copied_constants:
             saved_constants[current_element] = getattr(constants, current_element)
 
+        saved_flags = {}
+        for current_element in self.copied_flags:
+            saved_flags[current_element] = getattr(flags, current_element)
+
         saved_grid_dicts = []
-        for current_grid in self.global_manager.get('grid_list'):
+        for current_grid in status.grid_list:
             if not current_grid.is_mini_grid: #minimap grid doesn't need to be saved
                 saved_grid_dicts.append(current_grid.to_save_dict())
 
             
         saved_actor_dicts = []
-        for current_pmob in self.global_manager.get('pmob_list'):
+        for current_pmob in status.pmob_list:
             if not (current_pmob.in_group or current_pmob.in_vehicle or current_pmob.in_building): #containers save their contents and load them in, contents don't need to be saved/loaded separately
                 saved_actor_dicts.append(current_pmob.to_save_dict())
                 
-        for current_npmob in self.global_manager.get('npmob_list'):
+        for current_npmob in status.npmob_list:
             if current_npmob.saves_normally: #for units like native warriors that are saved as part a village and not as their own unit, do not attempt to save from here
                 saved_actor_dicts.append(current_npmob.to_save_dict())
             
-        for current_building in self.global_manager.get('building_list'):
+        for current_building in status.building_list:
             saved_actor_dicts.append(current_building.to_save_dict())
             
-        for current_loan in self.global_manager.get('loan_list'):
+        for current_loan in status.loan_list:
             saved_actor_dicts.append(current_loan.to_save_dict())
 
         saved_minister_dicts = []        
@@ -262,6 +270,7 @@ class save_load_manager_template():
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
             pickle.dump(saved_constants, handle)
+            pickle.dump(saved_flags, handle)
             pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
@@ -278,7 +287,7 @@ class save_load_manager_template():
         Output:
             None
         '''
-        self.global_manager.set('loading_save', True)
+        flags.loading_save = True
         
         text_utility.print_to_screen('', self.global_manager)
         text_utility.print_to_screen('Loading ' + file_path, self.global_manager)
@@ -289,6 +298,7 @@ class save_load_manager_template():
             with open(file_path, 'rb') as handle:
                 new_global_manager = pickle.load(handle)
                 saved_constants = pickle.load(handle)
+                saved_flags = pickle.load(handle)
                 saved_grid_dicts = pickle.load(handle)
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
@@ -304,6 +314,8 @@ class save_load_manager_template():
                 self.global_manager.set(current_element, new_global_manager.get(current_element))
         for current_element in self.copied_constants:
             setattr(constants, current_element, saved_constants[current_element])
+        for current_element in self.copied_flags:
+            setattr(flags, current_element, saved_flags[current_element])
         constants.money_tracker.set(constants.money)
         constants.money_tracker.transaction_history = self.global_manager.get('transaction_history')
         constants.turn_tracker.set(constants.turn)
@@ -400,4 +412,4 @@ class save_load_manager_template():
 
         tutorial_utility.show_tutorial_notifications(self.global_manager)
 
-        self.global_manager.set('loading_save', False)
+        flags.loading_save = False

@@ -6,6 +6,7 @@ import random
 from .buttons import button
 from ..util import utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class die(button):
     '''
@@ -57,7 +58,7 @@ class die(button):
         input_dict['color'] = 'white'
         input_dict['button_type'] = 'die'
         super().__init__(input_dict, global_manager)
-        global_manager.get('dice_list').append(self)
+        status.dice_list.append(self)
         self.final_result = input_dict['final_result']
         #self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
         self.highlight_Rect = pygame.Rect(self.x - 3, constants.display_height - (self.y + self.height + 3), self.width + 6, self.height + 6) #could implement as outline rect instead, with larger outline width passed to superclass
@@ -128,7 +129,7 @@ class die(button):
             tooltip_list.append(str(self.roll_result))
             if not self.rolling: #if rolls completed
                 tooltip_list.append('Finished rolling')
-                if self.highlighted and len(self.global_manager.get('dice_list')) > 1: #if other dice present and this die chosen
+                if self.highlighted and len(status.dice_list) > 1: #if other dice present and this die chosen
                     tooltip_list.append('This result was chosen')
         self.set_tooltip(tooltip_list)
 
@@ -143,7 +144,7 @@ class die(button):
         '''
         self.last_roll = time.time()
         self.rolling = True
-        dice_list = self.global_manager.get('dice_list')
+        dice_list = status.dice_list
         if self == dice_list[0]: #only 1 die at a time makes noise
             if len(dice_list) == 1:
                 constants.sound_manager.play_sound('dice_1')
@@ -165,7 +166,7 @@ class die(button):
         if self.rolls_completed == self.num_rolls: #if last roll just happened, stop rolling - allows slight pause after last roll during which you don't know if it is the final one
             self.rolling = False
             dice_rolling = False
-            for current_die in self.global_manager.get('dice_list'):
+            for current_die in status.dice_list:
                 if current_die.rolling:
                     dice_rolling = True
             if not dice_rolling:
@@ -219,4 +220,4 @@ class die(button):
             None
         '''
         super().remove()
-        self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))
+        status.dice_list = utility.remove_from_list(status.dice_list, self)

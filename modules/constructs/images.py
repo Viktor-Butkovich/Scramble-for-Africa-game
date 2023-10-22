@@ -4,6 +4,7 @@ import pygame
 from ..util import utility, drawing_utility, text_utility, scaling
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class image():
     '''
@@ -476,7 +477,7 @@ class free_image(image):
         self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
         if not self.has_parent_collection:
-            self.global_manager.get('independent_interface_elements').append(self)
+            status.independent_interface_elements.append(self)
 
         if self.has_parent_collection:
             input_dict['member_config'] = input_dict.get('member_config', {})
@@ -495,7 +496,7 @@ class free_image(image):
         self.set_image(input_dict['image_id'])
 
         self.to_front = input_dict.get('to_front', False)
-        self.global_manager.get('free_image_list').append(self)
+        status.free_image_list.append(self)
 
     def calibrate(self, new_actor):
         return
@@ -565,8 +566,8 @@ class free_image(image):
             None
         '''
         super().remove()
-        self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
-        self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
+        status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
+        status.free_image_list = utility.remove_from_list(status.free_image_list, self)
 
     def remove_recursive(self, complete=False):
         '''
@@ -805,10 +806,10 @@ class indicator_image(tooltip_free_image):
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.indicator_type == 'prosecution_bribed_judge':
-                if self.global_manager.get('prosecution_bribed_judge'):
+                if flags.prosecution_bribed_judge:
                     return(True)
             elif self.indicator_type == 'not prosecution_bribed_judge':
-                if not self.global_manager.get('prosecution_bribed_judge'):
+                if not flags.prosecution_bribed_judge:
                     return(True)
             else:
                 return(True)
@@ -916,7 +917,7 @@ class minister_type_image(tooltip_free_image):
         self.minister_type = input_dict['minister_type'] #position, like General
         if self.minister_type != 'none':
             self.calibrate(global_manager.get('current_ministers')[self.minister_type]) #calibrate to current minister or none if no current minister
-        self.global_manager.get('minister_image_list').append(self)
+        status.minister_image_list.append(self)
         self.to_front = True
 
     def calibrate(self, new_minister):
@@ -1053,7 +1054,7 @@ class loading_image_template(free_image):
         input_dict['height'] = constants.display_height
         input_dict['modes'] = []
         super().__init__(input_dict, global_manager)
-        self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
+        status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
 
     def can_show(self, skip_parent_collection=False):
         '''

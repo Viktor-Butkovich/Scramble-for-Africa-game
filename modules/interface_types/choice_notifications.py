@@ -5,6 +5,7 @@ from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class choice_notification(action_notifications.action_notification):
     '''
@@ -56,7 +57,7 @@ class choice_notification(action_notifications.action_notification):
                 'notification': self,
                 'init_type': init_type
             }, global_manager))
-        self.global_manager.set('making_choice', True)
+        flags.making_choice = True
 
     def on_click(self, choice_button_override=False):
         '''
@@ -92,7 +93,7 @@ class choice_notification(action_notifications.action_notification):
         Output:
             None
         '''
-        self.global_manager.set('making_choice', False)
+        flags.making_choice = False
         super().remove()
         for current_choice_button in self.choice_buttons:
             current_choice_button.remove_complete()

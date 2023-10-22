@@ -6,6 +6,7 @@ import logging
 import json
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 import modules.util.scaling as scaling
 import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
@@ -25,11 +26,11 @@ def setup(*args):
     Output:
         None
     '''
-    constants.startup_complete = False
+    flags.startup_complete = False
     for setup_function in args:
         setup_function(constants.global_manager)
-    constants.startup_complete = True
-    constants.creating_new_game = False
+    flags.startup_complete = True
+    flags.creating_new_game = False
 
 def misc(global_manager):
     '''
@@ -47,49 +48,8 @@ def misc(global_manager):
     instructions_message = 'Placeholder instructions, use += to add'
     status.instructions_list.append(instructions_message)
 
-    global_manager.set('country_list', [])
-    global_manager.set('flag_icon_list', [])
-    global_manager.set('grid_list', [])
-    global_manager.set('text_list', [])
-    global_manager.set('free_image_list', [])
-    global_manager.set('minister_image_list', [])
-    global_manager.set('available_minister_portrait_list', [])
-    global_manager.set('country_selection_image_list', [])
-    global_manager.set('actor_list', [])
-    global_manager.set('mob_list', [])
-    global_manager.set('pmob_list', [])
-    global_manager.set('npmob_list', [])
-    global_manager.set('beast_list', [])
-    global_manager.set('village_list', [])
-    global_manager.set('building_list', [])
-    global_manager.set('slums_list', [])
-    global_manager.set('resource_building_list', [])
-    global_manager.set('loan_list', [])
-    global_manager.set('attacker_queue', [])
-    global_manager.set('enemy_turn_queue', [])
-    global_manager.set('player_turn_queue', [])
-    global_manager.set('interface_collection_list', [])
-    global_manager.set('independent_interface_elements', [])
-    global_manager.set('dice_list', [])
-    global_manager.set('draw_list', [])
-
-    pygame.key.set_repeat(300, 200)
-    global_manager.set('crashed', False)
-    global_manager.set('lmb_down', False)
-    global_manager.set('rmb_down', False)
-    global_manager.set('mmb_down', False)
-    global_manager.set('typing', False)
     global_manager.set('message', '')
-    global_manager.set('show_text_box', True)
-    global_manager.set('making_choice', False)
-    global_manager.set('loading_save', False)
-    global_manager.set('player_turn', True)
-    global_manager.set('enemy_combat_phase', False)
-    global_manager.set('choosing_destination', False)
     global_manager.set('choosing_destination_info_dict', {})
-    global_manager.set('choosing_advertised_commodity', False)
-    global_manager.set('drawing_automatic_route', False)
-    global_manager.set('prosecution_bribed_judge', False)
 
     global_manager.set('ongoing_action', False)
     global_manager.set('ongoing_action_type', 'none')
@@ -864,7 +824,7 @@ def buttons(global_manager):
         'init_type': 'switch game mode button'
     }
     strategic_to_europe_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
-    global_manager.get('flag_icon_list').append(strategic_to_europe_button) #sets button image to update to flag icon when country changes
+    status.flag_icon_list.append(strategic_to_europe_button) #sets button image to update to flag icon when country changes
 
     europe_button_width = 60
     europe_button_height = 60
@@ -1335,7 +1295,7 @@ def new_game_setup_screen(global_manager):
         'modes': ['new_game_setup'],
         'init_type': 'country selection image'
     }
-    for current_country in global_manager.get('country_list'):
+    for current_country in status.country_list:
         input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) - (countries_per_row * (country_image_width + country_separation) / 2) + (country_image_width + country_separation) * (current_country_index % countries_per_row) + country_separation / 2, constants.default_display_height / 2 + 50 - ((country_image_height + country_separation) * (current_country_index // countries_per_row)))
         input_dict['country'] = current_country
         constants.actor_creation_manager.create_interface_element(input_dict, global_manager)

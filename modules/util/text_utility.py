@@ -2,6 +2,7 @@
 
 import pygame
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def message_width(message, fontsize, font_name):
     '''
@@ -75,7 +76,7 @@ def print_to_screen(input_message, global_manager):
     Output:
         None
     '''
-    global_manager.get('text_list').append(input_message)
+    status.text_list.append(input_message)
 
     
 def print_to_previous_message(message, global_manager):
@@ -88,7 +89,7 @@ def print_to_previous_message(message, global_manager):
     Output:
         None
     '''
-    global_manager.get('text_list')[-1] = global_manager.get('text_list')[-1] + message
+    status.text_list[-1] = status.text_list[-1] + message
 
     
 def clear_message(global_manager):

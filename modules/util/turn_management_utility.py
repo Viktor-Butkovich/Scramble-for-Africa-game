@@ -4,6 +4,7 @@ import random
 from . import text_utility, actor_utility, trial_utility, market_utility, utility, game_transitions
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 def end_turn(global_manager):
     '''
@@ -15,13 +16,13 @@ def end_turn(global_manager):
         None
     '''
     remove_excess_inventory(global_manager)
-    for current_pmob in global_manager.get('pmob_list'):
+    for current_pmob in status.pmob_list:
         current_pmob.end_turn_move()
 
     actor_utility.deselect_all(global_manager)
         
-    global_manager.set('player_turn', False)
-    global_manager.set('player_turn_queue', [])
+    flags.player_turn = False
+    status.player_turn_queue = []
     start_enemy_turn(global_manager)
 
 def start_enemy_turn(global_manager):
@@ -53,10 +54,10 @@ def start_player_turn(global_manager, first_turn = False):
     text_utility.print_to_screen('', global_manager)
     text_utility.print_to_screen('Turn ' + str(constants.turn + 1), global_manager)
     if not first_turn:
-        for current_pmob in global_manager.get('pmob_list'):
+        for current_pmob in status.pmob_list:
             if current_pmob.is_vehicle:
                 current_pmob.reembark()
-        for current_building in global_manager.get('building_list'):
+        for current_building in status.building_list:
             if current_building.building_type == 'resource':
                 current_building.reattach_work_crews()
         manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
@@ -77,8 +78,8 @@ def start_player_turn(global_manager, first_turn = False):
         actor_utility.reset_action_prices(global_manager)
         game_end_check(global_manager)
 
-    global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
-    global_manager.set('enemy_combat_phase', False)
+    flags.player_turn = True #player_turn also set to True in main_loop when enemies done moving
+    flags.enemy_combat_phase = False
     constants.turn_tracker.change(1)
         
     if not first_turn:
@@ -106,18 +107,18 @@ def reset_mobs(mob_type, global_manager):
         None
     '''
     if mob_type == 'pmobs':
-        for current_pmob in global_manager.get('pmob_list'):
+        for current_pmob in status.pmob_list:
             current_pmob.reset_movement_points()
             current_pmob.set_disorganized(False)
     elif mob_type == 'npmobs':
-        for current_npmob in global_manager.get('npmob_list'):
+        for current_npmob in status.npmob_list:
             current_npmob.reset_movement_points()
             current_npmob.set_disorganized(False)
             #if not current_npmob.creation_turn == constants.turn: #if not created this turn
             current_npmob.turn_done = False
-            global_manager.get('enemy_turn_queue').append(current_npmob)
+            status.enemy_turn_queue.append(current_npmob)
     else:
-        for current_mob in global_manager.get('mob_list'):
+        for current_mob in status.mob_list:
             current_mob.reset_movement_points()
             current_mob.set_disorganized(False)
 
@@ -131,14 +132,14 @@ def manage_attrition(global_manager):
     Output:
         None
     '''
-    for current_pmob in global_manager.get('pmob_list'):
+    for current_pmob in status.pmob_list:
         if not (current_pmob.in_vehicle or current_pmob.in_group or current_pmob.in_building): #vehicles, groups, and buildings handle attrition for their submobs
             current_pmob.manage_health_attrition()
-    for current_building in global_manager.get('building_list'):
+    for current_building in status.building_list:
         if current_building.building_type == 'resource':
             current_building.manage_health_attrition()
 
-    for current_pmob in global_manager.get('pmob_list'):
+    for current_pmob in status.pmob_list:
         current_pmob.manage_inventory_attrition()
 
     terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list(), [status.slave_traders_grid.cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
@@ -178,7 +179,7 @@ def manage_production(global_manager):
     for current_commodity in global_manager.get('collectable_resources'):
         global_manager.get('commodities_produced')[current_commodity] = 0
         expected_production[current_commodity] = 0
-    for current_resource_building in global_manager.get('resource_building_list'):
+    for current_resource_building in status.resource_building_list:
         if not current_resource_building.damaged:
             for current_work_crew in current_resource_building.contained_work_crews:
                 if current_work_crew.movement_points >= 1:
@@ -241,7 +242,7 @@ def manage_loans(global_manager):
     Output:
         None
     '''
-    for current_loan in global_manager.get('loan_list'):
+    for current_loan in status.loan_list:
         current_loan.make_payment()
 
 def manage_slave_traders(global_manager):
@@ -359,7 +360,7 @@ def manage_worker_migration(global_manager):
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
         trigger_worker_migration(global_manager)
 
-    for current_slums in global_manager.get('slums_list'):
+    for current_slums in status.slums_list:
         population_increase = 0
         for current_worker in range(current_slums.available_workers):
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
@@ -497,7 +498,7 @@ def manage_warriors(global_manager):
     Output:
         None
     '''
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         current_village.manage_warriors()
 
 def manage_villages(global_manager):
@@ -509,7 +510,7 @@ def manage_villages(global_manager):
     Output:
         None
     '''
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         if current_village.population > 0:
             previous_aggressiveness = current_village.aggressiveness
             roll = random.randrange(1, 7)
@@ -539,7 +540,7 @@ def manage_beasts(global_manager):
     Output:
         None
     '''
-    beast_list = global_manager.get('beast_list')
+    beast_list = status.beast_list
     for current_beast in beast_list:
         current_beast.check_despawn()
 
@@ -555,7 +556,7 @@ def manage_enemy_movement(global_manager):
     Output:
         None
     '''
-    for current_npmob in global_manager.get('npmob_list'):
+    for current_npmob in status.npmob_list:
         if not current_npmob.creation_turn == constants.turn: #if not created this turn
             current_npmob.end_turn_move()
 
@@ -568,8 +569,8 @@ def manage_combat(global_manager):
     Output:
         None
     '''
-    if len(global_manager.get('attacker_queue')) > 0:
-        global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+    if len(status.attacker_queue) > 0:
+        status.attacker_queue.pop(0).attempt_local_combat()
     else:
         start_player_turn(global_manager)
 
@@ -621,9 +622,9 @@ def manage_ministers(global_manager):
             current_minister.corruption_evidence -= evidence_lost
         if removing_minister:
             current_minister.remove_complete()
-    if global_manager.get('prosecution_bribed_judge'):
+    if flags.prosecution_bribed_judge:
         text_utility.print_to_screen('The effect of bribing the judge has faded and will not affect the next trial.', global_manager)
-    global_manager.set('prosecution_bribed_judge', False)
+    flags.prosecution_bribed_judge = False
             
     while len(removed_ministers) > 0:
         current_minister = removed_ministers.pop(0)

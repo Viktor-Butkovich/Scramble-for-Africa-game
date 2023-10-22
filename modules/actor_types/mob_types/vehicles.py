@@ -6,6 +6,7 @@ from .pmobs import pmob
 from ...util import text_utility, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class vehicle(pmob):
     '''
@@ -245,7 +246,7 @@ class vehicle(pmob):
         while len(self.contained_mobs) > 0:
             current_mob = self.contained_mobs.pop(0)
             current_mob.disembark_vehicle(self)
-            if (not self.global_manager.get('player_turn')) or self.global_manager.get('enemy_combat_phase'):
+            if (not flags.player_turn) or flags.enemy_combat_phase:
                 self.ejected_passengers.append(current_mob)
 
     def reembark(self):
@@ -258,10 +259,10 @@ class vehicle(pmob):
             None
         '''
         if not self.ejected_crew == 'none':
-            if self.ejected_crew in self.global_manager.get('pmob_list'): #not self.ejected_crew.dead:
+            if self.ejected_crew in status.pmob_list: #not self.ejected_crew.dead:
                 self.ejected_crew.crew_vehicle(self)
                 for current_passenger in self.ejected_passengers:
-                    if current_passenger in self.global_manager.get('pmob_list'): #not current_passenger.dead:
+                    if current_passenger in status.pmob_list: #not current_passenger.dead:
                         current_passenger.embark_vehicle(self)
             self.ejected_crew = 'none'
             self.ejected_passengers = []

@@ -5,6 +5,7 @@ from . import main_loop_utility, text_utility, actor_utility, minister_utility, 
 from ..actor_types import tiles
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 def cycle_player_turn(global_manager, start_of_turn = False):
     '''
@@ -16,7 +17,7 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     Output:
         None
     '''
-    turn_queue = global_manager.get('player_turn_queue')
+    turn_queue = status.player_turn_queue
     if len(turn_queue) == 0:
         if not start_of_turn: #print no units message if there are no units in turn queue
             text_utility.print_to_screen('There are no units left to move this turn.', global_manager)
@@ -80,7 +81,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('current_game_mode', 'main_menu')
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
-            global_manager.set('text_list', []) #clear text box when going to main menu
+            status.text_list = [] #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
@@ -92,7 +93,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('current_game_mode', new_game_mode)
-    for current_mob in global_manager.get('mob_list'):
+    for current_mob in status.mob_list:
         current_mob.selected = False
         
     if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
@@ -110,7 +111,7 @@ def set_game_mode(new_game_mode, global_manager):
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display'), None)
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), None)
 
-    if constants.startup_complete and not new_game_mode in ['main_menu', 'new_game_setup']:
+    if flags.startup_complete and not new_game_mode in ['main_menu', 'new_game_setup']:
         constants.notification_manager.update_notification_layout()
 
 def create_strategic_map(global_manager, from_save=False):
@@ -125,7 +126,7 @@ def create_strategic_map(global_manager, from_save=False):
     #text_tools.print_to_screen('Creating map...', global_manager)
     main_loop_utility.update_display(global_manager)
 
-    for current_grid in global_manager.get('grid_list'):
+    for current_grid in status.grid_list:
         if current_grid.is_abstract_grid: #if europe/slave traders grid
             tiles.abstract_tile(False, {
                 'grid': current_grid,
@@ -160,8 +161,8 @@ def start_loading(global_manager):
     Output:
         None
     '''
-    constants.loading = True
-    constants.loading_start_time = time.time()
+    flags.loading = True
+    flags.loading_start_time = time.time()
     main_loop_utility.update_display(global_manager)
 
 def to_main_menu(global_manager, override = False):
@@ -177,24 +178,24 @@ def to_main_menu(global_manager, override = False):
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), None)
     minister_utility.calibrate_minister_info_display(global_manager, None)
-    for current_actor in global_manager.get('actor_list'):
+    for current_actor in status.actor_list:
         current_actor.remove_complete()
-    for current_grid in global_manager.get('grid_list'):
+    for current_grid in status.grid_list:
         current_grid.remove_complete()
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         current_village.remove_complete()
     for current_minister in status.minister_list:
         current_minister.remove_complete()
     for current_lore_mission in global_manager.get('lore_mission_list'):
         current_lore_mission.remove_complete()
-    for current_die in global_manager.get('dice_list'):
+    for current_die in status.dice_list:
         current_die.remove_complete()
-    global_manager.set('loan_list', [])
+    status.loan_list = []
     status.displayed_mob = None
     status.displayed_tile = None
     global_manager.set('end_turn_selected_mob', 'none')
     global_manager.set('message', '')
-    global_manager.set('player_turn_queue', [])
+    status.player_turn_queue = []
     global_manager.set('current_lore_mission', 'none')
     if status.current_instructions_page:
         status.current_instructions_page.remove_complete()

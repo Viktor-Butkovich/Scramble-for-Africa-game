@@ -3,6 +3,7 @@
 import pygame
 from ..constructs.images import free_image
 import modules.constants.constants as constants
+import modules.constants.flags as flags
 
 class mouse_follower(free_image):
     '''
@@ -47,6 +48,6 @@ class mouse_follower(free_image):
         Output:
             None
         '''
-        if self.global_manager.get('choosing_destination') or self.global_manager.get('choosing_advertised_commodity') or self.global_manager.get('drawing_automatic_route'):
+        if flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route:
             self.update()
             super().draw()

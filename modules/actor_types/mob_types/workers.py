@@ -6,6 +6,7 @@ from ...util import actor_utility
 from ...util import market_utility
 from ...util import text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class worker(pmob):
     '''
@@ -84,14 +85,14 @@ class worker(pmob):
                 new_worker_source = actor_utility.find_closest_available_worker(destination, self.global_manager)
                 if not new_worker_source == 'none':
                     market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                    if new_worker_source in self.global_manager.get('village_list'): #both village and slum have change_population, but slum change population automatically changes number of workers while village does not
+                    if new_worker_source in status.village_list: #both village and slum have change_population, but slum change population automatically changes number of workers while village does not
                         new_worker_source.available_workers -= 1
                     new_worker_source.change_population(-1)
 
-                    if new_worker_source in self.global_manager.get('village_list'):
+                    if new_worker_source in status.village_list:
                         text_utility.print_to_screen('Replacement workers have been automatically hired from ' + new_worker_source.name + ' village at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.',
                             self.global_manager)
-                    elif new_worker_source in self.global_manager.get('slums_list'):
+                    elif new_worker_source in status.slums_list:
                         text_utility.print_to_screen('Replacement workers have been automatically hired from the slums at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.', self.global_manager)
                     
                 else: #if no villages or slums with available workers, recruit abstract African workers and give bigger upkeep penalty to compensate

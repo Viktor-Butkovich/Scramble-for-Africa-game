@@ -1,5 +1,6 @@
 from ...util import text_utility
 import modules.constants.constants as constants
+import modules.constants.flags as flags
 
 class input_manager_template():
     '''
@@ -71,6 +72,6 @@ class input_manager_template():
         '''
         if self.send_input_to == 'do something':
             if received_input == 'done':
-                self.global_manager.set('crashed', True)
+                self.flags.crashed = True
             else:
                 text_utility.print_to_screen('I didn\'t understand that.')

@@ -5,6 +5,7 @@ from ..groups import group
 from ....util import actor_utility, dice_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class expedition(group):
     '''
@@ -57,8 +58,8 @@ class expedition(group):
         Output:
             None
         '''
-        constants.show_selection_outlines = True
-        constants.show_minimap_outlines = True
+        flags.show_selection_outlines = True
+        flags.show_minimap_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         
         future_x = self.x + x_change

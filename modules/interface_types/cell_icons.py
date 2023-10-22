@@ -4,6 +4,7 @@ from ..actor_types.actors import actor
 from ..util import utility
 from ..constructs import images
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class cell_icon(actor):
     '''
@@ -24,7 +25,7 @@ class cell_icon(actor):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        self.global_manager.get('independent_interface_elements').append(self)
+        status.independent_interface_elements.append(self)
         self.showing = False
         self.image_dict = {'default': input_dict['image']}
         self.images = [images.actor_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', global_manager)
@@ -66,5 +67,5 @@ class cell_icon(actor):
             None
         '''
         super().remove()
-        if self in self.global_manager.get('independent_interface_elements'):
-            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
+        if self in status.independent_interface_elements:
+            status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)

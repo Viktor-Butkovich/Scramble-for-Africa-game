@@ -266,10 +266,10 @@ def find_closest_available_worker(destination, global_manager):
         slums/village: Returns the slums or village at which the chosen closest worker is located
     '''
     possible_sources = []
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         if current_village.available_workers > 0:
             possible_sources.append(current_village)
-    possible_sources += global_manager.get('slums_list')
+    possible_sources += status.slums_list
     
     min_distance = -1 #makes a list of closest sources
     min_distance_sources = []
@@ -318,7 +318,7 @@ def update_roads(global_manager):
     Output:
         None
     '''
-    for current_building in global_manager.get('building_list'):
+    for current_building in status.building_list:
         if current_building.building_type == 'infrastructure':
             current_building.cell.tile.update_image_bundle()
 
@@ -331,7 +331,7 @@ def deselect_all(global_manager):
     Output:
         None
     '''
-    for current_mob in global_manager.get('mob_list'):
+    for current_mob in status.mob_list:
         if current_mob.selected:
             current_mob.selected = False
     
@@ -393,7 +393,7 @@ def get_migration_destinations(global_manager):
         cell list: Returns list of all cells to which migration could occur
     '''
     return_list = []
-    for current_building in global_manager.get('building_list'):
+    for current_building in status.building_list:
         if current_building.building_type in ['port', 'train_station', 'resource']:
             if not current_building.cell in return_list:
                 if not current_building.damaged:
@@ -410,7 +410,7 @@ def get_migration_sources(global_manager):
         village list: Returns list of all villages from which migration could occur
     '''
     return_list = []
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         if current_village.available_workers > 0:
             return_list.append(current_village)
     return(return_list)
@@ -427,11 +427,11 @@ def get_num_available_workers(location_types, global_manager):
     '''
     num_available_workers = 0
     if not location_types == 'village': #slums or all
-        for current_slums in global_manager.get('slums_list'):
+        for current_slums in status.slums_list:
             #if current_building.building_type == 'slums':
             num_available_workers += current_slums.available_workers
     if not location_types == 'slums': #village or all
-        for current_village in global_manager.get('village_list'):
+        for current_village in status.village_list:
             num_available_workers += current_village.available_workers
     return(num_available_workers)
 

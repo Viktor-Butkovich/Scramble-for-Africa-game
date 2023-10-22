@@ -5,6 +5,7 @@ from ..interface_types.buttons import button
 from ..util import main_loop_utility, utility, actor_utility, minister_utility, trial_utility, text_utility, game_transitions
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class embark_all_passengers_button(button):
     '''
@@ -470,7 +471,7 @@ class end_unit_turn_button(button):
             displayed_mob = status.displayed_mob
             if not displayed_mob.is_pmob:
                 return(False)
-            elif not displayed_mob in self.global_manager.get('player_turn_queue'):
+            elif not displayed_mob in status.player_turn_queue:
                 return(False)
         return(result)
 
@@ -1325,7 +1326,7 @@ class labor_broker_button(button):
         '''
         lowest_cost_village = 'none'
         lowest_cost = 0
-        for current_village in self.global_manager.get('village_list'):
+        for current_village in status.village_list:
             if current_village.population > 0:
                 distance = int(utility.find_object_distance(current_village, status.displayed_mob))
                 cost = (5 * current_village.aggressiveness) + distance
@@ -1451,7 +1452,7 @@ class switch_theatre_button(button):
                             current_mob.select()
                         current_mob.clear_automatic_route()
                         current_mob.end_turn_destination = 'none'
-                        self.global_manager.set('choosing_destination', True)
+                        flags.choosing_destination = True
                         self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
                 else:
                     text_utility.print_to_screen('You are inland and cannot cross the ocean.', self.global_manager) 
@@ -1840,7 +1841,7 @@ class bribe_judge_button(button):
             boolean: Returns same as superclass if judge has not been bribed yet, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.global_manager.get('prosecution_bribed_judge'):
+            if not flags.prosecution_bribed_judge:
                 return(True)
         return(False)
 
@@ -1855,9 +1856,9 @@ class bribe_judge_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             if constants.money >= self.get_cost():
-                if not self.global_manager.get('prosecution_bribed_judge'):
+                if not flags.prosecution_bribed_judge:
                     constants.money_tracker.change(-1 * self.get_cost(), 'trial')
-                    self.global_manager.set('prosecution_bribed_judge', True)
+                    flags.prosecution_bribed_judge = True
                     prosecutor = status.displayed_prosecution
                     prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that the judge has been successfully bribed for ' + str(self.get_cost()) +
                         ' money. /n /nThis may provide a bonus in the next trial this turn. /n /n')
@@ -2068,7 +2069,7 @@ class automatic_route_button(button):
                         return()
                     attached_mob.clear_automatic_route()
                     attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
-                    self.global_manager.set('drawing_automatic_route', True)
+                    flags.drawing_automatic_route = True
                     
                 elif self.button_type == 'follow automatic route':
                     if attached_mob.can_follow_automatic_route():

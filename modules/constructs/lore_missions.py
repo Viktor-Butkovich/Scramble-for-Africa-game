@@ -58,7 +58,7 @@ class lore_mission():
                     'proven_false': False
                 }, self.global_manager)
 
-            for current_village in self.global_manager.get('village_list'):
+            for current_village in status.village_list:
                 current_village.found_rumors = False
             self.confirmed_all_locations_revealed = False
             self.artifact_location = random.choice(self.possible_artifact_locations)

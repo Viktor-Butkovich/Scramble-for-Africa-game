@@ -4,6 +4,7 @@ import pygame
 from .buttons import button
 from ..util import scaling, text_utility, utility, market_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class label(button):
     '''
@@ -265,10 +266,10 @@ class money_label_template(value_label):
         num_available_workers = market_utility.count_available_workers(self.global_manager)
         tooltip_text.append('Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of ' + str(num_available_workers) + ' African worker' + utility.generate_plural(num_available_workers) + '.')
         
-        if len(self.global_manager.get('loan_list')) > 0:
+        if len(status.loan_list) > 0:
             tooltip_text.append('')
             tooltip_text.append('Loans: ')
-            for current_loan in self.global_manager.get('loan_list'):
+            for current_loan in status.loan_list:
                 tooltip_text.append('    ' + current_loan.get_description())
 
         tooltip_text.append('')

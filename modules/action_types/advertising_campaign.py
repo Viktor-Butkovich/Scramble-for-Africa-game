@@ -6,6 +6,7 @@ from . import action
 from ..util import action_utility, text_utility, market_utility, scaling, game_transitions
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class advertising_campaign(action.campaign):
     '''
@@ -183,7 +184,7 @@ class advertising_campaign(action.campaign):
                     game_transitions.set_game_mode('europe', self.global_manager)
                     unit.select()
                 text_utility.print_to_screen('Select a commodity to advertise, or click elsewhere to cancel: ', self.global_manager)
-                self.global_manager.set('choosing_advertised_commodity', True)
+                flags.choosing_advertised_commodity = True
             else:
                 text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe', self.global_manager)
 
@@ -197,7 +198,7 @@ class advertising_campaign(action.campaign):
         Output:
             None
         '''
-        self.global_manager.set('choosing_advertised_commodity', False)
+        flags.choosing_advertised_commodity = False
         self.target_commodity = commodity
         self.target_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
         while self.target_unadvertised_commodity == 'consumer goods' or self.target_unadvertised_commodity == self.target_commodity or self.global_manager.get('commodity_prices')[self.target_unadvertised_commodity] == 1:

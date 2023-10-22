@@ -182,11 +182,11 @@ class dice_rolling_notification(action_notification):
             None
         '''
         super().remove()
-        num_dice = len(self.global_manager.get('dice_list'))
+        num_dice = len(status.dice_list)
         if num_dice > 1: #if there are multiple dice, check if any player-controlled dice are critical successes for promotion
             max_roll = 0
             max_die = 0
-            for current_die in self.global_manager.get('dice_list'):
+            for current_die in status.dice_list:
                 if not (not current_die.normal_die and current_die.special_die_type == 'red'): #do not include enemy dice in this calculation
                     if current_die.roll_result > max_roll:
                         max_roll = current_die.roll_result
@@ -197,13 +197,13 @@ class dice_rolling_notification(action_notification):
                     elif current_die.special_die_type == 'red':
                         current_die.outline_color = current_die.outcome_color_dict['crit_fail']
 
-            for current_die in self.global_manager.get('dice_list'):
+            for current_die in status.dice_list:
                 if not (not current_die.normal_die and current_die.special_die_type == 'red'):
                     if not current_die == max_die:
                         current_die.normal_die = True
             max_die.highlighted = True
         elif num_dice: #if only 1 die, check if it is a crtiical success for promotion
-            self.global_manager.get('dice_list')[0].highlighted = True
+            status.dice_list[0].highlighted = True
 
 class off_tile_exploration_notification(action_notification):
     '''
@@ -449,7 +449,7 @@ class trial_notification(action_notification):
             None
         '''
         super().remove(handle_next_notification=False)
-        for current_die in self.global_manager.get('dice_list'):
+        for current_die in status.dice_list:
             current_die.remove_complete()
         previous_roll = self.global_manager.get('trial_rolls').pop(0)
         if previous_roll >= 5:

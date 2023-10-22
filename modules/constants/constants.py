@@ -16,6 +16,7 @@ pygame.init()
 pygame.mixer.init()
 pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
 pygame.display.set_caption('SFA')
+pygame.key.set_repeat(300, 200)
 
 default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
 default_display_height: int = 972
@@ -50,13 +51,10 @@ fps_tracker: value_tracker_template = None
 frames_this_second: int = 0
 last_fps_update: float = 0.0
 
-loading: bool = True
 loading_start_time: float = 0.0
 previous_turn_time: float = 0.0
 current_time: float = 0.0
 last_selection_outline_switch: float = 0.0
-show_selection_outlines: bool = False
-show_minimap_outlines: bool = False
 mouse_moved_time: float = 0.0
 end_turn_wait_time: float = 0.8
 
@@ -69,9 +67,6 @@ default_music_volume: float = 0.5
 
 current_instructions_page_index: int = 0
 current_instructions_page_text: str = ''
-
-startup_complete: bool = False
-creating_new_game: bool = False
 
 grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid']
 

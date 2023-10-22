@@ -37,7 +37,7 @@ class interface_element():
         self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
         if not self.has_parent_collection:
-            self.global_manager.get('independent_interface_elements').append(self)
+            status.independent_interface_elements.append(self)
 
         input_dict['coordinates'] = input_dict.get('coordinates', (0, 0))
         self.x, self.y = input_dict['coordinates']
@@ -92,8 +92,8 @@ class interface_element():
         Output:
             None
         '''
-        if self in self.global_manager.get('independent_interface_elements'):
-            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
+        if self in status.independent_interface_elements:
+            status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
 
     def draw(self):
         '''
@@ -267,7 +267,6 @@ class interface_collection(interface_element):
             None
         '''
         self.members = []
-        global_manager.get('interface_collection_list').append(self)
         self.minimized = False
         if input_dict.get('is_info_display', False):
             self.is_info_display = True
@@ -386,7 +385,7 @@ class interface_collection(interface_element):
 
         if not new_member.has_parent_collection:
             new_member.has_parent_collection = True
-            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), new_member))
+            status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, new_member)
         new_member.parent_collection = self
         if not 'index' in member_config:
             self.members.append(new_member)
@@ -417,7 +416,7 @@ class interface_collection(interface_element):
             removed_member.y_offset = None
         removed_member.parent_collection = 'none'
         removed_member.has_parent_collection = False
-        self.global_manager.get('independent_interface_elements').append(removed_member)
+        status.independent_interface_elements.append(removed_member)
         self.members.remove(removed_member)
 
     def remove_recursive(self, complete=False):

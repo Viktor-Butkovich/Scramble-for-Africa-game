@@ -3,6 +3,7 @@
 import random
 from . import text_utility, utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 def adjust_prices(global_manager):
     '''
@@ -209,7 +210,7 @@ def calculate_end_turn_money_change(global_manager):
     estimated_change = 0
     estimated_change += calculate_subsidies(global_manager, True)
     estimated_change -= calculate_total_worker_upkeep(global_manager)
-    for current_loan in global_manager.get('loan_list'):
+    for current_loan in status.loan_list:
         estimated_change -= current_loan.interest
     estimated_change += calculate_total_sale_revenue(global_manager)
     return(round(estimated_change, 2))
@@ -224,9 +225,9 @@ def count_available_workers(global_manager):
         int: Returns the total number of wandering workers and available workers between all villages and slums
     '''
     num_available_workers = 0
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         num_available_workers += current_village.available_workers
-    for current_slums in global_manager.get('slums_list'):
+    for current_slums in status.slums_list:
         num_available_workers += current_slums.available_workers
     num_available_workers += global_manager.get('num_wandering_workers')
     return(num_available_workers)
@@ -254,7 +255,7 @@ class loan():
         self.interest = input_dict['interest']
         self.remaining_duration = input_dict['remaining_duration']
         self.total_to_pay = self.interest * self.remaining_duration
-        self.global_manager.get('loan_list').append(self)
+        status.loan_list.append(self)
         if not from_save:
             constants.money_tracker.change(self.principal, 'loan')
             text_utility.print_to_screen('You have accepted a ' + str(self.principal) + ' money loan with interest payments of ' + str(self.interest) + '/turn for ' + str(self.remaining_duration) + ' turns.', self.global_manager)
@@ -318,7 +319,7 @@ class loan():
         '''
         total_paid = self.interest * 10
         text_utility.print_to_screen('You have finished paying off the ' + str(total_paid) + ' money required for your ' + str(self.principal) + ' money loan', self.global_manager)
-        self.global_manager.set('loan_list', utility.remove_from_list(self.global_manager.get('loan_list'), self))
+        status.loan_list = utility.remove_from_list(status.loan_list, self)
 
     def get_description(self):
         '''

@@ -97,7 +97,7 @@ def update_available_minister_display(global_manager):
     Output:
         None
     '''
-    available_minister_portrait_list = global_manager.get('available_minister_portrait_list')
+    available_minister_portrait_list = status.available_minister_portrait_list
     available_minister_left_index = global_manager.get('available_minister_left_index')
     available_minister_list = status.available_minister_list
     for current_index in range(len(available_minister_portrait_list)):

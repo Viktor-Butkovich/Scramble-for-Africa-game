@@ -7,6 +7,7 @@ from ..util import text_utility, scaling, main_loop_utility, actor_utility, util
 from . import interface_elements
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class button(interface_elements.interface_element):
     '''
@@ -395,7 +396,7 @@ class button(interface_elements.interface_element):
             
         elif self.button_type == 'cycle units':
             tooltip_text = ['Selects the next unit in the turn order']
-            turn_queue = self.global_manager.get('player_turn_queue')
+            turn_queue = status.player_turn_queue
             if len(turn_queue) > 0:
                 for current_pmob in turn_queue:
                     tooltip_text.append('    ' + utility.capitalize(current_pmob.name))
@@ -806,7 +807,7 @@ class button(interface_elements.interface_element):
                         if self.global_manager.get('current_game_mode') == 'strategic':
                             if current_mob.can_move(x_change, y_change):
                                 current_mob.move(x_change, y_change)
-                                constants.show_selection_outlines = True
+                                flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
@@ -823,7 +824,7 @@ class button(interface_elements.interface_element):
             constants.effect_manager.set_effect('hide_grid_lines', utility.toggle(constants.effect_manager.effect_active('hide_grid_lines')))
 
         elif self.button_type == 'toggle text box':
-            self.global_manager.set('show_text_box', utility.toggle(self.global_manager.get('show_text_box')))
+            flags.show_text_box = not flags.show_text_box
 
         elif self.button_type == 'expand text box':
             if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
@@ -844,7 +845,7 @@ class button(interface_elements.interface_element):
                         moved_units[current_unit_type] = 0
                         attempted_units[current_unit_type] = 0
                     
-                    for current_pmob in self.global_manager.get('pmob_list'):
+                    for current_pmob in status.pmob_list:
                         if len(current_pmob.base_automatic_route) > 0:
                             if current_pmob.is_vehicle:
                                 if current_pmob.vehicle_type == 'train':
@@ -1074,7 +1075,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'free all':
             actor_utility.deselect_all(self.global_manager)
-            pmob_list = utility.copy_list(self.global_manager.get('pmob_list')) #alllows iterating through each unit without any issues from removing from list during iteration
+            pmob_list = utility.copy_list(status.pmob_list) #alllows iterating through each unit without any issues from removing from list during iteration
             old_public_opinion = constants.public_opinion
             num_freed = 0
             for current_pmob in pmob_list:
@@ -1139,11 +1140,11 @@ class button(interface_elements.interface_element):
             game_transitions.to_main_menu(self.global_manager)
 
         elif self.button_type == 'quit':
-            self.global_manager.set('crashed', True)
+            self.flags.crashed = True
 
         elif self.button_type == 'wake up all':
             if main_loop_utility.action_possible(self.global_manager):
-                for current_pmob in self.global_manager.get('pmob_list'):
+                for current_pmob in status.pmob_list:
                     if current_pmob.sentry_mode:
                         current_pmob.set_sentry_mode(False)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), status.displayed_mob)
@@ -1318,7 +1319,7 @@ class end_turn_button(button):
         Output:
             boolean: Returns whether this button's enemy turn version should be shown
         '''
-        if self.global_manager.get('player_turn') and not self.global_manager.get('enemy_combat_phase'):
+        if flags.player_turn and not flags.enemy_combat_phase:
             return(False)
         return(True)
         
@@ -1777,7 +1778,7 @@ class switch_game_mode_button(button):
                     constants.notification_manager.display_notification({
                         'message': text,
                     })
-                if self.global_manager.get('prosecution_bribed_judge'):
+                if flags.prosecution_bribed_judge:
                     text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
                     constants.notification_manager.display_notification({
                         'message': text,
@@ -1841,12 +1842,12 @@ class minister_portrait_image(button):
         self.minister_type = input_dict['minister_type'] #position, like General
         if self.minister_type == 'none': #if available minister portrait
             if 'ministers' in self.modes:
-                self.global_manager.get('available_minister_portrait_list').append(self)
+                status.available_minister_portrait_list.append(self)
             warning_x_offset = scaling.scale_width(-100)
         else:
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
             warning_x_offset = 0
-        self.global_manager.get('minister_image_list').append(self)
+        status.minister_image_list.append(self)
 
         self.warning_image = constants.actor_creation_manager.create_interface_element({
             'attached_image': self,
@@ -1888,7 +1889,7 @@ class minister_portrait_image(button):
             showing = True
             if not self.current_minister == 'none':
                 pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.Rect) #draw white background
-                if status.displayed_minister == self.current_minister and constants.show_selection_outlines: 
+                if status.displayed_minister == self.current_minister and flags.show_selection_outlines: 
                     pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
         super().draw()
         if showing and self.warning_image.showing:
@@ -1907,7 +1908,7 @@ class minister_portrait_image(button):
             if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
                 if self.current_minister != 'none':
                     self.current_minister.play_voice_line('acknowledgement')
-                if self in self.global_manager.get('available_minister_portrait_list'): #if available minister portrait
+                if self in status.available_minister_portrait_list: #if available minister portrait
                     own_index = status.available_minister_list.index(self.current_minister)
                     self.global_manager.set('available_minister_left_index', own_index - 2)
                     minister_utility.update_available_minister_display(self.global_manager)
@@ -1978,7 +1979,6 @@ class country_selection_image(button):
         input_dict['button_type'] = 'country images'
         input_dict['image_id'] = self.default_image_id
         super().__init__(input_dict, global_manager)
-        self.global_manager.get('country_selection_image_list').append(self)
         self.current_country = input_dict['country']
         self.calibrate(self.current_country)
 
@@ -1994,7 +1994,7 @@ class country_selection_image(button):
         if self.showing: #draw outline around portrait if country selected
             if not self.current_country == 'none':
                 pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.Rect) #draw white background
-                if status.displayed_country == self.current_country and constants.show_selection_outlines: 
+                if status.displayed_country == self.current_country and flags.show_selection_outlines: 
                     pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
         super().draw()
 
@@ -2108,7 +2108,7 @@ class cycle_available_ministers_button(button):
             if self.direction == 'right':
                 self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
             minister_utility.update_available_minister_display(self.global_manager)
-            self.global_manager.get('available_minister_portrait_list')[2].on_click() #select new middle portrait
+            status.available_minister_portrait_list[2].on_click() #select new middle portrait
         else:
             text_utility.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
 
@@ -2155,7 +2155,7 @@ class commodity_button(button):
         Output:
             None
         '''
-        if self.global_manager.get('choosing_advertised_commodity'):
+        if flags.choosing_advertised_commodity:
             if self.commodity == 'consumer goods':
                 text_utility.print_to_screen('You cannot advertise consumer goods.', self.global_manager)
             else:

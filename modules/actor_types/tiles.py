@@ -7,6 +7,7 @@ from ..util import utility, actor_utility, main_loop_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class tile(actor): #to do: make terrain tiles a subclass
     '''
@@ -403,7 +404,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.global_manager.get('player_turn') and main_loop_utility.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
+        if flags.player_turn and main_loop_utility.action_possible(self.global_manager): #(not flags.choosing_destination):
             if self.name == 'Slave traders' and self.global_manager.get('slave_traders_strength') > 0:
                 if constants.sound_manager.previous_state != 'slave traders':
                     constants.event_manager.clear()

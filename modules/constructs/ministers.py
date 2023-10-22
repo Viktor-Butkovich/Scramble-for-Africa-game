@@ -5,6 +5,7 @@ import os
 from ..util import tutorial_utility, utility, actor_utility, minister_utility, main_loop_utility, scaling
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 class minister():
     '''
@@ -540,7 +541,7 @@ class minister():
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
-        for current_pmob in self.global_manager.get('pmob_list'):
+        for current_pmob in status.pmob_list:
             current_pmob.update_controlling_minister()
         if not new_position == 'none': #if appointing
             status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
@@ -549,7 +550,7 @@ class minister():
         else:
             status.available_minister_list.append(self)
             self.global_manager.set('available_minister_left_index', len(status.available_minister_list) - 3) #move available minister display to newly fired minister
-        for current_minister_type_image in self.global_manager.get('minister_image_list'):
+        for current_minister_type_image in status.minister_image_list:
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
             elif current_minister_type_image.minister_type == old_position:
@@ -604,7 +605,7 @@ class minister():
         if (not skill_type in self.apparent_skills) or self.apparent_skills[skill_type] != new_value:
             self.apparent_skills[skill_type] = new_value
             self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
-            if not (constants.creating_new_game or self.initializing):
+            if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
             if status.displayed_minister == self:
                 minister_utility.calibrate_minister_info_display(self.global_manager, self)
@@ -689,7 +690,7 @@ class minister():
         if (not hasattr(self, 'apparent_corruption')) or self.apparent_corruption != new_value:
             self.apparent_corruption = new_value
             self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
-            if not (constants.creating_new_game or self.initializing):
+            if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
             if status.displayed_minister == self:
                 minister_utility.calibrate_minister_info_display(self.global_manager, self)
@@ -835,7 +836,7 @@ class minister():
             self.set_apparent_skill(rumor_type, apparent_value)
 
         if prosecutor == 'none' :
-            if not constants.creating_new_game:
+            if not flags.creating_new_game:
                 message = 'A rumor has been found that ' + self.name + ', '
                 if self.current_position == 'none':
                     message += ' a potential minister candidate, '
@@ -989,7 +990,7 @@ class minister():
         '''
         if not self.current_position == 'none':
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
-            for current_minister_image in self.global_manager.get('minister_image_list'):
+            for current_minister_image in status.minister_image_list:
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'

@@ -2,6 +2,7 @@ import random
 from . import utility, scaling, game_transitions, minister_utility, dice_utility, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 def start_trial(global_manager): #called by launch trial button in middle of trial screen
     '''
@@ -132,14 +133,14 @@ def trial(global_manager): #called by choice notification button
     if prosecutor_corrupt:
         prosecution.steal_money(price, 'trial')
         prosecution.steal_money(get_fabricated_evidence_cost(defense.fabricated_evidence, True), 'trial')
-        if global_manager.get('prosecution_bribed_judge'):
+        if flags.prosecution_bribed_judge:
             prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial')
 
     defense_info_dict = manage_defense(defense.corruption_evidence, prosecutor_corrupt, global_manager)
     effective_evidence = defense_info_dict['effective_evidence']
 
     defense_bribed_judge = defense_info_dict['defense_bribed_judge']
-    prosecution_bribed_judge = global_manager.get('prosecution_bribed_judge')
+    prosecution_bribed_judge = flags.prosecution_bribed_judge
     text = ''
     judge_modifier = 0
     judge_bias = prosecution.no_corruption_roll(6) - defense.get_roll_modifier() #D6 with both skill modifiers competing
@@ -326,6 +327,6 @@ def complete_trial(final_roll, global_manager):
             'audio': 'not guilty'
         })
         minister_utility.calibrate_minister_info_display(global_manager, defense)
-    global_manager.set('prosecution_bribed_judge', False)
+    flags.prosecution_bribed_judge = False
     global_manager.set('ongoing_action', False)
     global_manager.set('ongoing_action_type', 'none')
