@@ -65,7 +65,7 @@ def update_display(global_manager):
         if flags.show_text_box:
             draw_text_box(global_manager)
 
-        global_manager.get('mouse_follower').draw()
+        constants.mouse_follower.draw()
             
         if status.current_instructions_page:
             status.current_instructions_page.draw()

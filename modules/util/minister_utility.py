@@ -12,7 +12,7 @@ def check_corruption(minister_type, global_manager):
     Description:
         boolean: Returns whether the minister in the inputted office would lie about the result of a given roll
     '''
-    return(global_manager.get('current_ministers')[minister_type].check_corruption)
+    return(status.current_ministers[minister_type].check_corruption)
 
 def get_skill_modifier(minister_type, global_manager):
     '''
@@ -23,7 +23,7 @@ def get_skill_modifier(minister_type, global_manager):
     Output:
         int: Returns the skill-based dice roll modifier of the minister in the inputted office, between -1 and 1
     '''
-    return(global_manager.get('current_ministers')[minister_type].get_skill_modifier)
+    return(status.current_ministers[minister_type].get_skill_modifier)
 
 def calibrate_minister_info_display(global_manager, new_minister):
     '''
@@ -119,7 +119,7 @@ def positions_filled(global_manager):
         boolean: Returns whether all minister positions are currently filled
     '''
     completed = True
-    for current_position in global_manager.get('minister_types'):
-        if global_manager.get('current_ministers')[current_position] == 'none':
+    for current_position in constants.minister_types:
+        if status.current_ministers[current_position] == None:
             completed = False
     return(completed)

@@ -90,8 +90,8 @@ class advertising_campaign(action.campaign):
             increase = 1
             if self.roll_result >= 6:
                 increase += 1
-            advertised_original_price = self.global_manager.get('commodity_prices')[self.target_commodity]
-            unadvertised_original_price = self.global_manager.get('commodity_prices')[self.target_unadvertised_commodity]
+            advertised_original_price = constants.commodity_prices[self.target_commodity]
+            unadvertised_original_price = constants.commodity_prices[self.target_unadvertised_commodity]
             unadvertised_final_price = unadvertised_original_price - increase
             if unadvertised_final_price < 1:
                 unadvertised_final_price = 1
@@ -200,9 +200,9 @@ class advertising_campaign(action.campaign):
         '''
         flags.choosing_advertised_commodity = False
         self.target_commodity = commodity
-        self.target_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
-        while self.target_unadvertised_commodity == 'consumer goods' or self.target_unadvertised_commodity == self.target_commodity or self.global_manager.get('commodity_prices')[self.target_unadvertised_commodity] == 1:
-            self.target_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
+        self.target_unadvertised_commodity = random.choice(constants.commodity_types)
+        while self.target_unadvertised_commodity == 'consumer goods' or self.target_unadvertised_commodity == self.target_commodity or constants.commodity_prices[self.target_unadvertised_commodity] == 1:
+            self.target_unadvertised_commodity = random.choice(constants.commodity_types)
 
         if super().start(unit):
             constants.notification_manager.display_notification({

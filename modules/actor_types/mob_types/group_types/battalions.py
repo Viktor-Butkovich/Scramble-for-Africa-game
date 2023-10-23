@@ -105,7 +105,7 @@ class battalion(group):
         flags.show_selection_outlines = True
         flags.show_minimap_outlines = True
         constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately when selected
-        if not self.global_manager.get('actions')['combat'].on_click(
+        if not status.actions['combat'].on_click(
             self,
             on_click_info_dict={
                 'x_change': x_change,

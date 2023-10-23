@@ -87,7 +87,7 @@ class cell():
 
         saved_inventory = {}
         if self.tile.can_hold_commodities: #only save inventory if not empty
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                if self.tile.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
         save_dict['inventory'] = saved_inventory
@@ -292,7 +292,7 @@ class cell():
             None
         '''
         self.contained_buildings = {}
-        for current_building_type in self.global_manager.get('building_types'):
+        for current_building_type in constants.building_types:
             self.contained_buildings[current_building_type] = 'none'
 
     def get_buildings(self):
@@ -305,7 +305,7 @@ class cell():
             building list contained_buildings_list: buildings contained in this cell
         '''
         contained_buildings_list = []
-        for current_building_type in self.global_manager.get('building_types'):
+        for current_building_type in constants.building_types:
             if self.has_building(current_building_type):
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
@@ -320,7 +320,7 @@ class cell():
             building list contained_buildings_list: nondamaged buildings contained in this cell
         '''
         contained_buildings_list = []
-        for current_building_type in self.global_manager.get('building_types'):
+        for current_building_type in constants.building_types:
             if self.has_intact_building(current_building_type):
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
@@ -685,7 +685,7 @@ class cell():
         self.terrain = new_terrain
         if self.tile != 'none':
             self.tile.set_terrain(new_terrain, update_image_bundle)
-        self.color = self.global_manager.get('terrain_colors')[new_terrain]
+        self.color = constants.terrain_colors[new_terrain]
 
     def copy(self, other_cell):
         '''

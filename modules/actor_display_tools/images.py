@@ -168,7 +168,7 @@ class minister_background_image(mob_background_image):
             if self.actor.current_position == 'none':
                 image_id_list.append('misc/mob_background.png')
             else:
-                image_id_list.append('ministers/icons/' + self.global_manager.get('minister_type_dict')[self.actor.current_position] + '.png')
+                image_id_list.append('ministers/icons/' + constants.minister_type_dict[self.actor.current_position] + '.png')
             if self.actor.just_removed and self.actor.current_position == 'none':
                 image_id_list.append({'image_id': 'misc/warning_icon.png', 'x_offset': 0.75})
         return(image_id_list)

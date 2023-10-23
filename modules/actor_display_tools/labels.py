@@ -101,8 +101,8 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_t
             self.add_attached_button(input_dict)
 
-            for action_type in self.global_manager.get('actions'):
-                button_input_dict = self.global_manager.get('actions')[action_type].button_setup(input_dict.copy())
+            for action_type in status.actions:
+                button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
                 if button_input_dict:
                     self.add_attached_button(button_input_dict)
 
@@ -306,7 +306,7 @@ class actor_display_label(label):
             input_dict['init_type'] = 'remove minister button'
             self.add_attached_button(input_dict)
             input_dict['init_type'] = 'appoint minister button'
-            for current_position in global_manager.get('minister_types'):
+            for current_position in constants.minister_types:
                 input_dict['appoint_type'] = current_position
                 self.add_attached_button(input_dict)
 
@@ -509,7 +509,7 @@ class actor_display_label(label):
                     for skill_type in self.actor.apparent_skills:
                         if self.actor.apparent_skills[skill_type] == skill_value:
                             rank += 1
-                            skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                            skill_name = constants.minister_type_dict[skill_type] #like General to military
                             tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.actor.apparent_skill_descriptions[skill_type])
             self.set_tooltip(tooltip_text)
 
@@ -741,7 +741,7 @@ class actor_display_label(label):
                     displayed_skill = new_actor.current_position
                     message += 'Current ability: '
                 if displayed_skill != 'unknown':
-                    displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military
+                    displayed_skill_name = constants.minister_type_dict[displayed_skill] #like General to military
                     message += new_actor.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
                 else:
                     message += displayed_skill

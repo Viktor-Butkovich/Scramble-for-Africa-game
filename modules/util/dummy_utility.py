@@ -102,7 +102,7 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict,
                 dummy_input_dict[attribute] = getattr(officer, attribute)
         dummy_input_dict['officer'] = officer
         dummy_input_dict['worker'] = worker
-        dummy_input_dict['group_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
+        dummy_input_dict['group_type'] = constants.officer_group_type_dict[officer.officer_type]
         if dummy_input_dict['group_type'] == 'battalion':
             if worker.worker_type == 'European':
                 dummy_input_dict['battalion_type'] = 'imperial'

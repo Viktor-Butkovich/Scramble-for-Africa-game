@@ -160,7 +160,7 @@ class button(interface_elements.interface_element):
                             adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
                             connecting_roads = False
                             if (current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none') or (current_mob.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none'):
-                                tooltip_text += self.global_manager.get('actions')['combat'].update_tooltip(
+                                tooltip_text += status.actions['combat'].update_tooltip(
                                     tooltip_info_dict = {
                                         'adjacent_infrastructure': adjacent_infrastructure,
                                         'local_infrastructure': local_infrastructure,
@@ -196,14 +196,14 @@ class button(interface_elements.interface_element):
                                     if (current_mob.can_walk and adjacent_cell.terrain == 'water' and (not current_mob.can_swim_river)) and adjacent_cell.y > 0 and not local_cell.has_walking_connection(adjacent_cell):
                                         tooltip_text.append('Moving into a river tile costs an entire turn of movement points for units without canoes')
                                     else:
-                                        tooltip_text.append('Moving into a ' + adjacent_cell.terrain + ' tile costs ' + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + ' movement points')
+                                        tooltip_text.append('Moving into a ' + adjacent_cell.terrain + ' tile costs ' + str(constants.terrain_movement_cost_dict[adjacent_cell.terrain]) + ' movement points')
                             if (not current_mob.is_vehicle) and current_mob.images[0].current_cell.terrain == 'water' and current_mob.images[0].current_cell.has_vehicle('ship'):
                                 if (current_mob.images[0].current_cell.y == 0 and not (current_mob.can_swim and current_mob.can_swim_ocean)) or (current_mob.images[0].current_cell.y > 0 and not (current_mob.can_swim and current_mob.can_swim_river)): #if could not naturally move into current tile, must be from vehicle
                                     tooltip_text.append('Moving from a steamship or steamboat in the water after disembarking requires all remaining movement points, at least the usual amount')
                             if connecting_roads:
                                 tooltip_text.append('Moving between 2 tiles with roads or railroads costs half as many movement points.')
                         else:
-                            tooltip_text += self.global_manager.get('actions')['exploration'].update_tooltip(tooltip_info_dict={'direction': direction})
+                            tooltip_text += status.actions['exploration'].update_tooltip(tooltip_info_dict={'direction': direction})
                     else:
                         tooltip_text.append('This unit cannot currently move to the ' + direction)
 
@@ -334,14 +334,14 @@ class button(interface_elements.interface_element):
             if not self.attached_label.actor == 'none':
                 commodity_list = self.attached_label.actor.get_held_commodities()
                 commodity = commodity_list[self.attached_label.commodity_index]
-                sell_price = self.global_manager.get('commodity_prices')[commodity]
+                sell_price = constants.commodity_prices[commodity]
                 if self.button_type == 'sell commodity':
-                    self.set_tooltip(['Orders your ' + self.global_manager.get('type_minister_dict')['trade'] + ' to sell 1 unit of ' + commodity + ' for about ' + str(sell_price) + ' money at the end of the turn',
+                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell 1 unit of ' + commodity + ' for about ' + str(sell_price) + ' money at the end of the turn',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
                                       'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
                 else:
                     num_present = self.attached_label.actor.get_inventory(commodity)
-                    self.set_tooltip(['Orders your ' + self.global_manager.get('type_minister_dict')['trade'] + ' to sell your entire stockpile of ' + commodity + ' for about ' + str(sell_price) + ' money each at the end of the turn, ' +
+                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell your entire stockpile of ' + commodity + ' for about ' + str(sell_price) + ' money each at the end of the turn, ' +
                                           'for a total of about ' + str(sell_price * num_present) + ' money',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
                                       'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
@@ -892,7 +892,7 @@ class button(interface_elements.interface_element):
                                 else:
                                     text += 'Only ' + str(num_progressed) + ' of the ' + str(num_attempted) + ' ' + plural + ' made progress on their designated movement routes. /n /n'
 
-                    transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+                    transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
                     if types_moved > 0:
                         transportation_minister.display_message(text)
                     else:
@@ -989,8 +989,8 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start end turn':
             if main_loop_utility.action_possible(self.global_manager):
                 stopping = False
-                for current_position in self.global_manager.get('minister_types'):
-                    if self.global_manager.get('current_ministers')[current_position] == 'none':
+                for current_position in constants.minister_types:
+                    if status.current_ministers[current_position] == None:
                         stopping = True
                 if stopping:
                     game_transitions.force_minister_appointment(self.global_manager)
@@ -1793,7 +1793,7 @@ class switch_game_mode_button(button):
                 game_transitions.set_game_mode(self.to_mode, self.global_manager)
             else:
                 self.global_manager.set('exit_minister_screen_tutorial_completed', True)
-                game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+                game_transitions.set_game_mode(constants.previous_game_mode, self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
 
@@ -1807,7 +1807,7 @@ class switch_game_mode_button(button):
             None
         '''
         if self.to_mode == 'previous':
-            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.global_manager.get('previous_game_mode')]))
+            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[constants.previous_game_mode]))
         else:
             self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
 
@@ -1845,7 +1845,7 @@ class minister_portrait_image(button):
                 status.available_minister_portrait_list.append(self)
             warning_x_offset = scaling.scale_width(-100)
         else:
-            self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
+            self.type_keyword = constants.minister_type_dict[self.minister_type]
             warning_x_offset = 0
         status.minister_image_list.append(self)
 
@@ -2160,12 +2160,12 @@ class commodity_button(button):
                 text_utility.print_to_screen('You cannot advertise consumer goods.', self.global_manager)
             else:
                 can_advertise = False
-                for current_commodity in self.global_manager.get('collectable_resources'):
-                    if current_commodity != self.commodity and self.global_manager.get('commodity_prices')[current_commodity] > 1:
+                for current_commodity in constants.collectable_resources:
+                    if current_commodity != self.commodity and constants.commodity_prices[current_commodity] > 1:
                         can_advertise = True
                         break
                 if can_advertise:
-                    self.global_manager.get('actions')['advertising_campaign'].start(status.displayed_mob, self.commodity)
+                    status.actions['advertising_campaign'].start(status.displayed_mob, self.commodity)
                 else:
                     text_utility.print_to_screen('You cannot advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
 

@@ -17,14 +17,14 @@ def adjust_prices(global_manager):
     num_increased = 4
     num_decreased = 2
     for i in range(num_increased):
-        changed_commodity = random.choice(global_manager.get('commodity_types'))
+        changed_commodity = random.choice(constants.commodity_types)
         while changed_commodity == 'consumer goods':
-            changed_commodity = random.choice(global_manager.get('commodity_types')) #consumer goods price is changed separately and should not be changed here
+            changed_commodity = random.choice(constants.commodity_types) #consumer goods price is changed separately and should not be changed here
         change_price(changed_commodity, 1, global_manager)
     for i in range(num_decreased):
-        changed_commodity = random.choice(global_manager.get('commodity_types'))
+        changed_commodity = random.choice(constants.commodity_types)
         while changed_commodity == 'consumer goods':
-            changed_commodity = random.choice(global_manager.get('commodity_types')) #consumer goods price is changed separately and should not be changed here
+            changed_commodity = random.choice(constants.commodity_types) #consumer goods price is changed separately and should not be changed here
         change_price(changed_commodity, -1, global_manager)
         
     consumer_goods_roll = random.randrange(1, 7)
@@ -45,9 +45,9 @@ def change_price(changed_commodity, num_change, global_manager):
     Output:
         None
     '''
-    global_manager.get('commodity_prices')[changed_commodity] += num_change
-    if global_manager.get('commodity_prices')[changed_commodity] < 1:
-        global_manager.get('commodity_prices')[changed_commodity] = 1
+    constants.commodity_prices[changed_commodity] += num_change
+    if constants.commodity_prices[changed_commodity] < 1:
+        constants.commodity_prices[changed_commodity] = 1
     global_manager.get('commodity_prices_label').update_label()
     constants.money_label.check_for_updates()
 
@@ -62,9 +62,9 @@ def set_price(changed_commodity, new_value, global_manager):
     Output:
         None
     '''
-    global_manager.get('commodity_prices')[changed_commodity] = new_value
-    if global_manager.get('commodity_prices')[changed_commodity] < 1:
-        global_manager.get('commodity_prices')[changed_commodity] = 1
+    constants.commodity_prices[changed_commodity] = new_value
+    if constants.commodity_prices[changed_commodity] < 1:
+        constants.commodity_prices[changed_commodity] = 1
     global_manager.get('commodity_prices_label').update_label()
 
 def sell(seller, sold_commodity, num_sold, global_manager):
@@ -80,7 +80,7 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     Output:
         None
     '''
-    global_manager.get('sold_commodities')[sold_commodity] += num_sold
+    constants.sold_commodities[sold_commodity] += num_sold
     #for i in range(num_sold):
     #    seller.change_inventory(sold_commodity, -1)
     seller.change_inventory(sold_commodity, -1 * num_sold)
@@ -96,8 +96,8 @@ def calculate_total_sale_revenue(global_manager):
         int: Returns the total estimated revenue from sold commodities this turn
     '''
     total_sale_price = 0
-    for commodity in global_manager.get('commodity_types'):
-        total_sale_price += global_manager.get('sold_commodities')[commodity] * global_manager.get('commodity_prices')[commodity]
+    for commodity in constants.commodity_types:
+        total_sale_price += constants.sold_commodities[commodity] * constants.commodity_prices[commodity]
     return(total_sale_price)
 
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):

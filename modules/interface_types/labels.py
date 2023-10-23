@@ -278,7 +278,7 @@ class money_label_template(value_label):
         total_sale_revenue = market_utility.calculate_total_sale_revenue(self.global_manager)
         if total_sale_revenue > 0:
             tooltip_text.append('')
-            tooltip_text.append('Your ' + self.global_manager.get('type_minister_dict')['trade'] + ' has been ordered to sell commodities at the end of the turn for an estimated total of ' + str(total_sale_revenue) + ' money')
+            tooltip_text.append('Your ' + constants.type_minister_dict['trade'] + ' has been ordered to sell commodities at the end of the turn for an estimated total of ' + str(total_sale_revenue) + ' money')
 
         tooltip_text.append('')
         estimated_money_change = market_utility.calculate_end_turn_money_change(self.global_manager)
@@ -333,15 +333,15 @@ class commodity_prices_label(label):
         '''
         message = ['Prices: ']
         widest_commodity_width = 0
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             current_message_width = text_utility.message_width(current_commodity, self.font_size, self.font_name)
             if current_message_width > widest_commodity_width:
                 widest_commodity_width = current_message_width
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             current_line = ''
             while text_utility.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
                 current_line += ' '
-            current_line += current_commodity + ': ' +  str(self.global_manager.get('commodity_prices')[current_commodity])
+            current_line += current_commodity + ': ' +  str(constants.commodity_prices[current_commodity])
             message.append(current_line)
         self.set_label(message)
             

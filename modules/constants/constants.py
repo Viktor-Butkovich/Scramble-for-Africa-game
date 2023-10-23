@@ -10,6 +10,7 @@ from modules.tools.data_managers.event_manager_template import event_manager_tem
 from modules.tools.data_managers.effect_manager_template import effect_manager_template
 from modules.tools.data_managers.notification_manager_template import notification_manager_template
 from modules.tools.data_managers.value_tracker_template import value_tracker_template, public_opinion_tracker_template, money_tracker_template
+from modules.tools.mouse_followers import mouse_follower_template
 from modules.interface_types.labels import money_label_template
 
 pygame.init()
@@ -17,6 +18,7 @@ pygame.mixer.init()
 pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
 pygame.display.set_caption('SFA')
 pygame.key.set_repeat(300, 200)
+pygame.mixer.music.set_endevent(pygame.USEREVENT+1)
 
 default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
 default_display_height: int = 972
@@ -25,15 +27,16 @@ display_width: float = resolution_finder.current_w - round(default_display_width
 display_height: float = resolution_finder.current_h - round(default_display_height/10)
 game_display: pygame.Surface = pygame.display.set_mode((display_width, display_height))
 
-global_manager:global_manager_template = global_manager_template()
-sound_manager:sound_manager_template = sound_manager_template(global_manager)
-save_load_manager:save_load_manager_template = save_load_manager_template(global_manager)
-flavor_text_manager:flavor_text_manager_template = flavor_text_manager_template(global_manager)
-input_manager:input_manager_template = input_manager_template(global_manager)
-actor_creation_manager:actor_creation_manager_template = actor_creation_manager_template()
-event_manager:event_manager_template = event_manager_template(global_manager)
-effect_manager:effect_manager_template = effect_manager_template(global_manager)
-notification_manager:notification_manager_template = None #requires additional setup before initialization
+global_manager: global_manager_template = global_manager_template()
+sound_manager: sound_manager_template = sound_manager_template(global_manager)
+save_load_manager: save_load_manager_template = save_load_manager_template(global_manager)
+flavor_text_manager: flavor_text_manager_template = flavor_text_manager_template(global_manager)
+input_manager: input_manager_template = input_manager_template(global_manager)
+actor_creation_manager: actor_creation_manager_template = actor_creation_manager_template()
+event_manager: event_manager_template = event_manager_template(global_manager)
+effect_manager: effect_manager_template = effect_manager_template(global_manager)
+notification_manager: notification_manager_template = None #requires additional setup before initialization
+mouse_follower: mouse_follower_template = None
 
 turn: int = 0
 turn_tracker: value_tracker_template = None
@@ -52,6 +55,7 @@ frames_this_second: int = 0
 last_fps_update: float = 0.0
 
 current_game_mode: str = None
+previous_game_mode: str = None
 
 loading_start_time: float = 0.0
 previous_turn_time: float = 0.0
@@ -78,10 +82,15 @@ grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_trader
 minimap_grid_x: int = default_display_width - (640 + 100)
 europe_grid_x: int = default_display_width - (320 + 100 + 120 + 25)
 europe_grid_y: int = default_display_height - (300 + 25)
+strategic_map_width: int = 15
+strategic_map_height: int = 16
 
 mob_ordered_list_start_y: int = 0
 
 available_minister_left_index: int = -2 #so that first index is in middle
+
+building_types: List[str] = ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses']
+upgrade_types: List[str] = ['scale', 'efficiency', 'warehouse_level']
 
 building_prices: Dict[str, int] = {
     'resource': 10,
@@ -98,7 +107,6 @@ building_prices: Dict[str, int] = {
     'train': 10,
     'steamboat': 10
 } 
-
 base_action_prices: Dict[str, int] = {
     'trade': 0,
     'slave_capture': 5,
@@ -166,3 +174,192 @@ green_screen_colors: List[tuple[int, int, int]] = [
     (70, 70, 92),
     (110, 107, 3)
 ]
+
+terrain_variant_dict: Dict[str, int] = {}
+terrain_list: List[str] = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
+terrain_colors: Dict[str, tuple[int, int, int]] = {
+    'clear': (150, 200, 104),
+    'hills': (50, 205, 50),
+    'jungle': (0, 100, 0),
+    'water': (0, 0, 200),
+    'mountain': (100, 100, 100),
+    'swamp': (100, 100, 50),
+    'desert': (255, 248, 104),
+    'none': (0, 0, 0)
+}
+terrain_animal_dict: Dict[str, tuple[str, str, str]] = {
+    'clear': ['lion', 'bull elephant', 'Cape buffalo'],
+    'hills': ['gorilla', 'Cape buffalo', 'hippopotamus'],
+    'jungle': ['gorilla', 'crocodile', 'leopard'],
+    'water': ['crocodile', 'hippopotamus', 'leopard'],
+    'mountain': ['lion', 'gorilla', 'leopard'],
+    'swamp': ['bull elephant', 'crocodile', 'hippopotamus'],
+    'desert': ['lion', 'bull elephant', 'Cape buffalo']
+}
+animal_terrain_dict: Dict[str, tuple[str, str, str]] = {
+    'lion': ['clear', 'desert', 'mountain'],
+    'bull elephant': ['clear', 'swamp', 'desert'],
+    'Cape buffalo': ['clear', 'hills', 'desert'],
+    'crocodile': ['water', 'swamp', 'jungle'],
+    'hippopotamus': ['water', 'swamp', 'hills'],
+    'gorilla': ['mountain', 'jungle', 'hills'],
+    'leopard': ['jungle', 'mountain', 'water']
+}
+animal_adjectives: List[str] = ['man-eating', 'bloodthirsty', 'rampaging', 'giant', 'ravenous', 'ferocious', 'king', 'lurking', 'spectral', 'infernal']
+terrain_movement_cost_dict: Dict[str, int] = {
+    'clear': 1,
+    'hills': 2,
+    'jungle': 3,
+    'water': 1,
+    'mountain': 3,
+    'swamp': 3,
+    'desert': 2
+}
+terrain_build_cost_multiplier_dict: Dict[str, int] = {
+    'clear': 1,
+    'hills': 2,
+    'jungle': 3,
+    'water': 1,
+    'mountain': 3,
+    'swamp': 3,
+    'desert': 2
+}
+
+commodity_types: List[str] = ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
+collectable_resources: List[str] = ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
+commodity_prices: Dict[str, int] = {}
+sold_commodities: Dict[str, int] = {}
+commodities_produced: Dict[str, int] = {}
+resource_building_dict: Dict[str, str] = {
+    'coffee': 'buildings/plantation.png',
+    'copper': 'buildings/mine.png',
+    'diamond': 'buildings/mine.png',
+    'exotic wood': 'buildings/plantation.png',
+    'fruit': 'buildings/plantation.png',
+    'gold': 'buildings/mine.png',
+    'iron': 'buildings/mine.png',
+    'ivory': 'buildings/camp.png',
+    'rubber': 'buildings/plantation.png',
+}
+resource_building_button_dict: Dict[str, str] = {
+    'coffee': 'scenery/resources/production/coffee.png',
+    'copper': 'scenery/resources/production/copper.png',
+    'diamond': 'scenery/resources/production/diamond.png',
+    'exotic wood': 'scenery/resources/production/exotic wood.png',
+    'fruit': 'scenery/resources/production/fruit.png',
+    'gold': 'scenery/resources/production/gold.png',
+    'iron': 'scenery/resources/production/iron.png',
+    'ivory': 'scenery/resources/production/ivory.png',
+    'rubber': 'scenery/resources/production/rubber.png',
+    'none': 'scenery/resources/production/none.png',
+}
+
+background_status_dict: Dict[str, int] = {
+    'lowborn': 1,
+    'banker': 2,
+    'merchant': 2,
+    'lawyer': 2,
+    'army officer': 2,
+    'naval officer': 2,
+    'priest': 2,
+    'preacher': 2,
+    'natural scientist': 2, 
+    'doctor': 2,
+    'industrialist': 3,
+    'aristocrat': 3,
+    'politician': 3,
+    'business magnate': 4,
+    'royal heir': 4
+}
+background_skills_dict: Dict[str, List[str]] = {
+    'lowborn': ['none'],
+    'banker': ['trade'],
+    'merchant': ['trade'],
+    'lawyer': ['prosecution'],
+    'army officer': ['military'],
+    'naval officer': ['transportation'],
+    'priest': ['religion'],
+    'preacher': ['religion'],
+    'natural scientist': ['exploration'],
+    'doctor': ['random'],
+    'industrialist': ['construction', 'production', 'transportation'],
+    'aristocrat': ['none', 'random'],
+    'politician': ['none', 'random'],
+    'business magnate': ['construction', 'production', 'transportation'],
+    'royal heir': ['none', 'random']
+}
+skill_types: List[str] = ['military', 'religion', 'trade', 'exploration', 'construction', 'production', 'transportation', 'prosecution']
+minister_types: List[str] =  ['General', 'Bishop', 'Minister of Trade', 'Minister of Geography', 'Minister of Engineering', 'Minister of Production',
+                                'Minister of Transportation', 'Prosecutor']
+type_minister_dict: Dict[str, str] = {
+    'military': 'General',
+    'religion': 'Bishop',
+    'trade': 'Minister of Trade',
+    'exploration': 'Minister of Geography',
+    'construction': 'Minister of Engineering',
+    'production': 'Minister of Production',
+    'transportation': 'Minister of Transportation',
+    'prosecution': 'Prosecutor'
+}
+minister_type_dict: Dict[str, str] = {
+    'General': 'military',
+    'Bishop': 'religion',
+    'Minister of Trade': 'trade',
+    'Minister of Geography': 'exploration',
+    'Minister of Engineering': 'construction',
+    'Minister of Production': 'production',
+    'Minister of Transportation': 'transportation',
+    'Prosecutor': 'prosecution'
+}
+minister_skill_to_description_dict: List[List[str]] = [
+    ['unknown'],
+    ['brainless', 'moronic', 'stupid', 'idiotic'],
+    ['incompetent', 'dull', 'slow', 'bad'],
+    ['incapable', 'poor', 'ineffective', 'lacking'],
+    ['able', 'capable', 'effective', 'competent'],
+    ['smart', 'clever', 'quick', 'good'],
+    ['expert', 'genius', 'brilliant', 'superior'],
+] #not literally a dict, but index of skill number can be used like a dictionary
+minister_corruption_to_description_dict: List[List[str]] = [
+    ['unknown'],
+    ['absolute', 'fanatic', 'pure', 'saintly'],
+    ['steadfast', 'honest', 'straight', 'solid'],
+    ['decent', 'obedient', 'dependable', 'trustworthy'],
+    ['opportunist', 'questionable', 'undependable', 'untrustworthy'],
+    ['shady', 'dishonest', 'slippery', 'mercurial'],
+    ['corrupt', 'crooked', 'rotten', 'treacherous'],
+] #not literally a dict, but index of corruption number can be used like a dictionary
+minister_limit: int = 15
+
+officer_types: List[str] = ['explorer', 'hunter', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']
+officer_group_type_dict: Dict[str, str] = {
+    'explorer': 'expedition',
+    'hunter': 'safari',
+    'engineer': 'construction_gang',
+    'driver': 'porters',
+    'foreman': 'work_crew',
+    'merchant': 'caravan',
+    'evangelist': 'missionaries',
+    'major': 'battalion'
+}
+officer_minister_dict: Dict[str, str] = {
+    'explorer': type_minister_dict['exploration'],
+    'hunter': type_minister_dict['exploration'],
+    'engineer': type_minister_dict['construction'],
+    'driver': type_minister_dict['transportation'],
+    'foreman': type_minister_dict['production'],
+    'merchant': type_minister_dict['trade'],
+    'evangelist': type_minister_dict['religion'],
+    'major': type_minister_dict['military']
+}
+group_minister_dict: Dict[str, str] = {
+    'expedition': type_minister_dict['exploration'],
+    'safari': type_minister_dict['exploration'],
+    'construction_gang': type_minister_dict['construction'],
+    'porters': type_minister_dict['transportation'],
+    'work_crew': type_minister_dict['production'],
+    'caravan': type_minister_dict['trade'],
+    'missionaries': type_minister_dict['religion'],
+    'battalion': type_minister_dict['military']
+}
+country_specific_units: List[str] = ['major']

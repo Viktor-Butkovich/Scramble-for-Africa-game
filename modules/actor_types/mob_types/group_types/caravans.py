@@ -283,7 +283,7 @@ class caravan(group):
 
         roll_result = 0
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('commodity_prices')['consumer goods'], 'trade', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.commodity_prices['consumer goods'], 'trade', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
     
@@ -305,7 +305,7 @@ class caravan(group):
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('commodity_prices')['consumer goods'], 'trade')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, constants.commodity_prices['consumer goods'], 'trade')
             roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result) #0 requirement for critical fail means critical fails will not occur
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                             
@@ -322,8 +322,8 @@ class caravan(group):
         commodity = 'none'
         notification_type = 'none'
         if roll_result >= self.current_min_success:
-            commodity = random.choice(self.global_manager.get('collectable_resources'))
-            text += '/n The merchant managed to buy a unit of ' + commodity + ' (currently worth ' + str(self.global_manager.get('commodity_prices')[commodity]) + ' money). /n /n'
+            commodity = random.choice(constants.collectable_resources)
+            text += '/n The merchant managed to buy a unit of ' + commodity + ' (currently worth ' + str(constants.commodity_prices[commodity]) + ' money). /n /n'
             notification_type = 'successful_commodity_trade'
         else:
             text += '/n The merchant bought items that turned out to be worthless. /n /n'

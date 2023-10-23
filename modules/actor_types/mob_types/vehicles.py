@@ -63,7 +63,7 @@ class vehicle(pmob):
             for current_passenger in input_dict['passenger_dicts']:
                 constants.actor_creation_manager.create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
-        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
+        self.set_controlling_minister_type(constants.type_minister_dict['transportation'])
         if not self.has_crew:
             self.remove_from_turn_queue()
         if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
@@ -128,7 +128,7 @@ class vehicle(pmob):
             sub_mobs = [self.crew]
         sub_mobs += self.contained_mobs
 
-        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
         non_replaced_attrition = []
         for current_sub_mob in sub_mobs:
             worker_type = 'none'

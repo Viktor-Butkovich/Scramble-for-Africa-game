@@ -88,15 +88,15 @@ class grid(interface_elements.interface_element):
         area = self.coordinate_width * self.coordinate_height
         num_worms = area // 5
         if constants.effect_manager.effect_active('enable_oceans'):
-            self.global_manager.get('terrain_list').append('water')
+            constants.terrain_list.append('water')
         for i in range(num_worms):
-            self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
+            self.make_random_terrain_worm(round(area/24), round(area/12), constants.terrain_list)
         #if constants.effect_manager.effect_active('enable_oceans'):
         #    for i in range(num_worms // 6): #range(num_worms / 3):
         #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
         if not constants.effect_manager.effect_active('enable_oceans'):
             for row in self.cell_list:
-                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict['ocean_water'])
                 row[0].set_terrain('water', terrain_variant)
             num_rivers = random.randrange(2, 4)
             valid = False
@@ -388,7 +388,7 @@ class grid(interface_elements.interface_element):
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = random.choice(possible_terrains)
-        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        terrain_variant = random.randrange(0, constants.terrain_variant_dict[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
         self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         counter = 0        
         while not counter == worm_length:           
@@ -403,7 +403,7 @@ class grid(interface_elements.interface_element):
                     current_y = current_y - 1
                 elif direction == 4:
                     current_x = current_x - 1
-                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
                 self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):
@@ -428,7 +428,7 @@ class grid(interface_elements.interface_element):
         else:
             water_type = 'river_water'
         #self.find_cell(current_x, current_y).set_terrain(terrain)
-        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        terrain_variant = random.randrange(0, constants.terrain_variant_dict[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
         self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         #self.find_cell(current_x, current_y).set_terrain(terrain)
         counter = 0        
@@ -450,7 +450,7 @@ class grid(interface_elements.interface_element):
                 else:
                     water_type = 'river_water'
                 #self.find_cell(current_x, current_y).set_terrain(terrain)
-                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
                 self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
 
     def touching_mouse(self):

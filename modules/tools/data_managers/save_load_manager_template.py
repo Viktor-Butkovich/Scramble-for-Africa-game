@@ -39,7 +39,6 @@ class save_load_manager_template():
             None
         '''
         self.copied_globals = []
-        self.copied_globals.append('commodity_prices')
         self.copied_globals.append('african_worker_upkeep')
         self.copied_globals.append('european_worker_upkeep')
         self.copied_globals.append('slave_worker_upkeep')
@@ -49,7 +48,6 @@ class save_load_manager_template():
         self.copied_globals.append('transaction_history')
         self.copied_globals.append('previous_financial_report')
         self.copied_globals.append('num_wandering_workers')
-        self.copied_globals.append('sold_commodities')
         self.copied_globals.append('slave_traders_strength')
         self.copied_globals.append('slave_traders_natural_max_strength')
         self.copied_globals.append('completed_lore_mission_types')
@@ -62,6 +60,8 @@ class save_load_manager_template():
         self.copied_constants.append('evil')
         self.copied_constants.append('fear')
         self.copied_constants.append('current_game_mode')
+        self.copied_constants.append('sold_commodities')
+        self.copied_constants.append('commodity_prices')
 
         self.copied_statuses = []
         self.copied_statuses.append('current_country_name')
@@ -89,8 +89,8 @@ class save_load_manager_template():
             'coordinates': scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25)),
             'width': scaling.scale_width(strategic_grid_width),
             'height': scaling.scale_height(strategic_grid_height),
-            'coordinate_width': self.global_manager.get('strategic_map_width'),
-            'coordinate_height': self.global_manager.get('strategic_map_height'),
+            'coordinate_width': constants.strategic_map_width,
+            'coordinate_height': constants.strategic_map_height,
             'internal_line_color': 'black',
             'external_line_color': 'black',
             'modes': ['strategic'],
@@ -149,7 +149,7 @@ class save_load_manager_template():
 
         game_transitions.set_game_mode('ministers', self.global_manager)
 
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             if not current_commodity == 'consumer goods':
                 #min_price = self.global_manager.get('commodity_min_starting_price')
                 #max_price = self.global_manager.get('commodity_max_starting_price')
@@ -191,8 +191,8 @@ class save_load_manager_template():
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
         self.global_manager.get('recruitment_costs')['slave workers'] = self.global_manager.get('base_slave_recruitment_cost')
         actor_utility.reset_action_prices(self.global_manager)
-        for current_commodity in self.global_manager.get('commodity_types'):
-            self.global_manager.get('sold_commodities')[current_commodity] = 0
+        for current_commodity in constants.commodity_types:
+            constants.sold_commodities[current_commodity] = 0
         flags.prosecution_bribed_judge = False
 
         for i in range(1, random.randrange(5, 8)):
@@ -210,8 +210,8 @@ class save_load_manager_template():
         else:
             self.global_manager.set('minister_appointment_tutorial_completed', True)
             self.global_manager.set('exit_minister_screen_tutorial_completed', True)
-            for current_minister_position_index in range(len(self.global_manager.get('minister_types'))):
-                status.minister_list[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
+            for current_minister_position_index in range(len(constants.minister_types)):
+                status.minister_list[current_minister_position_index].appoint(constants.minister_types[current_minister_position_index])
             game_transitions.set_game_mode('strategic', self.global_manager)
         flags.creating_new_game = False
         
@@ -353,8 +353,8 @@ class save_load_manager_template():
                 input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25))
                 input_dict['width'] = scaling.scale_width(strategic_grid_width)
                 input_dict['height'] = scaling.scale_height(strategic_grid_height)
-                input_dict['coordinate_width'] = self.global_manager.get('strategic_map_width')
-                input_dict['coordinate_height'] = self.global_manager.get('strategic_map_height')
+                input_dict['coordinate_width'] = constants.strategic_map_width
+                input_dict['coordinate_height'] = constants.strategic_map_height
                 input_dict['internal_line_color'] = 'black'
                 input_dict['external_line_color'] = 'black'
                 input_dict['modes'] = ['strategic']

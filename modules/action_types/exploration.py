@@ -93,7 +93,7 @@ class exploration(action.action):
                 if self.future_cell.resource == 'natives':
                     text += 'The expedition has discovered a ' + self.future_cell.terrain.upper() + ' tile containing the village of ' + self.future_cell.village.name + '. /n /n'
                 else:
-                    text += 'The expedition has discovered a ' + self.future_cell.terrain.upper() + ' tile with a ' + self.future_cell.resource.upper() + ' resource (currently worth ' + str(self.global_manager.get('commodity_prices')[self.future_cell.resource]) + ' money each). /n /n'
+                    text += 'The expedition has discovered a ' + self.future_cell.terrain.upper() + ' tile with a ' + self.future_cell.resource.upper() + ' resource (currently worth ' + str(constants.commodity_prices[self.future_cell.resource]) + ' money each). /n /n'
                 self.public_relations_change += 3
             else:
                 text += 'The expedition has discovered a ' + self.future_cell.terrain.upper() + ' tile. /n /n'

@@ -421,7 +421,7 @@ class pmob(mob):
         if current_cell == 'none':
             return()
         if current_cell.local_attrition():
-            transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+            transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
             if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
@@ -487,7 +487,7 @@ class pmob(mob):
         '''
         if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
             current_tile = self.images[0].current_cell.tile
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                 current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.remove_from_turn_queue()
         super().remove()
@@ -568,7 +568,7 @@ class pmob(mob):
         if self.controlling_minister_type == 'none':
             self.controlling_minister = 'none'
         else:
-            self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
+            self.controlling_minister = status.current_ministers[self.controlling_minister_type]
             for current_minister_type_image in status.minister_image_list:
                 if current_minister_type_image.minister_type == self.controlling_minister_type:
                     current_minister_type_image.calibrate(self.controlling_minister)
@@ -656,7 +656,7 @@ class pmob(mob):
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
-        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
         if not transportation_minister == 'none':
             if self.can_leave():
                 if not self.grid.is_abstract_grid:

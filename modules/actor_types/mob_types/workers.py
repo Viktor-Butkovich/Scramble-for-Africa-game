@@ -51,7 +51,7 @@ class worker(pmob):
             if not from_save:
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
                 
-        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
+        self.set_controlling_minister_type(constants.type_minister_dict['production'])
 
         if not from_save:
             self.second_image_variant = random.randrange(0, len(self.image_variants))
@@ -358,7 +358,7 @@ class slave_worker(worker):
                     text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
                 constants.evil_tracker.change(6)
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
-        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
+        self.set_controlling_minister_type(constants.type_minister_dict['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
         constants.money_label.check_for_updates()
@@ -460,7 +460,7 @@ class church_volunteers(worker):
         '''
         input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict, global_manager)
-        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
+        self.set_controlling_minister_type(constants.type_minister_dict['religion'])
         self.global_manager.set('num_church_volunteers', self.global_manager.get('num_church_volunteers') + 1)
 
     def remove(self):

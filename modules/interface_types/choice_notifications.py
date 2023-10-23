@@ -301,7 +301,7 @@ class recruitment_choice_button(choice_button):
             input_dict['image'] = self.mob_image_id
             input_dict['modes'] = ['strategic', 'europe']
             constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
-            if self.recruitment_type in self.global_manager.get('officer_types'):
+            if self.recruitment_type in constants.officer_types:
                 name = ''
                 for character in self.recruitment_type:
                     if not character == '_':

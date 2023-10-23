@@ -5,7 +5,7 @@ from ..constructs.images import free_image
 import modules.constants.constants as constants
 import modules.constants.flags as flags
 
-class mouse_follower(free_image):
+class mouse_follower_template(free_image):
     '''
     Free image that follows the mouse pointer and appears in certain situations, such as when choosing on a movement destination
     '''

@@ -20,9 +20,9 @@ class repair(action.action):
         '''
         super().initial_setup(**kwargs)
         self.building_type = kwargs.get('building_type', 'none')
-        self.requirement = self.global_manager.get('actions')[self.building_type].requirement
-        del self.global_manager.get('actions')[self.action_type]
-        self.global_manager.get('actions')['repair_' + self.building_type] = self
+        self.requirement = status.actions[self.building_type].requirement
+        del status.actions[self.action_type]
+        status.actions['repair_' + self.building_type] = self
         self.current_building = 'none'
         
         constants.transaction_descriptions[self.action_type] = 'repairs'
@@ -64,7 +64,7 @@ class repair(action.action):
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
         initial_input_dict['image_id'] = 'buildings/buttons/repair_' + self.building_type + '.png'
-        initial_input_dict['keybind_id'] = self.global_manager.get('actions')[self.building_type].button.keybind_id
+        initial_input_dict['keybind_id'] = status.actions[self.building_type].button.keybind_id
         return(initial_input_dict)
 
     def update_tooltip(self):

@@ -103,7 +103,7 @@ class actor():
         save_dict['name'] = self.name
         saved_inventory = {}
         if self.can_hold_commodities: #only save inventory if not empty
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                if self.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.inventory[current_commodity]
         save_dict['inventory'] = saved_inventory
@@ -137,7 +137,7 @@ class actor():
         Output:
             None
         '''
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             if current_commodity in inventory_dict:
                 self.set_inventory(current_commodity, inventory_dict[current_commodity])
             else:
@@ -155,7 +155,7 @@ class actor():
             None
         '''
         self.inventory = {}
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             if constants.effect_manager.effect_active('infinite_commodities') and self.name == 'Europe':
                 self.inventory[current_commodity] = 10
             else:
@@ -172,7 +172,7 @@ class actor():
         Output:
             None
         '''
-        for current_commodity in self.get_held_commodities(): #current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in self.get_held_commodities(): #current_commodity in constants.commodity_types:
             self.images[0].current_cell.tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
             self.set_inventory(current_commodity, 0)
 
@@ -255,7 +255,7 @@ class actor():
         '''
         if self.can_hold_commodities:
             held_commodities = []
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                 if self.get_inventory(current_commodity) > 0:
                     if not (current_commodity == 'consumer goods' and ignore_consumer_goods):
                         held_commodities.append(current_commodity)
@@ -274,7 +274,7 @@ class actor():
         '''
         if self.get_inventory_used() > 0:
             if random.randrange(1, 7) <= 1 or constants.effect_manager.effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
-                transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+                transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
                 if self.actor_type == 'tile':
                     current_cell = self.cell
                 elif self.actor_type == 'mob':
@@ -322,7 +322,7 @@ class actor():
                 amounts_lost_list.append(amount_lost)
                 self.change_inventory(current_commodity, -1 * amount_lost)
                 if stealing:
-                    value_stolen += (self.global_manager.get('commodity_prices')[current_commodity] * amount_lost)
+                    value_stolen += (constants.commodity_prices[current_commodity] * amount_lost)
                     for i in range(amount_lost):
                         if random.randrange(1, 7) <= 1: #1/6 chance
                             market_utility.change_price(current_commodity, -1, self.global_manager)

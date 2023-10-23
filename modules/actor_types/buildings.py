@@ -773,7 +773,7 @@ class resource_building(building):
         '''
         if current_cell == 'default':
             current_cell = self.cell
-        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
         worker_attrition_list = []
         officer_attrition_list = []
         for current_work_crew in self.contained_work_crews:

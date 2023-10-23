@@ -1495,7 +1495,7 @@ class appoint_minister_button(button):
         self.appoint_type = input_dict['appoint_type']
         input_dict['button_type'] = 'appoint minister'
         input_dict['modes'] = ['ministers']
-        input_dict['image_id'] = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.appoint_type] + '.png'
+        input_dict['image_id'] = 'ministers/icons/' + constants.minister_type_dict[self.appoint_type] + '.png'
         super().__init__(input_dict, global_manager)
 
     def can_show(self, skip_parent_collection=False):
@@ -1510,7 +1510,7 @@ class appoint_minister_button(button):
         if super().can_show(skip_parent_collection=skip_parent_collection):
             displayed_minister = status.displayed_minister
             if displayed_minister and displayed_minister.current_position == 'none': #if there is an available minister displayed
-                if self.global_manager.get('current_ministers')[self.appoint_type] == 'none': #if the position that this button appoints is available
+                if not status.current_ministers[self.appoint_type]: #if the position that this button appoints is available
                     return(True)
         return(False)
 
@@ -1657,7 +1657,7 @@ class to_trial_button(button):
                 if minister_utility.positions_filled(self.global_manager):
                     if len(status.minister_list) > 8: #if any available appointees
                         defense = status.displayed_minister
-                        prosecution = self.global_manager.get('current_ministers')['Prosecutor']
+                        prosecution = status.current_ministers['Prosecutor']
                         game_transitions.set_game_mode('trial', self.global_manager)
                         minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
                     else:
@@ -1724,7 +1724,7 @@ class active_investigation_button(button):
                 if minister_utility.positions_filled(self.global_manager):
                     cost = constants.action_prices['active_investigation']
                     constants.money_tracker.change(-1 * cost, 'active_investigation')
-                    status.displayed_minister.attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
+                    status.displayed_minister.attempt_active_investigation(status.current_ministers['Prosecutor'], cost)
                     actor_utility.double_action_price(self.global_manager, 'active_investigation')
                 else:
                     game_transitions.force_minister_appointment(self.global_manager)

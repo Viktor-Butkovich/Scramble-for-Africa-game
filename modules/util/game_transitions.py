@@ -64,7 +64,7 @@ def set_game_mode(new_game_mode, global_manager):
             constants.sound_manager.play_random_music('main menu')
 
         if not (new_game_mode == 'trial' or constants.current_game_mode == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
-            global_manager.set('previous_game_mode', constants.current_game_mode)
+            constants.previous_game_mode = constants.current_game_mode
         start_loading(global_manager)
         constants.current_game_mode = new_game_mode
         if new_game_mode == 'strategic':

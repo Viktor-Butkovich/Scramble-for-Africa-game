@@ -176,8 +176,8 @@ def manage_production(global_manager):
     '''
     global_manager.set('attempted_commodities', [])
     expected_production = {}
-    for current_commodity in global_manager.get('collectable_resources'):
-        global_manager.get('commodities_produced')[current_commodity] = 0
+    for current_commodity in constants.collectable_resources:
+        constants.commodities_produced[current_commodity] = 0
         expected_production[current_commodity] = 0
     for current_resource_building in status.resource_building_list:
         if not current_resource_building.damaged:
@@ -201,7 +201,7 @@ def manage_production_report(expected_production, global_manager):
     '''
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
-    production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]
+    production_minister = status.current_ministers[constants.type_minister_dict['production']]
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
         text = production_minister.current_position + ' ' + production_minister.name + ' reports the following commodity production: /n /n'
         while len(displayed_commodities) < len(attempted_commodities):
@@ -209,10 +209,10 @@ def manage_production_report(expected_production, global_manager):
             max_commodity = 'none'
             for current_commodity in attempted_commodities:
                 if not current_commodity in displayed_commodities:
-                    if global_manager.get('commodities_produced')[current_commodity] >= max_produced:
+                    if constants.commodities_produced[current_commodity] >= max_produced:
                         max_commodity = current_commodity
-                        max_produced = global_manager.get('commodities_produced')[current_commodity]
-                        expected_production[max_commodity] = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_production[max_commodity])
+                        max_produced = constants.commodities_produced[current_commodity]
+                        expected_production[max_commodity] = status.current_ministers['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
             text += max_commodity.capitalize() + ': ' + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
         production_minister.display_message(text)       
@@ -599,7 +599,7 @@ def manage_ministers(global_manager):
         current_minister.just_removed = False
 
         if current_minister.fabricated_evidence > 0:
-            prosecutor = global_manager.get('current_ministers')['Prosecutor']
+            prosecutor = status.current_ministers['Prosecutor']
             if prosecutor.check_corruption(): #corruption is normally resolved during a trial, but prosecutor can still steal money from unused fabricated evidence if no trial occurs
                 prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated_evidence')
             text_utility.print_to_screen('The ' + str(current_minister.fabricated_evidence) + ' fabricated evidence against ' + current_minister.name + ' is no longer usable.', global_manager)
@@ -634,8 +634,8 @@ def manage_ministers(global_manager):
             current_minister.appoint('none')
         current_minister.remove()
 
-    if (len(status.minister_list) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(status.minister_list) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
-        while len(status.minister_list) < global_manager.get('minister_limit'):
+    if (len(status.minister_list) <= constants.minister_limit - 2 and random.randrange(1, 7) == 1) or len(status.minister_list) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
+        while len(status.minister_list) < constants.minister_limit:
             constants.actor_creation_manager.create_minister(False, {}, global_manager)
         constants.notification_manager.display_notification({
             'message': 'Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n',
@@ -658,7 +658,7 @@ def manage_minister_rumors(global_manager):
     for current_minister in status.minister_list:
         if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
             current_minister.attempt_rumor('loyalty', 'none')
-        for skill_type in global_manager.get('minister_types'):
+        for skill_type in constants.minister_types:
             if skill_type == current_minister.current_position:
                 if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
                     current_minister.attempt_rumor(skill_type, 'none')
@@ -696,19 +696,19 @@ def manage_commodity_sales(global_manager):
     Output:
         None
     '''
-    sold_commodities = global_manager.get('sold_commodities')
-    trade_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['trade']]
+    sold_commodities = constants.sold_commodities
+    trade_minister = status.current_ministers[constants.type_minister_dict['trade']]
     stealing = False
     money_stolen = 0
     reported_revenue = 0
     text = trade_minister.current_position + ' ' + trade_minister.name + ' reports the following commodity sales: /n /n'
     any_sold = False
-    for current_commodity in global_manager.get('commodity_types'):
+    for current_commodity in constants.commodity_types:
         if sold_commodities[current_commodity] > 0:
             any_sold = True
-            sell_price = global_manager.get('commodity_prices')[current_commodity]
+            sell_price = constants.commodity_prices[current_commodity]
             expected_revenue = sold_commodities[current_commodity] * sell_price
-            expected_revenue = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_revenue, False)
+            expected_revenue = status.current_ministers['Prosecutor'].estimate_expected(expected_revenue, False)
             actual_revenue = 0
                 
             for i in range(sold_commodities[current_commodity]):
@@ -732,8 +732,8 @@ def manage_commodity_sales(global_manager):
     if money_stolen > 0:
         trade_minister.steal_money(money_stolen, 'sold_commodities')
 
-    for current_commodity in global_manager.get('commodity_types'):
-        global_manager.get('sold_commodities')[current_commodity] = 0
+    for current_commodity in constants.commodity_types:
+        constants.sold_commodities[current_commodity] = 0
 
 def manage_lore(global_manager):
     '''

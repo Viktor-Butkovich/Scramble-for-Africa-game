@@ -111,9 +111,9 @@ class lore_mission():
         used_coordinates = []
         for current_possible_artifact_location in self.possible_artifact_locations:
             used_coordinates.append((current_possible_artifact_location.x, current_possible_artifact_location.y))
-        possible_coordinates = (random.randrange(0, self.global_manager.get('strategic_map_width')), random.randrange(1, self.global_manager.get('strategic_map_height')))
+        possible_coordinates = (random.randrange(0, constants.strategic_map_width), random.randrange(1, constants.strategic_map_height))
         while possible_coordinates in used_coordinates: #would cause infinite loop if too many possible locations existed
-            possible_coordinates = (random.randrange(0, self.global_manager.get('strategic_map_width')), random.randrange(1, self.global_manager.get('strategic_map_height')))
+            possible_coordinates = (random.randrange(0, constants.strategic_map_width), random.randrange(1, constants.strategic_map_height))
         return(possible_coordinates)
 
     def remove_complete(self):

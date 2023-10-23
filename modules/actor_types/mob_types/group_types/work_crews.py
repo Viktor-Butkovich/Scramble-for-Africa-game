@@ -100,7 +100,7 @@ class work_crew(group):
                 if roll_result >= 4: #4+ required on D6 for production
                     if not self.controlling_minister.check_corruption():
                         building.cell.tile.change_inventory(building.resource_type, 1)
-                        self.global_manager.get('commodities_produced')[building.resource_type] += 1
+                        constants.commodities_produced[building.resource_type] += 1
 
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
@@ -111,7 +111,7 @@ class work_crew(group):
                                 'zoom_destination': building.cell.tile,
                             })
                     else:
-                        value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
+                        value_stolen += constants.commodity_prices[building.resource_type]
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
                 if random.randrange(1, 7) <= 1: #1/6 chance

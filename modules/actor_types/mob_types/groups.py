@@ -46,7 +46,7 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
+        for current_commodity in constants.commodity_types: #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
@@ -154,7 +154,7 @@ class group(pmob):
         if current_cell == 'none':
             return()
 
-        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
     
         if current_cell.local_attrition():
             if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
@@ -260,7 +260,7 @@ class group(pmob):
         '''
         self.group_type = new_type
         if not new_type == 'none':
-            self.set_controlling_minister_type(self.global_manager.get('group_minister_dict')[self.group_type])
+            self.set_controlling_minister_type(constants.group_minister_dict[self.group_type])
         else:
             self.set_controlling_minister_type('none')
         self.update_image_bundle()

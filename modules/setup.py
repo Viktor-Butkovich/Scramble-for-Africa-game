@@ -68,29 +68,15 @@ def misc(global_manager):
     #safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
 
     game_transitions.set_game_mode('main_menu', global_manager)
-    global_manager.set('previous_game_mode', 'main_menu') #after set game mode, both previous and current game modes should be main_menu
+    constants.previous_game_mode = 'main_menu' #after set game mode, both previous and current game modes should be main_menu
 
-    global_manager.set('mouse_follower', constants.actor_creation_manager.create_interface_element({
+    constants.mouse_follower =  constants.actor_creation_manager.create_interface_element({
         'init_type': 'mouse follower image'
-    }, global_manager))
-
-    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses'])
-    global_manager.set('upgrade_types', ['scale', 'efficiency', 'warehouse_level'])
+    }, global_manager)
 
     constants.notification_manager = notification_manager_template.notification_manager_template(global_manager)
 
-    global_manager.set('current_advertised_commodity', 'none')
-    global_manager.set('current_sound_file_index', 0)
-
-    width = 15
-    height = 16
-    global_manager.set('strategic_map_width', width)
-    global_manager.set('strategic_map_height', height)
-
-    global_manager.set('SONG_END_EVENT', pygame.USEREVENT+1)
-    pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
-
-    global_manager.set('info_displays_collection', constants.actor_creation_manager.create_interface_element({
+    status.info_displays_collection = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 205 + 125),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(10),
@@ -100,10 +86,11 @@ def misc(global_manager):
         'allow_move': True,
         'description': 'general information panel',
         'resize_with_contents': True,
-    }, global_manager))
+    }, global_manager)
     anchor = constants.actor_creation_manager.create_interface_element(
-        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': global_manager.get('info_displays_collection')}, 
-        global_manager) #rect at original location prevents collection from moving unintentionally when resizing
+        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}, 
+        global_manager
+    ) #rect at original location prevents collection from moving unintentionally when resizing
 
 def terrains(global_manager):
     '''
@@ -114,72 +101,12 @@ def terrains(global_manager):
     Output:
         None
     '''
-    terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
-    global_manager.set('terrain_list', terrain_list)
-    global_manager.set('terrain_colors',
-        {
-        'clear': (150, 200, 104),
-        'hills': (50, 205, 50),
-        'jungle': (0, 100, 0),
-        'water': (0, 0, 200),
-        'mountain': (100, 100, 100),
-        'swamp': (100, 100, 50),
-        'desert': (255, 248, 104),
-        'none': (0, 0, 0)
-        }
-    )
-    global_manager.set('terrain_animal_dict',
-        {
-        'clear': ['lion', 'bull elephant', 'Cape buffalo'],
-        'hills': ['gorilla', 'Cape buffalo', 'hippopotamus'],
-        'jungle': ['gorilla', 'crocodile', 'leopard'],
-        'water': ['crocodile', 'hippopotamus', 'leopard'],
-        'mountain': ['lion', 'gorilla', 'leopard'],
-        'swamp': ['bull elephant', 'crocodile', 'hippopotamus'],
-        'desert': ['lion', 'bull elephant', 'Cape buffalo']
-        }
-    )
-    global_manager.set('animal_terrain_dict',
-        {
-        'lion': ['clear', 'desert', 'mountain'],
-        'bull elephant': ['clear', 'swamp', 'desert'],
-        'Cape buffalo': ['clear', 'hills', 'desert'],
-        'crocodile': ['water', 'swamp', 'jungle'],
-        'hippopotamus': ['water', 'swamp', 'hills'],
-        'gorilla': ['mountain', 'jungle', 'hills'],
-        'leopard': ['jungle', 'mountain', 'water']
-        }
-    )
-    global_manager.set('animal_adjectives', ['man-eating', 'bloodthirsty', 'rampaging', 'giant', 'ravenous', 'ferocious', 'king', 'lurking', 'spectral', 'infernal'])
-    global_manager.set('terrain_movement_cost_dict',
-        {
-        'clear': 1,
-        'hills': 2,
-        'jungle': 3,
-        'water': 1,
-        'mountain': 3,
-        'swamp': 3,
-        'desert': 2
-        }
-    )
-    global_manager.set('terrain_build_cost_multiplier_dict',
-        {
-        'clear': 1,
-        'hills': 2,
-        'jungle': 3,
-        'water': 1,
-        'mountain': 3,
-        'swamp': 3,
-        'desert': 2
-        }
-    )
-    global_manager.set('terrain_variant_dict', {})
-    for current_terrain in (global_manager.get('terrain_list') + ['ocean_water', 'river_water']):
+    for current_terrain in (constants.terrain_list + ['ocean_water', 'river_water']):
         current_index = 0
         while os.path.exists('graphics/scenery/terrain/' + current_terrain + '_' + str(current_index) + '.png'):
             current_index += 1
         current_index -= 1 #back up from index that didn't work
-        global_manager.get('terrain_variant_dict')[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
+        constants.terrain_variant_dict[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
 
 def actions(global_manager):
     '''
@@ -190,7 +117,6 @@ def actions(global_manager):
     Output:
         none
     '''
-    global_manager.set('actions', {})
     public_relations_campaign.public_relations_campaign(global_manager)
     religious_campaign.religious_campaign(global_manager)
     suppress_slave_trade.suppress_slave_trade(global_manager)
@@ -199,12 +125,12 @@ def actions(global_manager):
     combat.combat(global_manager)
     exploration.exploration(global_manager)
     loan_search.loan_search(global_manager)
-    for building_type in global_manager.get('building_types') + ['train', 'steamboat']:
+    for building_type in constants.building_types + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(global_manager, building_type=building_type)
             if not building_type in ['train', 'steamboat', 'infrastructure']:
                 repair.repair(global_manager, building_type=building_type)
-    for upgrade_type in global_manager.get('upgrade_types'):
+    for upgrade_type in constants.upgrade_types:
         upgrade.upgrade(global_manager, building_type=upgrade_type)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
@@ -217,52 +143,12 @@ def commodities(global_manager):
     Output:
         None
     '''
-    global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
-    global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
-    global_manager.set('commodity_prices', {})
-    global_manager.set('sold_commodities', {})
+    for current_commodity in constants.commodity_types:
+        constants.commodity_prices[current_commodity] = 0
+        constants.sold_commodities[current_commodity] = 0
 
-    for current_commodity in global_manager.get('commodity_types'):
-        global_manager.get('commodity_prices')[current_commodity] = 0
-        global_manager.get('sold_commodities')[current_commodity] = 0
-
-    global_manager.set('commodities_produced', {})
-
-    for current_commodity in global_manager.get('collectable_resources'):
-        global_manager.get('commodities_produced')[current_commodity] = 0
-
-    global_manager.set('resource_building_dict',
-        {
-        'coffee': 'buildings/plantation.png',
-        'copper': 'buildings/mine.png',
-        'diamond': 'buildings/mine.png',
-        'exotic wood': 'buildings/plantation.png',
-        'fruit': 'buildings/plantation.png',
-        'gold': 'buildings/mine.png',
-        'iron': 'buildings/mine.png',
-        'ivory': 'buildings/camp.png',
-        'rubber': 'buildings/plantation.png',
-        }
-    )
-    global_manager.set('resource_building_button_dict',
-        {
-        'coffee': 'scenery/resources/production/coffee.png',
-        'copper': 'scenery/resources/production/copper.png',
-        'diamond': 'scenery/resources/production/diamond.png',
-        'exotic wood': 'scenery/resources/production/exotic wood.png',
-        'fruit': 'scenery/resources/production/fruit.png',
-        'gold': 'scenery/resources/production/gold.png',
-        'iron': 'scenery/resources/production/iron.png',
-        'ivory': 'scenery/resources/production/ivory.png',
-        'rubber': 'scenery/resources/production/rubber.png',
-        'none': 'scenery/resources/production/none.png',
-        }
-    )
-
-    for current_commodity in global_manager.get('commodity_types'):
-        global_manager.set(current_commodity + ' buy button', 'none')
-
-    global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
+    for current_commodity in constants.collectable_resources:
+        constants.commodities_produced[current_commodity] = 0
 
 def def_ministers(global_manager):
     '''
@@ -273,150 +159,8 @@ def def_ministers(global_manager):
     Output:
         None
     '''
-    global_manager.set('background_status_dict', {
-        'lowborn': 1,
-        'banker': 2,
-        'merchant': 2,
-        'lawyer': 2,
-        'army officer': 2,
-        'naval officer': 2,
-        'priest': 2,
-        'preacher': 2,
-        'natural scientist': 2, 
-        'doctor': 2,
-        'industrialist': 3,
-        'aristocrat': 3,
-        'politician': 3,
-        'business magnate': 4,
-        'royal heir': 4
-        }
-    )
-
-    global_manager.set('background_skills_dict', {
-        'lowborn': ['none'],
-        'banker': ['trade'],
-        'merchant': ['trade'],
-        'lawyer': ['prosecution'],
-        'army officer': ['military'],
-        'naval officer': ['transportation'],
-        'priest': ['religion'],
-        'preacher': ['religion'],
-        'natural scientist': ['exploration'],
-        'doctor': ['random'],
-        'industrialist': ['construction', 'production', 'transportation'],
-        'aristocrat': ['none', 'random'],
-        'politician': ['none', 'random'],
-        'business magnate': ['construction', 'production', 'transportation'],
-        'royal heir': ['none', 'random']
-        }
-    )
-
-    global_manager.set('skill_types', ['military', 'religion', 'trade', 'exploration', 'construction', 'production', 'transportation', 'prosecution'])
-    global_manager.set('minister_types', ['General', 'Bishop', 'Minister of Trade', 'Minister of Geography', 'Minister of Engineering', 'Minister of Production', 'Minister of Transportation', 'Prosecutor'])
-    global_manager.set('type_minister_dict',
-        {
-        'military': 'General',
-        'religion': 'Bishop',
-        'trade': 'Minister of Trade',
-        'exploration': 'Minister of Geography',
-        'construction': 'Minister of Engineering',
-        'production': 'Minister of Production',
-        'transportation': 'Minister of Transportation',
-        'prosecution': 'Prosecutor'
-        }
-    )
-    global_manager.set('minister_type_dict',
-        {
-        'General': 'military',
-        'Bishop': 'religion',
-        'Minister of Trade': 'trade',
-        'Minister of Geography': 'exploration',
-        'Minister of Engineering': 'construction',
-        'Minister of Production': 'production',
-        'Minister of Transportation': 'transportation',
-        'Prosecutor': 'prosecution'
-        }
-    )
-    global_manager.set('current_ministers', {})
-    for current_minister_type in global_manager.get('minister_types'):
-        global_manager.get('current_ministers')[current_minister_type] = 'none'
-
-    minister_portraits = [] #put all images in graphics/minister/portraits folder in list
-    for file_name in os.listdir('graphics/ministers/portraits'):
-        if file_name.endswith('.png'): 
-            minister_portraits.append('ministers/portraits/' + file_name)
-            continue
-        else:
-            continue
-    global_manager.set('minister_portraits', minister_portraits)
-
-
-    global_manager.set('officer_types', ['explorer', 'hunter', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']) #change to driver
-    global_manager.set('officer_group_type_dict',
-        {
-        'explorer': 'expedition',
-        'hunter': 'safari',
-        'engineer': 'construction_gang',
-        'driver': 'porters',
-        'foreman': 'work_crew',
-        'merchant': 'caravan',
-        'evangelist': 'missionaries',
-        'major': 'battalion'
-        }
-    )
-
-    type_minister_dict = global_manager.get('type_minister_dict')
-    global_manager.set('officer_minister_dict',
-        {
-        'explorer': type_minister_dict['exploration'],
-        'hunter': type_minister_dict['exploration'],
-        'engineer': type_minister_dict['construction'],
-        'driver': type_minister_dict['transportation'],
-        'foreman': type_minister_dict['production'],
-        'merchant': type_minister_dict['trade'],
-        'evangelist': type_minister_dict['religion'],
-        'major': type_minister_dict['military']
-        }
-    )
-
-    global_manager.set('group_minister_dict',
-        {
-        'expedition': type_minister_dict['exploration'],
-        'safari': type_minister_dict['exploration'],
-        'construction_gang': type_minister_dict['construction'],
-        'porters': type_minister_dict['transportation'],
-        'work_crew': type_minister_dict['production'],
-        'caravan': type_minister_dict['trade'],
-        'missionaries': type_minister_dict['religion'],
-        'battalion': type_minister_dict['military']
-        }
-    )
-
-    global_manager.set('minister_skill_to_description_dict', #not literally a dict, but index of skill number can be used like a dictionary
-        [
-            ['unknown'],
-            ['brainless', 'moronic', 'stupid', 'idiotic'],
-            ['incompetent', 'dull', 'slow', 'bad'],
-            ['incapable', 'poor', 'ineffective', 'lacking'],
-            ['able', 'capable', 'effective', 'competent'],
-            ['smart', 'clever', 'quick', 'good'],
-            ['expert', 'genius', 'brilliant', 'superior'],
-        ]
-    )
-
-    global_manager.set('minister_corruption_to_description_dict', #not literally a dict, but index of corruption number can be used like a dictionary
-        [
-            ['unknown'],
-            ['absolute', 'fanatic', 'pure', 'saintly'],
-            ['steadfast', 'honest', 'straight', 'solid'],
-            ['decent', 'obedient', 'dependable', 'trustworthy'],
-            ['opportunist', 'questionable', 'undependable', 'untrustworthy'],
-            ['shady', 'dishonest', 'slippery', 'mercurial'],
-            ['corrupt', 'crooked', 'rotten', 'treacherous'],
-        ]
-    )
-
-    global_manager.set('minister_limit', 15)
+    for current_minister_type in constants.minister_types:
+        status.current_ministers[current_minister_type] = None
 
 def def_countries(global_manager):
     '''
@@ -427,8 +171,6 @@ def def_countries(global_manager):
     Output:
         None
     '''
-    global_manager.set('country_specific_units', ['major'])
-
     #25 backgrounds by default
     default_weighted_backgrounds = [
         'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
@@ -594,9 +336,9 @@ def transactions(global_manager):
     Output:
         None
     '''
-    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
+    global_manager.set('recruitment_types', constants.officer_types + ['European workers', 'steamship'])
     global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10, 'officer': 5})
-    for current_officer in global_manager.get('officer_types'):
+    for current_officer in constants.officer_types:
         global_manager.get('recruitment_costs')[current_officer] = global_manager.get('recruitment_costs')['officer']
 
     global_manager.set('num_african_workers', 0)
@@ -1010,14 +752,14 @@ def ministers_screen(global_manager):
         'init_type': 'minister portrait image'
     }
     for current_index in range(0, 8): #creates an office icon and a portrait at a section of the table for each minister
-        input_dict['minister_type'] = global_manager.get('minister_types')[current_index]
+        input_dict['minister_type'] = constants.minister_types[current_index]
         if current_index <= 3: #left side
             constants.actor_creation_manager.create_interface_element({
                 'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - (table_width / 2) + 10, current_index * 200 + 95),
                 'width': scaling.scale_width(position_icon_width),
                 'height': scaling.scale_height(position_icon_width),
                 'modes': ['ministers'],
-                'minister_type': global_manager.get('minister_types')[current_index],
+                'minister_type': constants.minister_types[current_index],
                 'attached_label': 'none',
                 'init_type': 'minister type image'
             }, global_manager)
@@ -1031,7 +773,7 @@ def ministers_screen(global_manager):
                 'width': scaling.scale_width(position_icon_width),
                 'height': scaling.scale_height(position_icon_width),
                 'modes': ['ministers'],
-                'minister_type': global_manager.get('minister_types')[current_index],
+                'minister_type': constants.minister_types[current_index],
                 'attached_label': 'none',
                 'init_type': 'minister type image'
             }, global_manager)
@@ -1285,7 +1027,7 @@ def mob_interface(global_manager):
         'is_info_display': True,
         'actor_type': 'mob',
         'description': 'unit information panel',
-        'parent_collection': global_manager.get('info_displays_collection'),
+        'parent_collection': status.info_displays_collection,
         #'resize_with_contents': True, #need to get resize to work with info displays - would prevent invisible things from taking space
         # - collection with 5 width/height should still take space because of its member rects - the fact that this is not happening means something about resizing is not working
     }, global_manager)
@@ -1394,7 +1136,7 @@ def tile_interface(global_manager):
         'is_info_display': True,
         'actor_type': 'tile',
         'description': 'tile information panel',
-        'parent_collection': global_manager.get('info_displays_collection'),
+        'parent_collection': status.info_displays_collection,
     }, global_manager)
 
     separation = scaling.scale_height(3)
@@ -1522,7 +1264,7 @@ def inventory_interface(global_manager):
         None
     '''
     commodity_prices_x, commodity_prices_y = (870, 100)
-    commodity_prices_height = 30 + (30 * len(global_manager.get('commodity_types')))
+    commodity_prices_height = 30 + (30 * len(constants.commodity_types))
     commodity_prices_width = 200
 
     global_manager.set('commodity_prices_label', constants.actor_creation_manager.create_interface_element({
@@ -1540,10 +1282,10 @@ def inventory_interface(global_manager):
         'modes': ['europe'],
         'init_type': 'commodity button'
     }
-    for current_index in range(len(global_manager.get('commodity_types'))): #commodity prices in Europe
+    for current_index in range(len(constants.commodity_types)): #commodity prices in Europe
         input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index))
-        input_dict['image_id'] = 'scenery/resources/large/' + global_manager.get('commodity_types')[current_index] + '.png'
-        input_dict['commodity'] = global_manager.get('commodity_types')[current_index]
+        input_dict['image_id'] = 'scenery/resources/large/' + constants.commodity_types[current_index] + '.png'
+        input_dict['commodity'] = constants.commodity_types[current_index]
         new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     mob_inventory_collection = constants.actor_creation_manager.create_interface_element({
@@ -1568,7 +1310,7 @@ def inventory_interface(global_manager):
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     
     del input_dict['actor_label_type']
-    for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected mob
+    for current_index in range(len(constants.commodity_types)): #commodities held in selected mob
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
@@ -1594,7 +1336,7 @@ def inventory_interface(global_manager):
     tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     del input_dict['actor_label_type']
-    for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected tile
+    for current_index in range(len(constants.commodity_types)): #commodities held in selected tile
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)

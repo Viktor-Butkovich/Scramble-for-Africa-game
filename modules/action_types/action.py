@@ -43,7 +43,7 @@ class action():
         Output:
             None
         '''
-        self.global_manager.get('actions')[self.action_type] = self
+        status.actions[self.action_type] = self
         self.current_unit = 'none'
         if not self.action_type in constants.action_types:
             constants.action_types.append(self.action_type)

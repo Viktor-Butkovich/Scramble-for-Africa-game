@@ -45,7 +45,7 @@ class beast(npmob):
         
         self.npmob_type = 'beast'
         self.hostile = True
-        self.preferred_terrains = global_manager.get('animal_terrain_dict')[self.animal_type]
+        self.preferred_terrains = constants.animal_terrain_dict[self.animal_type]
         if from_save:
             self.set_hidden(input_dict['hidden'], True)
         else:

@@ -1,11 +1,12 @@
 import pygame
 from typing import Dict, List, Any
-from modules.interface_types.grids import grid
 from modules.actor_types.tiles import tile
 from modules.actor_types.mobs import mob
 from modules.constructs.ministers import minister
 from modules.constructs.countries import country
 from modules.constructs.images import image, free_image
+from modules.interface_types.interface_elements import interface_collection
+from modules.interface_types.grids import grid
 from modules.interface_types.panels import safe_click_panel
 from modules.interface_types.notifications import notification
 from modules.interface_types.buttons import button
@@ -19,6 +20,7 @@ from modules.actor_types.mob_types.npmobs import npmob
 from modules.actor_types.mob_types.npmob_types.beasts import beast
 from modules.constructs.villages import village
 from modules.util.market_utility import loan
+from modules.action_types.action import action
 
 strategic_map_grid: grid = None
 minimap_grid: grid = None
@@ -31,6 +33,8 @@ Germany: country = None
 Belgium: country = None
 Portugal: country = None
 Italy: country = None
+
+actions: Dict[str, action] = {}
 
 displayed_mob: mob = None
 displayed_tile: tile = None
@@ -73,8 +77,10 @@ draw_list: List[Any] = []
 
 loading_image: image = None
 safe_click_area: safe_click_panel = None
+info_displays_collection: interface_collection = None
 
 current_instructions_page: instructions_page = None
 current_country: country = None
 current_country_name: str = None
 ongoing_action_type: str = None
+current_ministers: Dict[str, minister] = {}

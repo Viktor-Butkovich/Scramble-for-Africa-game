@@ -36,7 +36,7 @@ class officer(pmob):
         super().__init__(from_save, input_dict, global_manager)
         self.is_officer = True
         self.officer_type = input_dict.get('officer_type', type(self).__name__)
-        self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
+        self.set_controlling_minister_type(constants.officer_minister_dict[self.officer_type])
         if not from_save:
             self.veteran = False
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)

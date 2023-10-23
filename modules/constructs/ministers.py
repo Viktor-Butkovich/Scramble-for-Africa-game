@@ -46,7 +46,7 @@ class minister():
             self.name = input_dict['name']
             self.current_position = input_dict['current_position']
             self.background = input_dict['background']
-            self.status_number = global_manager.get('background_status_dict')[self.background]
+            self.status_number = constants.background_status_dict[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = input_dict['personal_savings']
@@ -74,7 +74,7 @@ class minister():
         else:
             self.background = random.choice(global_manager.get('weighted_backgrounds'))
             self.name = constants.flavor_text_manager.generate_minister_name(self.background)
-            self.status_number = global_manager.get('background_status_dict')[self.background]
+            self.status_number = constants.background_status_dict[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
@@ -170,7 +170,7 @@ class minister():
         '''
         self.tooltip_text = []
         if not self.current_position == 'none':
-            keyword = self.global_manager.get('minister_type_dict')[self.current_position] #type, like military
+            keyword = constants.minister_type_dict[self.current_position] #type, like military
             self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
         else:
             self.tooltip_text.append('This is ' + self.name + ', an available minister candidate.')
@@ -187,7 +187,7 @@ class minister():
             displayed_skill = self.current_position
 
         if displayed_skill != 'unknown':
-            displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military]
+            displayed_skill_name = constants.minister_type_dict[displayed_skill] #like General to military]
             if self.apparent_skill_descriptions[displayed_skill] != 'unknown':
                 if self.current_position == 'none':
                     message = 'Highest ability: ' + self.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
@@ -200,7 +200,7 @@ class minister():
             for skill_type in self.apparent_skills:
                 if self.apparent_skills[skill_type] == skill_value:
                     rank += 1
-                    skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                    skill_name = constants.minister_type_dict[skill_type] #like General to military
                     self.tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.apparent_skill_descriptions[skill_type])
 
         self.tooltip_text.append('Evidence: ' + str(self.corruption_evidence))
@@ -289,7 +289,7 @@ class minister():
         Output:
             None
         '''
-        prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
+        prosecutor = status.current_ministers['Prosecutor']
         if prosecutor != 'none':
             if constants.effect_manager.effect_active('show_minister_stealing'):
                 print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + constants.transaction_descriptions[theft_type] + '.')
@@ -537,10 +537,10 @@ class minister():
             None
         '''
         old_position = self.current_position
-        if not self.current_position == 'none': #if removing, set old position to none
-            self.global_manager.get('current_ministers')[self.current_position] = 'none'
+        if self.current_position != 'none': #if removing, set old position to none
+            status.current_ministers[self.current_position] = None
         self.current_position = new_position
-        self.global_manager.get('current_ministers')[new_position] = self
+        status.current_ministers[new_position] = self
         for current_pmob in status.pmob_list:
             current_pmob.update_controlling_minister()
         if new_position != 'none': #if appointing
@@ -562,8 +562,8 @@ class minister():
         
         if not self.global_manager.get('minister_appointment_tutorial_completed'):
             completed = True
-            for current_position in self.global_manager.get('minister_types'):
-                if self.global_manager.get('current_ministers')[current_position] == 'none':
+            for current_position in constants.minister_types:
+                if status.current_ministers[current_position] == None:
                     completed = False
             if completed:
                 self.global_manager.set('minister_appointment_tutorial_completed', True)
@@ -582,12 +582,12 @@ class minister():
         self.specific_skills = {}
         self.apparent_skills = {}
         self.apparent_skill_descriptions = {}
-        background_skill = random.choice(self.global_manager.get('background_skills_dict')[self.background])
+        background_skill = random.choice(constants.background_skills_dict[self.background])
         if background_skill == 'random':
-            background_skill = random.choice(self.global_manager.get('skill_types'))
-        for current_minister_type in self.global_manager.get('minister_types'):
+            background_skill = random.choice(constants.skill_types)
+        for current_minister_type in constants.minister_types:
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
-            if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill and (self.specific_skills[current_minister_type] + self.general_skill) < 6:
+            if constants.minister_type_dict[current_minister_type] == background_skill and (self.specific_skills[current_minister_type] + self.general_skill) < 6:
                 self.specific_skills[current_minister_type] += 1
             if constants.effect_manager.effect_active('transparent_ministers'):
                 self.set_apparent_skill(current_minister_type, self.specific_skills[current_minister_type] + self.general_skill)
@@ -604,7 +604,7 @@ class minister():
         '''
         if (not skill_type in self.apparent_skills) or self.apparent_skills[skill_type] != new_value:
             self.apparent_skills[skill_type] = new_value
-            self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
+            self.apparent_skill_descriptions[skill_type] = random.choice(constants.minister_skill_to_description_dict[new_value])
             if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
             if status.displayed_minister == self:
@@ -643,11 +643,10 @@ class minister():
         Output:
             None
         '''
-        skill_types = self.global_manager.get('skill_types')
-        type_minister_dict = self.global_manager.get('type_minister_dict')
+        type_minister_dict = constants.type_minister_dict
         highest_skills = []
         highest_skill_number = 0
-        for current_skill in skill_types:
+        for current_skill in constants.skill_types:
             if len(highest_skills) == 0 or self.specific_skills[type_minister_dict[current_skill]] > highest_skill_number:
                 highest_skills = [current_skill]
                 highest_skill_number = self.specific_skills[type_minister_dict[current_skill]]
@@ -656,7 +655,7 @@ class minister():
         first_interest = random.choice(highest_skills)
         second_interest = first_interest
         while second_interest == first_interest:
-            second_interest = random.choice(skill_types)
+            second_interest = random.choice(constants.skill_types)
 
         if random.randrange(1, 7) >= 4:
             self.interests = [first_interest, second_interest]
@@ -689,7 +688,7 @@ class minister():
         '''
         if (not hasattr(self, 'apparent_corruption')) or self.apparent_corruption != new_value:
             self.apparent_corruption = new_value
-            self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
+            self.apparent_corruption_description = random.choice(constants.minister_corruption_to_description_dict[new_value])
             if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
             if status.displayed_minister == self:
@@ -706,7 +705,7 @@ class minister():
         '''
         num_data_points = 0
         total_apparent_skill = 0
-        for skill_type in self.global_manager.get('minister_types'):
+        for skill_type in constants.minister_types:
             if self.apparent_skills[skill_type] != 'unknown':
                 num_data_points += 1
                 total_apparent_skill += self.apparent_skills[skill_type]
@@ -726,7 +725,7 @@ class minister():
         '''
         max_skills = ['unknown']
         max_skill_value = 0
-        for skill_type in self.global_manager.get('minister_types'):
+        for skill_type in constants.minister_types:
             if self.apparent_skills[skill_type] != 'unknown':
                 if self.apparent_skills[skill_type] > max_skill_value:
                     max_skills = [skill_type]
@@ -742,7 +741,7 @@ class minister():
         new_values = {}
         roll_result = prosecutor.roll(6, 4, 0, constants.action_prices['active_investigation'], 'active_investigation')
         if roll_result >= 4:
-            for category in self.global_manager.get('minister_types') + ['loyalty']:
+            for category in constants.minister_types + ['loyalty']:
                 if category == 'loyalty' or category == self.current_position: #simplify this
                     if random.randrange(1, 7) >= 4:
                         if category == 'loyalty':
@@ -776,7 +775,7 @@ class minister():
                 if category == 'loyalty':
                     category_name = category
                 else:
-                    category_name = self.global_manager.get('minister_type_dict')[category]
+                    category_name = constants.minister_type_dict[category]
                 message += '    ' + category_name.capitalize() + ': ' + new_values[category]
                 if previous_values[category] == 'unknown': #if unknown
                     message += ' /n'
@@ -846,7 +845,7 @@ class minister():
                 if rumor_type == 'loyalty':
                     message += self.apparent_corruption_description + ' loyalty'
                 else:
-                    skill_name = self.global_manager.get('minister_type_dict')[rumor_type]
+                    skill_name = constants.minister_type_dict[rumor_type]
                     message += utility.generate_article(self.apparent_skill_descriptions[rumor_type]) + ' ' + self.apparent_skill_descriptions[rumor_type] + ' ' + skill_name + ' ability'
                 message += '. /n /n'
                 #if not changed_value:
@@ -862,9 +861,9 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
-        if constants.effect_manager.effect_active('band_of_thieves') or ((constants.effect_manager.effect_active('lawbearer') and self != self.global_manager.get('current_ministers')['Prosecutor'])):
+        if constants.effect_manager.effect_active('band_of_thieves') or ((constants.effect_manager.effect_active('lawbearer') and self != status.current_ministers['Prosecutor'])):
             return(True)
-        elif constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
+        elif constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == status.current_ministers['Prosecutor']):
             return(False)
             
         if random.randrange(1, 7) >= self.corruption_threshold:
@@ -940,7 +939,7 @@ class minister():
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
         modifier = 0
-        if constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == self.global_manager.get('current_ministers')['Prosecutor']):
+        if constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == status.current_ministers['Prosecutor']):
             return(5)
         elif constants.effect_manager.effect_active('nine_mortal_men'):
             return(-10)
@@ -989,7 +988,7 @@ class minister():
             None
         '''
         if not self.current_position == 'none':
-            self.global_manager.get('current_ministers')[self.current_position] = 'none'
+            status.current_ministers[self.current_position] = None
             for current_minister_image in status.minister_image_list:
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
@@ -1076,7 +1075,7 @@ class minister():
                             'Learn how to respect your betters - we\'re not savages. ']
                 text += random.choice(warnings)
             else:
-                warnings = ['Think of what will happen to the ' + random.choice(self.global_manager.get('commodity_types')) + ' prices after the media hears about this! ',
+                warnings = ['Think of what will happen to the ' + random.choice(constants.commodity_types) + ' prices after the media hears about this! ',
                             'You think you can kick me down from your palace in the clouds? ',
                             'I\'ll make sure to tell all about those judges you bribed. ',
                             'So many dead... what will be left of this land by the time you\'re done? ',

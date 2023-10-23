@@ -339,7 +339,7 @@ class mob(actor):
             adjacent_cell = local_cell.adjacent_cells[direction]
             
         if adjacent_cell:
-            cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
+            cost = cost * constants.terrain_movement_cost_dict[adjacent_cell.terrain]
             if self.is_pmob:
                 local_infrastructure = local_cell.get_intact_building('infrastructure')
                 adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')

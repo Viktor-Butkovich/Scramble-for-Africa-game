@@ -32,7 +32,7 @@ class recruitment_button(button):
             None
         '''
         self.recruitment_type = input_dict['recruitment_type']
-        if self.recruitment_type in global_manager.get('country_specific_units'):
+        if self.recruitment_type in constants.country_specific_units:
             if status.current_country:
                 self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + status.current_country.adjective + '/default.png'
             else:
@@ -151,14 +151,13 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        possible_commodity_types = global_manager.get('commodity_types')
+        possible_commodity_types = constants.commodity_types
         self.commodity_type = input_dict['commodity_type']
         if self.commodity_type in possible_commodity_types:
             input_dict['image_id'] = 'scenery/resources/buttons/' + self.commodity_type + '.png'
         else:
             input_dict['image_id'] = 'buttons/default_button.png'
-        self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
-        global_manager.set(self.commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
+        self.cost = constants.commodity_prices[self.commodity_type] #update this when price changes
         input_dict['button_type'] = 'buy commodity'
         super().__init__(input_dict, global_manager)
 
@@ -172,7 +171,7 @@ class buy_commodity_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
+            self.cost = constants.commodity_prices[self.commodity_type]
             if constants.money_tracker.get() >= self.cost:
                 if minister_utility.positions_filled(self.global_manager):
                     status.europe_grid.cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
@@ -195,6 +194,6 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
+        self.cost = constants.commodity_prices[self.commodity_type]
         self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])
         

@@ -21,8 +21,8 @@ class upgrade(action.action):
         '''
         super().initial_setup(**kwargs)
         self.building_type = kwargs.get('building_type', 'none')
-        del self.global_manager.get('actions')[self.action_type]
-        self.global_manager.get('actions')[self.building_type] = self
+        del status.actions[self.action_type]
+        status.actions[self.building_type] = self
         self.building_name = self.building_type.replace('_', ' ')
         self.requirement = 'can_construct'
         self.current_building = 'none'

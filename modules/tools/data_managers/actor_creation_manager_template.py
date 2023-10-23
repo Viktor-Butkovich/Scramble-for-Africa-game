@@ -58,7 +58,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
         elif init_type == 'boat':
             new_actor = vehicles.boat(from_save, input_dict, global_manager)
-        elif init_type in global_manager.get('officer_types'):
+        elif init_type in constants.officer_types:
             new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'native_warriors':
             new_actor = native_warriors.native_warriors(from_save, input_dict, global_manager)
@@ -357,7 +357,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             elif base == 'loading image template':
                 new_element = images.loading_image_template(input_dict, global_manager)
             elif base == 'mouse follower':
-                new_element = mouse_followers.mouse_follower(input_dict, global_manager)
+                new_element = mouse_followers.mouse_follower_template(input_dict, global_manager)
 
         elif init_type.endswith('notification'):
             base = init_type.removesuffix('notification')
@@ -453,7 +453,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             'worker': worker,
             'officer': officer,
             'modes': officer.grids[0].modes, #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
-            'init_type': global_manager.get('officer_group_type_dict')[officer.officer_type],
+            'init_type': constants.officer_group_type_dict[officer.officer_type],
             'image': 'misc/empty.png',
             'name': actor_utility.generate_group_name(worker, officer, global_manager)
         }, global_manager))
@@ -467,7 +467,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        for i in range(0, global_manager.get('minister_limit') - 2 + random.randrange(-2, 3)):
+        for i in range(0, constants.minister_limit - 2 + random.randrange(-2, 3)):
             self.create_minister(False, {}, global_manager)
 
     def create_minister(self, from_save, input_dict, global_manager):

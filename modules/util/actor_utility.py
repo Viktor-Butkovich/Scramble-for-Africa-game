@@ -60,7 +60,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
         cost_multiplier = 1
     else:
         terrain = constructor.images[0].current_cell.terrain
-        cost_multiplier = global_manager.get('terrain_build_cost_multiplier_dict')[terrain]
+        cost_multiplier = constants.terrain_build_cost_multiplier_dict[terrain]
 
     return(base_price * cost_multiplier)
 
@@ -77,8 +77,8 @@ def update_descriptions(global_manager, target = 'all'):
     '''
     if target == 'all':
         targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
-        targets_to_update += global_manager.get('building_types') + ['road', 'railroad', 'road_bridge', 'railroad_bridge']
-        targets_to_update += global_manager.get('upgrade_types')
+        targets_to_update += constants.building_types + ['road', 'railroad', 'road_bridge', 'railroad_bridge']
+        targets_to_update += constants.upgrade_types
     else:
         targets_to_update = [target]
 
@@ -86,8 +86,8 @@ def update_descriptions(global_manager, target = 'all'):
         list_descriptions = global_manager.get('list_descriptions')
         string_descriptions = global_manager.get('string_descriptions')
         text_list = []
-        if current_target in global_manager.get('officer_types'):
-            first_line = utility.capitalize(current_target) + 's are controlled by the ' + global_manager.get('officer_minister_dict')[current_target]
+        if current_target in constants.officer_types:
+            first_line = utility.capitalize(current_target) + 's are controlled by the ' + constants.officer_minister_dict[current_target]
             if current_target == 'explorer':
                 first_line += '.'
                 text_list.append(first_line)
@@ -172,7 +172,7 @@ def update_descriptions(global_manager, target = 'all'):
 
         elif current_target == 'resource':
             if global_manager.has('actions'):
-                building_name = global_manager.get('actions')[current_target].building_name
+                building_name = status.actions[current_target].building_name
                 if building_name == 'none':
                     building_name = 'resource production facility'
             else:
@@ -238,20 +238,20 @@ def spawn_beast(global_manager):
     '''
     spawn_cell = status.strategic_map_grid.choose_cell({
         'ocean_allowed': False,
-        'allowed_terrains': global_manager.get('terrain_list') + ['water'],
+        'allowed_terrains': constants.terrain_list + ['water'],
         'nearby_buildings_allowed': True
     })
     if spawn_cell.adjacent_to_buildings():
         return() #cancel spawn if beast would spawn near buildings, become less common as colony develops
     terrain_type = spawn_cell.terrain
-    animal_type = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
+    animal_type = random.choice(constants.terrain_animal_dict[terrain_type])
 
     constants.actor_creation_manager.create(False, {
         'coordinates': (spawn_cell.x, spawn_cell.y),
         'grids': [status.strategic_map_grid, status.strategic_map_grid.mini_grid],
         'modes': ['strategic'],
         'animal_type': animal_type,
-        'adjective': random.choice(global_manager.get('animal_adjectives')),
+        'adjective': random.choice(constants.animal_adjectives),
         'image': 'mobs/beasts/' + animal_type + '.png',
         'init_type': 'beast'
     }, global_manager)  
@@ -446,7 +446,7 @@ def generate_resource_icon(tile, global_manager):
         string: Returns string image file path for tile's resource icon
     '''
     small = False
-    for building_type in global_manager.get('building_types'):
+    for building_type in constants.building_types:
         if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
             small = True
     if tile.cell.resource == 'natives':
@@ -644,7 +644,7 @@ def generate_group_name(worker, officer, global_manager, add_veteran=False):
     '''
     if not officer.officer_type == 'major':
         name = ''
-        for character in global_manager.get('officer_group_type_dict')[officer.officer_type]:
+        for character in constants.officer_group_type_dict[officer.officer_type]:
             if not character == '_':
                 name += character
             else:

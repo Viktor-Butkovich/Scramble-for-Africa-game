@@ -21,8 +21,8 @@ class construction(action.action):
         '''
         super().initial_setup(**kwargs)
         self.building_type = kwargs.get('building_type', 'none')
-        del self.global_manager.get('actions')[self.action_type]
-        self.global_manager.get('actions')[self.building_type] = self
+        del status.actions[self.action_type]
+        status.actions[self.building_type] = self
         self.building_name = self.building_type.replace('_', ' ')
         if self.building_type == 'infrastructure':
             self.building_name = 'road' #deal with infrastructure exceptions later
@@ -52,7 +52,7 @@ class construction(action.action):
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
         if self.building_type == 'resource':
-            initial_input_dict['image_id'] = self.global_manager.get('resource_building_button_dict')[self.attached_resource]
+            initial_input_dict['image_id'] = constants.resource_building_button_dict[self.attached_resource]
         elif self.building_type == 'infrastructure':
             initial_input_dict['image_id'] = 'buildings/buttons/road.png'
         elif self.building_type == 'train':
@@ -122,7 +122,7 @@ class construction(action.action):
 
         if status.displayed_mob and status.strategic_map_grid in status.displayed_mob.grids:
             terrain = status.displayed_mob.images[0].current_cell.terrain
-            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
+            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(constants.terrain_build_cost_multiplier_dict[terrain]) + ' when built in ' + terrain + ' terrain')
         return(message)
 
     def generate_notification_text(self, subject):
@@ -219,7 +219,7 @@ class construction(action.action):
         if self.building_type == 'resource':
             cell = status.displayed_mob.images[0].current_cell
             if cell.resource != self.attached_resource:
-                if cell.resource in self.global_manager.get('collectable_resources'): #if not natives or none
+                if cell.resource in constants.collectable_resources: #if not natives or none
                     self.attached_resource = cell.resource
                     if self.attached_resource in ['gold', 'iron', 'copper', 'diamond']:
                         self.building_name = self.attached_resource + ' mine'
@@ -230,7 +230,7 @@ class construction(action.action):
                 else:
                     self.attached_resource = 'none'
                     self.building_name = 'none'
-                self.button.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
+                self.button.image.set_image(constants.resource_building_button_dict[self.attached_resource])
 
         elif self.building_type == 'infrastructure':
             cell = status.displayed_mob.images[0].current_cell
@@ -387,7 +387,7 @@ class construction(action.action):
                 if self.current_unit.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
                     self.current_unit.images[0].current_cell.get_building(self.building_type).remove_complete()
             if self.building_type == 'resource':
-                input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
+                input_dict['image'] = constants.resource_building_dict[self.attached_resource]
                 input_dict['resource_type'] = self.attached_resource
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'

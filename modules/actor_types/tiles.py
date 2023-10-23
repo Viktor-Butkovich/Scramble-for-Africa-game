@@ -226,7 +226,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 image_id_list.append({'image_id': self.image_dict['default'], 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -9})
                 if self.cell.resource != 'none':
                     image_id_list.append(actor_utility.generate_resource_icon(self, self.global_manager))
-                for current_building_type in self.global_manager.get('building_types'):
+                for current_building_type in constants.building_types:
                     current_building = self.cell.get_building(current_building_type)
                     if current_building != 'none':
                         image_id_list += current_building.get_image_id_list()
@@ -311,7 +311,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if new_terrain in self.global_manager.get('terrain_list') + ['water']:
+        if new_terrain in constants.terrain_list + ['water']:
             base_word = new_terrain
             if new_terrain == 'water':
                 current_y = self.y
