@@ -134,7 +134,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
             if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -151,7 +151,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile.inventory[commodity] = new_value
             if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self)
 
     def get_main_grid_coordinates(self):
         '''
@@ -355,9 +355,9 @@ class tile(actor): #to do: make terrain tiles a subclass
                     tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource')
             else:
                 tooltip_message .append('This tile has not been explored')
-            if not self.global_manager.get('current_lore_mission') == 'none':
-                if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(coordinates[0], coordinates[1]):
-                    tooltip_message.append('There are rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be found here')
+            if status.current_lore_mission:
+                if status.current_lore_mission.has_revealed_possible_artifact_location(coordinates[0], coordinates[1]):
+                    tooltip_message.append('There are rumors that the ' + status.current_lore_mission.name + ' may be found here')
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])

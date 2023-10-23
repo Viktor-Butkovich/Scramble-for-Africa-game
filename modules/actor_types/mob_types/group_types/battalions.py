@@ -44,7 +44,7 @@ class battalion(group):
             self.battalion_type = 'colonial'
         self.set_group_type('battalion')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates label to show new combat strength
 
     def get_movement_cost(self, x_change, y_change, post_attack = False):
         '''
@@ -308,7 +308,7 @@ class battalion(group):
             constants.notification_manager.display_notification({
                 'message': text,
             })
-        self.global_manager.set('capture_slaves_result', [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])
+        #capture_slaves_result [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])
 
     def complete_capture_slaves(self):
         '''
@@ -320,10 +320,11 @@ class battalion(group):
         Output:
             None
         '''
-        roll_result = self.global_manager.get('capture_slaves_result')[1]
-        village = self.global_manager.get('capture_slaves_result')[2]
-        public_opinion_decrease = self.global_manager.get('capture_slaves_result')[3]
-        village_aggressiveness_increase = self.global_manager.get('capture_slaves_result')[4]
+        capture_slaves_result = []
+        roll_result = capture_slaves_result[1]
+        village = capture_slaves_result[2]
+        public_opinion_decrease = capture_slaves_result[3]
+        village_aggressiveness_increase = capture_slaves_result[4]
         
         village.change_aggressiveness(village_aggressiveness_increase)
         if roll_result >= self.current_min_success: #if campaign succeeded
@@ -384,7 +385,7 @@ class safari(battalion):
         self.battalion_type = 'none'
         self.set_group_type('safari')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates label to show new combat strength
 
     def track_beasts(self):
         '''

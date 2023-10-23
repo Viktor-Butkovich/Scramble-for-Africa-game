@@ -66,7 +66,7 @@ class country:
         constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
         constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
         constants.flavor_text_manager.set_flavor_text('minister_last_names', 'text/names/' + self.adjective + '_last_names.csv')
-        self.global_manager.set('weighted_backgrounds', self.background_set)
+        constants.weighted_backgrounds = self.background_set
         for current_recruitment_button in status.recruitment_button_list:
             if current_recruitment_button.recruitment_type in constants.country_specific_units:
                 current_recruitment_button.calibrate(self)
@@ -160,7 +160,7 @@ class hybrid_country(country):
         constants.flavor_text_manager.allow_particles = self.allow_particles
         constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
         constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
-        self.global_manager.set('weighted_backgrounds', self.background_set)
+        constants.weighted_backgrounds = self.background_set
         for current_recruitment_button in status.recruitment_button_list:
             if current_recruitment_button.recruitment_type in constants.country_specific_units:
                 current_recruitment_button.calibrate(self)

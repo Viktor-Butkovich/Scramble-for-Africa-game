@@ -243,8 +243,8 @@ class notification_manager_template():
                 is_last = True
             elif notification_type in ['successful_commodity_trade', 'failed_commodity_trade']:
                 commodity_trade = True
-            elif notification_type == 'trade_promotion':
-                self.global_manager.get('trade_result')[0].promote() #promotes caravan
+            #elif notification_type == 'trade_promotion':
+                #trade_result[0].promote() #promotes caravan
             trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade, 'dies': dies}
             input_dict['trade_info_dict'] = trade_info_dict
             input_dict['init_type'] = 'trade notification'

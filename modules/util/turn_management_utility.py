@@ -90,10 +90,10 @@ def start_player_turn(global_manager, first_turn = False):
         game_transitions.cycle_player_turn(global_manager, True)
 
     selected_mob = status.displayed_mob
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
+    actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, None, override_exempt=True)
     if selected_mob:
         selected_mob.select()
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), selected_mob.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, selected_mob.images[0].current_cell.tile)
        
 
 def reset_mobs(mob_type, global_manager):
@@ -174,7 +174,6 @@ def manage_production(global_manager):
     Output:
         None
     '''
-    global_manager.set('attempted_commodities', [])
     expected_production = {}
     for current_commodity in constants.collectable_resources:
         constants.commodities_produced[current_commodity] = 0
@@ -189,8 +188,8 @@ def manage_production(global_manager):
                         expected_production[current_resource_building.resource_type] += 0.5 * current_resource_building.efficiency
             current_resource_building.produce()
             if len(current_resource_building.contained_work_crews) == 0:
-                if not current_resource_building.resource_type in global_manager.get('attempted_commodities'):
-                    global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
+                if not current_resource_building.resource_type in constants.attempted_commodities:
+                    constants.attempted_commodities.append(current_resource_building.resource_type)
     manage_production_report(expected_production, global_manager)
 
 def manage_production_report(expected_production, global_manager):
@@ -198,10 +197,10 @@ def manage_production_report(expected_production, global_manager):
     Description:
         Displays a production report at the end of the turn, showing expected and actual production for each commodity the company has the capacity to produce
     '''
-    attempted_commodities = global_manager.get('attempted_commodities')
+    attempted_commodities = constants.attempted_commodities
     displayed_commodities = []
     production_minister = status.current_ministers[constants.type_minister_dict['production']]
-    if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
+    if not len(constants.attempted_commodities) == 0: #if any attempted, do production report
         text = production_minister.current_position + ' ' + production_minister.name + ' reports the following commodity production: /n /n'
         while len(displayed_commodities) < len(attempted_commodities):
             max_produced = 0
@@ -302,7 +301,7 @@ def manage_financial_report(global_manager):
     constants.notification_manager.display_notification({
         'message': financial_report_text,
     })
-    global_manager.set('previous_financial_report', financial_report_text)
+    status.previous_financial_report = financial_report_text
     constants.money_tracker.reset_transaction_history()
 
 def manage_worker_price_changes(global_manager):
@@ -738,6 +737,6 @@ def manage_lore(global_manager):
     Output:
         None
     '''
-    if global_manager.get('current_lore_mission') == 'none':
+    if status.current_lore_mission == None:
         if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or constants.effect_manager.effect_active('instant_lore_mission'):
             constants.actor_creation_manager.create_lore_mission(False, {}, global_manager)

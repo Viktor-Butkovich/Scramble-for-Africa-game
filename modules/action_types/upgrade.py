@@ -215,5 +215,5 @@ class upgrade(action.action):
         '''
         if self.roll_result >= self.current_min_success:
             self.current_building.upgrade(self.building_type)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.current_unit.images[0].current_cell.tile) #update tile display to show building upgrade
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show building upgrade
         super().complete()

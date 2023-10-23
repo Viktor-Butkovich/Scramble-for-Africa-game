@@ -348,7 +348,7 @@ class trade_notification(action_notification):
         self.notification_images = []
 
         if self.is_commodity_trade:
-            self.trade_result = global_manager.get('trade_result')
+            self.trade_result = {} #trade_result
             consumer_goods_y = 0
             if self.commodity_trade_type == 'successful_commodity_trade':
                 consumer_goods_y = 500
@@ -406,7 +406,7 @@ class trade_notification(action_notification):
                 }, global_manager))
 
         elif self.dies:
-            self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
+            self.trade_result = {} #trade result, #allows caravan object to be found so that it can die
         super().__init__(input_dict, global_manager)
         
     def remove(self):
@@ -452,10 +452,10 @@ class trial_notification(action_notification):
         super().remove(handle_next_notification=False)
         for current_die in status.dice_list:
             current_die.remove_complete()
-        previous_roll = self.global_manager.get('trial_rolls').pop(0)
+        previous_roll = status.trial_rolls.pop(0)
         if previous_roll >= 5:
-            self.global_manager.set('trial_rolls', []) #stop trial after success
-        if len(self.global_manager.get('trial_rolls')) > 0:
+            status.trial_rolls = [] #stop trial after success
+        if len(status.trial_rolls) > 0:
             trial_utility.display_evidence_roll(self.global_manager)
         else:
             trial_utility.complete_trial(previous_roll, self.global_manager)
@@ -513,7 +513,7 @@ class rumor_search_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(constants.notification_manager.notification_queue) == 1 and not constants.notification_manager.notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            self.global_manager.get('rumor_search_result')[0].complete_rumor_search()
+            #rumor_search_result[0].complete_rumor_search()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
@@ -567,7 +567,7 @@ class artifact_search_notification(action_notification):
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
         if len(notification_manager.notification_queue) > 0 and notification_manager.notification_type_queue[0] in ['final_artifact_search', 'default'] and not self.is_last: #if roll failed or succeeded and about to complete
-            self.global_manager.get('artifact_search_result')[0].complete_artifact_search()
+            #artifact_search_result[0].complete_artifact_search()
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
         elif len(notification_manager.notification_queue) > 0:
@@ -646,7 +646,7 @@ class capture_slaves_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(constants.notification_manager.notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            self.global_manager.get('capture_slaves_result')[0].complete_capture_slaves()
+            #capture_slaves_result[0].complete_capture_slaves()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])

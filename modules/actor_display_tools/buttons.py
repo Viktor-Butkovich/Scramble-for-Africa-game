@@ -274,7 +274,7 @@ class disable_sentry_mode_button(button):
         if main_loop_utility.action_possible(self.global_manager):
             displayed_mob = status.displayed_mob     
             displayed_mob.set_sentry_mode(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob)
         else:
             text_utility.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
@@ -674,7 +674,7 @@ class embark_vehicle_button(button):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob)
         self.was_showing = result
         return(result)
     
@@ -769,7 +769,7 @@ class cycle_passengers_button(button):
             displayed_mob = status.displayed_mob
             moved_mob = displayed_mob.contained_mobs.pop(0)
             displayed_mob.contained_mobs.append(moved_mob)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob) #updates mob info display list to show changed passenger order
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob) #updates mob info display list to show changed passenger order
         else:
             text_utility.print_to_screen('You are busy and cannot cycle passengers.', self.global_manager)
 
@@ -839,7 +839,7 @@ class cycle_work_crews_button(button):
             displayed_tile = status.displayed_tile
             moved_mob = displayed_tile.cell.contained_buildings['resource'].contained_work_crews.pop(0)
             displayed_tile.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), displayed_tile) #updates tile info display list to show changed work crew order
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, displayed_tile) #updates tile info display list to show changed work crew order
         else:
             text_utility.print_to_screen('You are busy and cannot cycle work crews.', self.global_manager)
 
@@ -1067,7 +1067,7 @@ class rumor_search_button(button):
         Output:
             None
         '''
-        if not self.global_manager.get('current_lore_mission') == 'none':
+        if status.current_lore_mission:
             if main_loop_utility.action_possible(self.global_manager):
                 current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
@@ -1075,16 +1075,16 @@ class rumor_search_button(button):
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
-                                if not self.global_manager.get('current_lore_mission').confirmed_all_locations_revealed:
+                                if not status.current_lore_mission.confirmed_all_locations_revealed:
                                     if not current_cell.get_building('village').found_rumors:
                                         if current_mob.ministers_appointed():
                                             if current_mob.sentry_mode:
                                                 current_mob.set_sentry_mode(False)
                                             current_mob.start_rumor_search()
                                     else:
-                                        text_utility.print_to_screen('This village\'s rumors regarding the location of the ' + self.global_manager.get('current_lore_mission').name + ' have already been found.', self.global_manager)
+                                        text_utility.print_to_screen('This village\'s rumors regarding the location of the ' + status.current_lore_mission.name + ' have already been found.', self.global_manager)
                                 else:
-                                    text_utility.print_to_screen('All possible locations of the ' + self.global_manager.get('current_lore_mission').name + ' have already been revealed.', self.global_manager)
+                                    text_utility.print_to_screen('All possible locations of the ' + status.current_lore_mission.name + ' have already been revealed.', self.global_manager)
                             else:
                                 text_utility.print_to_screen('This village has no population and no rumors can be found.', self.global_manager)
                         else:
@@ -1145,18 +1145,18 @@ class artifact_search_button(button):
         Output:
             None
         '''
-        if self.global_manager.get('current_lore_mission') != 'none':
+        if status.current_lore_mission:
             if main_loop_utility.action_possible(self.global_manager):
                 current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
                     if constants.money >= constants.action_prices['artifact_search']:
-                        if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
+                        if status.current_lore_mission.has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
                             if current_mob.ministers_appointed():
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
                                 current_mob.start_artifact_search()
                         else:
-                            text_utility.print_to_screen('You have not found any rumors indicating that the ' + self.global_manager.get('current_lore_mission').name + ' may be at this location.', self.global_manager)
+                            text_utility.print_to_screen('You have not found any rumors indicating that the ' + status.current_lore_mission.name + ' may be at this location.', self.global_manager)
                     else:
                         text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['artifact_search']) + ' money needed to attempt a artifact search.', self.global_manager)
                 else:
@@ -1788,7 +1788,7 @@ class fabricate_evidence_button(button):
                     ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
                 defense.fabricated_evidence += 1
                 defense.corruption_evidence += 1
-                minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display'), defense) #updates trial display with new evidence
+                minister_utility.calibrate_trial_info_display(self.global_manager, status.defense_info_display, defense) #updates trial display with new evidence
             else:
                 text_utility.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
         else:
@@ -2074,7 +2074,7 @@ class automatic_route_button(button):
                     if attached_mob.can_follow_automatic_route():
                         attached_mob.follow_automatic_route()
                         attached_mob.remove_from_turn_queue()
-                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), attached_mob) #updates mob info display if automatic route changed anything
+                        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, attached_mob) #updates mob info display if automatic route changed anything
                     else:
                         text_utility.print_to_screen('This unit is currently not able to progress along its designated route.', self.global_manager)
             else:

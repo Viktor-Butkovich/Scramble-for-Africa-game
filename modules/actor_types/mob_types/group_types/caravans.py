@@ -43,7 +43,7 @@ class caravan(group):
         self.trades_remaining = 0
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for inventory capacity changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for inventory capacity changing
         else:
             self.load_inventory(input_dict['inventory'])
         self.set_group_type('caravan')
@@ -185,7 +185,7 @@ class caravan(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        self.global_manager.set('trade_result', [self, roll_result])
+        #trade_result = [self, roll_result]
         constants.notification_manager.display_notification({
             'message': text + 'Click to continue.',
             'num_dice': num_dice,
@@ -362,7 +362,7 @@ class caravan(group):
                 'notification_type': 'stop_trade'
             })
 
-        self.global_manager.set('trade_result', [self, roll_result, commodity, gets_worker]) #allows notification to give random commodity when clicked
+        #trade_result = self, roll_result, commodity, gets_worker]) #allows notification to give random commodity when clicked
 
     def complete_trade(self, gives_commodity, trade_result):
         '''

@@ -411,7 +411,7 @@ class mob(actor):
             if self.is_pmob and self.movement_points <= 0:
                 self.remove_from_turn_queue()
             if status.displayed_mob == self: #update mob info display to show new movement points
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def set_movement_points(self, new_value):
         '''
@@ -430,7 +430,7 @@ class mob(actor):
         if self.is_pmob and self.movement_points <= 0:
             self.remove_from_turn_queue()
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def reset_movement_points(self):
         '''
@@ -451,7 +451,7 @@ class mob(actor):
             if self.is_pmob and (not self.images[0].current_cell == 'none') and not (self.is_vehicle and self.crew == 'none'):
                 self.add_to_turn_queue()
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def set_max_movement_points(self, new_value, initial_setup = True):
         '''
@@ -483,8 +483,8 @@ class mob(actor):
         '''
         if new_grid == status.europe_grid:
             self.modes.append('europe')
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), None)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), new_grid.cell_list[0][0].tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, None)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, new_grid.cell_list[0][0].tile)
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
@@ -513,10 +513,9 @@ class mob(actor):
         '''
         actor_utility.deselect_all(self.global_manager)
         self.selected = True
-        self.global_manager.set('end_turn_selected_mob', self) #tells game to select this unit at the end of the turn because it was selected most recently
         flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def move_to_front(self):
         '''
@@ -639,7 +638,7 @@ class mob(actor):
         if self.selected:
             self.selected = False
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
         for current_image in self.images:
             current_image.remove_from_cell()
         super().remove()
@@ -767,7 +766,7 @@ class mob(actor):
                         self.set_movement_points(0)
                     vehicle.select()
         if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
             self.manage_inventory_attrition()
@@ -882,7 +881,7 @@ class mob(actor):
         '''
         super().set_name(new_name)
         if status.displayed_mob == self: #self.selected:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def hide_images(self):
         '''
@@ -894,7 +893,7 @@ class mob(actor):
             None
         '''
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None)
         for current_image in self.images:
             current_image.remove_from_cell()
         

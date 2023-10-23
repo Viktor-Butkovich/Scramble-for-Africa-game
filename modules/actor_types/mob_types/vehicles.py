@@ -67,8 +67,8 @@ class vehicle(pmob):
         if not self.has_crew:
             self.remove_from_turn_queue()
         if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
             self.select()
 
     def set_crew(self, new_crew): #continue adding set_crew
@@ -87,7 +87,7 @@ class vehicle(pmob):
             self.has_crew = True
         self.update_image_bundle()
         if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -407,7 +407,7 @@ class train(vehicle):
         self.inventory_capacity = 27#9
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
         else:
             self.load_inventory(input_dict['inventory'])
 
@@ -482,7 +482,7 @@ class ship(vehicle):
         self.inventory_capacity = 27
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for travel_possible changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for travel_possible changing
         else:
             self.load_inventory(input_dict['inventory'])
 

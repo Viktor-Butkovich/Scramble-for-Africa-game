@@ -29,8 +29,8 @@ class lore_mission():
             None
         '''
         self.global_manager = global_manager
-        self.global_manager.get('lore_mission_list').append(self)
-        self.global_manager.set('current_lore_mission', self)
+        status.lore_mission_list.append(self)
+        status.current_lore_mission = self
         self.possible_artifact_locations = []
         if from_save:
             self.lore_type = input_dict['lore_type']
@@ -44,9 +44,9 @@ class lore_mission():
                     self.artifact_location = new_possible_artifact_location
             self.confirmed_all_locations_revealed = input_dict['confirmed_all_locations_revealed']
         else:
-            self.lore_type = random.choice(global_manager.get('lore_types'))
-            self.artifact_type = random.choice(global_manager.get('lore_types_artifact_dict')[self.lore_type])
-            self.adjective = random.choice(global_manager.get('lore_types_adjective_dict')[self.lore_type])
+            self.lore_type = random.choice(constants.lore_types)
+            self.artifact_type = random.choice(constants.lore_types_artifact_dict[self.lore_type])
+            self.adjective = random.choice(constants.lore_types_adjective_dict[self.lore_type])
             self.name = self.adjective + self.artifact_type
             num_possible_artifact_locations = random.randrange(1, 7)
             while len(self.possible_artifact_locations) < num_possible_artifact_locations:
@@ -137,8 +137,8 @@ class lore_mission():
         Output:
             None
         '''
-        self.global_manager.set('current_lore_mission', 'none')
-        self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
+        status.current_lore_mission = None
+        status.lore_mission_list = utility.remove_from_list(status.lore_mission_list, self)
         for current_possible_artifact_location in self.possible_artifact_locations:
             current_possible_artifact_location.remove_complete()
         self.possible_artifact_locations = []

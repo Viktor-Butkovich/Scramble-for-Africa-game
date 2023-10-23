@@ -351,50 +351,12 @@ def lore(global_manager):
     Output:
         None
     '''
-    global_manager.set('lore_types', ['zoology', 'botany', 'archaeology', 'anthropology', 'paleontology', 'theology'])
-    global_manager.set('lore_types_artifact_dict',
-        {
-        'zoology': ['Monkey', 'Serpent', 'Beetle', 'Hawk', 'Panther', 'Spider'],
-        'botany': ['Orchid', 'Vine', 'Root', 'Bark', 'Stalk', 'Fruit'],
-        'archaeology': ['Tomb', 'Stele', 'Mask', 'Statue', 'City', 'Temple'],
-        'anthropology': ['Urn', 'Skull', 'Totem', 'Headdress', 'Spear', 'Idol'],
-        'paleontology': ['saurus Fossil', 'tops Fossil', 'don Fossil', 'raptor Fossil', 'nyx Fossil', 'mut Fossil'],
-        'theology': ['Grail', 'Ark', 'Bone', 'Crown', 'Shroud', 'Blood']
-        }
-    )
-    global_manager.set('lore_types_adjective_dict', 
-        {
-        'zoology': ['Albino ', 'Devil ', 'Royal ', 'Vampire ', 'Assassin ', 'Storm '],
-        'botany': ['Blood ', 'Midnight ', 'Thorny ', 'Strangler ', 'Carnivorous ', 'Ghost '],
-        'archaeology': ['Emperor\'s ', 'Golden ', 'Lost ', 'Antediluvian ', 'Ancient ', 'Forbidden '],
-        'anthropology': ['Crystal ', 'Golden ', 'Great Chief\'s ', 'Sky ', 'Moon ', 'Volcano '],
-        'paleontology': ['Tyranno', 'Bronto', 'Stego', 'Tricera', 'Pterano', 'Dimetro'],
-        'theology': ['Lost ', 'Holy ', 'Prester John\'s ', 'Mary\'s ', 'True ', 'Sacred ']
-        }
-    )
-    global_manager.set('lore_types_effects_dict',
-        {
-        'zoology': effects.effect('zoology_completion_effect', 'hunting_plus_modifier', global_manager),
-        'botany': effects.effect('botany_completion_effect', 'health_attrition_plus_modifier', global_manager),
-        'archaeology': effects.effect('archaeology_completion_effect', 'attack_plus_modifier', global_manager),
-        'anthropology': effects.effect('anthropology_completion_effect', 'conversion_plus_modifier', global_manager),
-        'paleontology': effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier', global_manager),
-        'theology': effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier', global_manager)
-        }
-    )
-    global_manager.set('lore_types_effect_descriptions_dict',
-        {
-        'zoology': 'chance of a positive modifier for hunting rolls',
-        'botany': 'lower chance of unit attrition death',
-        'archaeology': 'chance of a positive modifier for attacking rolls against native warriors',
-        'anthropology': 'chance of a positive modifier for native conversion rolls',
-        'paleontology': 'chance of a positive modifier for public relations campaign rolls',
-        'theology': 'chance of a positive modifier for religious campaign rolls'
-        }
-    )
-    global_manager.set('current_lore_mission', 'none') #lore mission should be an object type with attributes for type, location, leads, etc.
-    global_manager.set('lore_mission_list', [])
-    global_manager.set('completed_lore_mission_types', [])
+    status.lore_types_effects_dict['zoology'] = effects.effect('zoology_completion_effect', 'hunting_plus_modifier', global_manager)
+    status.lore_types_effects_dict['botany'] = effects.effect('botany_completion_effect', 'health_attrition_plus_modifier', global_manager)
+    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'attack_plus_modifier', global_manager)
+    status.lore_types_effects_dict['anthropology'] = effects.effect('anthropology_completion_effect', 'conversion_plus_modifier', global_manager)
+    status.lore_types_effects_dict['paleontology'] = effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier', global_manager)
+    status.lore_types_effects_dict['theology'] = effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier', global_manager)
 
 def value_trackers(global_manager):
     '''
@@ -459,7 +421,6 @@ def value_trackers(global_manager):
             'parent_collection': value_trackers_ordered_collection
         }, global_manager)
 
-    global_manager.set('previous_financial_report', 'none')
     constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(270, constants.default_display_height - 30),
         'width': scaling.scale_width(30),
@@ -799,7 +760,7 @@ def trial_screen(global_manager):
     defense_y = trial_display_default_y
     defense_x = (constants.default_display_width / 2) + (distance_to_center - button_separation) + distance_to_notification
     defense_current_y = 0
-    defense_info_display = constants.actor_creation_manager.create_interface_element({
+    status.defense_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': (defense_x, defense_y),
         'width': 10,
         'height': 10,
@@ -820,7 +781,7 @@ def trial_screen(global_manager):
         'minister_type': 'none',
         'attached_label': 'none',
         'init_type': 'minister type image',
-        'parent_collection': defense_info_display
+        'parent_collection': status.defense_info_display
     }, global_manager)
 
     defense_current_y -= button_separation * 2
@@ -831,7 +792,7 @@ def trial_screen(global_manager):
         'init_type': 'minister portrait image',
         'minister_type': 'none',
         'color': 'gray',
-        'parent_collection': defense_info_display
+        'parent_collection': status.defense_info_display
     }, global_manager)
 
     defense_current_y -= 35
@@ -842,7 +803,7 @@ def trial_screen(global_manager):
         'image_id': 'misc/default_label.png',
         'message': 'Defense',
         'init_type': 'label',
-        'parent_collection': defense_info_display
+        'parent_collection': status.defense_info_display
     }
     defense_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
@@ -860,7 +821,7 @@ def trial_screen(global_manager):
     prosecution_x = (constants.default_display_width / 2) - (distance_to_center + button_separation) - distance_to_notification
     prosecution_current_y = 0
 
-    prosecution_info_display = constants.actor_creation_manager.create_interface_element({
+    status.prosecution_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': (prosecution_x, prosecution_y),
         'width': 10,
         'height': 10,
@@ -881,7 +842,7 @@ def trial_screen(global_manager):
         'minister_type': 'none',
         'attached_label': 'none',
         'init_type': 'minister type image',
-        'parent_collection': prosecution_info_display
+        'parent_collection': status.prosecution_info_display
     }, global_manager)
 
     prosecution_current_y -= button_separation * 2
@@ -891,7 +852,7 @@ def trial_screen(global_manager):
         'init_type': 'minister portrait image',
         'minister_type': 'none',
         'color': 'gray',
-        'parent_collection': prosecution_info_display
+        'parent_collection': status.prosecution_info_display
     }, global_manager)
 
     prosecution_current_y -= 35
@@ -901,14 +862,14 @@ def trial_screen(global_manager):
         'image_id': 'misc/default_label.png',
         'message': 'Prosecution',
         'init_type': 'label',
-        'parent_collection': prosecution_info_display
+        'parent_collection': status.prosecution_info_display
     }
     prosecution_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     input_dict['actor_type'] = 'minister'
     del input_dict['message']
     input_dict['init_type'] = 'actor display label'
-    input_dict['parent_collection'] = prosecution_info_display
+    input_dict['parent_collection'] = status.prosecution_info_display
     prosecution_info_display_labels = ['minister_name', 'minister_office']
     for current_actor_label_type in prosecution_info_display_labels:
         prosecution_current_y -= 35
@@ -986,7 +947,7 @@ def mob_interface(global_manager):
     actor_display_current_y = actor_display_top_y
     constants.mob_ordered_list_start_y = actor_display_current_y
 
-    mob_info_display = constants.actor_creation_manager.create_interface_element({
+    status.mob_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
         'width': scaling.scale_width(400),
         'height': scaling.scale_height(430),
@@ -1009,7 +970,7 @@ def mob_interface(global_manager):
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
         'init_type': 'actor display label',
-        'parent_collection': mob_info_display,
+        'parent_collection': status.mob_info_display,
         'member_config': {'order_overlap': True}
     }, global_manager)
 
@@ -1021,7 +982,7 @@ def mob_interface(global_manager):
         'modes':['strategic', 'europe'],
         'actor_image_type': 'default',
         'init_type': 'actor display free image',
-        'parent_collection': mob_info_display,
+        'parent_collection': status.mob_info_display,
         'member_config': {'order_overlap': False}
     }, global_manager)
 
@@ -1032,7 +993,7 @@ def mob_interface(global_manager):
         'modes': ['strategic', 'europe'],
         'image_id': 'buttons/remove_minister_button.png',
         'init_type': 'fire unit button',
-        'parent_collection': mob_info_display,
+        'parent_collection': status.mob_info_display,
         'member_config': {'order_exempt': True}
     }
     fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
@@ -1060,7 +1021,7 @@ def mob_interface(global_manager):
             'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
-            'parent_collection': mob_info_display,
+            'parent_collection': status.mob_info_display,
             'member_config': {'order_x_offset': x_displacement}
         }
         if not current_actor_label_type == 'current passenger':
@@ -1075,16 +1036,15 @@ def mob_interface(global_manager):
                 constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     tab_collection_relative_coordinates = (450, -30)
-
-    global_manager.set('mob_tabbed_collection', constants.actor_creation_manager.create_interface_element({
+    status.mob_tabbed_collection = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1]),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'tabbed collection',
-        'parent_collection': global_manager.get('mob_info_display'),
+        'parent_collection': status.mob_info_display,
         'member_config': {'order_exempt': True},
         'description': 'unit information tabs'
-    }, global_manager))
+    }, global_manager)
 
 def tile_interface(global_manager):
     '''
@@ -1095,7 +1055,7 @@ def tile_interface(global_manager):
     Output:
         None
     '''
-    tile_info_display = constants.actor_creation_manager.create_interface_element({
+    status.tile_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
         'width': scaling.scale_width(775),
         'height': scaling.scale_height(10),
@@ -1113,7 +1073,7 @@ def tile_interface(global_manager):
         'width': 10,
         'height': 10,
         'init_type': 'ordered collection',
-        'parent_collection': tile_info_display,
+        'parent_collection': status.tile_info_display,
         'member_config': {'order_exempt': True},
         'separation': separation
     }, global_manager)
@@ -1131,7 +1091,6 @@ def tile_interface(global_manager):
     del input_dict['member_config']
     input_dict['coordinates'] = (0, 0)
     input_dict['height'] = scaling.scale_height(25)
-    global_manager.set('same_tile_icon_list', [])
     input_dict['init_type'] = 'same tile icon'
     input_dict['image_id'] = 'buttons/default_button.png'
     input_dict['is_last'] = False
@@ -1153,7 +1112,7 @@ def tile_interface(global_manager):
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
         'init_type': 'actor display label',
-        'parent_collection': tile_info_display,
+        'parent_collection': status.tile_info_display,
         'member_config': {'order_overlap': True}
     }, global_manager)
 
@@ -1164,7 +1123,7 @@ def tile_interface(global_manager):
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'default',
         'init_type': 'actor display free image',
-        'parent_collection': tile_info_display,
+        'parent_collection': status.tile_info_display,
         'member_config': {'order_overlap': False}
     }, global_manager)
 
@@ -1186,7 +1145,7 @@ def tile_interface(global_manager):
             'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
-            'parent_collection': tile_info_display,
+            'parent_collection': status.tile_info_display,
             'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
         }
         if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
@@ -1212,15 +1171,15 @@ def tile_interface(global_manager):
 
     tab_collection_relative_coordinates = (450, -30)
 
-    global_manager.set('tile_tabbed_collection', constants.actor_creation_manager.create_interface_element({
+    status.tile_tabbed_collection = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1]),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'tabbed collection',
-        'parent_collection': global_manager.get('tile_info_display'),
+        'parent_collection': status.tile_info_display,
         'member_config': {'order_exempt': True},
         'description': 'tile information tabs'
-    }, global_manager))
+    }, global_manager)
 
 def inventory_interface(global_manager):
     '''
@@ -1235,14 +1194,14 @@ def inventory_interface(global_manager):
     commodity_prices_height = 30 + (30 * len(constants.commodity_types))
     commodity_prices_width = 200
 
-    global_manager.set('commodity_prices_label', constants.actor_creation_manager.create_interface_element({
+    status.commodity_prices_label = constants.actor_creation_manager.create_interface_element({
         'coordinates':scaling.scale_coordinates(commodity_prices_x, commodity_prices_y),
         'minimum_width':scaling.scale_width(commodity_prices_width),
         'height': scaling.scale_height(commodity_prices_height),
         'modes': ['europe'],
         'image_id': 'misc/commodity_prices_label.png',
         'init_type': 'commodity prices label'
-    }, global_manager))
+    }, global_manager)
 
     input_dict = {
         'width': scaling.scale_width(30),
@@ -1256,15 +1215,14 @@ def inventory_interface(global_manager):
         input_dict['commodity'] = constants.commodity_types[current_index]
         new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
-    mob_inventory_collection = constants.actor_creation_manager.create_interface_element({
+    status.mob_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
-        'parent_collection': global_manager.get('mob_tabbed_collection'),
+        'parent_collection': status.mob_tabbed_collection,
         'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
         'description': 'unit inventory panel'
     }, global_manager)
-    global_manager.set('mob_inventory_collection', mob_inventory_collection)
 
     input_dict = {
         'minimum_width': scaling.scale_width(10),
@@ -1273,7 +1231,7 @@ def inventory_interface(global_manager):
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',
-        'parent_collection': mob_inventory_collection,
+        'parent_collection': status.mob_inventory_collection,
     }
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
     
@@ -1287,7 +1245,7 @@ def inventory_interface(global_manager):
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
-        'parent_collection': global_manager.get('tile_tabbed_collection'), #global_manager.get('tile_info_display'),
+        'parent_collection': status.tile_tabbed_collection,
         'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
         'description': 'tile inventory panel'
     }, global_manager)
@@ -1327,7 +1285,7 @@ def unit_organization_interface(global_manager):
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'autofill collection',
-        'parent_collection': global_manager.get('mob_tabbed_collection'),
+        'parent_collection': status.mob_tabbed_collection,
         'member_config': {'tabbed': True, 'button_image_id': 'buttons/merge_button.png', 'identifier': 'reorganization'},
         'description': 'unit organization panel',
         'direction': 'horizontal',
@@ -1484,7 +1442,7 @@ def minister_interface(global_manager):
     minister_display_top_y = constants.mob_ordered_list_start_y
     minister_display_current_y = 0
 
-    minister_info_display = constants.actor_creation_manager.create_interface_element({
+    status.minister_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': (0, minister_display_top_y),
         'width': 10,
         'height': 10,
@@ -1505,7 +1463,7 @@ def minister_interface(global_manager):
         'height': scaling.scale_height(125),
         'modes': ['ministers'],
         'init_type': 'minister background image',
-        'parent_collection': minister_info_display,
+        'parent_collection': status.minister_info_display,
         'member_config': {'order_overlap': True}
     }, global_manager)
 
@@ -1517,7 +1475,7 @@ def minister_interface(global_manager):
         'modes': ['ministers'],
         'actor_image_type': 'minister_default',
         'init_type': 'actor display free image',
-        'parent_collection': minister_info_display,
+        'parent_collection': status.minister_info_display,
         'member_config': {'order_overlap': True, 'order_x_offset': 5, 'order_y_offset': -5}
     }, global_manager)
 
@@ -1530,7 +1488,7 @@ def minister_interface(global_manager):
         'actor_label_type': 'tooltip',
         'actor_type': 'minister',
         'init_type': 'actor display label',
-        'parent_collection': minister_info_display,
+        'parent_collection': status.minister_info_display,
         'member_config': {'order_overlap': False}
     }, global_manager)
 
@@ -1543,7 +1501,7 @@ def minister_interface(global_manager):
         'image_id': 'misc/default_label.png',
         'actor_type': 'minister',
         'init_type': 'actor display label',
-        'parent_collection': minister_info_display
+        'parent_collection': status.minister_info_display
     }
     #minister info labels setup
     minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability', 'evidence']
@@ -1564,7 +1522,7 @@ def country_interface(global_manager):
         int actor_display_current_y: Value that tracks the location of interface as it is created, used by other setup functions
     '''
 
-    country_info_display = constants.actor_creation_manager.create_interface_element({
+    status.country_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': (0, constants.mob_ordered_list_start_y),
         'width': 10,
         'height': 10,
@@ -1585,7 +1543,7 @@ def country_interface(global_manager):
         'height': scaling.scale_height(125),
         'modes': ['new_game_setup'],
         'init_type': 'mob background image',
-        'parent_collection': country_info_display,
+        'parent_collection': status.country_info_display,
         'member_config': {'order_overlap': True}
     }, global_manager)
 
@@ -1597,7 +1555,7 @@ def country_interface(global_manager):
         'modes': ['new_game_setup'],
         'actor_image_type': 'country_default',
         'init_type': 'actor display free image',
-        'parent_collection': country_info_display,
+        'parent_collection': status.country_info_display,
         'member_config': {'order_overlap': True, 'order_x_offset': 5, 'order_y_offset': -5}
     }, global_manager)
 
@@ -1609,7 +1567,7 @@ def country_interface(global_manager):
         'actor_label_type': 'tooltip',
         'actor_type': 'country',
         'init_type': 'actor display label',
-        'parent_collection': country_info_display,
+        'parent_collection': status.country_info_display,
         'member_config': {'order_overlap': False}
     }, global_manager)
 
@@ -1619,7 +1577,7 @@ def country_interface(global_manager):
         'image_id': 'misc/default_label.png',
         'actor_type': 'country',
         'init_type': 'actor display label',
-        'parent_collection': country_info_display
+        'parent_collection': status.country_info_display
     }
     #country info labels setup
     country_info_display_labels = ['country_name', 'country_effect']

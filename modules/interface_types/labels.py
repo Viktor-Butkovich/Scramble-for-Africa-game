@@ -153,10 +153,10 @@ class value_label(label):
             tooltip_text.append('Public opinion tends to approach the netural value of 50 over time')
         if self.value_name == 'turn':
             tooltip_text.append('Current lore mission: ')
-            if self.global_manager.get('current_lore_mission') == 'none':
+            if status.current_lore_mission == None:
                 text = '    None'
             else:
-                text = '    Find the ' + self.global_manager.get('current_lore_mission').name + ' (' + self.global_manager.get('current_lore_mission').lore_type + ')'
+                text = '    Find the ' + status.current_lore_mission.name + ' (' + status.current_lore_mission.lore_type + ')'
             tooltip_text.append(text)
         self.set_tooltip(tooltip_text)
 
@@ -281,7 +281,7 @@ class money_label_template(value_label):
         
         self.set_tooltip(tooltip_text)
 
-class commodity_prices_label(label):
+class commodity_prices_label_template(label):
     '''
     Label that shows the price of each commodity. Unlike most labels, its message is a list of strings rather than a string, allowing it to have a line for each commodity
     '''

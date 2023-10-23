@@ -434,10 +434,10 @@ class construction(action.action):
                     input_dict['init_type'] = 'warehouses'
                     constants.actor_creation_manager.create(False, input_dict, self.global_manager)
                     
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.current_unit.images[0].current_cell.tile) #update tile display to show new building
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:
                 new_building.move_to_front()
                 new_building.select()
             else:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.current_unit) #update mob display to show new upgrade possibilities
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self.current_unit) #update mob display to show new upgrade possibilities
         super().complete()

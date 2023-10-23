@@ -3,6 +3,7 @@
 from ..groups import group
 from ....util import actor_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class construction_gang(group):
     '''
@@ -36,4 +37,4 @@ class construction_gang(group):
         self.can_construct = True
         self.set_group_type('construction_gang')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for can_construct changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for can_construct changing

@@ -424,10 +424,10 @@ class button(interface_elements.interface_element):
                               'Costs 1 movement point'])
 
         elif self.button_type == 'rumor search':
-            if self.global_manager.get('current_lore_mission') == 'none':
+            if status.current_lore_mission == None:
                 intro = 'Attempts to search this village for rumors of a lore mission artifact\'s location for '
             else:
-                intro = 'Attempts to search this village for rumors of the location of the ' + self.global_manager.get('current_lore_mission').name + ' for '
+                intro = 'Attempts to search this village for rumors of the location of the ' + status.current_lore_mission.name + ' for '
             self.set_tooltip([intro + str(constants.action_prices['rumor_search']) + ' money',
                               'Can only be done in a village',
                               'If successful, reveals the coordinates of a possible location for the current lore mission\'s artifact',
@@ -435,10 +435,10 @@ class button(interface_elements.interface_element):
                               'Costs all remaining movement points, at least 1'])
 
         elif self.button_type == 'artifact search':
-            if self.global_manager.get('current_lore_mission') == 'none':
+            if status.current_lore_mission == None:
                 intro = 'Attempts to search for a lore mission\'s artifact at a location revealed by rumors for '
             else:
-                intro = 'Attempts to search for the ' + self.global_manager.get('current_lore_mission').name + ' at a location revealed by rumors for '
+                intro = 'Attempts to search for the ' + status.current_lore_mission.name + ' at a location revealed by rumors for '
             self.set_tooltip([intro + str(constants.action_prices['rumor_search']) + ' money',
                               'Can only be done on a revealed possible artifact location',
                               'If successful, reveals whether this is the artifact\'s actual location, finding it and completing the lore mission if it is present',
@@ -723,7 +723,6 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
         if self.showing:
             if self.showing_outline and allow_show_outline:
                 pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
@@ -827,10 +826,10 @@ class button(interface_elements.interface_element):
             flags.show_text_box = not flags.show_text_box
 
         elif self.button_type == 'expand text box':
-            if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
-                self.global_manager.set('text_box_height', scaling.scale_height(constants.default_display_height - 45)) #self.height
+            if constants.text_box_height == constants.default_text_box_height:
+                constants.text_box_height = scaling.scale_height(constants.default_display_height - 45)
             else:
-                self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
+                constants.text_box_height = constants.default_text_box_height
 
         elif self.button_type == 'execute movement routes':
             if main_loop_utility.action_possible(self.global_manager):
@@ -862,7 +861,7 @@ class button(interface_elements.interface_element):
                             if progressed:
                                 moved_units[unit_type] += 1
                             current_pmob.remove_from_turn_queue()
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), status.displayed_mob) #updates mob info display if automatic route changed anything
+                    actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, status.displayed_mob) #updates mob info display if automatic route changed anything
 
                     types_moved = 0
                     text = ''
@@ -966,8 +965,8 @@ class button(interface_elements.interface_element):
                                         displayed_mob.set_sentry_mode(False)
                                     displayed_mob.change_inventory(commodity, amount_transferred)
                                     displayed_tile.change_inventory(commodity, -1 * amount_transferred)
-                                    for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members:
-                                        if tab_button.linked_element == self.global_manager.get('mob_inventory_collection'):
+                                    for tab_button in status.mob_tabbed_collection.tabs_collection.members:
+                                        if tab_button.linked_element == status.mob_inventory_collection:
                                             tab_button.on_click()
                                             continue
                             else:
@@ -1147,7 +1146,7 @@ class button(interface_elements.interface_element):
                 for current_pmob in status.pmob_list:
                     if current_pmob.sentry_mode:
                         current_pmob.set_sentry_mode(False)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), status.displayed_mob)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, status.displayed_mob)
             else:
                 text_utility.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
@@ -1366,7 +1365,7 @@ class cycle_same_tile_button(button):
             cycled_tile.cell.contained_mobs[0].select()
             if cycled_tile.cell.contained_mobs[0].is_pmob:
                 cycled_tile.cell.contained_mobs[0].selection_sound()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), cycled_tile) #updates mob info display list to show changed passenger order
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, cycled_tile) #updates mob info display list to show changed passenger order
         else:
             text_utility.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
 
@@ -1422,7 +1421,7 @@ class same_tile_icon(button):
         self.is_last = input_dict['is_last']
         if self.is_last:
             self.name_list = []
-        self.global_manager.get('same_tile_icon_list').append(self)
+        status.same_tile_icon_list.append(self)
 
     def reset(self):
         '''
@@ -1792,7 +1791,7 @@ class switch_game_mode_button(button):
             elif not self.to_mode == 'previous':
                 game_transitions.set_game_mode(self.to_mode, self.global_manager)
             else:
-                self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+                status.exit_minister_screen_tutorial_completed = True
                 game_transitions.set_game_mode(constants.previous_game_mode, self.global_manager)
         else:
             text_utility.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
@@ -2008,7 +2007,7 @@ class country_selection_image(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('country_info_display'), self.current_country)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.country_info_display, self.current_country)
         else:
             text_utility.print_to_screen('You are busy and cannot select another country.', self.global_manager)
 
@@ -2216,10 +2215,7 @@ class show_previous_financial_report_button(button):
         Output:
             boolean: Returns False during the first turn when there is no previous financial report to show, otherwise returns same as superclass
         '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.global_manager.get('previous_financial_report') == 'none':
-                return(True)
-        return(False)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.previous_financial_report)
     
     def on_click(self):
         '''
@@ -2232,7 +2228,7 @@ class show_previous_financial_report_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             constants.notification_manager.display_notification({
-                'message': self.global_manager.get('previous_financial_report'),
+                'message': status.previous_financial_report,
             })
         else:
             text_utility.print_to_screen('You are busy and cannot view the last turn\'s financial report', self.global_manager)

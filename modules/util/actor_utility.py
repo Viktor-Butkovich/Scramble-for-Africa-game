@@ -171,7 +171,7 @@ def update_descriptions(global_manager, target = 'all'):
             text_list.append('Crewing a train requires a basic level of technological training, which is generally unavailable to slave workers.')
 
         elif current_target == 'resource':
-            if global_manager.has('actions'):
+            if current_target in status.actions:
                 building_name = status.actions[current_target].building_name
                 if building_name == 'none':
                     building_name = 'resource production facility'
@@ -362,20 +362,20 @@ def calibrate_actor_info_display(global_manager, info_display, new_actor, overri
     '''
     if new_actor == 'none':
         print(0/0)
-    if info_display == global_manager.get('tile_info_display'):
-        for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+    if info_display == status.tile_info_display:
+        for current_same_tile_icon in status.same_tile_icon_list:
             current_same_tile_icon.reset()
         status.displayed_tile = new_actor
         if new_actor:
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
 
-    elif info_display == global_manager.get('mob_info_display'):
+    elif info_display == status.mob_info_display:
         status.displayed_mob = new_actor
         if new_actor and new_actor.images[0].current_cell.tile == status.displayed_tile:
-            for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+            for current_same_tile_icon in status.same_tile_icon_list:
                 current_same_tile_icon.reset()
 
-    elif info_display == global_manager.get('country_info_display'):
+    elif info_display == status.country_info_display:
         status.displayed_country = new_actor
 
     target = 'none'

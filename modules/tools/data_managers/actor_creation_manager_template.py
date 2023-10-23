@@ -307,7 +307,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 elif base == 'money':
                     new_element = labels.money_label_template(input_dict, global_manager)
                 elif base == 'commodity prices':
-                    new_element = labels.commodity_prices_label(input_dict, global_manager)
+                    new_element = labels.commodity_prices_label_template(input_dict, global_manager)
                 elif base == 'multi line':
                     new_element = labels.multi_line_label(input_dict, global_manager)
 

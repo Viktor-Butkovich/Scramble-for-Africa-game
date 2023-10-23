@@ -38,13 +38,6 @@ class save_load_manager_template():
         Output:
             None
         '''
-        self.copied_globals = []
-        self.copied_globals.append('minister_appointment_tutorial_completed')
-        self.copied_globals.append('exit_minister_screen_tutorial_completed')
-        self.copied_globals.append('transaction_history')
-        self.copied_globals.append('previous_financial_report')
-        self.copied_globals.append('completed_lore_mission_types')
-
         self.copied_constants = []
         self.copied_constants.append('action_prices')
         self.copied_constants.append('turn')
@@ -62,9 +55,14 @@ class save_load_manager_template():
         self.copied_constants.append('slave_worker_upkeep')
         self.copied_constants.append('slave_traders_strength')
         self.copied_constants.append('slave_traders_natural_max_strength')
+        self.copied_constants.append('completed_lore_mission_types')
 
         self.copied_statuses = []
         self.copied_statuses.append('current_country_name')
+        self.copied_statuses.append('previous_financial_report')
+        self.copied_statuses.append('minister_appointment_tutorial_completed')
+        self.copied_statuses.append('exit_minister_screen_tutorial_completed')
+        self.copied_statuses.append('transaction_history')
 
         self.copied_flags = []
         self.copied_flags.append('prosecution_bribed_judge')
@@ -151,8 +149,6 @@ class save_load_manager_template():
 
         for current_commodity in constants.commodity_types:
             if not current_commodity == 'consumer goods':
-                #min_price = self.global_manager.get('commodity_min_starting_price')
-                #max_price = self.global_manager.get('commodity_max_starting_price')
                 price = round((random.randrange(1, 7) + random.randrange(1, 7))/2)
                 increase = 0
                 if current_commodity == 'gold':
@@ -175,7 +171,7 @@ class save_load_manager_template():
         constants.slave_traders_natural_max_strength = 10 #regenerates to natural strength, can increase indefinitely when slaves are purchased
         actor_utility.set_slave_traders_strength(constants.slave_traders_natural_max_strength, self.global_manager)
         flags.player_turn = True
-        self.global_manager.set('previous_financial_report', 'none')
+        status.previous_financial_report = None
 
         constants.actor_creation_manager.create_initial_ministers(self.global_manager)
 
@@ -204,12 +200,12 @@ class save_load_manager_template():
 
         turn_management_utility.start_player_turn(self.global_manager, True)
         if not constants.effect_manager.effect_active('skip_intro'):
-            self.global_manager.set('minister_appointment_tutorial_completed', False)
-            self.global_manager.set('exit_minister_screen_tutorial_completed', False)
+            status.minister_appointment_tutorial_completed = False
+            status.exit_minister_screen_tutorial_completed = False
             tutorial_utility.show_tutorial_notifications(self.global_manager)
         else:
-            self.global_manager.set('minister_appointment_tutorial_completed', True)
-            self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+            status.minister_appointment_tutorial_completed = True
+            status.exit_minister_screen_tutorial_completed = True
             for current_minister_position_index in range(len(constants.minister_types)):
                 status.minister_list[current_minister_position_index].appoint(constants.minister_types[current_minister_position_index])
             game_transitions.set_game_mode('strategic', self.global_manager)
@@ -226,10 +222,7 @@ class save_load_manager_template():
         '''
         file_path = 'save_games/' + file_path
         saved_global_manager = global_manager_template.global_manager_template()
-        self.global_manager.set('transaction_history', constants.money_tracker.transaction_history)
-        for current_element in self.copied_globals: #save necessary data into new global manager
-            saved_global_manager.set(current_element, self.global_manager.get(current_element))
-        
+        status.transaction_history = constants.money_tracker.transaction_history
         saved_constants = {}
         for current_element in self.copied_constants:
             saved_constants[current_element] = getattr(constants, current_element)
@@ -271,7 +264,7 @@ class save_load_manager_template():
                     ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
         saved_lore_mission_dicts = []
-        for current_lore_mission in self.global_manager.get('lore_mission_list'):
+        for current_lore_mission in status.lore_mission_list:
             saved_lore_mission_dicts.append(current_lore_mission.to_save_dict())
 
         with open(file_path, 'wb') as handle: #write wb, read rb
@@ -318,8 +311,6 @@ class save_load_manager_template():
             return()
 
         #load variables
-        for current_element in self.copied_globals:
-            self.global_manager.set(current_element, new_global_manager.get(current_element))
         for current_element in self.copied_constants:
             setattr(constants, current_element, saved_constants[current_element])
         for current_element in self.copied_statuses:
@@ -327,7 +318,7 @@ class save_load_manager_template():
         for current_element in self.copied_flags:
             setattr(flags, current_element, saved_flags[current_element])
         constants.money_tracker.set(constants.money)
-        constants.money_tracker.transaction_history = self.global_manager.get('transaction_history')
+        constants.money_tracker.transaction_history = status.transaction_history
         constants.turn_tracker.set(constants.turn)
         constants.public_opinion_tracker.set(constants.public_opinion)
         constants.evil_tracker.set(constants.evil)
@@ -411,14 +402,14 @@ class save_load_manager_template():
             constants.actor_creation_manager.create_lore_mission(True, current_lore_mission_dict, self.global_manager)
         constants.available_minister_left_index = -2
         minister_utility.update_available_minister_display(self.global_manager)
-        self.global_manager.get('commodity_prices_label').update_label()
+        status.commodity_prices_label.update_label()
         
         status.minimap_grid.calibrate(2, 2)
         if saved_constants['current_game_mode'] != 'strategic':
             game_transitions.set_game_mode(saved_constants['current_game_mode'], self.global_manager)
 
-        for current_completed_lore_type in self.global_manager.get('completed_lore_mission_types'):
-            self.global_manager.get('lore_types_effects_dict')[current_completed_lore_type].apply()
+        for current_completed_lore_type in constants.completed_lore_mission_types:
+            status.lore_types_effects_dict[current_completed_lore_type].apply()
 
         tutorial_utility.show_tutorial_notifications(self.global_manager)
 

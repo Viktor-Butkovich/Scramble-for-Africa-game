@@ -48,7 +48,7 @@ class pmob(mob):
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
-                end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
+                end_turn_destination_grid = getattr(status, input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
             self.default_name = input_dict['default_name']
             self.set_name(self.default_name)
@@ -70,8 +70,8 @@ class pmob(mob):
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
             actor_utility.deselect_all(self.global_manager)
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
                 self.select()
         self.attached_cell_icon_list = []
 
@@ -99,7 +99,7 @@ class pmob(mob):
             save_dict['end_turn_destination'] = 'none'
         else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
             for grid_type in constants.grid_types_list:
-                if self.end_turn_destination.grid == self.global_manager.get(grid_type):
+                if self.end_turn_destination.grid == getattr(status, grid_type):
                     save_dict['end_turn_destination_grid_type'] = grid_type
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['default_name'] = self.default_name
@@ -154,7 +154,7 @@ class pmob(mob):
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
         if self == status.displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def calculate_automatic_route(self):
         '''
@@ -283,7 +283,7 @@ class pmob(mob):
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
         if self == status.displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def selection_sound(self):
         '''
@@ -322,9 +322,9 @@ class pmob(mob):
         self.automatically_replace = new_value
         displayed_mob = status.displayed_mob
         if self == displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
         elif displayed_mob and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob)
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -359,12 +359,12 @@ class pmob(mob):
             if new_value == True:
                 self.remove_from_turn_queue()
                 if status.displayed_mob == self:
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with sentry icon
+                    actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates actor info display with sentry icon
             else:
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == status.displayed_mob:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def add_to_turn_queue(self):
         '''
@@ -615,7 +615,7 @@ class pmob(mob):
         if self.can_hold_commodities:
             self.inventory[commodity] += change
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -630,7 +630,7 @@ class pmob(mob):
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
 
     def fire(self):
         '''
@@ -765,7 +765,7 @@ class pmob(mob):
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
             vehicle.select()
         if not flags.loading_save:
             constants.sound_manager.play_sound('footsteps')
@@ -803,9 +803,9 @@ class pmob(mob):
 
         self.add_to_turn_queue()
         if focus:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
             self.select()
             if status.minimap_grid in self.grids:
                 status.minimap_grid.calibrate(self.x, self.y)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
             constants.sound_manager.play_sound('footsteps')

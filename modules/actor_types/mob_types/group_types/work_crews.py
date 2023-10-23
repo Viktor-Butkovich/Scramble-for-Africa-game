@@ -4,6 +4,7 @@ import random
 from ..groups import group
 from ....util import actor_utility, utility, market_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 class work_crew(group):
     '''
@@ -37,7 +38,7 @@ class work_crew(group):
         self.is_work_crew = True
         self.set_group_type('work_crew')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for new button available
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for new button available
 
     def work_building(self, building):
         '''
@@ -55,8 +56,8 @@ class work_crew(group):
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), building.cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, building.cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
 
     def leave_building(self, building):
         '''
@@ -72,8 +73,8 @@ class work_crew(group):
         self.show_images()
         self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
         self.select()
 
     def attempt_production(self, building):
@@ -88,8 +89,8 @@ class work_crew(group):
         '''
         value_stolen = 0
         if self.movement_points >= 1: #do not attempt production if unit already did something this turn or suffered from attrition #not self.temp_movement_disabled:
-            if not building.resource_type in self.global_manager.get('attempted_commodities'):
-                self.global_manager.get('attempted_commodities').append(building.resource_type)
+            if not building.resource_type in constants.attempted_commodities:
+                constants.attempted_commodities.append(building.resource_type)
             for current_attempt in range(building.efficiency):
                 if self.veteran:
                     results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]

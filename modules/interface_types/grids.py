@@ -548,7 +548,7 @@ class mini_grid(grid):
         if constants.current_game_mode in self.modes:
             self.center_x = center_x
             self.center_y = center_y
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
             for current_cell in self.get_flat_cell_list():
                 attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
                 if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:

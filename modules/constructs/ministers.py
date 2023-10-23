@@ -72,7 +72,7 @@ class minister():
             else:
                 status.available_minister_list.append(self)
         else:
-            self.background = random.choice(global_manager.get('weighted_backgrounds'))
+            self.background = random.choice(constants.weighted_backgrounds)
             self.name = constants.flavor_text_manager.generate_minister_name(self.background)
             self.status_number = constants.background_status_dict[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
@@ -560,13 +560,13 @@ class minister():
 
         minister_utility.update_available_minister_display(self.global_manager)
         
-        if not self.global_manager.get('minister_appointment_tutorial_completed'):
+        if not status.minister_appointment_tutorial_completed:
             completed = True
             for current_position in constants.minister_types:
                 if status.current_ministers[current_position] == None:
                     completed = False
             if completed:
-                self.global_manager.set('minister_appointment_tutorial_completed', True)
+                status.minister_appointment_tutorial_completed = True
                 tutorial_utility.show_tutorial_notifications(self.global_manager)
 
     def skill_setup(self):

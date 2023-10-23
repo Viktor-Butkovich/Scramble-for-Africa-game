@@ -85,6 +85,9 @@ europe_grid_y: int = default_display_height - (300 + 25)
 strategic_map_width: int = 15
 strategic_map_height: int = 16
 
+default_text_box_height: int = 0
+text_box_height: int = 0
+
 mob_ordered_list_start_y: int = 0
 
 available_minister_left_index: int = -2 #so that first index is in middle
@@ -230,6 +233,7 @@ collectable_resources: List[str] = ['coffee', 'copper', 'diamond', 'exotic wood'
 commodity_prices: Dict[str, int] = {}
 sold_commodities: Dict[str, int] = {}
 commodities_produced: Dict[str, int] = {}
+attempted_commodities: List[str] = []
 resource_building_dict: Dict[str, str] = {
     'coffee': 'buildings/plantation.png',
     'copper': 'buildings/mine.png',
@@ -254,6 +258,7 @@ resource_building_button_dict: Dict[str, str] = {
     'none': 'scenery/resources/production/none.png',
 }
 
+weighted_backgrounds: List[str] = []
 background_status_dict: Dict[str, int] = {
     'lowborn': 1,
     'banker': 2,
@@ -399,3 +404,30 @@ slave_traders_strength: int = 0
 
 list_descriptions: Dict[str, List[str]] = {}
 string_descriptions: Dict[str, str] = {}
+
+lore_types: List[str] = ['zoology', 'botany', 'archaeology', 'anthropology', 'paleontology', 'theology']
+lore_types_artifact_dict: Dict[str, List[str]] = {
+    'zoology': ['Monkey', 'Serpent', 'Beetle', 'Hawk', 'Panther', 'Spider'],
+    'botany': ['Orchid', 'Vine', 'Root', 'Bark', 'Stalk', 'Fruit'],
+    'archaeology': ['Tomb', 'Stele', 'Mask', 'Statue', 'City', 'Temple'],
+    'anthropology': ['Urn', 'Skull', 'Totem', 'Headdress', 'Spear', 'Idol'],
+    'paleontology': ['saurus Fossil', 'tops Fossil', 'don Fossil', 'raptor Fossil', 'nyx Fossil', 'mut Fossil'],
+    'theology': ['Grail', 'Ark', 'Bone', 'Crown', 'Shroud', 'Blood']
+}
+lore_types_adjective_dict: Dict[str, List[str]] = {
+    'zoology': ['Albino ', 'Devil ', 'Royal ', 'Vampire ', 'Assassin ', 'Storm '],
+    'botany': ['Blood ', 'Midnight ', 'Thorny ', 'Strangler ', 'Carnivorous ', 'Ghost '],
+    'archaeology': ['Emperor\'s ', 'Golden ', 'Lost ', 'Antediluvian ', 'Ancient ', 'Forbidden '],
+    'anthropology': ['Crystal ', 'Golden ', 'Great Chief\'s ', 'Sky ', 'Moon ', 'Volcano '],
+    'paleontology': ['Tyranno', 'Bronto', 'Stego', 'Tricera', 'Pterano', 'Dimetro'],
+    'theology': ['Lost ', 'Holy ', 'Prester John\'s ', 'Mary\'s ', 'True ', 'Sacred ']
+}
+lore_types_effect_descriptions_dict: Dict[str, str] = {
+    'zoology': 'chance of a positive modifier for hunting rolls',
+    'botany': 'lower chance of unit attrition death',
+    'archaeology': 'chance of a positive modifier for attacking rolls against native warriors',
+    'anthropology': 'chance of a positive modifier for native conversion rolls',
+    'paleontology': 'chance of a positive modifier for public relations campaign rolls',
+    'theology': 'chance of a positive modifier for religious campaign rolls'
+}
+completed_lore_mission_types: List[str] = []

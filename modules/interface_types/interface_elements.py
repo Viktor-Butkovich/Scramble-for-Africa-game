@@ -268,11 +268,9 @@ class interface_collection(interface_element):
         '''
         self.members = []
         self.minimized = False
-        if input_dict.get('is_info_display', False):
-            self.is_info_display = True
+        self.is_info_display = input_dict.get('is_info_display', False)
+        if self.is_info_display:
             self.actor_type = input_dict['actor_type']
-        else:
-            self.is_info_display = False
 
         input_dict['resize_with_contents'] = input_dict.get('resize_with_contents', False)
         self.resize_with_contents = input_dict['resize_with_contents']
@@ -285,8 +283,6 @@ class interface_collection(interface_element):
         self.original_coordinates = (self.x, self.y)
         if self.has_parent_collection:
             self.original_offsets = (self.x_offset, self.y_offset)
-        if self.is_info_display:
-            global_manager.set(self.actor_type + '_info_display', self)
         self.description = input_dict.get('description', 'window')
         self.move_with_mouse_config = {'moving': False}
         customize_button_x_offset = 0

@@ -58,8 +58,8 @@ class worker(pmob):
         self.update_image_bundle()
         if not from_save:
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
         constants.money_label.check_for_updates()
         #self.update_image_bundle()
@@ -197,7 +197,7 @@ class worker(pmob):
         self.remove_from_turn_queue()
         vehicle.add_to_turn_queue()
         if not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
             vehicle.select()
 
     def uncrew_vehicle(self, vehicle):
@@ -220,11 +220,11 @@ class worker(pmob):
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
         vehicle.remove_from_turn_queue()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
         vehicle.select()
         self.add_to_turn_queue()
         self.update_image_bundle()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
 
     def join_group(self):
         '''
@@ -359,7 +359,7 @@ class slave_worker(worker):
         constants.num_slave_workers += 1
         self.set_controlling_minister_type(constants.type_minister_dict['production'])
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for is_worker changing
         constants.money_label.check_for_updates()
         if constants.slave_traders_strength <= 0:
             self.automatically_replace = False

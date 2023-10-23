@@ -204,7 +204,7 @@ def trial(global_manager): #called by choice notification button
         'audio': 'trial starting'
     })
     
-    global_manager.set('trial_rolls', [])
+    status.trial_rolls = []
 
     if prosecutor_corrupt:
         max_roll = 4
@@ -212,9 +212,9 @@ def trial(global_manager): #called by choice notification button
         max_roll = 6
     for i in range(0, effective_evidence):
         current_roll = prosecution.no_corruption_roll(max_roll)
-        global_manager.get('trial_rolls').append(current_roll)
+        status.trial_rolls.append(current_roll)
 
-    if len(global_manager.get('trial_rolls')) == 0:
+    if len(status.trial_rolls) == 0:
         constants.notification_manager.display_notification({
             'message': 'As you have no evidence rolls remaining, you automatically lose the trial. /n /n',
         })
@@ -233,8 +233,8 @@ def display_evidence_roll(global_manager):
     '''
     text = ''
     text += ''
-    text = 'Evidence rolls remaining: ' + str(len(global_manager.get('trial_rolls'))) + ' /n /n'
-    result = global_manager.get('trial_rolls')[0]
+    text = 'Evidence rolls remaining: ' + str(len(status.trial_rolls)) + ' /n /n'
+    result = status.trial_rolls[0]
     result_outcome_dict = {'min_success': 5, 'min_crit_success': 5, 'max_crit_fail': 0}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
     constants.actor_creation_manager.display_die(scaling.scale_coordinates(constants.notification_manager.notification_x - 140, 440), scaling.scale_width(100),

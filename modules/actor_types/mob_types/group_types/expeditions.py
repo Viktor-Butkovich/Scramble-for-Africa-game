@@ -156,7 +156,7 @@ class expedition(group):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
-        message = 'Are you sure you want to attempt to search for artifact rumors? If successful, the coordinates of a possible location for the ' + self.global_manager.get('current_lore_mission').name + ' will be revealed. /n /n'
+        message = 'Are you sure you want to attempt to search for artifact rumors? If successful, the coordinates of a possible location for the ' + status.current_lore_mission.name + ' will be revealed. /n /n'
         message += 'The search will cost ' + str(constants.action_prices['rumor_search']) + ' money. /n /n'
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
@@ -225,7 +225,7 @@ class expedition(group):
         constants.money_tracker.change(constants.action_prices['rumor_search'] * -1, 'rumor_search')
         village = self.images[0].current_cell.get_building('village')
         text = ''
-        text += 'The expedition tries to find information regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+        text += 'The expedition tries to find information regarding the location of the ' + status.current_lore_mission.name + '. /n /n'
 
         if not self.veteran:
             constants.notification_manager.display_notification({
@@ -288,13 +288,13 @@ class expedition(group):
         location = 'none'
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            if self.global_manager.get('current_lore_mission').get_num_revealed_possible_artifact_locations() == len(self.global_manager.get('current_lore_mission').possible_artifact_locations):
+            if status.current_lore_mission.get_num_revealed_possible_artifact_locations() == len(status.current_lore_mission.possible_artifact_locations):
                 village.found_rumors = True
-                self.global_manager.get('current_lore_mission').confirmed_all_locations_revealed = True
-                text += 'While the villagers have proven cooperative, the expedition has concluded that all rumors about the ' + self.global_manager.get('current_lore_mission').name + ' have been found. /n /n'
+                status.current_lore_mission.confirmed_all_locations_revealed = True
+                text += 'While the villagers have proven cooperative, the expedition has concluded that all rumors about the ' + status.current_lore_mission.name + ' have been found. /n /n'
             else:
-                location = self.global_manager.get('current_lore_mission').get_random_unrevealed_possible_artifact_location() #random.choice(self.global_manager.get('current_lore_mission').possible_artifact_locations)
-                text += 'The villagers have proven cooperative and the expedition found valuable new rumors regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+                location = status.current_lore_mission.get_random_unrevealed_possible_artifact_location() #random.choice(status.current_lore_mission.possible_artifact_locations)
+                text += 'The villagers have proven cooperative and the expedition found valuable new rumors regarding the location of the ' + status.current_lore_mission.name + '. /n /n'
         else:
             text += 'The expedition failed to find any useful information from the natives. /n /n'
         if roll_result <= self.current_max_crit_fail:
@@ -316,7 +316,7 @@ class expedition(group):
             })
             success = False
 
-        self.global_manager.set('rumor_search_result', [self, roll_result, village, success, location])
+        #rumor_search_result = [self, roll_result, village, success, location])
 
     def complete_rumor_search(self):
         '''
@@ -328,10 +328,11 @@ class expedition(group):
         Output:
             None
         '''
-        roll_result = self.global_manager.get('rumor_search_result')[1]
-        village = self.global_manager.get('rumor_search_result')[2]
-        success = self.global_manager.get('rumor_search_result')[3]
-        location = self.global_manager.get('rumor_search_result')[4]
+        rumor_search_result = []
+        roll_result = rumor_search_result[1]
+        village = rumor_search_result[2]
+        success = rumor_search_result[3]
+        location = rumor_search_result[4]
         if success: #if campaign succeeded
             if not location == 'none':
                 coordinates = (location.x, location.y)
@@ -340,7 +341,7 @@ class expedition(group):
                 location.set_revealed(True)
                 village.found_rumors = True
 
-                text = 'The villagers tell rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
+                text = 'The villagers tell rumors that the ' + status.current_lore_mission.name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
                 flags.ongoing_action = True
                 status.ongoing_action_type = 'rumor_search'
                 constants.notification_manager.display_notification({
@@ -373,8 +374,8 @@ class expedition(group):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
-        message = 'Are you sure you want to attempt to search for the ' + self.global_manager.get('current_lore_mission').name + '? '
-        message += 'If successful, the ' + self.global_manager.get('current_lore_mission').name + ' will be found if it is at this location. /n /n'
+        message = 'Are you sure you want to attempt to search for the ' + status.current_lore_mission.name + '? '
+        message += 'If successful, the ' + status.current_lore_mission.name + ' will be found if it is at this location. /n /n'
         message += 'The search will cost ' + str(constants.action_prices['artifact_search']) + ' money. /n /n'
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -432,7 +433,7 @@ class expedition(group):
         constants.money_tracker.change(constants.action_prices['artifact_search'] * -1, 'artifact_search')
         #village = self.images[0].current_cell.get_building('village')
         text = ''
-        text += 'The expedition tries to locate the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+        text += 'The expedition tries to locate the ' + status.current_lore_mission.name + '. /n /n'
 
         if not self.veteran:
             constants.notification_manager.display_notification({
@@ -495,15 +496,15 @@ class expedition(group):
         location = 'none'
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            location = self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.x, self.y)
-            if location == self.global_manager.get('current_lore_mission').artifact_location:
-                text += 'The expedition successfully found the ' + self.global_manager.get('current_lore_mission').name + '! /n /n'
+            location = status.current_lore_mission.get_possible_artifact_location(self.x, self.y)
+            if location == status.current_lore_mission.artifact_location:
+                text += 'The expedition successfully found the ' + status.current_lore_mission.name + '! /n /n'
                 text += 'These findings will be reported to the ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society as soon as possible. /n /n'
             else:
-                text += 'The expedition successfully verified that the ' + self.global_manager.get('current_lore_mission').name + ' is not at this location. /n /n'
+                text += 'The expedition successfully verified that the ' + status.current_lore_mission.name + ' is not at this location. /n /n'
 
         else:
-            text += 'The expedition failed to find whether the ' + self.global_manager.get('current_lore_mission').name + ' is at this location. /n /n'
+            text += 'The expedition failed to find whether the ' + status.current_lore_mission.name + ' is at this location. /n /n'
 
         if roll_result <= self.current_max_crit_fail:
             text += 'With neither trace nor logical explanation, the entire expedition seems to have vanished. /n /n'
@@ -524,7 +525,7 @@ class expedition(group):
             })
             success = False
 
-        self.global_manager.set('artifact_search_result', [self, roll_result, success, location])
+        #artifact_search_result = [self, roll_result, success, location]
 
     def complete_artifact_search(self):
         '''
@@ -536,29 +537,30 @@ class expedition(group):
         Output:
             None
         '''
-        roll_result = self.global_manager.get('artifact_search_result')[1]
-        success = self.global_manager.get('artifact_search_result')[2]
-        location = self.global_manager.get('artifact_search_result')[3]
+        artifact_search_result = []
+        roll_result = artifact_search_result[1]
+        success = artifact_search_result[2]
+        location = artifact_search_result[3]
         if success: #if campaign succeeded
-            if location == self.global_manager.get('current_lore_mission').artifact_location:
+            if location == status.current_lore_mission.artifact_location:
                 prize_money = random.randrange(25, 51) * 10
                 public_opinion_increase = random.randrange(30, 61)
-                text = 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society awarded ' + str(prize_money) + ' money for finding the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+                text = 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society awarded ' + str(prize_money) + ' money for finding the ' + status.current_lore_mission.name + '. /n /n'
                 text += 'Additionally, public opinion has increased by ' + str(public_opinion_increase) + '. /n /n'
-                lore_type = self.global_manager.get('current_lore_mission').lore_type
-                if not lore_type in self.global_manager.get('completed_lore_mission_types'):
-                    text += 'Completing a mission in the ' + lore_type + ' category has given your company a permanent ' + self.global_manager.get('lore_types_effect_descriptions_dict')[lore_type] + '. /n /n'
-                    self.global_manager.get('completed_lore_mission_types').append(lore_type)
-                    self.global_manager.get('lore_types_effects_dict')[lore_type].apply()
+                lore_type = status.current_lore_mission.lore_type
+                if not lore_type in constants.completed_lore_mission_types:
+                    text += 'Completing a mission in the ' + lore_type + ' category has given your company a permanent ' + constants.lore_types_effect_descriptions_dict[lore_type] + '. /n /n'
+                    constants.completed_lore_mission_types.append(lore_type)
+                    status.lore_types_effects_dict[lore_type].apply()
                 constants.notification_manager.display_notification({
                     'message': text,
                 })
                 constants.money_tracker.change(prize_money)
                 constants.public_opinion_tracker.change(public_opinion_increase)
-                self.global_manager.get('current_lore_mission').remove_complete()
+                status.current_lore_mission.remove_complete()
             else:
                 location.set_proven_false(True)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), status.displayed_tile) #updates tile display without question mark
+            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, status.displayed_tile) #updates tile display without question mark
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         elif roll_result <= self.current_max_crit_fail:

@@ -440,7 +440,7 @@ class combat(action.action):
                 status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y)
                 self.current_unit.select()
                 self.current_unit.move_to_front()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.current_unit) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self.current_unit) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
         else:
             self.current_unit.clear_attached_cell_icons()
             self.current_unit.move(self.x_change, self.y_change, True)

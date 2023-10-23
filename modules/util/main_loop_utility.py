@@ -223,7 +223,7 @@ def draw_text_box(global_manager):
     '''
     greatest_width = scaling.scale_width(300)
     max_screen_lines = (scaling.scale_height(constants.default_display_height // constants.font_size)) - 1
-    max_text_box_lines = (scaling.scale_height(global_manager.get('text_box_height') // constants.font_size)) - 1
+    max_text_box_lines = (scaling.scale_height(constants.text_box_height // constants.font_size)) - 1
     font_name = constants.font_name
     font_size = constants.font_size
     for text_index in range(len(status.text_list)):
@@ -237,13 +237,13 @@ def draw_text_box(global_manager):
         if text_utility.message_width(constants.message, font_size, font_name) > greatest_width: #manages width of user input
             greatest_width = text_utility.message_width(constants.message, font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10)
-    x, y = (0, constants.display_height - global_manager.get('text_box_height'))
-    pygame.draw.rect(constants.game_display, constants.color_dict['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
+    x, y = (0, constants.display_height - constants.text_box_height)
+    pygame.draw.rect(constants.game_display, constants.color_dict['white'], (x, y, text_box_width, constants.text_box_height)) #draws white rect to prevent overlapping
     if flags.typing:
         color = 'red'
     else:
         color = 'black'
-    pygame.draw.rect(constants.game_display, constants.color_dict[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3)) #black text box outline
+    pygame.draw.rect(constants.game_display, constants.color_dict[color], (x, y, text_box_width, constants.text_box_height), scaling.scale_height(3)) #black text box outline
     pygame.draw.line(constants.game_display, constants.color_dict[color], (0, constants.display_height - (font_size + scaling.scale_height(5))), #input line
         (text_box_width, constants.display_height - (font_size + scaling.scale_height(5))))
 
@@ -289,7 +289,7 @@ def manage_rmb_down(clicked_button, global_manager):
                             moved_mob.select()
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
-                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), moved_mob.images[0].current_cell.tile)
+                            actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, moved_mob.images[0].current_cell.tile)
     elif flags.drawing_automatic_route:
         stopping = True
         flags.drawing_automatic_route = False
@@ -305,7 +305,7 @@ def manage_rmb_down(clicked_button, global_manager):
             status.displayed_mob.clear_automatic_route()
             text_utility.print_to_screen('The created route must go between at least 2 tiles', global_manager)
         status.minimap_grid.calibrate(status.displayed_mob.x, status.displayed_mob.y)
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.displayed_mob.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
@@ -331,7 +331,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             if current_cell.visible:
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_mob = True
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
+                                    actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, None, override_exempt=True)
                                     current_cell.contained_mobs[0].select()
                                     if current_cell.contained_mobs[0].is_pmob:
                                         current_cell.contained_mobs[0].selection_sound()
@@ -341,9 +341,9 @@ def manage_lmb_down(clicked_button, global_manager):
                                         if main_cell:
                                             main_tile = main_cell.tile
                                             if not main_tile == 'none':
-                                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
+                                                actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, main_tile)
                                     else:
-                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
+                                        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, current_cell.tile)
             if selected_mob:
                 unit = status.displayed_mob
                 if unit and unit.grids[0] == status.minimap_grid.attached_grid:
@@ -352,10 +352,10 @@ def manage_lmb_down(clicked_button, global_manager):
                 if constants.current_game_mode == 'ministers':
                     minister_utility.calibrate_minister_info_display(global_manager, None)
                 elif constants.current_game_mode == 'new_game_setup':
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), None, override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, status.country_info_display, None, override_exempt=True)
                 else:
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), None, override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, None, override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, None, override_exempt=True)
                 click_move_minimap(global_manager)
                 
         elif (not clicked_button) and flags.choosing_destination: #if clicking to move somewhere
@@ -381,8 +381,8 @@ def manage_lmb_down(clicked_button, global_manager):
                                 flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately once destination is chosen
                                 status.displayed_mob.remove_from_turn_queue()
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), status.displayed_mob)
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.displayed_mob.images[0].current_cell.tile)
+                                actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, status.displayed_mob)
+                                actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
                         else: #cannot move to same continent
                             text_utility.print_to_screen('You can only send ships to other theatres.', global_manager)
             flags.choosing_destination = False
@@ -462,7 +462,7 @@ def click_move_minimap(global_manager):
                     elif current_grid == status.strategic_map_grid:
                         status.minimap_grid.calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
-                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_grid.cell_list[0][0].tile)
+                        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, current_grid.cell_list[0][0].tile)
                     breaking = True
                     break
                 if breaking:

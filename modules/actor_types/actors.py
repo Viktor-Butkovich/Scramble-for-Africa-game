@@ -98,8 +98,6 @@ class actor():
         for grid_type in constants.grid_types_list:
             if getattr(status, grid_type) == self.grid:
                 save_dict['grid_type'] = grid_type
-            #if self.global_manager.get(grid_type) == self.grid:
-            #    save_dict['grid_type'] = grid_type
         save_dict['name'] = self.name
         saved_inventory = {}
         if self.can_hold_commodities: #only save inventory if not empty
@@ -123,10 +121,10 @@ class actor():
                 current_image.set_image(new_image)
         if self.actor_type == 'mob':
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
         elif self.actor_type == 'tile':
             if status.displayed_tile == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self)
 
     def load_inventory(self, inventory_dict):
         '''

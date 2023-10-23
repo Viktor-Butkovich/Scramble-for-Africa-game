@@ -48,7 +48,7 @@ def change_price(changed_commodity, num_change, global_manager):
     constants.commodity_prices[changed_commodity] += num_change
     if constants.commodity_prices[changed_commodity] < 1:
         constants.commodity_prices[changed_commodity] = 1
-    global_manager.get('commodity_prices_label').update_label()
+    status.commodity_prices_label.update_label()
     constants.money_label.check_for_updates()
 
 def set_price(changed_commodity, new_value, global_manager):
@@ -65,7 +65,7 @@ def set_price(changed_commodity, new_value, global_manager):
     constants.commodity_prices[changed_commodity] = new_value
     if constants.commodity_prices[changed_commodity] < 1:
         constants.commodity_prices[changed_commodity] = 1
-    global_manager.get('commodity_prices_label').update_label()
+    status.commodity_prices_label.update_label()
 
 def sell(seller, sold_commodity, num_sold, global_manager):
     '''
