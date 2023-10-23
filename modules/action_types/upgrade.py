@@ -77,7 +77,7 @@ class upgrade(action.action):
         unit = status.displayed_mob 
         if unit != None:
             self.current_building = unit.images[0].current_cell.get_intact_building(self.upgraded_building_type)
-            actor_utility.update_descriptions(self.global_manager, self.building_type)
+            actor_utility.update_descriptions(self.building_type)
             if self.building_type == 'warehouse_level':
                 noun = 'tile'
             elif self.building_type in ['efficiency', 'scale']:
@@ -196,7 +196,7 @@ class upgrade(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }
@@ -215,5 +215,5 @@ class upgrade(action.action):
         '''
         if self.roll_result >= self.current_min_success:
             self.current_building.upgrade(self.building_type)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show building upgrade
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show building upgrade
         super().complete()

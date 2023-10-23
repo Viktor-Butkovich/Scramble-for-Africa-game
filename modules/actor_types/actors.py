@@ -10,7 +10,7 @@ class actor():
     '''
     Object that can exist within certain coordinates on one or more grids and can optionally be able to hold an inventory of commodities
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -20,11 +20,9 @@ class actor():
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grid': grid value - grid in which this tile can appear
                 'modes': string list value - Game modes during which this actor's images can appear
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.from_save = from_save
         status.actor_list.append(self)
         self.modes = input_dict['modes']
@@ -58,7 +56,7 @@ class actor():
                 'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
+                'grid_type': string value - String matching the status key of this actor's primary grid, allowing loaded object to start in that grid
                 'name': string value - This actor's name
                 'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
         '''
@@ -121,10 +119,10 @@ class actor():
                 current_image.set_image(new_image)
         if self.actor_type == 'mob':
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
         elif self.actor_type == 'tile':
             if status.displayed_tile == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self)
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
 
     def load_inventory(self, inventory_dict):
         '''
@@ -323,7 +321,7 @@ class actor():
                     value_stolen += (constants.commodity_prices[current_commodity] * amount_lost)
                     for i in range(amount_lost):
                         if random.randrange(1, 7) <= 1: #1/6 chance
-                            market_utility.change_price(current_commodity, -1, self.global_manager)
+                            market_utility.change_price(current_commodity, -1)
         for current_index in range(0, len(types_lost_list)):
             lost_commodity = types_lost_list[current_index]
             amount_lost = amounts_lost_list[current_index]
@@ -507,7 +505,7 @@ class actor():
         pygame.draw.rect(constants.game_display, constants.color_dict['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
-            constants.game_display.blit(text_utility.text(text_line, constants.myfont, self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
+            constants.game_display.blit(text_utility.text(text_line, constants.myfont), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
                 tooltip_image.tooltip_box.y + (text_line_index * constants.font_size)))
 
     def get_image_id_list(self, override_values={}):

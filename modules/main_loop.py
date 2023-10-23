@@ -7,12 +7,12 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
-def main_loop(global_manager):
+def main_loop():
     '''
     Description:
         Controls the main loop of the program, handling events such as mouse clicks and button presses, controlling timers, and drawing shapes and images. The program will end once this function stops
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -27,7 +27,7 @@ def main_loop(global_manager):
             flags.ctrl = flags.r_ctrl or flags.l_ctrl
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
-                    main_loop_utility.debug_print(global_manager)
+                    main_loop_utility.debug_print()
                 for current_button in status.button_list:
                     if current_button.showing and not flags.typing:
                         if current_button.has_keybind:
@@ -103,9 +103,9 @@ def main_loop(global_manager):
                     if flags.typing:
                         if constants.input_manager.taking_input:
                             constants.input_manager.taking_input = False
-                            text_utility.print_to_screen('Response: ' + constants.message, global_manager)
+                            text_utility.print_to_screen('Response: ' + constants.message)
                         else:
-                            text_utility.print_to_screen(constants.message, global_manager)
+                            text_utility.print_to_screen(constants.message)
                         flags.typing = False
                         constants.message = ''
                     else:
@@ -140,7 +140,7 @@ def main_loop(global_manager):
                             current_button.on_rmb_click()
                             current_button.on_rmb_release()
                             clicked_button = True
-                main_loop_utility.manage_rmb_down(clicked_button, global_manager)
+                main_loop_utility.manage_rmb_down(clicked_button)
 
         if flags.old_lmb_down != flags.lmb_down: #if lmb changes
             if not flags.lmb_down: #if user just released lmb
@@ -174,7 +174,7 @@ def main_loop(global_manager):
                             current_button.on_release()
                             clicked_button = True
                             #break
-                main_loop_utility.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
+                main_loop_utility.manage_lmb_down(clicked_button) #whether button was clicked or not determines whether characters are deselected
 
         if (flags.lmb_down or flags.rmb_down):
             for current_button in status.button_list:
@@ -188,9 +188,9 @@ def main_loop(global_manager):
                     current_button.showing_outline = False
 
         if not flags.loading:
-            main_loop_utility.update_display(global_manager)
+            main_loop_utility.update_display()
         else:
-            main_loop_utility.draw_loading_screen(global_manager)
+            main_loop_utility.draw_loading_screen()
         constants.current_time = time.time()
         if constants.current_time - constants.last_selection_outline_switch > 1:
             flags.show_selection_outlines = not flags.show_selection_outlines
@@ -205,7 +205,7 @@ def main_loop(global_manager):
             if enemy_turn_done:
                 flags.player_turn = True
                 flags.enemy_combat_phase = True
-                turn_management_utility.manage_combat(global_manager)
+                turn_management_utility.manage_combat()
             else:
                 current_enemy = status.enemy_turn_queue[0]
                 removed = False
@@ -235,7 +235,7 @@ def main_loop(global_manager):
             
                 elif not current_enemy.visible(): #if not just spawned and hidden, do action without displaying
                     if current_enemy.selected:
-                        actor_utility.deselect_all(global_manager)
+                        actor_utility.deselect_all()
                     current_enemy.end_turn_move()
                     moving = True
                     
@@ -250,7 +250,7 @@ def main_loop(global_manager):
                             else:
                                 status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                         else:
-                            actor_utility.deselect_all(global_manager)
+                            actor_utility.deselect_all()
                     else:
                         current_enemy.turn_done = True
                     

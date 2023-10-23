@@ -10,18 +10,16 @@ class image():
     '''
     Abstract base image class
     '''
-    def __init__(self, width, height, global_manager):
+    def __init__(self, width, height):
         '''
         Description:
             Initializes this object
         Input:
             int width: Pixel width of this image
             int height: Pixel height of this image
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.contains_bundle = False
         self.width = width
         self.height = height
@@ -39,7 +37,7 @@ class image():
         if self.contains_bundle:
             self.image.complete_draw()
         elif self.image_id != 'misc/empty.png':
-            drawing_utility.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+            drawing_utility.display_image(self.image, self.x, self.y - self.height)
 
     def touching_mouse(self):
         '''
@@ -133,7 +131,7 @@ class image_bundle(image):
     Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
     An image can be set to an image bundle rather than a string image path
     '''
-    def __init__(self, parent_image, image_id_list, global_manager):
+    def __init__(self, parent_image, image_id_list):
         '''
         Description:
             Initializes this object
@@ -146,14 +144,13 @@ class image_bundle(image):
                     'x_offset': float value - x-axis offset of image, with 1 being shifted a full width to the right
                     'y_offset': float value - y-axis offset of image, with 1 being shifted a full height upward
                     'level': int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
-            global_manager_template global_manager: Object that accesses shared variables
             boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
         Output:
             None
         '''
         self.image_type = 'bundle'
         self.combined_surface = 'none'
-        super().__init__(parent_image.width, parent_image.height, global_manager)
+        super().__init__(parent_image.width, parent_image.height)
         self.parent_image = parent_image
         self.members = []
         if isinstance(image_id_list, list):
@@ -175,7 +172,7 @@ class image_bundle(image):
         Output:
             image_bundle: Returns a copy of this image bundle
         '''
-        return(image_bundle(self.parent_image, self, self.global_manager))
+        return(image_bundle(self.parent_image, self))
 
     def scale(self):
         '''
@@ -242,7 +239,7 @@ class image_bundle(image):
         Output:
             None
         '''
-        drawing_utility.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+        drawing_utility.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height)
 
     def remove_member(self, member_type):
         '''
@@ -451,7 +448,7 @@ class free_image(image):
     '''
     Image unrelated to any actors or grids that appears at certain pixel coordinates
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -465,14 +462,13 @@ class free_image(image):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'member_config' = {}: Dictionary of extra configuration values for how to add elements to collections
                 'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.image_type = 'free'
         self.showing = False
         self.has_parent_collection = False    
-        super().__init__(input_dict['width'], input_dict['height'], global_manager)
+        super().__init__(input_dict['width'], input_dict['height'])
         self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
         if not self.has_parent_collection:
@@ -612,7 +608,7 @@ class free_image(image):
                     self.image = pygame.transform.scale(self.image, (self.width, self.height))
                 else: #if set to image path list
                     self.contains_bundle = True
-                    self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+                    self.image = image_bundle(self, self.image_id) #self.image_id
         
     def can_show_tooltip(self):
         '''
@@ -629,14 +625,13 @@ class background_image(free_image):
     '''
     Background image covering entire screen - designed to blit efficiently
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'modes': string list value - Game modes during which this button can appear
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -644,7 +639,7 @@ class background_image(free_image):
         input_dict['coordinates'] = (0, 0)
         input_dict['width'] = constants.display_width
         input_dict['height'] = constants.display_height
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.previous_safe_click_area_showing = False
 
     def can_show(self):
@@ -670,7 +665,7 @@ class tooltip_free_image(free_image):
     '''
     Abstract class, free image that has a tooltip when moused over
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -682,11 +677,10 @@ class tooltip_free_image(free_image):
                 'height': int value - Pixel height of this image
                 'modes': string list value - Game modes during which this button can appear
                 'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + self.height), self.width, self.height)
         self.Rect.y = self.y - self.height
         self.tooltip_text = []
@@ -767,14 +761,14 @@ class tooltip_free_image(free_image):
             pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                constants.game_display.blit(text_utility.text(text_line, constants.myfont, self.global_manager), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
+                constants.game_display.blit(text_utility.text(text_line, constants.myfont), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
                     (text_line_index * constants.font_size)))
 
 class indicator_image(tooltip_free_image):
     '''
     Image that appears under certain conditions based on its type
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -787,12 +781,11 @@ class indicator_image(tooltip_free_image):
                 'modes': string list value - Game modes during which this button can appear
                 'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
                 'indicator_type': string value - Type of variable that this indicator is attached to, like 'prosecution_bribed_judge'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.indicator_type = input_dict['indicator_type']
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -840,7 +833,7 @@ class dice_roll_minister_image(tooltip_free_image):
     '''
     Part of a pair of images that shows the controlling minister's position and portrait next to notifications during dice rolls
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -854,7 +847,6 @@ class dice_roll_minister_image(tooltip_free_image):
                 'attached_minister': minister value - Minister attached to this image
                 'minister_image_type': string value - Type of minister information shown by this image, like 'portrait' or 'position'
                 'minister_message_image' = False: boolean value - Whether this image is attached to a minister message or an action notification dice roll
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -868,7 +860,7 @@ class dice_roll_minister_image(tooltip_free_image):
             else:
                 input_dict['image_id'] = 'misc/mob_background.png'
         self.minister_message_image = input_dict.get('minister_message_image', False)
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.to_front = True
 
     def update_tooltip(self):
@@ -890,7 +882,7 @@ class minister_type_image(tooltip_free_image):
     '''
     Image that displays the icon corresponding to a certain minister office. Can be set to always show the icon for the same office or to show the icon of a certain unit's minister
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -904,14 +896,13 @@ class minister_type_image(tooltip_free_image):
                 'minister_type': string value - Minister office whose icon is always represented by this image, or 'none' if the icon can change
                 'attached_label': actor_display_label/string value - Actor display label that this image appears next to, or 'none' if not attached to a label
                 'minister_image_type': string value = 'position': Type of minister image to show - either only position or full portrait
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.current_minister = 'none'
         input_dict['image_id'] = 'misc/empty.png'
         self.minister_image_type = input_dict.get('minister_image_type', 'position')
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.attached_label = input_dict['attached_label']
         self.minister_type = input_dict['minister_type'] #position, like General
         if self.minister_type != 'none':
@@ -1003,14 +994,13 @@ class warning_image(free_image):
     '''
     Image that appears over the image it is attached to under certain conditions to draw the player's attention
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'attached_image': image value - Image that this warning appears over under certain conditions
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -1020,7 +1010,7 @@ class warning_image(free_image):
         input_dict['width'] = self.attached_image.width
         input_dict['height'] = self.attached_image.height
         input_dict['modes'] = self.attached_image.modes
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1037,14 +1027,13 @@ class loading_image_template(free_image):
     '''
     Image that occupies the entire screen, covering all other objects while the game is loading 
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -1052,7 +1041,7 @@ class loading_image_template(free_image):
         input_dict['width'] = constants.display_width
         input_dict['height'] = constants.display_height
         input_dict['modes'] = []
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
 
     def can_show(self, skip_parent_collection=False):
@@ -1071,7 +1060,7 @@ class actor_image(image):
     '''
     Image that is attached to an actor and a grid, representing the actor on a certain grid. An actor will have a different actor_image for each grid on which it appears
     '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
+    def __init__(self, actor, width, height, grid, image_description):
         '''
         Description:
             Initializes this object
@@ -1081,13 +1070,11 @@ class actor_image(image):
             int height: Pixel height of this image
             grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
             string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.image_type = 'actor'
-        super().__init__(width, height, global_manager)
-        self.global_manager = global_manager
+        super().__init__(width, height)
         self.actor = actor
         self.modes = actor.modes
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
@@ -1156,7 +1143,7 @@ class actor_image(image):
                 self.image = pygame.transform.scale(self.image, (self.width, self.height))
             else: #if set to image path list
                 self.contains_bundle = True
-                self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+                self.image = image_bundle(self, self.image_id) #self.image_id
         
     def draw(self):
         '''
@@ -1235,7 +1222,7 @@ class mob_image(actor_image):
     '''
     actor image attached to a mob rather than an actor, gaining the ability to manage the cells corresponding to this image's mob's coordinates
     '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
+    def __init__(self, actor, width, height, grid, image_description):
         '''
         Description:
             Initializes this object
@@ -1245,11 +1232,10 @@ class mob_image(actor_image):
             int height: Pixel height of this image
             grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
             string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
+        super().__init__(actor, width, height, grid, image_description)
         self.current_cell = 'none'
         self.image_type = 'mob'
         self.add_to_cell()
@@ -1309,7 +1295,7 @@ class button_image(actor_image):
     '''
     actor image attached to a button rather than an actor, causing it to be located at a pixel coordinate location where its button should be rather than within a grid cell
     '''
-    def __init__(self, button, width, height, image_id, global_manager):
+    def __init__(self, button, width, height, image_id):
         '''
         Description:
             Initializes this object
@@ -1318,11 +1304,9 @@ class button_image(actor_image):
             int width: Pixel width of this image
             int height: Pixel height of this image
             string image_id: File path to the image used by this object
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.image_type = 'button'
         self.button = button
         self.width = width
@@ -1382,7 +1366,7 @@ class button_image(actor_image):
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
         else: #if set to image path list
             self.contains_bundle = True
-            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+            self.image = image_bundle(self, self.image_id) #self.image_id
         
     def draw(self):
         '''
@@ -1432,7 +1416,7 @@ class tile_image(actor_image):
     '''
     actor_image attached to a tile rather than an actor, causing it to use file paths directly rather than an dictionary of image keys and file path values
     '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
+    def __init__(self, actor, width, height, grid, image_description):
         '''
         Description:
             Initializes this object
@@ -1442,11 +1426,10 @@ class tile_image(actor_image):
             int height: Pixel height of this image
             grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
             string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
+        super().__init__(actor, width, height, grid, image_description)
         self.go_to_cell((self.actor.x, self.actor.y))
 
     def go_to_cell(self, coordinates):

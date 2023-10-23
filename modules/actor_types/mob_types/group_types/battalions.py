@@ -12,7 +12,7 @@ class battalion(group):
     '''
     A group with a major officer that can attack non-beast enemies
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,16 +27,15 @@ class battalion(group):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_battalion = True
         if self.worker.worker_type == 'European':
             self.battalion_type = 'imperial'
@@ -44,7 +43,7 @@ class battalion(group):
             self.battalion_type = 'colonial'
         self.set_group_type('battalion')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates label to show new combat strength
 
     def get_movement_cost(self, x_change, y_change, post_attack = False):
         '''
@@ -238,10 +237,10 @@ class battalion(group):
                     results = [second_roll, first_roll]
             else:
                 results = [self.controlling_minister.no_corruption_roll(6, 'slave_capture'), self.controlling_minister.no_corruption_roll(6, 'slave_capture')]
-            first_roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -263,7 +262,7 @@ class battalion(group):
                 result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
             else:
                 result = self.controlling_minister.no_corruption_roll(6, 'slave_capture')
-            roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
@@ -338,7 +337,7 @@ class battalion(group):
                 'init_type': 'slaves',
                 'purchased': False,
                 'worker_type': 'slave' #not european - doesn't count as a European worker for upkeep
-            }, self.global_manager)
+            })
 
             village.change_population(-1)
             if roll_result >= self.current_min_crit_success and not self.veteran:
@@ -355,7 +354,7 @@ class safari(battalion):
     '''
     A group with a hunter officer that can track down and attack beast enemies
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -368,24 +367,23 @@ class safari(battalion):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
                 'canoes_image': string value - File path tothe image used by this object when it is in a river
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)    
+        super().__init__(from_save, input_dict)    
         self.is_battalion = False
         self.is_safari = True
         self.set_has_canoes(True)
         self.battalion_type = 'none'
         self.set_group_type('safari')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates label to show new combat strength
 
     def track_beasts(self):
         '''

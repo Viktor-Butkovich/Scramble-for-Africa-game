@@ -10,7 +10,7 @@ class beast(npmob):
     '''
     Beasts that wander the map hidden, prefer certain terrains, attack/demoralize nearby units, and can be tracked down by a safari
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -29,7 +29,6 @@ class beast(npmob):
                 'animal_type': string value - Type of beast, like 'lion'
                 'adjective': string value - Descriptor for beast, like 'man-eating'
                 'hidden': boolean value - Whether this beast is currently hidden
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -41,7 +40,7 @@ class beast(npmob):
             input_dict['name'] = self.animal_type + ' ' + self.adjective + ' '
         else:
             input_dict['name'] = self.adjective + ' ' + self.animal_type
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         
         self.npmob_type = 'beast'
         self.hostile = True

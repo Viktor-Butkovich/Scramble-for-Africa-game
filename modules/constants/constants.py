@@ -1,6 +1,5 @@
 import pygame
 from typing import Dict, List
-from modules.tools.data_managers.global_manager_template import global_manager_template
 from modules.tools.data_managers.sound_manager_template import sound_manager_template
 from modules.tools.data_managers.save_load_manager_template import save_load_manager_template
 from modules.tools.data_managers.flavor_text_manager_template import flavor_text_manager_template
@@ -27,14 +26,13 @@ display_width: float = resolution_finder.current_w - round(default_display_width
 display_height: float = resolution_finder.current_h - round(default_display_height/10)
 game_display: pygame.Surface = pygame.display.set_mode((display_width, display_height))
 
-global_manager: global_manager_template = global_manager_template()
-sound_manager: sound_manager_template = sound_manager_template(global_manager)
-save_load_manager: save_load_manager_template = save_load_manager_template(global_manager)
-flavor_text_manager: flavor_text_manager_template = flavor_text_manager_template(global_manager)
-input_manager: input_manager_template = input_manager_template(global_manager)
+sound_manager: sound_manager_template = sound_manager_template()
+save_load_manager: save_load_manager_template = save_load_manager_template()
+flavor_text_manager: flavor_text_manager_template = flavor_text_manager_template()
+input_manager: input_manager_template = input_manager_template()
 actor_creation_manager: actor_creation_manager_template = actor_creation_manager_template()
-event_manager: event_manager_template = event_manager_template(global_manager)
-effect_manager: effect_manager_template = effect_manager_template(global_manager)
+event_manager: event_manager_template = event_manager_template()
+effect_manager: effect_manager_template = effect_manager_template()
 notification_manager: notification_manager_template = None #requires additional setup before initialization
 mouse_follower: mouse_follower_template = None
 

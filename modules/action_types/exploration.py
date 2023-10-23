@@ -121,7 +121,7 @@ class exploration(action.action):
         return_list = super().generate_attached_interface_elements(subject)
         if subject in ['success', 'critical_success']:
             image_id_list = [action_utility.generate_background_image_input_dict()] + self.future_cell.tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
-            return_list.append(action_utility.generate_free_image_input_dict(image_id_list, 250, self.global_manager, override_input_dict={
+            return_list.append(action_utility.generate_free_image_input_dict(image_id_list, 250, override_input_dict={
                 'member_config': {
                     'second_dimension_coordinate': -2, 'centered': True
                 }
@@ -166,7 +166,7 @@ class exploration(action.action):
                     'message': 'Explore'
                     },
                     {
-                    'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[self.global_manager], []]),
+                    'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[], []]),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Do nothing'
                     }

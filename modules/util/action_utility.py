@@ -5,19 +5,19 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
-def cancel_ongoing_actions(global_manager):
+def cancel_ongoing_actions():
     '''
     Description:
         Cancels any ongoing actions and frees the player to take other actions
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     flags.ongoing_action = False
     status.ongoing_action_type = None
 
-def generate_die_input_dict(coordinates, final_result, action, global_manager, override_input_dict=None):
+def generate_die_input_dict(coordinates, final_result, action, override_input_dict=None):
     '''
     Description:
         Creates and returns the input dict of a die created at the inputted coordinates with the inputted final result for the inputted action
@@ -25,7 +25,6 @@ def generate_die_input_dict(coordinates, final_result, action, global_manager, o
         int tuple coordinates: Two values representing x and y coordinates for the pixel location of the element
         int final_result: Predetermined final result of roll for die to end on
         action action: Action for which die is being rolled
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         dictionary: Returns the created input dict
     '''
@@ -48,13 +47,12 @@ def generate_die_input_dict(coordinates, final_result, action, global_manager, o
             return_dict[value] = override_input_dict[value]
     return(return_dict)
 
-def generate_action_ordered_collection_input_dict(coordinates, global_manager, override_input_dict=None):
+def generate_action_ordered_collection_input_dict(coordinates, override_input_dict=None):
     '''
     Description:
         Creates and returns the input dict of an ordered collection created at the inputted coordinates with any extra overrides
     Input:
         int tuple coordinates: Two values representing x and y coordinates for the pixel location of the element
-        global_manager_template global_manager: Object that accesses shared variables
         dictionary override_input_dict=None: Optional dictionary to override attributes of created input_dict
     Output:
         dictionary: Returns the created input dict
@@ -73,14 +71,13 @@ def generate_action_ordered_collection_input_dict(coordinates, global_manager, o
             return_dict[value] = override_input_dict[value]
     return(return_dict)
 
-def generate_free_image_input_dict(image_id, default_size, global_manager, override_input_dict=None):
+def generate_free_image_input_dict(image_id, default_size, override_input_dict=None):
     '''
     Description:
         Creates and returns the input dict of a free image with the inputted image id and inputted size
     Input:
         string/list/dict image_id: Image id of image to create
         default_size: Non-scaled width and height of image to create
-        global_manager_template global_manager: Object that accesses shared variables
         dictionary override_input_dict=None: Optional dictionary to override attributes of created input_dict
     Output:
         dictionary: Returns the created input dict
@@ -99,14 +96,13 @@ def generate_free_image_input_dict(image_id, default_size, global_manager, overr
             return_dict[value] = override_input_dict[value]
     return(return_dict)
 
-def generate_minister_portrait_input_dicts(coordinates, action, global_manager):
+def generate_minister_portrait_input_dicts(coordinates, action):
     '''
     Description:
         Creates and returns the input dicts of a minister portrait/background pair created at the inputted coordinates for the inputted action
     Input:
         int tuple coordinates: Two values representing x and y coordinates for the pixel location of the elements
         action action: Action for which portrait is being created
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         dictionary list: Returns the created input dicts
     '''

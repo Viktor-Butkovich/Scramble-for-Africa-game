@@ -7,7 +7,7 @@ import modules.constants.status as status
 import modules.constants.flags as flags
 
 class action_notification(notification):
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -28,11 +28,10 @@ class action_notification(notification):
                 'transfer_interface_elements' = False: boolean value - Whether this notification's sibling ordered collection's member should be transferred
                     to that of the next action notification on removal
                 'on_remove' = None: function value - Function to run after this notification is removed
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.attached_interface_elements = input_dict.get('attached_interface_elements', None)
         if self.attached_interface_elements:
             if self.attached_interface_elements:
@@ -48,20 +47,18 @@ class action_notification(notification):
                 self.notification_ordered_collection = constants.actor_creation_manager.create_interface_element(
                     action_utility.generate_action_ordered_collection_input_dict(
                         scaling.scale_coordinates(-1 * column_increment + (column_increment / 2), collection_y),
-                        self.global_manager,
                         override_input_dict = {'parent_collection': self.parent_collection,
                                                'second_dimension_increment': scaling.scale_width(column_increment),
                                                'anchor_coordinate': scaling.scale_height(notification_manager.default_notification_height / 2)
                         }
-                    ),
-                    self.global_manager
+                    )
                 )
 
                 index = 0
                 for element_input_dict in self.attached_interface_elements:
                     if type(element_input_dict) == dict:
                         element_input_dict['parent_collection'] = self.notification_ordered_collection #self.parent_collection
-                        self.attached_interface_elements[index] = constants.actor_creation_manager.create_interface_element(element_input_dict, global_manager) #if given input dict, create it and add it to notification
+                        self.attached_interface_elements[index] = constants.actor_creation_manager.create_interface_element(element_input_dict) #if given input dict, create it and add it to notification
                     else:
                         self.notification_ordered_collection.add_member(element_input_dict, member_config=element_input_dict.transfer_info_dict)
                     index += 1
@@ -121,7 +118,7 @@ class dice_rolling_notification(action_notification):
     '''
     Notification that is removed when a dice roll is completed rather than when clicked
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -138,11 +135,10 @@ class dice_rolling_notification(action_notification):
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         if status.ongoing_action_type in ['combat', 'slave_capture']:
             if status.displayed_mob.is_pmob and (status.displayed_mob.is_battalion or status.displayed_mob.is_safari):
                 constants.sound_manager.play_sound('gunfire')
@@ -210,7 +206,7 @@ class off_tile_exploration_notification(action_notification):
     '''
     Notification that shows a tile explored by an expedition in an adjacent tile, focusing on the new tile and returning minimap to original position upon removal
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -227,7 +223,6 @@ class off_tile_exploration_notification(action_notification):
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -253,12 +248,11 @@ class off_tile_exploration_notification(action_notification):
             'modes': input_dict['modes'],
             'to_front': True,
             'init_type': 'free image'
-        }, global_manager))
+        }))
 
         if new_visibility == True and not explored_tile.cell.resource == 'none':
-            image_id_list.append(actor_utility.generate_resource_icon(explored_tile, global_manager))
+            image_id_list.append(actor_utility.generate_resource_icon(explored_tile))
         image_id_list.append('misc/tile_outline.png')
-        #although global manager sets to busy here, calling object should also set to busy so that you can't click off before notification appears if another notification is opened when this one is queued
         flags.ongoing_action = True
         status.ongoing_action_type = self.current_expedition.current_action_type
         if self.current_expedition.current_action_type == 'exploration':
@@ -272,11 +266,11 @@ class off_tile_exploration_notification(action_notification):
             'modes': input_dict['modes'],
             'to_front': True,
             'init_type': 'free image'
-        }, global_manager))
+        }))
 
         constants.public_opinion_tracker.change(public_opinion_increase)
         status.minimap_grid.calibrate(explored_cell.x, explored_cell.y)
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def remove(self):
         '''
@@ -308,7 +302,7 @@ class trade_notification(action_notification):
     '''
     Notification used during trading that has various behaviors relevant to trading based on the values in its inputted trade_info_dict
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -330,7 +324,6 @@ class trade_notification(action_notification):
                     'stops_trade', boolean value: If True, trading will stop when this notification is removed
                     'commodity_trade', boolean value: If True, this notification will show a transaction
                     'commodity_trade_type', string value: If equals 'successful_commodity_trade', the trade will be successful and a commodity will be given for the transaction
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -361,7 +354,7 @@ class trade_notification(action_notification):
                     'modes': input_dict['modes'],
                     'to_front': True,
                     'init_type': 'free image'
-                }, global_manager))
+                }))
             else:
                 consumer_goods_y = 400 #either have icon at 300 and 500 or a single icon at 400
                 min_y = 400
@@ -374,7 +367,7 @@ class trade_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }, global_manager))
+            }))
 
             if self.trade_result[3]: #if gets available worker
                 background_dict = {
@@ -403,11 +396,11 @@ class trade_notification(action_notification):
                     'modes': input_dict['modes'],
                     'to_front': True,
                     'init_type': 'free image'
-                }, global_manager))
+                }))
 
         elif self.dies:
             self.trade_result = {} #trade result, #allows caravan object to be found so that it can die
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def remove(self):
         '''
@@ -456,9 +449,9 @@ class trial_notification(action_notification):
         if previous_roll >= 5:
             status.trial_rolls = [] #stop trial after success
         if len(status.trial_rolls) > 0:
-            trial_utility.display_evidence_roll(self.global_manager)
+            trial_utility.display_evidence_roll()
         else:
-            trial_utility.complete_trial(previous_roll, self.global_manager)
+            trial_utility.complete_trial(previous_roll)
 
         notification_manager = constants.notification_manager
         if len(notification_manager.notification_queue) >= 1:
@@ -470,7 +463,7 @@ class rumor_search_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a rumor search attempt when the last notification is removed
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -488,14 +481,13 @@ class rumor_search_notification(action_notification):
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
                 'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.is_last = input_dict['is_last']
         if self.is_last: #if last, show result
             self.notification_images = []
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def remove(self):
         '''
@@ -525,7 +517,7 @@ class artifact_search_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of an artifact search attempt when the last notification is removed
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -543,14 +535,13 @@ class artifact_search_notification(action_notification):
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
                 'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.is_last = input_dict['is_last']
         if self.is_last: #if last, show result
             self.notification_images = []
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def remove(self):
         '''
@@ -577,7 +568,7 @@ class capture_slaves_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a slave capture attempt when the last notification is removed
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -595,7 +586,6 @@ class capture_slaves_notification(action_notification):
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
                 'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -627,8 +617,8 @@ class capture_slaves_notification(action_notification):
                 'modes': input_dict['modes'],
                 'to_front': True,
                 'init_type': 'free image'
-            }, global_manager))
-        super().__init__(input_dict, global_manager)
+            }))
+        super().__init__(input_dict)
 
     def remove(self):
         '''

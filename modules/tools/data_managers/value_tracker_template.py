@@ -9,7 +9,7 @@ class value_tracker_template():
         Description:
             Initializes this object
         Input:
-            string value_key: Key used to access this tracker's variable in the global manager
+            string value_key: Key used to access this tracker's variable in constants
             any type initial_value: Value that this tracker's variable is set to when initialized
         Output:
             None

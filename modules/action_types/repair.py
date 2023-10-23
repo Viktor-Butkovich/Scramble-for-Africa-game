@@ -184,7 +184,7 @@ class repair(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }
@@ -202,5 +202,5 @@ class repair(action.action):
         '''
         if self.roll_result >= self.current_min_success:
             self.current_building.set_damaged(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show building repair
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show building repair
         super().complete()

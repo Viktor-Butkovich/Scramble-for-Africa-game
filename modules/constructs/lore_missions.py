@@ -10,7 +10,7 @@ class lore_mission():
     Mission from geographic society for an artifact that can be searched for at locations based on leads from villages, artifact gives permanent positive effect modifier and other bonuses when 
         found
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -24,11 +24,9 @@ class lore_mission():
                     possible artifact locations
                 'confirmed_all_locations_revealed': boolean value - Required if from save, whether an expedition has already searched for rumors at a village and confirmed that all locations 
                     have been revealed
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         status.lore_mission_list.append(self)
         status.current_lore_mission = self
         self.possible_artifact_locations = []
@@ -39,7 +37,7 @@ class lore_mission():
             self.name = self.adjective + self.artifact_type
             for current_save_dict in input_dict['possible_artifact_location_dicts']:
                 current_save_dict['lore_mission'] = self
-                new_possible_artifact_location = possible_artifact_location(True, current_save_dict, self.global_manager)
+                new_possible_artifact_location = possible_artifact_location(True, current_save_dict)
                 if current_save_dict['coordinates'] == input_dict['artifact_coordinates']:
                     self.artifact_location = new_possible_artifact_location
             self.confirmed_all_locations_revealed = input_dict['confirmed_all_locations_revealed']
@@ -56,7 +54,7 @@ class lore_mission():
                     'coordinates': self.generate_possible_artifact_coordinates(),
                     'revealed': False,
                     'proven_false': False
-                }, self.global_manager)
+                })
 
             for current_village in status.village_list:
                 current_village.found_rumors = False
@@ -208,7 +206,7 @@ class possible_artifact_location():
     '''
     Possible location for a lore mission's artifact that can be located from village rumors and investigated
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -219,11 +217,9 @@ class possible_artifact_location():
                 'coordinates': int tuple value - Two values representing this location's x and y coordinates on the strategic grid
                 'revealed': boolean value - Whether rumors of this location have been revealed yet
                 'proven_false': boolean value - Whether it has been confirmed that this is not the location of the artifact
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.lore_mission = input_dict['lore_mission']
         self.lore_mission.possible_artifact_locations.append(self)
         self.x, self.y = input_dict['coordinates']

@@ -4,16 +4,15 @@ class effect_manager_template():
     '''
     Object that controls global effects
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.possible_effects = []
         self.active_effects = []
 

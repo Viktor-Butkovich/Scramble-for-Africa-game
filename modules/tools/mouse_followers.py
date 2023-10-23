@@ -9,13 +9,12 @@ class mouse_follower_template(free_image):
     '''
     Free image that follows the mouse pointer and appears in certain situations, such as when choosing on a movement destination
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -24,7 +23,7 @@ class mouse_follower_template(free_image):
         input_dict['width'] = 50
         input_dict['height'] = 50
         input_dict['modes'] = ['strategic', 'europe']
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def update(self):
         ''''

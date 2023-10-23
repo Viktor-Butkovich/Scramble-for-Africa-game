@@ -6,16 +6,15 @@ class input_manager_template():
     '''
     Object designed to manage the passing of typed input from the text box to different parts of the program
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.previous_input = ''
         self.taking_input = False
         self.old_taking_input = self.taking_input
@@ -46,7 +45,7 @@ class input_manager_template():
         Output:
             None
         '''
-        text_utility.print_to_screen(message, self.global_manager)
+        text_utility.print_to_screen(message)
         self.send_input_to = solicitant
         self.taking_input = True
         

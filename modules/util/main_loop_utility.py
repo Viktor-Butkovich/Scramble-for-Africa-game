@@ -7,22 +7,22 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
-def update_display(global_manager):
+def update_display():
     '''
     Description:
         Draws all images and shapes and calls the functions to draw tooltips and the text box
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     if flags.loading:
         flags.loading_start_time -= 1 #end load timer faster once program starts repeating this part
-        draw_loading_screen(global_manager)
+        draw_loading_screen()
     else:
         possible_tooltip_drawers = []
 
-        traversal_utility.draw_interface_elements(status.independent_interface_elements, global_manager)
+        traversal_utility.draw_interface_elements(status.independent_interface_elements)
         #could modify with a layer dictionary to display elements on different layers - currently, drawing elements in order of collection creation is working w/o overlap
         # issues
 
@@ -63,7 +63,7 @@ def update_display(global_manager):
             possible_tooltip_drawers = [notification_tooltip_button]
                 
         if flags.show_text_box:
-            draw_text_box(global_manager)
+            draw_text_box()
 
         constants.mouse_follower.draw()
             
@@ -75,7 +75,7 @@ def update_display(global_manager):
             constants.mouse_moved_time = constants.current_time
             constants.old_mouse_x, constants.old_mouse_y = pygame.mouse.get_pos()
         if time.time() > constants.mouse_moved_time + 0.15: #show tooltip when mouse is still
-            manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
+            manage_tooltip_drawing(possible_tooltip_drawers)
         
     pygame.display.update()
 
@@ -87,12 +87,12 @@ def update_display(global_manager):
             constants.frames_this_second = 0
             constants.last_fps_update = current_time
 
-def action_possible(global_manager):
+def action_possible():
     '''
     Description:
         Because of this function, ongoing events such as trading, exploring, and clicking on a movement destination prevent actions such as pressing buttons from being done except when required by the event
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         boolean: Returns False if the player is in an ongoing event that prevents other actions from being taken, otherwise returns True
     '''
@@ -112,12 +112,12 @@ def action_possible(global_manager):
         return(False)
     return(True)
 
-def draw_loading_screen(global_manager):
+def draw_loading_screen():
     '''
     Description:
         Draws the loading screen, occupying the entire screen and blocking objects when the game is loading
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -125,12 +125,11 @@ def draw_loading_screen(global_manager):
     if flags.loading_start_time + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
         flags.loading = False
 
-def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
+def manage_tooltip_drawing(possible_tooltip_drawers):
     '''
     Description:
         Decides whether each of the inputted objects should have their tooltips drawn based on if they are covered by other objects. The tooltip of each chosen object is drawn in order with correct placement and spacing
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         object list possible_tooltip_drawers: All objects that possess tooltips and are currently touching the mouse and being drawn
     Output:
         None
@@ -212,12 +211,12 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += scaling.unscale_width(font_size)
 
-def draw_text_box(global_manager):
+def draw_text_box():
     '''
     Description:
         Draws the text input and output box at the bottom left of the screen along with the text it contains
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -259,18 +258,17 @@ def draw_text_box(global_manager):
         textsurface = constants.myfont.render(constants.message, False, (0, 0, 0))
     constants.game_display.blit(textsurface,(scaling.scale_width(10), constants.display_height - (font_size + scaling.scale_height(5))))
 
-def manage_rmb_down(clicked_button, global_manager):
+def manage_rmb_down(clicked_button):
     '''
     Description:
         If the player is right clicking on a grid cell, cycles the order of the units in the cell. Otherwise, has same functionality as manage_lmb_down
     Input:
         boolean clicked_button: True if this click clicked a button, otherwise False
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
     stopping = False
-    if (not clicked_button) and action_possible(global_manager):
+    if (not clicked_button) and action_possible():
         for current_grid in status.grid_list:
             if current_grid.showing: #if constants.current_game_mode in current_grid.modes:
                 for current_cell in current_grid.get_flat_cell_list():
@@ -289,7 +287,7 @@ def manage_rmb_down(clicked_button, global_manager):
                             moved_mob.select()
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
-                            actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, moved_mob.images[0].current_cell.tile)
+                            actor_utility.calibrate_actor_info_display(status.tile_info_display, moved_mob.images[0].current_cell.tile)
     elif flags.drawing_automatic_route:
         stopping = True
         flags.drawing_automatic_route = False
@@ -297,19 +295,19 @@ def manage_rmb_down(clicked_button, global_manager):
             destination_coordinates = (status.displayed_mob.base_automatic_route[-1][0], status.displayed_mob.base_automatic_route[-1][1])
             if status.displayed_mob.is_vehicle and status.displayed_mob.vehicle_type == 'train' and not status.strategic_map_grid.find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
                 status.displayed_mob.clear_automatic_route()
-                text_utility.print_to_screen('A train\'s automatic route must start and end at a train station.', global_manager)
-                text_utility.print_to_screen('The invalid route has been erased.', global_manager)
+                text_utility.print_to_screen('A train\'s automatic route must start and end at a train station.')
+                text_utility.print_to_screen('The invalid route has been erased.')
             else:
-                text_utility.print_to_screen('Route saved', global_manager)
+                text_utility.print_to_screen('Route saved')
         else:
             status.displayed_mob.clear_automatic_route()
-            text_utility.print_to_screen('The created route must go between at least 2 tiles', global_manager)
+            text_utility.print_to_screen('The created route must go between at least 2 tiles')
         status.minimap_grid.calibrate(status.displayed_mob.x, status.displayed_mob.y)
-        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
     if not stopping:
-        manage_lmb_down(clicked_button, global_manager)
+        manage_lmb_down(clicked_button)
     
-def manage_lmb_down(clicked_button, global_manager):
+def manage_lmb_down(clicked_button):
     '''
     Description:
         If the player is choosing a movement destination and the player clicks on a cell, chooses that cell as the movement destination. If the player is choosing a movement destination but did not click a cell, cancels the movement
@@ -317,12 +315,11 @@ def manage_lmb_down(clicked_button, global_manager):
             of that button. If nothing was clicked, deselects the selected mob if any is selected
     Input:
         boolean clicked_button: True if this click clicked a button, otherwise False
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
-    if action_possible(global_manager) or flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route:
-        if (not clicked_button and (not (flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
+    if action_possible() or flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route:
+        if (not clicked_button and (not (flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route))):#do not do selecting operations if user was trying to click a button #and action_possible()
             selected_mob = False
             for current_grid in status.grid_list:
                 if current_grid.showing: #if constants.current_game_mode in current_grid.modes:
@@ -331,7 +328,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             if current_cell.visible:
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_mob = True
-                                    actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, None, override_exempt=True)
+                                    actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
                                     current_cell.contained_mobs[0].select()
                                     if current_cell.contained_mobs[0].is_pmob:
                                         current_cell.contained_mobs[0].selection_sound()
@@ -341,28 +338,28 @@ def manage_lmb_down(clicked_button, global_manager):
                                         if main_cell:
                                             main_tile = main_cell.tile
                                             if not main_tile == 'none':
-                                                actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, main_tile)
+                                                actor_utility.calibrate_actor_info_display(status.tile_info_display, main_tile)
                                     else:
-                                        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, current_cell.tile)
+                                        actor_utility.calibrate_actor_info_display(status.tile_info_display, current_cell.tile)
             if selected_mob:
                 unit = status.displayed_mob
                 if unit and unit.grids[0] == status.minimap_grid.attached_grid:
                     status.minimap_grid.calibrate(unit.x, unit.y)
             else:
                 if constants.current_game_mode == 'ministers':
-                    minister_utility.calibrate_minister_info_display(global_manager, None)
+                    minister_utility.calibrate_minister_info_display(None)
                 elif constants.current_game_mode == 'new_game_setup':
-                    actor_utility.calibrate_actor_info_display(global_manager, status.country_info_display, None, override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(status.country_info_display, None, override_exempt=True)
                 else:
-                    actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, None, override_exempt=True)
-                    actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, None, override_exempt=True)
-                click_move_minimap(global_manager)
+                    actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(status.tile_info_display, None, override_exempt=True)
+                click_move_minimap()
                 
         elif (not clicked_button) and flags.choosing_destination: #if clicking to move somewhere
             for current_grid in status.grid_list: #destination_grids:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
-                        click_move_minimap(global_manager)
+                        click_move_minimap()
                         target_cell = 'none'
                         if current_cell.grid.is_abstract_grid:
                             target_cell = current_cell
@@ -373,7 +370,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
                                 destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
                                 if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < status.strategic_map_grid.coordinate_width: #or is harbor
-                                    text_utility.print_to_screen('You can only send ships to coastal waters and coastal ports.', global_manager)
+                                    text_utility.print_to_screen('You can only send ships to coastal waters and coastal ports.')
                                     stopping = True
                             chose_destination = True
                             if not stopping:
@@ -381,10 +378,10 @@ def manage_lmb_down(clicked_button, global_manager):
                                 flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately once destination is chosen
                                 status.displayed_mob.remove_from_turn_queue()
-                                actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, status.displayed_mob)
-                                actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
+                                actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
+                                actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
                         else: #cannot move to same continent
-                            text_utility.print_to_screen('You can only send ships to other theatres.', global_manager)
+                            text_utility.print_to_screen('You can only send ships to other theatres.')
             flags.choosing_destination = False
             
         elif (not clicked_button) and flags.choosing_advertised_commodity:
@@ -395,7 +392,7 @@ def manage_lmb_down(clicked_button, global_manager):
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         if current_cell.grid.is_abstract_grid:
-                            text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
+                            text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.')
                         else:
                             displayed_mob = status.displayed_mob
                             if current_cell.grid.is_mini_grid:
@@ -411,42 +408,42 @@ def manage_lmb_down(clicked_button, global_manager):
                             if utility.find_coordinate_distance((destination_x, destination_y), (previous_destination_x, previous_destination_y)) == 1:
                                 destination_infrastructure = target_cell.get_building('infrastructure')
                                 if not target_cell.visible:
-                                    text_utility.print_to_screen('Movement routes cannot be created through unexplored tiles.', global_manager)
+                                    text_utility.print_to_screen('Movement routes cannot be created through unexplored tiles.')
                                     return()
                                 elif displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not target_cell.has_building('railroad'):
-                                    text_utility.print_to_screen('Trains can only create movement routes along railroads.', global_manager)
+                                    text_utility.print_to_screen('Trains can only create movement routes along railroads.')
                                     return()
                                 elif (target_cell.terrain == 'water' and not displayed_mob.can_swim) and (displayed_mob.is_vehicle and destination_infrastructure == 'none'): 
                                     #non-train units can still move slowly through water, even w/o canoes or a bridge
                                     #railroad bridge allows anything to move through
-                                    text_utility.print_to_screen('This unit cannot create movement routes through water.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes through water.')
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_ocean) and destination_y == 0:
-                                    text_utility.print_to_screen('This unit cannot create movement routes through ocean water.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes through ocean water.')
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_river) and destination_y > 0:
-                                    text_utility.print_to_screen('This unit cannot create movement routes through river water.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes through river water.')
                                     return()
                                 elif (not target_cell.terrain == 'water') and (not displayed_mob.can_walk) and not target_cell.has_intact_building('port'):
-                                    text_utility.print_to_screen('This unit cannot create movement routes on land, except through ports.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes on land, except through ports.')
                                     return()
                                                                      
                                 displayed_mob.add_to_automatic_route((destination_x, destination_y))
-                                click_move_minimap(global_manager)
+                                click_move_minimap()
                                 flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time
                             else:
-                                text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
+                                text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.')
                                 
         elif not clicked_button:
-            click_move_minimap(global_manager)
+            click_move_minimap()
 
-def click_move_minimap(global_manager): 
+def click_move_minimap(): 
     '''
     Description:
         When a cell on the strategic map grid is clicked, centers the minimap on that cell
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -462,7 +459,7 @@ def click_move_minimap(global_manager):
                     elif current_grid == status.strategic_map_grid:
                         status.minimap_grid.calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
-                        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, current_grid.cell_list[0][0].tile)
+                        actor_utility.calibrate_actor_info_display(status.tile_info_display, current_grid.cell_list[0][0].tile)
                     breaking = True
                     break
                 if breaking:
@@ -470,12 +467,12 @@ def click_move_minimap(global_manager):
             if breaking:
                  break
 
-def debug_print(global_manager):
+def debug_print():
     '''
     Description:
         Called by main_loop to print some value whenver p is pressed - printed value modified for various debugging purposes
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''

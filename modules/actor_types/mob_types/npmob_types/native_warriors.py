@@ -11,7 +11,7 @@ class native_warriors(npmob):
     '''
     npmob that represents a population unit that temporarily leaves an aggressive village to attack player-controlled mobs/buildings
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -28,11 +28,10 @@ class native_warriors(npmob):
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'canoes_image': string value - File path to the image used by this object when it is in a river
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.number = 2 #native warriors is plural
         self.hostile = True
         self.can_damage_buildings = True

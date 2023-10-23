@@ -9,16 +9,15 @@ class sound_manager_template():
     '''
     Object that controls sounds
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.default_music_dict = {
             'europe': [('generic/' + current_song[:-4]) for current_song in os.listdir('sounds/music/generic')], #remove file extensions
             'main menu': ['main theme'],

@@ -9,7 +9,7 @@ class officer(pmob):
     '''
     pmob that is considered an officer and can join groups and become a veteran
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,22 +25,21 @@ class officer(pmob):
                 'modes': string list value - Game modes during which this mob's images can appear
                 'officer_type': string value - Type of officer that this is, like 'explorer', or 'engineer'
                 'end_turn_destination': string or int tuple - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'veteran': boolean value - Required if from save, whether this officer is a veteran
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_officer = True
         self.officer_type = input_dict.get('officer_type', type(self).__name__)
         self.set_controlling_minister_type(constants.officer_minister_dict[self.officer_type])
         if not from_save:
             self.veteran = False
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for is_officer changing
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for is_officer changing
             self.selection_sound()
         else:
             self.veteran = input_dict['veteran']
@@ -92,7 +91,7 @@ class officer(pmob):
         self.set_name('veteran ' + self.name)
         self.update_image_bundle()
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with veteran icon
 
     def load_veteran(self):
         '''
@@ -105,7 +104,7 @@ class officer(pmob):
         '''
         self.promote()
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def can_show_tooltip(self):
         '''
@@ -150,8 +149,8 @@ class officer(pmob):
         self.show_images()
         #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding

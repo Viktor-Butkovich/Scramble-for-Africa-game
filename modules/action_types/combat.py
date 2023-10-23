@@ -98,7 +98,7 @@ class combat(action.action):
         '''
         return_list = super().generate_attached_interface_elements(subject)
         if subject == 'dice':
-            return_list = [action_utility.generate_die_input_dict((0, 0), roll_list[0], self, self.global_manager, 
+            return_list = [action_utility.generate_die_input_dict((0, 0), roll_list[0], self, 
                                 override_input_dict={'member_config': {'centered': True}})
                             for roll_list in self.roll_lists]
             background_dict = action_utility.generate_background_image_input_dict()
@@ -106,11 +106,11 @@ class combat(action.action):
             npmob_image_id_list = [background_dict] + self.opponent.get_image_id_list() + ['misc/pmob_outline.png']
 
             image_size = 125
-            return_list.append(action_utility.generate_free_image_input_dict(pmob_image_id_list, image_size, self.global_manager,
+            return_list.append(action_utility.generate_free_image_input_dict(pmob_image_id_list, image_size,
                                 override_input_dict={
                                     'member_config': {'centered': True}
                                 }))
-            return_list.insert(0, action_utility.generate_free_image_input_dict(npmob_image_id_list, image_size, self.global_manager,
+            return_list.insert(0, action_utility.generate_free_image_input_dict(npmob_image_id_list, image_size,
                                 override_input_dict={
                                     'member_config': {'centered': True}
                                 }))
@@ -119,7 +119,6 @@ class combat(action.action):
                 (0, 0),
                 self.opponent_roll_result,
                 self,
-                self.global_manager,
                 override_input_dict={
                     'result_outcome_dict': {
                         'min_success': 7,
@@ -322,9 +321,9 @@ class combat(action.action):
             if opponent == 'none':
                 if ((unit.is_battalion and not future_cell.get_best_combatant('npmob', 'beast') == 'none') or (unit.is_safari and not future_cell.get_best_combatant('npmob') == 'none')): #if wrong type of defender present
                     if unit.is_battalion:
-                        text_utility.print_to_screen('Battalions cannot attack beasts.', self.global_manager)
+                        text_utility.print_to_screen('Battalions cannot attack beasts.')
                     elif unit.is_safari:
-                        text_utility.print_to_screen('Safaris can only attack beasts.', self.global_manager)
+                        text_utility.print_to_screen('Safaris can only attack beasts.')
                 else:
                     return(False)
             elif super().on_click(unit):
@@ -383,7 +382,7 @@ class combat(action.action):
                     'message': 'Attack'
                     },
                     {
-                    'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[self.global_manager], []]),
+                    'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[], []]),
                     'tooltip': ['Stop attack'],
                     'message': 'Stop attack'
                     }
@@ -440,7 +439,7 @@ class combat(action.action):
                 status.minimap_grid.calibrate(self.current_unit.x, self.current_unit.y)
                 self.current_unit.select()
                 self.current_unit.move_to_front()
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self.current_unit) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self.current_unit) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
         else:
             self.current_unit.clear_attached_cell_icons()
             self.current_unit.move(self.x_change, self.y_change, True)
@@ -484,7 +483,7 @@ class combat(action.action):
         for index in range(min(len(results), num_dice)):
             result = results[index]
             roll_type = roll_types[index]
-            self.roll_lists.append(dice_utility.combat_roll_to_list(6, roll_type, self.global_manager, result, self.current_roll_modifier))
+            self.roll_lists.append(dice_utility.combat_roll_to_list(6, roll_type, result, self.current_roll_modifier))
 
         attached_interface_elements = []
         attached_interface_elements = self.generate_attached_interface_elements('dice')
@@ -625,4 +624,4 @@ class combat(action.action):
         if len(status.attacker_queue) > 0:
             status.attacker_queue.pop(0).attempt_local_combat()
         elif flags.enemy_combat_phase: #if enemy combat phase done, go to player turn
-            turn_management_utility.start_player_turn(self.global_manager)
+            turn_management_utility.start_player_turn()

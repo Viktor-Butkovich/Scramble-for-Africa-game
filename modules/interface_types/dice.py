@@ -12,7 +12,7 @@ class die(button):
     '''
     A die with a predetermined result that will appear, show random rolling, and end with the predetermined result and an outline with a color based on the result
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -29,7 +29,6 @@ class die(button):
                     critical successes/failures
                 'outcome_color_dict': string/int dictionary value - Dictionary of string color name keys and int die result values determining colors shown for certain die results
                 'final_result': int value - Predetermined final result of roll for die to end on
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -57,7 +56,7 @@ class die(button):
             input_dict['image_id'] = 'misc/dice/impossible.png'
         input_dict['color'] = 'white'
         input_dict['button_type'] = 'die'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         status.dice_list.append(self)
         self.final_result = input_dict['final_result']
         #self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance

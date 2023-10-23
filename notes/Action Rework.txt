@@ -7,7 +7,7 @@ action notifications: only a general action notification class - this class will
   When created, inserts interface collection above, places sibling ordered collection to the left, and populates ordered collection w/ dice/portraits
   When removed, recursively remove parent collection and member elements (think of how to handle this with removing self), alert notification manager, and call
     the correct action phase function
-action function: Each action function exists in its own file, taking a controlling unit, action phase, and global manager as input
+action function: Each action function exists in its own file, taking a controlling unit and action phase as input
   each action phase will call another function for that phase, and main action function will return whatever phase function returned
   phases:
       setup? - possible phase, would specify how to create a button linked to this action - lower priority

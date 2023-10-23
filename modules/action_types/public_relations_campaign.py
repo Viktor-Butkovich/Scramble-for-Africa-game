@@ -107,7 +107,7 @@ class public_relations_campaign(action.campaign):
             if status.europe_grid in unit.grids:
                 self.start(unit)
             else:
-                text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe', self.global_manager)
+                text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe')
 
     def start(self, unit):
         '''
@@ -129,7 +129,7 @@ class public_relations_campaign(action.campaign):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }

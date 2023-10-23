@@ -4,12 +4,12 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
-def start_trial(global_manager): #called by launch trial button in middle of trial screen
+def start_trial(): #called by launch trial button in middle of trial screen
     '''
     Description:
         Used when the player presses the trial button in the trial screen, displays a choice notification that allows the player to start the trial or not
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -30,14 +30,13 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
         'extra_parameters': choice_info_dict
     })
 
-def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
+def manage_defense(corruption_evidence, prosecutor_corrupt):
     '''
     Description:
         Determines the defending minister's actions in the trial, ranging from buying defense lawyers to bribing the prosecutor. The amount of money spent depends on the trial's success chance and the minister's savings
     Input:
         int corruption_evidence: How much evidence, real or fabricated, is being used in this trial
         boolean prosecutor_corrupt: Whether the prosecutor is corrupt and would be willing to take a bribe to intentionally lose the trial
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         dictionary: Keys corresponding to values containing information about the defense's strategy
             'num_lawyers': int value - Number of defense lawyers working to cancel out evidence
@@ -115,18 +114,18 @@ def get_fabricated_evidence_cost(current_fabricated_evidence, calculate_total = 
             total += base_cost * multiplier
         return(total)
 
-def trial(global_manager): #called by choice notification button
+def trial(): #called by choice notification button
     '''
     Description:
         Controls the trial process, determining and displaying its result through a series of notifications
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     price = constants.action_prices['trial']
     constants.money_tracker.change(-1 * constants.action_prices['trial'], 'trial')
-    actor_utility.double_action_price(global_manager, 'trial')
+    actor_utility.double_action_price('trial')
     defense = status.displayed_defense
     prosecution = status.displayed_prosecution
     prosecutor_corrupt = prosecution.check_corruption()
@@ -136,7 +135,7 @@ def trial(global_manager): #called by choice notification button
         if flags.prosecution_bribed_judge:
             prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial')
 
-    defense_info_dict = manage_defense(defense.corruption_evidence, prosecutor_corrupt, global_manager)
+    defense_info_dict = manage_defense(defense.corruption_evidence, prosecutor_corrupt)
     effective_evidence = defense_info_dict['effective_evidence']
 
     defense_bribed_judge = defense_info_dict['defense_bribed_judge']
@@ -218,16 +217,16 @@ def trial(global_manager): #called by choice notification button
         constants.notification_manager.display_notification({
             'message': 'As you have no evidence rolls remaining, you automatically lose the trial. /n /n',
         })
-        complete_trial(1, global_manager)
+        complete_trial(1)
     else:
-        display_evidence_roll(global_manager)
+        display_evidence_roll()
 
-def display_evidence_roll(global_manager):
+def display_evidence_roll():
     '''
     Description:
         Creates the die object and series of notifications necessary to display a single evidence roll in a trial
     Input:
-        global_manager_template global_manager: Object that accesses shared variablesNone
+        None
     Output:
         None
     '''
@@ -238,7 +237,7 @@ def display_evidence_roll(global_manager):
     result_outcome_dict = {'min_success': 5, 'min_crit_success': 5, 'max_crit_fail': 0}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
     constants.actor_creation_manager.display_die(scaling.scale_coordinates(constants.notification_manager.notification_x - 140, 440), scaling.scale_width(100),
-        scaling.scale_height(100), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
+        scaling.scale_height(100), ['trial'], 6, result_outcome_dict, outcome_color_dict, result)
     constants.notification_manager.display_notification({
         'message': text + 'Click to roll. 5+ required on at least 1 die to succeed.',
         'num_dice': 1
@@ -248,13 +247,13 @@ def display_evidence_roll(global_manager):
         'num_dice': 1,
         'notification_type': 'roll'
     })
-    results = dice_utility.roll_to_list(6, 'Evidence roll', 5, 5, 0, global_manager, result)
+    results = dice_utility.roll_to_list(6, 'Evidence roll', 5, 5, 0, result)
     constants.notification_manager.display_notification({
         'message': text + results[1],
         'notification_type': 'trial'
     })
 
-def complete_trial(final_roll, global_manager):
+def complete_trial(final_roll):
     '''
     Description:
         Used when the player finishes trial evidence rolls, shows the trial's results and makes any changes caused by the result. If successful, removes the minister from the game and confiscates a portion of their savings. On a
@@ -266,7 +265,7 @@ def complete_trial(final_roll, global_manager):
     '''
     prosecution = status.displayed_prosecution
     defense = status.displayed_defense
-    game_transitions.set_game_mode('ministers', global_manager)
+    game_transitions.set_game_mode('ministers')
     if final_roll >= 5:
         confiscated_money = defense.stolen_money / 2.0
         text = 'You have won the trial, removing ' + defense.name + ' as ' + defense.current_position + ' and putting him in prison. /n /n'
@@ -283,7 +282,7 @@ def complete_trial(final_roll, global_manager):
         })
         
         defense.appoint('none')
-        minister_utility.calibrate_minister_info_display(global_manager, None)
+        minister_utility.calibrate_minister_info_display(None)
         defense.respond('prison')
         defense.remove_complete()
         constants.fear_tracker.change(1)
@@ -326,7 +325,7 @@ def complete_trial(final_roll, global_manager):
             'message': text,
             'audio': 'not guilty'
         })
-        minister_utility.calibrate_minister_info_display(global_manager, defense)
+        minister_utility.calibrate_minister_info_display(defense)
     flags.prosecution_bribed_judge = False
     flags.ongoing_action = False
     status.ongoing_action_type = None

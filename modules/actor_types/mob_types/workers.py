@@ -12,7 +12,7 @@ class worker(pmob):
     '''
     pmob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,15 +27,14 @@ class worker(pmob):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker_type': string value - Type of worker this is, like 'European'. Each type of worker has a separate upkeep, labor pool, and abilities
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.number = 2 #workers is plural
         self.is_worker = True
         self.is_church_volunteers = False
@@ -44,12 +43,12 @@ class worker(pmob):
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
             constants.num_european_workers += 1
             if not from_save:
-                market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
             
         elif self.worker_type == 'African':
             constants.num_african_workers -= 1
             if not from_save:
-                market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
                 
         self.set_controlling_minister_type(constants.type_minister_dict['production'])
 
@@ -58,8 +57,8 @@ class worker(pmob):
         self.update_image_bundle()
         if not from_save:
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for is_worker changing
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
         constants.money_label.check_for_updates()
         #self.update_image_bundle()
@@ -82,47 +81,45 @@ class worker(pmob):
         destination_message = ' for the ' + destination.name + ' at (' + str(destination.x) + ', ' + str(destination.y) + ')'
         if self.worker_type in ['European', 'African']: #increase relevant costs as if recruiting new worker
             if self.worker_type == 'African': #get worker from nearest slum or village
-                new_worker_source = actor_utility.find_closest_available_worker(destination, self.global_manager)
+                new_worker_source = actor_utility.find_closest_available_worker(destination)
                 if not new_worker_source == 'none':
-                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
                     if new_worker_source in status.village_list: #both village and slum have change_population, but slum change population automatically changes number of workers while village does not
                         new_worker_source.available_workers -= 1
                     new_worker_source.change_population(-1)
 
                     if new_worker_source in status.village_list:
-                        text_utility.print_to_screen('Replacement workers have been automatically hired from ' + new_worker_source.name + ' village at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.',
-                            self.global_manager)
+                        text_utility.print_to_screen('Replacement workers have been automatically hired from ' + new_worker_source.name + ' village at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.')
                     elif new_worker_source in status.slums_list:
-                        text_utility.print_to_screen('Replacement workers have been automatically hired from the slums at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.', self.global_manager)
+                        text_utility.print_to_screen('Replacement workers have been automatically hired from the slums at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.')
                     
                 else: #if no villages or slums with available workers, recruit abstract African workers and give bigger upkeep penalty to compensate
-                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                    text_utility.print_to_screen('As there were no available workers in nearby slums and villages, replacement workers were automatically hired from a nearby colony' + destination_message + ', incurring an increased penalty on African worker upkeep.',
-                        self.global_manager)
+                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
+                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
+                    text_utility.print_to_screen('As there were no available workers in nearby slums and villages, replacement workers were automatically hired from a nearby colony' + destination_message + ', incurring an increased penalty on African worker upkeep.')
                     
             elif self.worker_type == 'European':
-                market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                text_utility.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
+                market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
+                text_utility.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.')
                 
         elif self.worker_type == 'slave':
             constants.money_tracker.change(constants.recruitment_costs['slave workers'] * -1, 'attrition_replacements')
-            actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1, self.global_manager)
-            text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(constants.recruitment_costs['slave workers']) + ' money.', self.global_manager)
-            market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+            actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1)
+            text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(constants.recruitment_costs['slave workers']) + ' money.')
+            market_utility.attempt_slave_recruitment_cost_change('increase')
 
             if constants.effect_manager.effect_active('no_slave_trade_penalty'):
-                text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.', self.global_manager)
+                text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.')
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = constants.public_opinion_tracker.get()
                 constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
                 resulting_public_opinion = constants.public_opinion_tracker.get()
                 if not resulting_public_opinion == current_public_opinion:
-                    text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                    text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
 
         elif self.worker_type == 'religious':
-            text_utility.print_to_screen('Replacement religious volunteers have been automatically found among nearby colonists.', self.global_manager)
+            text_utility.print_to_screen('Replacement religious volunteers have been automatically found among nearby colonists.')
 
     def to_save_dict(self):
         '''
@@ -151,16 +148,16 @@ class worker(pmob):
         '''
         super().fire()
         if self.worker_type in ['African', 'European']: #not religious volunteers
-            market_utility.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
+            market_utility.attempt_worker_upkeep_change('decrease', self.worker_type)
         if self.worker_type == 'African' and wander:
-            text_utility.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.', self.global_manager)
+            text_utility.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.')
             constants.num_wandering_workers += 1
         elif self.worker_type in ['European', 'religious']:
             current_public_opinion = constants.public_opinion
             constants.public_opinion_tracker.change(-1)
             resulting_public_opinion = constants.public_opinion
             if not current_public_opinion == resulting_public_opinion:
-                text_utility.print_to_screen('Firing ' + self.name + ' reflected poorly on your company and reduced your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                text_utility.print_to_screen('Firing ' + self.name + ' reflected poorly on your company and reduced your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
 
     def can_show_tooltip(self):
         '''
@@ -197,7 +194,7 @@ class worker(pmob):
         self.remove_from_turn_queue()
         vehicle.add_to_turn_queue()
         if not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             vehicle.select()
 
     def uncrew_vehicle(self, vehicle):
@@ -220,11 +217,11 @@ class worker(pmob):
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
         vehicle.remove_from_turn_queue()
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         vehicle.select()
         self.add_to_turn_queue()
         self.update_image_bundle()
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def join_group(self):
         '''
@@ -312,7 +309,7 @@ class slave_worker(worker):
     '''
     Worker that is captured or bought from slave traders, reduces public opinion, and has a low, unvarying upkeep and a varying recruitment cost
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -327,15 +324,14 @@ class slave_worker(worker):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'purchased': boolean value - Value set to true if the slaves were bought or false if they were captured, determining effects on public opinion and slave recruitment costs
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['worker_type'] = 'slave'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         if not from_save:
             if input_dict['purchased']: #as opposed to captured
                 if not constants.effect_manager.effect_active('no_slave_trade_penalty'):
@@ -344,22 +340,22 @@ class slave_worker(worker):
                     constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
                     resulting_public_opinion = constants.public_opinion_tracker.get()
                     if not resulting_public_opinion == current_public_opinion:
-                        text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
-                market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+                        text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
+                market_utility.attempt_slave_recruitment_cost_change('increase')
                 constants.evil_tracker.change(6)
-                actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1, self.global_manager)
+                actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = constants.public_opinion_tracker.get()
                 constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
                 resulting_public_opinion = constants.public_opinion_tracker.get()
                 if not resulting_public_opinion == current_public_opinion:
-                    text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                    text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
                 constants.evil_tracker.change(6)
         constants.num_slave_workers += 1
         self.set_controlling_minister_type(constants.type_minister_dict['production'])
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for is_worker changing
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for is_worker changing
         constants.money_label.check_for_updates()
         if constants.slave_traders_strength <= 0:
             self.automatically_replace = False
@@ -382,15 +378,15 @@ class slave_worker(worker):
             Frees this slave, increasing public opinion and adding them to the labor pool, followed by either re-recruiting them as African workers or allowing them to wander and settle in 
                 slums
         '''
-        market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+        market_utility.attempt_worker_upkeep_change('decrease', 'African')
         public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average
         current_public_opinion = constants.public_opinion_tracker.get()
         constants.public_opinion_tracker.change(public_opinion_bonus)
         resulting_public_opinion = constants.public_opinion_tracker.get()
         if not resulting_public_opinion == current_public_opinion:
-            text_utility.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+            text_utility.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
         if wander:
-            text_utility.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
+            text_utility.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums')
             constants.num_wandering_workers += 1
         constants.evil_tracker.change(-2)
 
@@ -412,7 +408,7 @@ class slave_worker(worker):
             'init_type': 'workers',
             'worker_type': 'African',
             'select_on_creation': self.selected
-        }, self.global_manager)
+        })
         new_worker.set_automatically_replace(self.automatically_replace)
         if self.in_vehicle:
             new_worker.embark_vehicle(self.vehicle, focus = False)
@@ -436,7 +432,7 @@ class church_volunteers(worker):
     '''
     Worker with no cost that can join with a head missionary to form missionaries, created through religious campaigns
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -451,14 +447,13 @@ class church_volunteers(worker):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['worker_type'] = 'religious'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.set_controlling_minister_type(constants.type_minister_dict['religion'])
         constants.num_church_volunteers += 1
 

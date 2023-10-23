@@ -10,7 +10,7 @@ class work_crew(group):
     '''
     A group with a foreman officer that can work in buildings
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,20 +25,19 @@ class work_crew(group):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_work_crew = True
         self.set_group_type('work_crew')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for new button available
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for new button available
 
     def work_building(self, building):
         '''
@@ -56,8 +55,8 @@ class work_crew(group):
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, building.cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, building.cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
 
     def leave_building(self, building):
         '''
@@ -73,8 +72,8 @@ class work_crew(group):
         self.show_images()
         self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         self.select()
 
     def attempt_production(self, building):
@@ -116,4 +115,4 @@ class work_crew(group):
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
                 if random.randrange(1, 7) <= 1: #1/6 chance
-                    market_utility.change_price(building.resource_type, -1, self.global_manager)
+                    market_utility.change_price(building.resource_type, -1)

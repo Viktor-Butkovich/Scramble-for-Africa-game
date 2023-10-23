@@ -4,7 +4,6 @@ import random
 import pickle
 from ...util import scaling, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility, tutorial_utility
 from ...interface_types import grids
-from . import global_manager_template
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -13,17 +12,15 @@ class save_load_manager_template():
     '''
     Object that controls creating new games, saving, and loading
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
-        self.global_manager = global_manager
-        self.copied_globals = []
         self.copied_constants = []
         self.copied_statuses = []
         self.copied_flags = []
@@ -94,7 +91,7 @@ class save_load_manager_template():
             'modes': ['strategic'],
             'strategic_grid': True,
             'grid_line_width': 2
-        }, self.global_manager)
+        })
 
         status.minimap_grid = grids.mini_grid(False, {
             'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
@@ -108,7 +105,7 @@ class save_load_manager_template():
             'modes': ['strategic'],
             'grid_line_width': 3,
             'attached_grid': status.strategic_map_grid
-        }, self.global_manager)
+        })
 
         europe_grid_x = constants.europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
         europe_grid_y = constants.europe_grid_y #constants.default_display_height - (strategic_grid_height + 25)
@@ -123,7 +120,7 @@ class save_load_manager_template():
             'tile_image_id': 'locations/europe/' + country.name + '.png',
             'grid_line_width': 3,
             'name': 'Europe'
-        }, self.global_manager)
+        })
 
 
         slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
@@ -139,13 +136,13 @@ class save_load_manager_template():
             'tile_image_id': 'locations/slave_traders/default.png', 
             'grid_line_width': 3,
             'name': 'Slave traders'
-        }, self.global_manager)
+        })
         
-        game_transitions.set_game_mode('strategic', self.global_manager)
-        game_transitions.create_strategic_map(self.global_manager, from_save=False)
+        game_transitions.set_game_mode('strategic')
+        game_transitions.create_strategic_map(from_save=False)
         status.minimap_grid.calibrate(2, 2)
 
-        game_transitions.set_game_mode('ministers', self.global_manager)
+        game_transitions.set_game_mode('ministers')
 
         for current_commodity in constants.commodity_types:
             if not current_commodity == 'consumer goods':
@@ -156,9 +153,9 @@ class save_load_manager_template():
                 elif current_commodity == 'diamond':
                     increase = random.randrange(1, 7) + random.randrange(1, 7)
                 price += increase    
-                market_utility.set_price(current_commodity, price, self.global_manager) #2-5
+                market_utility.set_price(current_commodity, price) #2-5
             else:
-                market_utility.set_price(current_commodity, constants.consumer_goods_starting_price, self.global_manager)
+                market_utility.set_price(current_commodity, constants.consumer_goods_starting_price)
 
         constants.money_tracker.reset_transaction_history()
         constants.money_tracker.set(500)
@@ -169,11 +166,11 @@ class save_load_manager_template():
         constants.fear_tracker.set(1)
 
         constants.slave_traders_natural_max_strength = 10 #regenerates to natural strength, can increase indefinitely when slaves are purchased
-        actor_utility.set_slave_traders_strength(constants.slave_traders_natural_max_strength, self.global_manager)
+        actor_utility.set_slave_traders_strength(constants.slave_traders_natural_max_strength)
         flags.player_turn = True
         status.previous_financial_report = None
 
-        constants.actor_creation_manager.create_initial_ministers(self.global_manager)
+        constants.actor_creation_manager.create_initial_ministers()
 
         constants.available_minister_left_index = -2
 
@@ -186,29 +183,29 @@ class save_load_manager_template():
         constants.european_worker_upkeep = constants.initial_european_worker_upkeep
         constants.slave_worker_upkeep = constants.initial_slave_worker_upkeep
         constants.recruitment_costs['slave workers'] = constants.base_slave_recruitment_cost
-        actor_utility.reset_action_prices(self.global_manager)
+        actor_utility.reset_action_prices()
         for current_commodity in constants.commodity_types:
             constants.sold_commodities[current_commodity] = 0
         flags.prosecution_bribed_judge = False
 
         for i in range(1, random.randrange(5, 8)):
-            turn_management_utility.manage_villages(self.global_manager)
-            turn_management_utility.manage_warriors(self.global_manager)
-            actor_utility.spawn_beast(self.global_manager)
+            turn_management_utility.manage_villages()
+            turn_management_utility.manage_warriors()
+            actor_utility.spawn_beast()
         
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
 
-        turn_management_utility.start_player_turn(self.global_manager, True)
+        turn_management_utility.start_player_turn(True)
         if not constants.effect_manager.effect_active('skip_intro'):
             status.minister_appointment_tutorial_completed = False
             status.exit_minister_screen_tutorial_completed = False
-            tutorial_utility.show_tutorial_notifications(self.global_manager)
+            tutorial_utility.show_tutorial_notifications()
         else:
             status.minister_appointment_tutorial_completed = True
             status.exit_minister_screen_tutorial_completed = True
             for current_minister_position_index in range(len(constants.minister_types)):
                 status.minister_list[current_minister_position_index].appoint(constants.minister_types[current_minister_position_index])
-            game_transitions.set_game_mode('strategic', self.global_manager)
+            game_transitions.set_game_mode('strategic')
         flags.creating_new_game = False
         
     def save_game(self, file_path):
@@ -221,7 +218,6 @@ class save_load_manager_template():
             None
         '''
         file_path = 'save_games/' + file_path
-        saved_global_manager = global_manager_template.global_manager_template()
         status.transaction_history = constants.money_tracker.transaction_history
         saved_constants = {}
         for current_element in self.copied_constants:
@@ -268,7 +264,6 @@ class save_load_manager_template():
             saved_lore_mission_dicts.append(current_lore_mission.to_save_dict())
 
         with open(file_path, 'wb') as handle: #write wb, read rb
-            pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
             pickle.dump(saved_constants, handle)
             pickle.dump(saved_statuses, handle)
             pickle.dump(saved_flags, handle)
@@ -277,7 +272,7 @@ class save_load_manager_template():
             pickle.dump(saved_minister_dicts, handle)
             pickle.dump(saved_lore_mission_dicts, handle)
             handle.close()
-        text_utility.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
+        text_utility.print_to_screen('Game successfully saved to ' + file_path)
 
     def load_game(self, file_path):
         '''
@@ -290,14 +285,13 @@ class save_load_manager_template():
         '''
         flags.loading_save = True
         
-        text_utility.print_to_screen('', self.global_manager)
-        text_utility.print_to_screen('Loading ' + file_path, self.global_manager)
-        game_transitions.start_loading(self.global_manager)
+        text_utility.print_to_screen('')
+        text_utility.print_to_screen('Loading ' + file_path)
+        game_transitions.start_loading()
         #load file
         try:
             file_path = 'save_games/' + file_path
             with open(file_path, 'rb') as handle:
-                new_global_manager = pickle.load(handle)
                 saved_constants = pickle.load(handle)
                 saved_statuses = pickle.load(handle)
                 saved_flags = pickle.load(handle)
@@ -307,7 +301,7 @@ class save_load_manager_template():
                 saved_lore_mission_dicts = pickle.load(handle)
                 handle.close()
         except:
-            text_utility.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
+            text_utility.print_to_screen('The ' + file_path + ' file does not exist.')
             return()
 
         #load variables
@@ -326,8 +320,8 @@ class save_load_manager_template():
 
         getattr(status, status.current_country_name).select() #selects the country object with the same identifier as the saved country name
 
-        text_utility.print_to_screen('', self.global_manager)
-        text_utility.print_to_screen('Turn ' + str(constants.turn), self.global_manager)
+        text_utility.print_to_screen('')
+        text_utility.print_to_screen('Turn ' + str(constants.turn))
 
         #load grids
         strategic_grid_height = 300
@@ -351,7 +345,7 @@ class save_load_manager_template():
                 input_dict['modes'] = ['strategic']
                 input_dict['strategic_grid'] = True
                 input_dict['grid_line_width'] = 2
-                status.strategic_map_grid = grids.grid(True, input_dict, self.global_manager)
+                status.strategic_map_grid = grids.grid(True, input_dict)
                 
             elif current_grid_dict['grid_type'] in ['europe_grid', 'slave_traders_grid']:
                 input_dict['width'] = scaling.scale_width(120)
@@ -364,13 +358,13 @@ class save_load_manager_template():
                     input_dict['coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y)
                     input_dict['tile_image_id'] = 'locations/europe/' + status.current_country.name + '.png' 
                     input_dict['name'] = 'Europe'
-                    status.europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
+                    status.europe_grid = grids.abstract_grid(True, input_dict)
                 else:
                     input_dict['modes'] = ['strategic']
                     input_dict['coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y)
                     input_dict['tile_image_id'] = 'locations/slave_traders/default.png' 
                     input_dict['name'] = 'Slave traders'
-                    status.slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
+                    status.slave_traders_grid = grids.abstract_grid(True, input_dict)
 
         status.minimap_grid = grids.mini_grid(False, {
             'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
@@ -384,33 +378,33 @@ class save_load_manager_template():
             'modes': ['strategic'],
             'grid_line_width': 3,
             'attached_grid': status.strategic_map_grid
-        }, self.global_manager)
+        })
         
-        game_transitions.set_game_mode('strategic', self.global_manager)
-        game_transitions.create_strategic_map(self.global_manager, from_save=True)
+        game_transitions.set_game_mode('strategic')
+        game_transitions.create_strategic_map(from_save=True)
         if constants.effect_manager.effect_active('eradicate_slave_trade'):
-            actor_utility.set_slave_traders_strength(0, self.global_manager)
+            actor_utility.set_slave_traders_strength(0)
         else:
-            actor_utility.set_slave_traders_strength(constants.slave_traders_strength, self.global_manager)
+            actor_utility.set_slave_traders_strength(constants.slave_traders_strength)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:
-            constants.actor_creation_manager.create(True, current_actor_dict, self.global_manager)
+            constants.actor_creation_manager.create(True, current_actor_dict)
         for current_minister_dict in saved_minister_dicts:
-            constants.actor_creation_manager.create_minister(True, current_minister_dict, self.global_manager)
+            constants.actor_creation_manager.create_minister(True, current_minister_dict)
         for current_lore_mission_dict in saved_lore_mission_dicts:
-            constants.actor_creation_manager.create_lore_mission(True, current_lore_mission_dict, self.global_manager)
+            constants.actor_creation_manager.create_lore_mission(True, current_lore_mission_dict)
         constants.available_minister_left_index = -2
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
         status.commodity_prices_label.update_label()
         
         status.minimap_grid.calibrate(2, 2)
         if saved_constants['current_game_mode'] != 'strategic':
-            game_transitions.set_game_mode(saved_constants['current_game_mode'], self.global_manager)
+            game_transitions.set_game_mode(saved_constants['current_game_mode'])
 
         for current_completed_lore_type in constants.completed_lore_mission_types:
             status.lore_types_effects_dict[current_completed_lore_type].apply()
 
-        tutorial_utility.show_tutorial_notifications(self.global_manager)
+        tutorial_utility.show_tutorial_notifications()
 
         flags.loading_save = False

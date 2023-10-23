@@ -78,7 +78,7 @@ class suppress_slave_trade(action.action):
         Output:
             int: Returns the current flat roll modifier for this action
         '''
-        return(super().generate_current_roll_modifier() + actor_utility.get_slave_traders_strength_modifier(self.global_manager))
+        return(super().generate_current_roll_modifier() + actor_utility.get_slave_traders_strength_modifier())
 
     def generate_notification_text(self, subject):
         '''
@@ -93,7 +93,7 @@ class suppress_slave_trade(action.action):
         if subject == 'confirmation':
             text += 'Are you sure you want to attempt to suppress the slave trade? If successful, your company\'s public opinion will increase and the strength of the slave traders will decrease, ending the slave trade once strength reaches 0. /n /n'
             text += 'The suppression will cost ' + str(self.get_price()) + ' money. /n /n'
-            strength_modifier = actor_utility.get_slave_traders_strength_modifier(self.global_manager)
+            strength_modifier = actor_utility.get_slave_traders_strength_modifier()
             if strength_modifier < 0:
                 text += 'The slave traders are flourishing and will provide strong resistance. /n /n'
             elif strength_modifier > 0:
@@ -142,9 +142,9 @@ class suppress_slave_trade(action.action):
         '''
         if super().on_click(unit):
             if unit.images[0].current_cell.grid != status.slave_traders_grid:
-                text_utility.print_to_screen('Suppressing the slave trade is only possible in the slave traders tile.', self.global_manager)
+                text_utility.print_to_screen('Suppressing the slave trade is only possible in the slave traders tile.')
             elif constants.slave_traders_strength <= 0:
-                text_utility.print_to_screen('The slave trade has already been eradicated.', self.global_manager)
+                text_utility.print_to_screen('The slave trade has already been eradicated.')
             else:
                 self.start(unit)
 
@@ -167,7 +167,7 @@ class suppress_slave_trade(action.action):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }
@@ -185,14 +185,14 @@ class suppress_slave_trade(action.action):
             None
         '''
         if self.roll_result >= self.current_min_success: #if campaign succeeded
-            actor_utility.set_slave_traders_strength(constants.slave_traders_strength - self.strength_decrease, self.global_manager)
+            actor_utility.set_slave_traders_strength(constants.slave_traders_strength - self.strength_decrease)
             if constants.slave_traders_strength <= 0:
                 constants.slave_traders_strength = 0
                 num_freed_slaves = random.randrange(1, 7) + random.randrange(1, 7)
                 initial_public_opinion_increase = self.public_opinion_increase
                 for i in range(num_freed_slaves):
                     self.public_opinion_increase += 4 + random.randrange(-3, 4) #1-7 each
-                    market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+                    market_utility.attempt_worker_upkeep_change('decrease', 'African')
                     constants.evil_tracker.change(-2)
                     constants.num_wandering_workers += 1
                 text = 'The slave trade has been eradicated. /n /n'

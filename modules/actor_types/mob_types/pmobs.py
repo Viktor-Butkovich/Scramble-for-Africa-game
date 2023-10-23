@@ -12,7 +12,7 @@ class pmob(mob):
     '''
     Short for player-controlled mob, mob controlled by the player
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,7 +27,7 @@ class pmob(mob):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'sentry_mode': boolean value - Required if from save, whether this unit is in sentry mode, preventing it from being in the turn order
@@ -35,12 +35,11 @@ class pmob(mob):
                 'base_automatic_route': int tuple list value - Required if from save, list of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - Required if from save, list of the coordinates and string commands this unit will execute, changes as the route is executed
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.sentry_mode = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.selection_outline_color = 'bright green'
         status.pmob_list.append(self)
         self.is_pmob = True
@@ -68,10 +67,10 @@ class pmob(mob):
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
-            actor_utility.deselect_all(self.global_manager)
+            actor_utility.deselect_all()
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
                 self.select()
         self.attached_cell_icon_list = []
 
@@ -86,7 +85,7 @@ class pmob(mob):
                 Along with superclass outputs, also saves the following values:
                 'default_name': string value - This actor's name without modifications like veteran
                 'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'sentry_mode': boolean value - Whether this unit is in sentry mode, preventing it from being in the turn order
                 'in_turn_queue': boolean value - Whether this unit is in the turn order, allowing end unit turn commands, etc. to persist after saving/loading
                 'base_automatic_route': int tuple list value - List of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
@@ -140,7 +139,7 @@ class pmob(mob):
             'image': image_id,
             'modes': ['strategic'],
             'init_type': 'cell icon'
-        }, self.global_manager))
+        }))
 
     def add_to_automatic_route(self, new_coordinates):
         '''
@@ -154,7 +153,7 @@ class pmob(mob):
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
         if self == status.displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def calculate_automatic_route(self):
         '''
@@ -283,7 +282,7 @@ class pmob(mob):
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
         if self == status.displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def selection_sound(self):
         '''
@@ -317,14 +316,14 @@ class pmob(mob):
             None
         '''
         if new_value == True and self.is_worker and self.worker_type == 'slave' and constants.slave_traders_strength <= 0:
-            text_utility.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
+            text_utility.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible')
             return()
         self.automatically_replace = new_value
         displayed_mob = status.displayed_mob
         if self == displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
         elif displayed_mob and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -359,12 +358,12 @@ class pmob(mob):
             if new_value == True:
                 self.remove_from_turn_queue()
                 if status.displayed_mob == self:
-                    actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates actor info display with sentry icon
+                    actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with sentry icon
             else:
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == status.displayed_mob:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def add_to_turn_queue(self):
         '''
@@ -538,10 +537,10 @@ class pmob(mob):
         Output:
             boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
         '''
-        if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
+        if minister_utility.positions_filled(): #not self.controlling_minister == 'none':
             return(True)
         else:
-            game_transitions.force_minister_appointment(self.global_manager)
+            game_transitions.force_minister_appointment()
             return(False)
 
     def set_controlling_minister_type(self, new_type):
@@ -615,7 +614,7 @@ class pmob(mob):
         if self.can_hold_commodities:
             self.inventory[commodity] += change
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -630,7 +629,7 @@ class pmob(mob):
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
             if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def fire(self):
         '''
@@ -683,9 +682,9 @@ class pmob(mob):
                                             if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and (not self.can_swim_river) and (not self.can_walk)):
                                                 if can_print:
                                                     if future_y == 0:
-                                                        text_utility.print_to_screen('This unit cannot move into the ocean.', self.global_manager)
+                                                        text_utility.print_to_screen('This unit cannot move into the ocean.')
                                                     elif future_y > 0:
-                                                        text_utility.print_to_screen('This unit cannot move through rivers.', self.global_manager)
+                                                        text_utility.print_to_screen('This unit cannot move through rivers.')
                                                 return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
@@ -693,35 +692,35 @@ class pmob(mob):
                                         return(True)
                                     else:
                                         if can_print:
-                                            text_utility.print_to_screen('You cannot move through enemy units.', self.global_manager)
+                                            text_utility.print_to_screen('You cannot move through enemy units.')
                                         return(False)
                                 else:
                                     if can_print:
-                                        text_utility.print_to_screen('You do not have enough movement points to move.', self.global_manager)
-                                        text_utility.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.', self.global_manager)
+                                        text_utility.print_to_screen('You do not have enough movement points to move.')
+                                        text_utility.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.')
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 if can_print:
-                                    text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.', self.global_manager)
+                                    text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.')
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 if can_print:
-                                    text_utility.print_to_screen('You cannot move on ocean with this unit.', self.global_manager)
+                                    text_utility.print_to_screen('You cannot move on ocean with this unit.')
                                 return(False)
                         else:
                             if can_print:
-                                text_utility.print_to_screen('You cannot move into an unexplored tile.', self.global_manager)
+                                text_utility.print_to_screen('You cannot move into an unexplored tile.')
                             return(False)
                     else:
-                        text_utility.print_to_screen('You cannot move off of the map.', self.global_manager)
+                        text_utility.print_to_screen('You cannot move off of the map.')
                         return(False)
                 else:
                     if can_print:
-                        text_utility.print_to_screen('You cannot move while in this area.', self.global_manager)
+                        text_utility.print_to_screen('You cannot move while in this area.')
                     return(False)
         else:
             if can_print:
-                text_utility.print_to_screen('You cannot move units before a Minister of Transportation has been appointed.', self.global_manager)
+                text_utility.print_to_screen('You cannot move units before a Minister of Transportation has been appointed.')
             return(False)
 
     def can_show_tooltip(self):
@@ -765,7 +764,7 @@ class pmob(mob):
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             vehicle.select()
         if not flags.loading_save:
             constants.sound_manager.play_sound('footsteps')
@@ -799,13 +798,13 @@ class pmob(mob):
                     consumer_goods_transferred = self.inventory_capacity
                 vehicle.change_inventory('consumer goods', -1 * consumer_goods_transferred)
                 self.change_inventory('consumer goods', consumer_goods_transferred)
-                text_utility.print_to_screen(utility.capitalize(self.name) + ' automatically took ' + str(consumer_goods_transferred) + ' consumer goods from ' + vehicle.name + '\'s cargo.', self.global_manager)
+                text_utility.print_to_screen(utility.capitalize(self.name) + ' automatically took ' + str(consumer_goods_transferred) + ' consumer goods from ' + vehicle.name + '\'s cargo.')
 
         self.add_to_turn_queue()
         if focus:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
             if status.minimap_grid in self.grids:
                 status.minimap_grid.calibrate(self.x, self.y)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
             constants.sound_manager.play_sound('footsteps')

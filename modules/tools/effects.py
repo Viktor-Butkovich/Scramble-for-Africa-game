@@ -4,14 +4,13 @@ from ..util import utility
 import modules.constants.constants as constants
 
 class effect():
-    def __init__(self, effect_id, effect_type, global_manager):
+    def __init__(self, effect_id, effect_type):
         '''
         Description:
             Initializes this object
         Input:
             string effect_id: Name of effect, like 'british_country_modifier'
             string effect_type: Type of effect produced by this effect, like 'advertising_plus_modifier'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''

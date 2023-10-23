@@ -11,7 +11,7 @@ class expedition(group):
     '''
     A group with an explorer officer that is able to explore and move on water
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -26,17 +26,16 @@ class expedition(group):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-                'canoes_image': string value - File path tothe image used by this object when it is in a river
-            global_manager_template global_manager: Object that accesses shared variables
+                'canoes_image': string value - File path to the image used by this object when it is in a river
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.can_explore = True
         self.set_has_canoes(True)
         
@@ -251,10 +250,10 @@ class expedition(group):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['rumor_search'], 'rumor_search', 2)
-            first_roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -273,7 +272,7 @@ class expedition(group):
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['rumor_search'], 'rumor_search')
-            roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
@@ -459,10 +458,10 @@ class expedition(group):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['artifact_search'], 'artifact_search', 2)
-            first_roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -481,7 +480,7 @@ class expedition(group):
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, constants.action_prices['artifact_search'], 'artifact_search')
-            roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
@@ -560,7 +559,7 @@ class expedition(group):
                 status.current_lore_mission.remove_complete()
             else:
                 location.set_proven_false(True)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, status.displayed_tile) #updates tile display without question mark
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile) #updates tile display without question mark
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         elif roll_result <= self.current_max_crit_fail:

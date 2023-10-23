@@ -9,7 +9,7 @@ class actor_display_free_image(free_image):
     '''
     Free image that changes its appearance to match selected mobs or tiles
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -22,7 +22,6 @@ class actor_display_free_image(free_image):
                 'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
                 'actor_image_type': string value - subtype of actor image, like 'minister_default' or 'possible_artifact_location'
                 'default_image_id' = 'none': string value - Image to use if not calibrated to any actor, such as for reorganization placeholder images
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -30,7 +29,7 @@ class actor_display_free_image(free_image):
         self.actor = 'none'
         self.default_image_id = input_dict.get('default_image_id', 'none')
         input_dict['image_id'] = 'misc/empty.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def calibrate(self, new_actor):
         '''
@@ -86,7 +85,7 @@ class mob_background_image(free_image):
     '''
     Image appearing behind the displayed actor in the actor info display
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -98,11 +97,10 @@ class mob_background_image(free_image):
                 'height': int value - Pixel height of this image
                 'modes': string list value - Game modes during which this button can appear
                 'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.actor = 'none'
 
     def calibrate(self, new_actor):
@@ -178,7 +176,7 @@ class label_image(free_image):
     '''
     Free image that is attached to a label and will only show when the label is showing
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -190,13 +188,12 @@ class label_image(free_image):
                 'modes': string list value - Game modes during which this button can appear
                 'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
                 'attached_label': label value - Label attached to this image
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.attached_label = input_dict['attached_label']
         input_dict['image_id'] = 'misc/empty.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''

@@ -11,7 +11,7 @@ class npmob(mob):
     '''
     Short for non-player-controlled mob, mob not controlled by the player
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,11 +27,10 @@ class npmob(mob):
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.can_swim = True
         self.can_swim_river = True
         self.can_swim_ocean = False
@@ -142,7 +141,7 @@ class npmob(mob):
             if len(status.attacker_queue) > 0:
                 status.attacker_queue.pop(0).attempt_local_combat()
             elif flags.enemy_combat_phase: #if enemy combat phase done, go to player turn
-                turn_management_utility.start_player_turn(self.global_manager)
+                turn_management_utility.start_player_turn()
 
     def kill_noncombatants(self):
         '''

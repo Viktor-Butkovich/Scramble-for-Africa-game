@@ -126,7 +126,6 @@ class advertising_campaign(action.campaign):
                      {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
-                    self.global_manager,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'left', 'centered': True}}
             ))
             return_list.append(
@@ -135,7 +134,6 @@ class advertising_campaign(action.campaign):
                      {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
-                    self.global_manager,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'leftmost', 'centered': True}}
             ))
         return(return_list)
@@ -181,12 +179,12 @@ class advertising_campaign(action.campaign):
         if super().on_click(unit):
             if status.europe_grid in unit.grids:
                 if not constants.current_game_mode == 'europe':
-                    game_transitions.set_game_mode('europe', self.global_manager)
+                    game_transitions.set_game_mode('europe')
                     unit.select()
-                text_utility.print_to_screen('Select a commodity to advertise, or click elsewhere to cancel: ', self.global_manager)
+                text_utility.print_to_screen('Select a commodity to advertise, or click elsewhere to cancel: ')
                 flags.choosing_advertised_commodity = True
             else:
-                text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe', self.global_manager)
+                text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe')
 
     def start(self, unit, commodity):
         '''
@@ -214,7 +212,7 @@ class advertising_campaign(action.campaign):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }
@@ -234,8 +232,8 @@ class advertising_campaign(action.campaign):
             increase = 1
             if self.roll_result >= self.current_min_crit_success:
                 increase += 1
-            market_utility.change_price(self.target_commodity, increase, self.global_manager)
-            market_utility.change_price(self.target_unadvertised_commodity, -1 * increase, self.global_manager)
+            market_utility.change_price(self.target_commodity, increase)
+            market_utility.change_price(self.target_unadvertised_commodity, -1 * increase)
         elif self.roll_result <= self.current_max_crit_fail:
             self.current_unit.die('quit')
         super().complete()

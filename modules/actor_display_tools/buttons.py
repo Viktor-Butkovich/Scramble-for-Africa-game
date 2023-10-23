@@ -11,7 +11,7 @@ class embark_all_passengers_button(button):
     '''
     Button that commands a vehicle to take all other mobs in its tile as passengers
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,13 +27,12 @@ class embark_all_passengers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.vehicle_type = 'none'
         input_dict['button_type'] = 'embark all'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):
         '''
@@ -44,12 +43,12 @@ class embark_all_passengers_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             vehicle = status.displayed_mob
             can_embark = True
             if self.vehicle_type == 'train':
                 if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                    text_utility.print_to_screen('A train can only pick up passengers at a train station.', self.global_manager)
+                    text_utility.print_to_screen('A train can only pick up passengers at a train station.')
                     can_embark = False
             if can_embark:
                 if vehicle.sentry_mode:
@@ -60,7 +59,7 @@ class embark_all_passengers_button(button):
                         passenger.embark_vehicle(vehicle)
                 constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
         else:
-            text_utility.print_to_screen('You are busy and cannot embark all passengers.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot embark all passengers.')
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -85,7 +84,7 @@ class disembark_all_passengers_button(button):
     '''
     Button that commands a vehicle to eject all of its passengers
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -101,13 +100,12 @@ class disembark_all_passengers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.vehicle_type = 'none'
         input_dict['button_type'] = 'disembark all'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):
         '''
@@ -118,12 +116,12 @@ class disembark_all_passengers_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             vehicle = status.displayed_mob
             can_disembark = True
             if self.vehicle_type == 'train':
                 if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                    text_utility.print_to_screen('A train can only drop off passengers at a train station.', self.global_manager)
+                    text_utility.print_to_screen('A train can only drop off passengers at a train station.')
                     can_disembark = False
             if can_disembark:
                 if vehicle.sentry_mode:
@@ -132,7 +130,7 @@ class disembark_all_passengers_button(button):
                     vehicle.contained_mobs[-1].selection_sound()
                 vehicle.eject_passengers()
         else:
-            text_utility.print_to_screen('You are busy and cannot disembark all passengers.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot disembark all passengers.')
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -157,7 +155,7 @@ class enable_sentry_mode_button(button):
     '''
     Button that enables sentry mode for a unit, causing it to not be added to the turn cycle queue
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -173,12 +171,11 @@ class enable_sentry_mode_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'enable sentry mode'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -207,7 +204,7 @@ class enable_sentry_mode_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):   
+        if main_loop_utility.action_possible():   
             displayed_mob = status.displayed_mob      
             displayed_mob.set_sentry_mode(True)
             if (constants.effect_manager.effect_active('promote_on_sentry') 
@@ -215,13 +212,13 @@ class enable_sentry_mode_button(button):
             and not displayed_mob.veteran): #purely for promotion testing, not normal functionality
                 displayed_mob.promote()
         else:
-            text_utility.print_to_screen('You are busy and cannot enable sentry mode.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot enable sentry mode.')
 
 class disable_sentry_mode_button(button):
     '''
     Button that disables sentry mode for a unit, causing it to not be added to the turn cycle queue
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -237,12 +234,11 @@ class disable_sentry_mode_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'disable sentry mode'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -271,18 +267,18 @@ class disable_sentry_mode_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             displayed_mob = status.displayed_mob     
             displayed_mob.set_sentry_mode(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
         else:
-            text_utility.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot disable sentry mode.')
 
 class enable_automatic_replacement_button(button):
     '''
     Button that enables automatic attrition replacement for a unit or one of its components
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -299,13 +295,12 @@ class enable_automatic_replacement_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'target_type': string value - Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.target_type = input_dict['target_type']
         input_dict['button_type'] = 'enable automatic replacement'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -342,7 +337,7 @@ class enable_automatic_replacement_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):     
+        if main_loop_utility.action_possible():     
             displayed_mob = status.displayed_mob    
             if self.target_type == 'unit':
                 target = displayed_mob
@@ -352,13 +347,13 @@ class enable_automatic_replacement_button(button):
                 target = displayed_mob.officer         
             target.set_automatically_replace(True)
         else:
-            text_utility.print_to_screen('You are busy and cannot enable automatic replacement.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot enable automatic replacement.')
 
 class disable_automatic_replacement_button(button):
     '''
     Button that disables automatic attrition replacement for a unit or one of its components
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -375,13 +370,12 @@ class disable_automatic_replacement_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'target_type': string value - Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.target_type = input_dict['target_type']
         input_dict['button_type'] = 'disable automatic replacement'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -418,7 +412,7 @@ class disable_automatic_replacement_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             displayed_mob = status.displayed_mob
             if self.target_type == 'unit':
                 target = displayed_mob
@@ -428,13 +422,13 @@ class disable_automatic_replacement_button(button):
                 target = displayed_mob.officer         
             target.set_automatically_replace(False)
         else:
-            text_utility.print_to_screen('You are busy and cannot disable automatic replacement.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot disable automatic replacement.')
 
 class end_unit_turn_button(button):
     '''
     Button that ends a unit's turn, removing it from the current turn's turn cycle queue
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -450,12 +444,11 @@ class end_unit_turn_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'end unit turn'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -484,17 +477,17 @@ class end_unit_turn_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             status.displayed_mob.remove_from_turn_queue()
-            game_transitions.cycle_player_turn(self.global_manager)
+            game_transitions.cycle_player_turn()
         else:
-            text_utility.print_to_screen('You are busy and cannot end this unit\'s turn.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot end this unit\'s turn.')
 
 class remove_work_crew_button(button):
     '''
     Button that removes a work crew from a building
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -512,13 +505,12 @@ class remove_work_crew_button(button):
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
                 'building_type': Type of building to remove workers from, like 'resource building'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.building_type = input_dict['building_type']
         input_dict['button_type'] = 'remove worker'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -544,16 +536,16 @@ class remove_work_crew_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):         
+        if main_loop_utility.action_possible():         
             self.attached_label.attached_list[self.attached_label.list_index].leave_building(self.attached_label.actor.cell.contained_buildings[self.building_type])
         else:
-            text_utility.print_to_screen('You are busy and cannot remove a work crew from a building.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot remove a work crew from a building.')
 
 class disembark_vehicle_button(button):
     '''
     Button that disembarks a passenger from a vehicle
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -570,13 +562,12 @@ class disembark_vehicle_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.vehicle_type = 'none'
         input_dict['button_type'] = 'disembark'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -606,12 +597,12 @@ class disembark_vehicle_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):         
+        if main_loop_utility.action_possible():         
             if len(self.attached_label.actor.contained_mobs) > 0:
                 can_disembark = True
                 if self.vehicle_type == 'train':
                     if self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                        text_utility.print_to_screen('A train can only drop off passengers at a train station.', self.global_manager)
+                        text_utility.print_to_screen('A train can only drop off passengers at a train station.')
                         can_disembark = False
                 if can_disembark:
                     passenger = self.attached_label.attached_list[self.attached_label.list_index]
@@ -620,15 +611,15 @@ class disembark_vehicle_button(button):
                     passenger.selection_sound()
                     self.attached_label.attached_list[self.attached_label.list_index].disembark_vehicle(self.attached_label.actor)
             else:
-                text_utility.print_to_screen('You must select a ' + self.vehicle_type + 'with passengers to disembark passengers.', self.global_manager)
+                text_utility.print_to_screen('You must select a ' + self.vehicle_type + 'with passengers to disembark passengers.')
         else:
-            text_utility.print_to_screen('You are busy and cannot disembark from a ' + self.vehicle_type + '.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot disembark from a ' + self.vehicle_type + '.')
 
 class embark_vehicle_button(button):
     '''
     Button that commands a selected mob to embark a vehicle of the correct type in the same tile
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -645,14 +636,13 @@ class embark_vehicle_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'vehicle_type': string value - Type of vehicle this button embarks, like 'train' or 'ship'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.vehicle_type = input_dict['vehicle_type']
         self.was_showing = False
         input_dict['button_type'] = 'embark'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -674,7 +664,7 @@ class embark_vehicle_button(button):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
         self.was_showing = result
         return(result)
     
@@ -687,7 +677,7 @@ class embark_vehicle_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             displayed_mob = status.displayed_mob
             if displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
                 vehicle = displayed_mob.images[0].current_cell.get_vehicle(self.vehicle_type)
@@ -695,7 +685,7 @@ class embark_vehicle_button(button):
                 can_embark = True
                 if vehicle.vehicle_type == 'train':
                     if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                        text_utility.print_to_screen('A train can only pick up passengers at a train station.', self.global_manager)
+                        text_utility.print_to_screen('A train can only pick up passengers at a train station.')
                         can_embark = False
                 if can_embark:
                     if rider.sentry_mode:
@@ -705,15 +695,15 @@ class embark_vehicle_button(button):
                     rider.embark_vehicle(vehicle)
                     constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
             else:
-                text_utility.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.', self.global_manager)
+                text_utility.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.')
         else:
-            text_utility.print_to_screen('You are busy and cannot embark a ' + self.vehicle_type + '.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot embark a ' + self.vehicle_type + '.')
 
 class cycle_passengers_button(button):
     '''
     Button that cycles the order of passengers displayed in a vehicle
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -729,13 +719,12 @@ class cycle_passengers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.vehicle_type = 'none'
         input_dict['button_type'] = 'cycle passengers'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -765,19 +754,19 @@ class cycle_passengers_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             displayed_mob = status.displayed_mob
             moved_mob = displayed_mob.contained_mobs.pop(0)
             displayed_mob.contained_mobs.append(moved_mob)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, displayed_mob) #updates mob info display list to show changed passenger order
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob) #updates mob info display list to show changed passenger order
         else:
-            text_utility.print_to_screen('You are busy and cannot cycle passengers.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot cycle passengers.')
 
 class cycle_work_crews_button(button):
     '''
     Button that cycles the order of work crews in a building
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -794,13 +783,12 @@ class cycle_work_crews_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.previous_showing_result = False
         input_dict['button_type'] = 'cycle work crews'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         
     def can_show(self, skip_parent_collection=False):
         '''
@@ -835,19 +823,19 @@ class cycle_work_crews_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             displayed_tile = status.displayed_tile
             moved_mob = displayed_tile.cell.contained_buildings['resource'].contained_work_crews.pop(0)
             displayed_tile.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, displayed_tile) #updates tile info display list to show changed work crew order
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, displayed_tile) #updates tile info display list to show changed work crew order
         else:
-            text_utility.print_to_screen('You are busy and cannot cycle work crews.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot cycle work crews.')
 
 class work_crew_to_building_button(button):
     '''
     Button that commands a work crew to work in a certain type of building in its tile
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -864,7 +852,6 @@ class work_crew_to_building_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'building_type': string value - Type of buliding this button attaches workers to, like 'resource building'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -872,7 +859,7 @@ class work_crew_to_building_button(button):
         self.attached_work_crew = None
         self.attached_building = None
         input_dict['button_type'] = 'worker to resource'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def update_info(self):
         '''
@@ -932,25 +919,25 @@ class work_crew_to_building_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             if self.attached_building:
                 if self.attached_building.scale > len(self.attached_building.contained_work_crews): #if has extra space
                     if self.attached_work_crew.sentry_mode:
                         self.attached_work_crew.set_sentry_mode(False)
                     self.attached_work_crew.work_building(self.attached_building)
                 else:
-                    text_utility.print_to_screen('This building is at its work crew capacity.', self.global_manager)
-                    text_utility.print_to_screen('Upgrade the building\'s scale to increase work crew capacity.', self.global_manager)
+                    text_utility.print_to_screen('This building is at its work crew capacity.')
+                    text_utility.print_to_screen('Upgrade the building\'s scale to increase work crew capacity.')
             else:
-                text_utility.print_to_screen('This work crew must be in the same tile as a resource production building to work in it', self.global_manager)
+                text_utility.print_to_screen('This work crew must be in the same tile as a resource production building to work in it')
         else:
-            text_utility.print_to_screen('You are busy and cannot attach a work crew to a building.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot attach a work crew to a building.')
 
 class trade_button(button):
     '''
     Button that commands a caravan to trade with a village
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -966,12 +953,11 @@ class trade_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'trade'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -993,7 +979,7 @@ class trade_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
                 if constants.money >= constants.action_prices['trade']:
@@ -1001,30 +987,30 @@ class trade_button(button):
                     if current_cell.has_building('village'):
                         if current_cell.get_building('village').population > 0:
                             if current_mob.get_inventory('consumer goods') > 0:
-                                if minister_utility.positions_filled(self.global_manager):
+                                if minister_utility.positions_filled():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_trade()
                                 else:
-                                    text_utility.print_to_screen('You cannot do any actions until all ministers have been appointed.', self.global_manager)
+                                    text_utility.print_to_screen('You cannot do any actions until all ministers have been appointed.')
                             else:
-                                text_utility.print_to_screen('Trading requires at least 1 unit of consumer goods.', self.global_manager)
+                                text_utility.print_to_screen('Trading requires at least 1 unit of consumer goods.')
                         else:
-                            text_utility.print_to_screen('Trading is only possible in a village with population above 0.', self.global_manager)
+                            text_utility.print_to_screen('Trading is only possible in a village with population above 0.')
                     else:
-                        text_utility.print_to_screen('Trading is only possible in a village.', self.global_manager)
+                        text_utility.print_to_screen('Trading is only possible in a village.')
                 else:
-                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trade']) + ' money needed to trade with a village.', self.global_manager)
+                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trade']) + ' money needed to trade with a village.')
             else:
-                text_utility.print_to_screen('Trading requires all remaining movement points, at least 1', self.global_manager)
+                text_utility.print_to_screen('Trading requires all remaining movement points, at least 1')
         else:
-            text_utility.print_to_screen('You are busy and cannot trade.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot trade.')
 
 class rumor_search_button(button):
     '''
     Button that commands an expedition to search a village for rumors of the location of a lore mission artifact
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1040,12 +1026,11 @@ class rumor_search_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'rumor search'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1068,7 +1053,7 @@ class rumor_search_button(button):
             None
         '''
         if status.current_lore_mission:
-            if main_loop_utility.action_possible(self.global_manager):
+            if main_loop_utility.action_possible():
                 current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
                     if constants.money >= constants.action_prices['rumor_search']:
@@ -1082,27 +1067,27 @@ class rumor_search_button(button):
                                                 current_mob.set_sentry_mode(False)
                                             current_mob.start_rumor_search()
                                     else:
-                                        text_utility.print_to_screen('This village\'s rumors regarding the location of the ' + status.current_lore_mission.name + ' have already been found.', self.global_manager)
+                                        text_utility.print_to_screen('This village\'s rumors regarding the location of the ' + status.current_lore_mission.name + ' have already been found.')
                                 else:
-                                    text_utility.print_to_screen('All possible locations of the ' + status.current_lore_mission.name + ' have already been revealed.', self.global_manager)
+                                    text_utility.print_to_screen('All possible locations of the ' + status.current_lore_mission.name + ' have already been revealed.')
                             else:
-                                text_utility.print_to_screen('This village has no population and no rumors can be found.', self.global_manager)
+                                text_utility.print_to_screen('This village has no population and no rumors can be found.')
                         else:
-                            text_utility.print_to_screen('Searching for rumors is only possible in a village.', self.global_manager)
+                            text_utility.print_to_screen('Searching for rumors is only possible in a village.')
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['rumor_search']) + ' money needed to attempt a rumor search.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['rumor_search']) + ' money needed to attempt a rumor search.')
                 else:
-                    text_utility.print_to_screen('A rumor search requires all remaining movement points, at least 1.', self.global_manager)
+                    text_utility.print_to_screen('A rumor search requires all remaining movement points, at least 1.')
             else:
-                text_utility.print_to_screen('You are busy and cannot search for rumors.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot search for rumors.')
         else:
-            text_utility.print_to_screen('There are no ongoing lore missions for which to find rumors.', self.global_manager)
+            text_utility.print_to_screen('There are no ongoing lore missions for which to find rumors.')
 
 class artifact_search_button(button):
     '''
     Button that commands an expedition to search a rumored location for a lore mission artifact
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1118,12 +1103,11 @@ class artifact_search_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'artifact search'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1146,7 +1130,7 @@ class artifact_search_button(button):
             None
         '''
         if status.current_lore_mission:
-            if main_loop_utility.action_possible(self.global_manager):
+            if main_loop_utility.action_possible():
                 current_mob = status.displayed_mob
                 if current_mob.movement_points >= 1:
                     if constants.money >= constants.action_prices['artifact_search']:
@@ -1156,21 +1140,21 @@ class artifact_search_button(button):
                                     current_mob.set_sentry_mode(False)
                                 current_mob.start_artifact_search()
                         else:
-                            text_utility.print_to_screen('You have not found any rumors indicating that the ' + status.current_lore_mission.name + ' may be at this location.', self.global_manager)
+                            text_utility.print_to_screen('You have not found any rumors indicating that the ' + status.current_lore_mission.name + ' may be at this location.')
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['artifact_search']) + ' money needed to attempt a artifact search.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['artifact_search']) + ' money needed to attempt a artifact search.')
                 else:
-                    text_utility.print_to_screen('An artifact search requires all remaining movement points, at least 1.', self.global_manager)
+                    text_utility.print_to_screen('An artifact search requires all remaining movement points, at least 1.')
             else:
-                text_utility.print_to_screen('You are busy and cannot search for artifact.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot search for artifact.')
         else:
-            text_utility.print_to_screen('There are no ongoing lore missions for which to find artifacts.', self.global_manager)
+            text_utility.print_to_screen('There are no ongoing lore missions for which to find artifacts.')
 
 class capture_slaves_button(button):
     '''
     Button that commands a battalion to capture slaves from a village
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1186,12 +1170,11 @@ class capture_slaves_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'capture slaves'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1213,7 +1196,7 @@ class capture_slaves_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
                 if constants.money >= constants.action_prices['slave_capture']:
@@ -1225,21 +1208,21 @@ class capture_slaves_button(button):
                                     current_mob.set_sentry_mode(False)
                                 current_mob.start_capture_slaves()
                         else:
-                            text_utility.print_to_screen('This village has no remaining population to be captured.', self.global_manager)
+                            text_utility.print_to_screen('This village has no remaining population to be captured.')
                     else:
-                        text_utility.print_to_screen('Capturing slaves is only possible in a village.', self.global_manager)
+                        text_utility.print_to_screen('Capturing slaves is only possible in a village.')
                 else:
-                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['slave_capture']) + ' money needed to attempt to capture slaves.', self.global_manager)
+                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['slave_capture']) + ' money needed to attempt to capture slaves.')
             else:
-                text_utility.print_to_screen('Capturing slaves requires all remaining movement points, at least 1.', self.global_manager)
+                text_utility.print_to_screen('Capturing slaves requires all remaining movement points, at least 1.')
         else:
-            text_utility.print_to_screen('You are busy and cannot capture slaves.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot capture slaves.')
 
 class labor_broker_button(button):
     '''
     Buttons that commands a vehicle without crew or an officer to use a labor broker in a port to recruit a worker from a nearby village, with a price based on the village's aggressiveness and distance
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1255,12 +1238,11 @@ class labor_broker_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'labor broker'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1288,7 +1270,7 @@ class labor_broker_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             current_mob = status.displayed_mob
             if status.strategic_map_grid in current_mob.grids:
                 if current_mob.images[0].current_cell.has_intact_building('port'):
@@ -1301,19 +1283,19 @@ class labor_broker_button(button):
                                         current_mob.set_sentry_mode(False)
                                     choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
                                         'source_type': 'labor broker', 'village': cost_info_list[0]}
-                                    constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
+                                    constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
                             else:
-                                text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ', self.global_manager)
+                                text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
                         else:
-                            text_utility.print_to_screen('Using a labor broker requires all remaining movement points, at least 1.', self.global_manager)
+                            text_utility.print_to_screen('Using a labor broker requires all remaining movement points, at least 1.')
                     else:
-                        text_utility.print_to_screen('There are no eligible villages to recruit workers from.', self.global_manager)
+                        text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
                 else:
-                    text_utility.print_to_screen('A labor broker can only be used at a port.', self.global_manager)
+                    text_utility.print_to_screen('A labor broker can only be used at a port.')
             else:
-                text_utility.print_to_screen('A labor broker can only be used at a port.', self.global_manager)
+                text_utility.print_to_screen('A labor broker can only be used at a port.')
         else:
-            text_utility.print_to_screen('You are busy and cannot use a labor broker.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot use a labor broker.')
 
     def get_cost(self):
         '''
@@ -1342,7 +1324,7 @@ class track_beasts_button(button):
     '''
     Button that orders a safari to spend 1 movement point to attempt to reveal beasts in its tile and adjacent explored tiles
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1358,12 +1340,11 @@ class track_beasts_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'track beasts'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1385,7 +1366,7 @@ class track_beasts_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             current_mob = status.displayed_mob
             if status.strategic_map_grid in current_mob.grids:
                 if current_mob.movement_points >= 1:
@@ -1395,19 +1376,19 @@ class track_beasts_button(button):
                                 current_mob.set_sentry_mode(False)
                             current_mob.track_beasts()
                     else:
-                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['track_beasts']) + ' money needed to track beasts.', self.global_manager)
+                        text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['track_beasts']) + ' money needed to track beasts.')
                 else:
-                    text_utility.print_to_screen('Tracking beasts requires 1 movement point.', self.global_manager)
+                    text_utility.print_to_screen('Tracking beasts requires 1 movement point.')
             else:
-                text_utility.print_to_screen('A safari can only track beasts in Africa', self.global_manager)
+                text_utility.print_to_screen('A safari can only track beasts in Africa')
         else:
-            text_utility.print_to_screen('You are busy and cannot track beasts.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot track beasts.')
 
 class switch_theatre_button(button):
     '''
     Button starts choosing a destination for a ship to travel between theatres, like between Europe and Africa. A destination is chosen when the player clicks a tile in another theatre.
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1423,12 +1404,11 @@ class switch_theatre_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'switch theatre'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):      
         '''
@@ -1440,7 +1420,7 @@ class switch_theatre_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             current_mob = status.displayed_mob
             if current_mob.movement_points >= 1:
                 if not (status.strategic_map_grid in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
@@ -1448,17 +1428,17 @@ class switch_theatre_button(button):
                         if current_mob.sentry_mode:
                             current_mob.set_sentry_mode(False)
                         if not constants.current_game_mode == 'strategic':
-                            game_transitions.set_game_mode('strategic', self.global_manager)
+                            game_transitions.set_game_mode('strategic')
                             current_mob.select()
                         current_mob.clear_automatic_route()
                         current_mob.end_turn_destination = 'none'
                         flags.choosing_destination = True
                 else:
-                    text_utility.print_to_screen('You are inland and cannot cross the ocean.', self.global_manager) 
+                    text_utility.print_to_screen('You are inland and cannot cross the ocean.') 
             else:
-                text_utility.print_to_screen('Crossing the ocean requires all remaining movement points, at least 1.', self.global_manager)
+                text_utility.print_to_screen('Crossing the ocean requires all remaining movement points, at least 1.')
         else:
-            text_utility.print_to_screen('You are busy and cannot move.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot move.')
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1475,7 +1455,7 @@ class appoint_minister_button(button):
     '''
     Button that appoints the selected minister to the office corresponding to this button
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1488,7 +1468,6 @@ class appoint_minister_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'appoint_type': string value - Office appointed to by this button, like 'Minister of Trade'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -1496,7 +1475,7 @@ class appoint_minister_button(button):
         input_dict['button_type'] = 'appoint minister'
         input_dict['modes'] = ['ministers']
         input_dict['image_id'] = 'ministers/icons/' + constants.minister_type_dict[self.appoint_type] + '.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1523,20 +1502,20 @@ class appoint_minister_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             appointed_minister = status.displayed_minister
             if not appointed_minister.just_removed:
                 appointed_minister.respond('first hired')
             appointed_minister.appoint(self.appoint_type)
-            minister_utility.calibrate_minister_info_display(self.global_manager, appointed_minister)
+            minister_utility.calibrate_minister_info_display(appointed_minister)
         else:
-            text_utility.print_to_screen('You are busy and cannot appoint a minister.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot appoint a minister.')
 
 class remove_minister_button(button):
     '''
     Button that removes the selected minister from their current office
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1548,14 +1527,13 @@ class remove_minister_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'remove minister'
         input_dict['modes'] = ['ministers']
         input_dict['image_id'] = 'buttons/remove_minister_button.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1582,7 +1560,7 @@ class remove_minister_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             appointed_minister = status.displayed_minister
             public_opinion_penalty = appointed_minister.status_number
             text = 'Are you sure you want to remove ' + appointed_minister.name + ' from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n.'
@@ -1600,13 +1578,13 @@ class remove_minister_button(button):
                 'choices': ['confirm remove minister', 'none']
             })
         else:
-            text_utility.print_to_screen('You are busy and cannot remove a minister.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot remove a minister.')
 
 class to_trial_button(button):
     '''
     Button that goes to the trial screen to remove the selected minister from their current office
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1618,14 +1596,13 @@ class to_trial_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'to trial'
         input_dict['modes'] = input_dict['attached_label'].modes
         input_dict['image_id'] = 'buttons/to_trial_button.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1652,28 +1629,28 @@ class to_trial_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             if constants.money >= constants.action_prices['trial']:
-                if minister_utility.positions_filled(self.global_manager):
+                if minister_utility.positions_filled():
                     if len(status.minister_list) > 8: #if any available appointees
                         defense = status.displayed_minister
                         prosecution = status.current_ministers['Prosecutor']
-                        game_transitions.set_game_mode('trial', self.global_manager)
-                        minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
+                        game_transitions.set_game_mode('trial')
+                        minister_utility.trial_setup(defense, prosecution) #sets up defense and prosecution displays
                     else:
-                        text_utility.print_to_screen('There are currently no available appointees to replace this minister in the event of a successful trial.', self.global_manager)
+                        text_utility.print_to_screen('There are currently no available appointees to replace this minister in the event of a successful trial.')
                 else:
-                    game_transitions.force_minister_appointment(self.global_manager)
+                    game_transitions.force_minister_appointment()
             else:
-                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.', self.global_manager)
+                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.')
         else:
-            text_utility.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot start a trial.')
 
 class active_investigation_button(button):
     '''
     Button that starts an active investigation on a minister
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1685,14 +1662,13 @@ class active_investigation_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'active investigation'
         input_dict['modes'] = ['ministers']
         input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1719,25 +1695,25 @@ class active_investigation_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             if constants.money >= constants.action_prices['active_investigation']:
-                if minister_utility.positions_filled(self.global_manager):
+                if minister_utility.positions_filled():
                     cost = constants.action_prices['active_investigation']
                     constants.money_tracker.change(-1 * cost, 'active_investigation')
                     status.displayed_minister.attempt_active_investigation(status.current_ministers['Prosecutor'], cost)
-                    actor_utility.double_action_price(self.global_manager, 'active_investigation')
+                    actor_utility.double_action_price('active_investigation')
                 else:
-                    game_transitions.force_minister_appointment(self.global_manager)
+                    game_transitions.force_minister_appointment()
             else:
-                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['active_investigation']) + ' money needed to start an active investigation.', self.global_manager)
+                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['active_investigation']) + ' money needed to start an active investigation.')
         else:
-            text_utility.print_to_screen('You are busy and cannot start an active investigation.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot start an active investigation.')
 
 class fabricate_evidence_button(button):
     '''
     Button in the trial screen that fabricates evidence to use against the defense in the current trial. Fabricated evidence disappears at the end of the trial or at the end of the turn
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1749,14 +1725,13 @@ class fabricate_evidence_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'fabricate evidence'
         input_dict['modes'] = ['trial', 'ministers']
         input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def get_cost(self):
         '''
@@ -1779,7 +1754,7 @@ class fabricate_evidence_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             if constants.money >= self.get_cost():
                 constants.money_tracker.change(-1 * self.get_cost(), 'trial')
                 defense = status.displayed_defense
@@ -1788,17 +1763,17 @@ class fabricate_evidence_button(button):
                     ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
                 defense.fabricated_evidence += 1
                 defense.corruption_evidence += 1
-                minister_utility.calibrate_trial_info_display(self.global_manager, status.defense_info_display, defense) #updates trial display with new evidence
+                minister_utility.calibrate_trial_info_display(status.defense_info_display, defense) #updates trial display with new evidence
             else:
-                text_utility.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
+                text_utility.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.')
         else:
-            text_utility.print_to_screen('You are busy and cannot fabricate evidence.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot fabricate evidence.')
 
 class bribe_judge_button(button):
     '''
     Button in the trial screen that bribes the judge to get an advantage in the next trial this turn
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1810,14 +1785,13 @@ class bribe_judge_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'bribe judge'
         input_dict['modes'] = ['trial']
         input_dict['image_id'] = 'buttons/bribe_judge_button.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def get_cost(self):
         '''
@@ -1853,7 +1827,7 @@ class bribe_judge_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             if constants.money >= self.get_cost():
                 if not flags.prosecution_bribed_judge:
                     constants.money_tracker.change(-1 * self.get_cost(), 'trial')
@@ -1862,17 +1836,17 @@ class bribe_judge_button(button):
                     prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that the judge has been successfully bribed for ' + str(self.get_cost()) +
                         ' money. /n /nThis may provide a bonus in the next trial this turn. /n /n')
                 else:
-                    text_utility.print_to_screen('The judge has already been bribed for this trial.', self.global_manager)
+                    text_utility.print_to_screen('The judge has already been bribed for this trial.')
             else:
-                text_utility.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to bribe the judge.', self.global_manager)
+                text_utility.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to bribe the judge.')
         else:
-            text_utility.print_to_screen('You are busy and cannot fabricate evidence.', self.global_manager)  
+            text_utility.print_to_screen('You are busy and cannot fabricate evidence.')  
     
 class hire_african_workers_button(button):
     '''
     Button that hires available workers from the displayed village/slum
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1889,7 +1863,6 @@ class hire_african_workers_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'hire_source_type': string value - Type of location workers are hired from, like 'village' or 'slums'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -1898,7 +1871,7 @@ class hire_african_workers_button(button):
             input_dict['button_type'] = 'hire village worker'
         elif self.hire_source_type == 'slums':
             input_dict['button_type'] = 'hire slums worker'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1931,17 +1904,17 @@ class hire_african_workers_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
-            constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
+            constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
         else:
-            text_utility.print_to_screen('You are busy and cannot hire a worker.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot hire a worker.')
 
 class buy_slaves_button(button):
     '''
     Button that buys slaves from slave traders
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1957,12 +1930,11 @@ class buy_slaves_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'buy slaves'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1988,21 +1960,21 @@ class buy_slaves_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             self.cost = constants.recruitment_costs['slave workers']
             if constants.money_tracker.get() >= self.cost:
                 choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
-                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers', self.global_manager)
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers')
             else:
-                text_utility.print_to_screen('You do not have enough money to buy slaves.', self.global_manager)
+                text_utility.print_to_screen('You do not have enough money to buy slaves.')
         else:
-            text_utility.print_to_screen('You are busy and cannot buy slaves.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot buy slaves.')
 
 class automatic_route_button(button):
     '''
     Button that modifies a unit's automatic movement route, with an effect depending on the button's type
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -2019,11 +1991,10 @@ class automatic_route_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -2057,14 +2028,14 @@ class automatic_route_button(button):
             None
         '''
         attached_mob = status.displayed_mob
-        if main_loop_utility.action_possible(self.global_manager):
+        if main_loop_utility.action_possible():
             if status.strategic_map_grid in attached_mob.grids:
                 if self.button_type == 'clear automatic route':
                     attached_mob.clear_automatic_route()
                     
                 elif self.button_type == 'draw automatic route':
                     if attached_mob.is_vehicle and attached_mob.vehicle_type == 'train' and not attached_mob.images[0].current_cell.has_intact_building('train_station'):
-                        text_utility.print_to_screen('A train can only start a movement route from a train station.', self.global_manager)
+                        text_utility.print_to_screen('A train can only start a movement route from a train station.')
                         return()
                     attached_mob.clear_automatic_route()
                     attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
@@ -2074,13 +2045,13 @@ class automatic_route_button(button):
                     if attached_mob.can_follow_automatic_route():
                         attached_mob.follow_automatic_route()
                         attached_mob.remove_from_turn_queue()
-                        actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, attached_mob) #updates mob info display if automatic route changed anything
+                        actor_utility.calibrate_actor_info_display(status.mob_info_display, attached_mob) #updates mob info display if automatic route changed anything
                     else:
-                        text_utility.print_to_screen('This unit is currently not able to progress along its designated route.', self.global_manager)
+                        text_utility.print_to_screen('This unit is currently not able to progress along its designated route.')
             else:
-                text_utility.print_to_screen('You can only create movement routes in Africa.', self.global_manager)
+                text_utility.print_to_screen('You can only create movement routes in Africa.')
         else:
             if self.button_type == 'follow automatic route':
-                text_utility.print_to_screen('You are busy and cannot move this unit.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot move this unit.')
             else:
-                text_utility.print_to_screen('You are busy and cannot modify this unit\'s movement route.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot modify this unit\'s movement route.')

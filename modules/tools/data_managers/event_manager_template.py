@@ -5,18 +5,17 @@ class event_manager_template():
     '''
     Object that tracks a list of events and calls the relevant functions once an inputted amount of time has passed
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
         self.event_list = []
         self.event_time_list = []
-        self.global_manager = global_manager
         self.previous_time = 0.0
 
     def add_event(self, function, inputs, activation_time):

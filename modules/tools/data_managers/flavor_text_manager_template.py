@@ -7,16 +7,15 @@ class flavor_text_manager_template():
     '''
     Object that reads flavor text from .csv files and distributes it to other parts of the program when requested
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.subject_dict = {}
         self.set_flavor_text('exploration', 'text/explorer.csv')
         self.set_flavor_text('advertising_campaign', 'text/advertising.csv')

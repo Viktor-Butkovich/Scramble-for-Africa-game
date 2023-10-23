@@ -11,7 +11,7 @@ class group(pmob):
     '''
     pmob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -26,12 +26,11 @@ class group(pmob):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -39,10 +38,10 @@ class group(pmob):
             self.worker = input_dict['worker']
             self.officer = input_dict['officer']
         else:
-            self.worker = constants.actor_creation_manager.create(True, input_dict['worker'], global_manager)
-            self.officer = constants.actor_creation_manager.create(True, input_dict['officer'], global_manager)
+            self.worker = constants.actor_creation_manager.create(True, input_dict['worker'])
+            self.officer = constants.actor_creation_manager.create(True, input_dict['officer'])
         self.group_type = 'none'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
@@ -54,7 +53,7 @@ class group(pmob):
         self.set_group_type('none')
         self.update_image_bundle()
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
         if self.officer.veteran:
             self.promote()
@@ -62,7 +61,7 @@ class group(pmob):
             self.status_icons = self.officer.status_icons
             for current_status_icon in self.status_icons:
                 current_status_icon.actor = self
-            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer, global_manager))
+            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer))
 
     def replace_worker(self, new_worker_type):
         '''
@@ -96,7 +95,7 @@ class group(pmob):
             input_dict['init_type'] = 'slaves'
             input_dict['purchased'] = False
         previous_selected = status.displayed_mob
-        new_worker = constants.actor_creation_manager.create(False, input_dict, self.global_manager)
+        new_worker = constants.actor_creation_manager.create(False, input_dict)
         new_worker.set_automatically_replace(self.worker.automatically_replace)
         self.worker.fire(wander = False)
         self.worker = new_worker
@@ -108,10 +107,10 @@ class group(pmob):
         elif previous_selected:
             previous_selected.select()
         else:
-            actor_utility.deselect_all(self.global_manager)
+            actor_utility.deselect_all()
 
         if self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -302,7 +301,7 @@ class group(pmob):
         self.officer.update_image_bundle()
         #self.officer.update_image_bundle()
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -371,5 +370,5 @@ class group(pmob):
         #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
         image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default']) #group default image is empty
-        image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer, self.global_manager)
+        image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer)
         return(image_id_list)

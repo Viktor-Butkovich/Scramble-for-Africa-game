@@ -10,7 +10,7 @@ class cell():
     '''
     Object representing one cell of a grid corresponding to one of its coordinates, able to contain terrain, resources, mobs, and tiles
     '''
-    def __init__(self, x, y, width, height, grid, color, save_dict, global_manager):
+    def __init__(self, x, y, width, height, grid, color, save_dict):
         '''
         Description:
             Initializes this object
@@ -22,11 +22,9 @@ class cell():
             grid grid: The grid that this cell is attached to
             string color: Color in the color_dict dictionary for this cell when nothing is covering it
             string or dictionary save_dict: Equals 'none' if creating new grid, equals dictionary of saved information necessary to recreate this cell if loading grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.move_priority = 99
         self.x = x
         self.y = y
@@ -391,9 +389,9 @@ class cell():
             'name': 'slums',
             'modes': ['strategic'],
             'init_type': 'slums'
-        }, self.global_manager)
+        })
         if self.tile == status.displayed_tile:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.tile) #update tile display to show new building
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.tile) #update tile display to show new building
 
     def has_vehicle(self, vehicle_type, is_worker = False):
         '''

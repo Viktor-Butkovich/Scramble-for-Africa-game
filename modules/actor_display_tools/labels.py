@@ -11,7 +11,7 @@ class actor_display_label(label):
     '''
     Label that changes its text to match the information of selected mobs or tiles
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,7 +27,6 @@ class actor_display_label(label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_label_type': string value - Type of actor information shown
                 'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -38,7 +37,7 @@ class actor_display_label(label):
         self.actor_type = input_dict['actor_type'] #mob or tile, none if does not scale with shown labels, like tooltip labels
         self.image_y_displacement = 0
         input_dict['message'] = ''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
         s_increment = scaling.scale_width(6)
         m_increment = scaling.scale_width(11)
@@ -287,7 +286,7 @@ class actor_display_label(label):
                 'minister_image_type': 'portrait',
                 'parent_collection': self.insert_collection_above(),
                 'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
-            }, global_manager)
+            })
 
             self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
@@ -379,7 +378,7 @@ class actor_display_label(label):
             member_config = {}
         if not 'order_y_offset' in member_config:
             member_config['order_y_offset'] = abs(input_dict['height'] - self.height) / -2
-        self.parent_collection.add_member(constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager), member_config)
+        self.parent_collection.add_member(constants.actor_creation_manager.create_interface_element(input_dict), member_config)
 
     def update_tooltip(self):
         '''
@@ -829,7 +828,7 @@ class list_item_label(actor_display_label):
     '''
     Label that shows the information of a certain item in a list, like a train passenger among a list of passengers
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -848,7 +847,6 @@ class list_item_label(actor_display_label):
                 'list_index': int value - Index to determine item of list reflected
                 'list_type': string value - Type of list associated with, like 'resource building' along with label type of 'building work crew' to show work crews attached to a resource 
                     building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -856,7 +854,7 @@ class list_item_label(actor_display_label):
         self.list_type = input_dict['list_type']
         #input_dict['actor_label_type'] = self.list_type + ' list item'
         self.attached_list = []
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def calibrate(self, new_actor):
         '''
@@ -888,7 +886,7 @@ class building_work_crews_label(actor_display_label):
     '''
     Label at the top of the list of work crews in a building that shows how many work crews are in it
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -904,7 +902,6 @@ class building_work_crews_label(actor_display_label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'building_type': string value - Type of building associated with, like 'resource building'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -912,7 +909,7 @@ class building_work_crews_label(actor_display_label):
         self.show_label = False
         self.attached_building = 'none'
         input_dict['actor_label_type'] = 'building work crews'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.building_type = input_dict['building_type']
 
     def calibrate(self, new_actor):
@@ -950,7 +947,7 @@ class building_efficiency_label(actor_display_label):
     '''
     Label that shows a production building's efficiency, which is the number of attempts work crews at the building have to produce commodities
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -966,14 +963,13 @@ class building_efficiency_label(actor_display_label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'building_type': string value - Type of building associated with, like 'resource building'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.remove_work_crew_button = 'none'
         self.show_label = False
         input_dict['actor_label_type'] = 'building efficiency'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.building_type = input_dict['building_type']
         self.attached_building = 'none'
 
@@ -1032,7 +1028,7 @@ class commodity_display_label(actor_display_label):
     '''
     Label that changes its text and attached image and button to match the commodity in a certain part of a currently selected actor's inventory    
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
 
         '''
         Description:
@@ -1049,13 +1045,12 @@ class commodity_display_label(actor_display_label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'commodity_index': int value - Index of actor's inventory reflected
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.current_commodity = 'none'
         input_dict['actor_label_type'] = 'commodity'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.showing_commodity = False
         self.commodity_index = input_dict['commodity_index']
 
@@ -1079,7 +1074,7 @@ class commodity_display_label(actor_display_label):
             'init_type': 'label image',
             'parent_collection': self.parent_collection,
             'member_config': {'x_offset': -1 * self.height - 5}
-        }, global_manager)
+        })
 
         input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':

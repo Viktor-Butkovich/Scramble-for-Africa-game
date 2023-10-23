@@ -10,7 +10,7 @@ class cell_icon(actor):
     '''
     An actor that exists in a tile while also acting as an interface element
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -20,15 +20,14 @@ class cell_icon(actor):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grid': grid value - grid in which this tile can appear
                 'modes': string list value - Game modes during which this actor's images can appear
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         status.independent_interface_elements.append(self)
         self.showing = False
         self.image_dict = {'default': input_dict['image']}
-        self.images = [images.actor_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', global_manager)
+        self.images = [images.actor_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default')
                            for current_grid in self.grids]
 
     def can_show(self, skip_parent_collection=False):

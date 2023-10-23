@@ -21,23 +21,22 @@ def setup(*args):
     Description:
         Runs the inputted setup functions in order
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         function list args: List of setup functions to run
     Output:
         None
     '''
     flags.startup_complete = False
     for setup_function in args:
-        setup_function(constants.global_manager)
+        setup_function()
     flags.startup_complete = True
     flags.creating_new_game = False
 
-def misc(global_manager):
+def misc():
     '''
     Description:
         Initializes object lists, current object variables, current status booleans, and other misc. values
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -51,12 +50,12 @@ def misc(global_manager):
     status.loading_image = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/loading.png',
         'init_type': 'loading image template image'
-    }, global_manager)
+    })
 
     strategic_background_image = constants.actor_creation_manager.create_interface_element({
         'modes': ['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'],
         'init_type': 'background image'
-    }, global_manager)
+    })
 
     status.safe_click_area = constants.actor_creation_manager.create_interface_element({
         'width': constants.display_width / 2 - scaling.scale_width(35),
@@ -64,17 +63,17 @@ def misc(global_manager):
         'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'image_id': 'misc/empty.png', #make a good image for this
         'init_type': 'safe click panel',
-    }, global_manager)
+    })
     #safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
 
-    game_transitions.set_game_mode('main_menu', global_manager)
+    game_transitions.set_game_mode('main_menu')
     constants.previous_game_mode = 'main_menu' #after set game mode, both previous and current game modes should be main_menu
 
     constants.mouse_follower =  constants.actor_creation_manager.create_interface_element({
         'init_type': 'mouse follower image'
-    }, global_manager)
+    })
 
-    constants.notification_manager = notification_manager_template.notification_manager_template(global_manager)
+    constants.notification_manager = notification_manager_template.notification_manager_template()
 
     status.info_displays_collection = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 205 + 125),
@@ -86,18 +85,17 @@ def misc(global_manager):
         'allow_move': True,
         'description': 'general information panel',
         'resize_with_contents': True,
-    }, global_manager)
+    })
     anchor = constants.actor_creation_manager.create_interface_element(
-        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}, 
-        global_manager
+        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}
     ) #rect at original location prevents collection from moving unintentionally when resizing
 
-def terrains(global_manager):
+def terrains():
     '''
     Description:
         Defines terrains and beasts
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -108,38 +106,38 @@ def terrains(global_manager):
         current_index -= 1 #back up from index that didn't work
         constants.terrain_variant_dict[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
 
-def actions(global_manager):
+def actions():
     '''
     Description:
         Configures any actions in the action_types folder, preparing them to be automatically implemented
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         none
     '''
-    public_relations_campaign.public_relations_campaign(global_manager)
-    religious_campaign.religious_campaign(global_manager)
-    suppress_slave_trade.suppress_slave_trade(global_manager)
-    advertising_campaign.advertising_campaign(global_manager)
-    conversion.conversion(global_manager)
-    combat.combat(global_manager)
-    exploration.exploration(global_manager)
-    loan_search.loan_search(global_manager)
+    public_relations_campaign.public_relations_campaign()
+    religious_campaign.religious_campaign()
+    suppress_slave_trade.suppress_slave_trade()
+    advertising_campaign.advertising_campaign()
+    conversion.conversion()
+    combat.combat()
+    exploration.exploration()
+    loan_search.loan_search()
     for building_type in constants.building_types + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
-            construction.construction(global_manager, building_type=building_type)
+            construction.construction(building_type=building_type)
             if not building_type in ['train', 'steamboat', 'infrastructure']:
-                repair.repair(global_manager, building_type=building_type)
+                repair.repair(building_type=building_type)
     for upgrade_type in constants.upgrade_types:
-        upgrade.upgrade(global_manager, building_type=upgrade_type)
+        upgrade.upgrade(building_type=upgrade_type)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
-def commodities(global_manager):
+def commodities():
     '''
     Description:
         Defines commodities with associated buildings and icons, along with buildings
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -150,24 +148,24 @@ def commodities(global_manager):
     for current_commodity in constants.collectable_resources:
         constants.commodities_produced[current_commodity] = 0
 
-def def_ministers(global_manager):
+def def_ministers():
     '''
     Description:
         Defines minister positions, backgrounds, and associated units
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     for current_minister_type in constants.minister_types:
         status.current_ministers[current_minister_type] = None
 
-def def_countries(global_manager):
+def def_countries():
     '''
     Description:
         Defines countries with associated passive effects and background, name, and unit sets
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -196,7 +194,7 @@ def def_countries(global_manager):
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
+    british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier')
 
     status.Britain = countries.country({
         'name': 'Britain',
@@ -208,7 +206,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
         'country_effect': british_country_effect,
-    }, global_manager)
+    })
 
     french_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -222,7 +220,7 @@ def def_countries(global_manager):
         'industrialist', 'industrialist', 
         'business magnate',
         ]
-    french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
+    french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier')
     status.France = countries.country({
         'name': 'France',
         'adjective': 'french',
@@ -234,7 +232,7 @@ def def_countries(global_manager):
         'background_set': french_weighted_backgrounds,
         'country_effect': french_country_effect,
         'has_aristocracy': False
-    }, global_manager)
+    })
 
     german_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -246,7 +244,7 @@ def def_countries(global_manager):
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
+    german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier')
     status.Germany = countries.country({
         'name': 'Germany',
         'adjective': 'german',
@@ -257,7 +255,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
         'country_effect': german_country_effect,
-    }, global_manager)
+    })
 
     belgian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -270,7 +268,7 @@ def def_countries(global_manager):
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    belgian_country_effect = effects.effect('belgian_country_modifier', 'slave_capture_plus_modifier', global_manager)
+    belgian_country_effect = effects.effect('belgian_country_modifier', 'slave_capture_plus_modifier')
     status.Belgium = countries.hybrid_country({
         'name': 'Belgium',
         'adjective': 'belgian',
@@ -278,7 +276,7 @@ def def_countries(global_manager):
         'religion': 'catholic',
         'background_set': belgian_weighted_backgrounds,
         'country_effect': belgian_country_effect,
-    }, global_manager)
+    })
 
     portuguese_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -290,7 +288,7 @@ def def_countries(global_manager):
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
+    portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty')
     status.Portugal = countries.country({
         'name': 'Portugal',
         'adjective': 'portuguese',
@@ -301,7 +299,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': portuguese_weighted_backgrounds,
         'country_effect': portuguese_country_effect,
-    }, global_manager)
+    })
 
     italian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -314,7 +312,7 @@ def def_countries(global_manager):
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier', global_manager)
+    italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier')
     status.Italy = countries.country({
         'name': 'Italy',
         'adjective': 'italian',
@@ -325,45 +323,45 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': italian_weighted_backgrounds,
         'country_effect': italian_country_effect,
-    }, global_manager)
+    })
     
-def transactions(global_manager):
+def transactions():
     '''
     Description:
         Defines recruitment, upkeep, building, and action costs, along with action and financial transaction types
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     for current_officer in constants.officer_types:
         constants.recruitment_costs[current_officer] = constants.recruitment_costs['officer']
-    actor_utility.update_descriptions(global_manager)
-    actor_utility.reset_action_prices(global_manager)
-    actor_utility.set_slave_traders_strength(0, global_manager)
+    actor_utility.update_descriptions()
+    actor_utility.reset_action_prices()
+    actor_utility.set_slave_traders_strength(0)
 
-def lore(global_manager):
+def lore():
     '''
     Description:
         Defines the types of lore missions, artifacts within each one, and the current lore mission
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    status.lore_types_effects_dict['zoology'] = effects.effect('zoology_completion_effect', 'hunting_plus_modifier', global_manager)
-    status.lore_types_effects_dict['botany'] = effects.effect('botany_completion_effect', 'health_attrition_plus_modifier', global_manager)
-    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'attack_plus_modifier', global_manager)
-    status.lore_types_effects_dict['anthropology'] = effects.effect('anthropology_completion_effect', 'conversion_plus_modifier', global_manager)
-    status.lore_types_effects_dict['paleontology'] = effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier', global_manager)
-    status.lore_types_effects_dict['theology'] = effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier', global_manager)
+    status.lore_types_effects_dict['zoology'] = effects.effect('zoology_completion_effect', 'hunting_plus_modifier')
+    status.lore_types_effects_dict['botany'] = effects.effect('botany_completion_effect', 'health_attrition_plus_modifier')
+    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'attack_plus_modifier')
+    status.lore_types_effects_dict['anthropology'] = effects.effect('anthropology_completion_effect', 'conversion_plus_modifier')
+    status.lore_types_effects_dict['paleontology'] = effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier')
+    status.lore_types_effects_dict['theology'] = effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier')
 
-def value_trackers(global_manager):
+def value_trackers():
     '''
     Description:
         Defines important global values and initializes associated tracker labels
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -373,7 +371,7 @@ def value_trackers(global_manager):
         'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup'],
         'init_type': 'ordered collection'
-    }, global_manager)
+    })
 
     constants.turn_tracker = value_tracker_template.value_tracker_template('turn', 0, 'none', 'none')
     constants.actor_creation_manager.create_interface_element({
@@ -385,7 +383,7 @@ def value_trackers(global_manager):
         'init_type': 'value label',
         'parent_collection': value_trackers_ordered_collection,
         'member_config': {'order_x_offset': scaling.scale_width(275), 'order_overlap': True}
-    }, global_manager)
+    })
 
     constants.public_opinion_tracker = value_tracker_template.public_opinion_tracker_template('public_opinion', 0, 0, 100)
     constants.actor_creation_manager.create_interface_element({
@@ -396,7 +394,7 @@ def value_trackers(global_manager):
         'value_name': 'public_opinion',
         'init_type': 'value label',
         'parent_collection': value_trackers_ordered_collection
-    }, global_manager)
+    })
 
     constants.money_tracker = value_tracker_template.money_tracker_template(100)
     constants.money_label =  constants.actor_creation_manager.create_interface_element({
@@ -407,7 +405,7 @@ def value_trackers(global_manager):
         'init_type': 'money label',
         'parent_collection': value_trackers_ordered_collection,
         'member_config': {'index': 1} #should appear before public opinion in collection but relies on public opinion existing
-    }, global_manager)
+    })
 
     if constants.effect_manager.effect_active('track_fps'):
         constants.fps_tracker = value_tracker_template.value_tracker_template('fps', 0, 0, 'none')
@@ -419,7 +417,7 @@ def value_trackers(global_manager):
             'value_name': 'fps',
             'init_type': 'value label',
             'parent_collection': value_trackers_ordered_collection
-        }, global_manager)
+        })
 
     constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(270, constants.default_display_height - 30),
@@ -428,18 +426,18 @@ def value_trackers(global_manager):
         'modes': ['strategic', 'europe', 'ministers', 'trial'],
         'image_id': 'buttons/instructions.png',
         'init_type': 'show previous financial report button'
-    }, global_manager)
+    })
     
     constants.evil_tracker = value_tracker_template.value_tracker_template('evil', 0, 0, 100)
     
     constants.fear_tracker = value_tracker_template.value_tracker_template('fear', 1, 1, 6)
 
-def buttons(global_manager):
+def buttons():
     '''
     Description:
         Initializes static buttons
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -456,7 +454,7 @@ def buttons(global_manager):
         'to_mode': 'europe',
         'init_type': 'switch game mode button'
     }
-    strategic_to_europe_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    strategic_to_europe_button = constants.actor_creation_manager.create_interface_element(input_dict)
     status.flag_icon_list.append(strategic_to_europe_button) #sets button image to update to flag icon when country changes
 
     europe_button_width = 60
@@ -468,7 +466,7 @@ def buttons(global_manager):
     input_dict['keybind_id'] = pygame.K_ESCAPE
     input_dict['to_mode'] = 'strategic'
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
-    europe_to_strategic_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    europe_to_strategic_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 50)
     input_dict['width'] = scaling.scale_width(50)
@@ -476,29 +474,29 @@ def buttons(global_manager):
     input_dict['modes'] = ['strategic', 'europe', 'ministers']
     input_dict['keybind_id'] = 'none'
     input_dict['to_mode'] = 'main_menu'
-    to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['new_game_setup']
     input_dict['keybind_id'] = pygame.K_ESCAPE
-    new_game_setup_to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    new_game_setup_to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['keybind_id'] = pygame.K_q
     input_dict['image_id'] = 'buttons/european_hq_button.png'
     input_dict['to_mode'] = 'ministers'
-    to_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    to_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['modes'] = ['ministers']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
     input_dict['to_mode'] = 'previous'
-    from_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    from_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['modes'] = ['trial']
     input_dict['to_mode'] = 'ministers'
-    from_trial_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    from_trial_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(round(constants.default_display_width * 0.4), constants.default_display_height - 50),
@@ -509,26 +507,26 @@ def buttons(global_manager):
         'image_id': 'buttons/end_turn_button.png',
         'init_type': 'end turn button'
     }
-    end_turn_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    end_turn_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height / 2 - 50))
     input_dict['modes'] = ['main_menu']
     input_dict['keybind_id'] = pygame.K_n
     input_dict['image_id'] = 'buttons/new_game_button.png'
     input_dict['init_type'] = 'new game button'
-    main_menu_new_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    main_menu_new_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height / 2 - 300))
     input_dict['modes'] = ['new_game_setup']
     input_dict['keybind_id'] = pygame.K_n
-    setup_new_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    setup_new_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height / 2 - 125))
     input_dict['modes'] = ['main_menu']
     input_dict['keybind_id'] = pygame.K_l
     input_dict['image_id'] = 'buttons/load_game_button.png'
     input_dict['init_type'] = 'load game button'
-    load_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    load_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     button_start_x = 750 #x position of leftmost button
     button_separation = 60 #x separation between each button
@@ -542,27 +540,27 @@ def buttons(global_manager):
         'image_id': 'buttons/left_button.png',
         'init_type': 'move left button'
     }
-    left_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    left_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
     current_button_number += 1
 
     input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
     input_dict['keybind_id'] = pygame.K_s
     input_dict['image_id'] = 'buttons/down_button.png'
     input_dict['init_type'] = 'move down button'
-    down_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    down_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80)
     input_dict['keybind_id'] = pygame.K_w
     input_dict['image_id'] = 'buttons/up_button.png'
     input_dict['init_type'] = 'move up button'
-    up_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    up_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
     current_button_number += 1
 
     input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
     input_dict['keybind_id'] = pygame.K_d
     input_dict['image_id'] = 'buttons/right_button.png'
     input_dict['init_type'] = 'move right button'
-    right_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    right_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 125),
@@ -572,58 +570,58 @@ def buttons(global_manager):
         'image_id': 'buttons/save_game_button.png',
         'init_type': 'save game button'
     }
-    save_game_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    save_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 200))
     input_dict['modes'] = ['strategic']
     input_dict['image_id'] = 'buttons/grid_line_button.png'
     input_dict['init_type'] = 'toggle grid lines button'
-    toggle_grid_lines_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    toggle_grid_lines_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 275))
     input_dict['modes'] = ['strategic', 'europe', 'ministers']
     input_dict['keybind_id'] = pygame.K_j
     input_dict['image_id'] = 'buttons/text_box_size_button.png'
     input_dict['init_type'] = 'expand text box button'
-    expand_text_box_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    expand_text_box_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = scaling.scale_coordinates(110, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['keybind_id'] = pygame.K_TAB
     input_dict['image_id'] = 'buttons/cycle_units_button.png'
     input_dict['init_type'] = 'cycle units button'
-    cycle_units_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    cycle_units_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (scaling.scale_width(55), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic']
     del input_dict['keybind_id']
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free all button'
-    free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (scaling.scale_width(165), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['image_id'] = 'buttons/disable_sentry_mode_button.png'
     input_dict['init_type'] = 'wake up all button'
-    wake_up_all_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    wake_up_all_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = (scaling.scale_width(220), input_dict['coordinates'][1])
     input_dict['image_id'] = 'buttons/execute_movement_routes_button.png'
     input_dict['init_type'] = 'execute movement routes button'
-    execute_movement_routes_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    execute_movement_routes_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, 0)
     input_dict['modes'] = ['main_menu']
     input_dict['image_id'] = ['buttons/exit_european_hq_button.png']
     input_dict['init_type'] = 'generate crash button'
-    generate_crash_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    generate_crash_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
-def europe_screen(global_manager):
+def europe_screen():
     '''
     Description:
         Initializes static interface of Europe screen
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -639,7 +637,7 @@ def europe_screen(global_manager):
     for recruitment_index in range(len(constants.recruitment_types)):
         input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
         input_dict['recruitment_type'] = constants.recruitment_types[recruitment_index]
-        new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8))),
@@ -648,14 +646,14 @@ def europe_screen(global_manager):
         'modes': ['europe'],
         'init_type': 'buy commodity button',
         'commodity_type': 'consumer goods'
-    }, global_manager)
+    })
 
-def ministers_screen(global_manager):
+def ministers_screen():
     '''
     Description:
         Initializes static interface of ministers screen
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -669,7 +667,7 @@ def ministers_screen(global_manager):
         'height': scaling.scale_height(table_height),
         'modes': ['ministers'],
         'init_type': 'free image'
-    }, global_manager)
+    })
         
 
     position_icon_width = 125
@@ -691,10 +689,10 @@ def ministers_screen(global_manager):
                 'minister_type': constants.minister_types[current_index],
                 'attached_label': 'none',
                 'init_type': 'minister type image'
-            }, global_manager)
+            })
 
             input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) - (table_width / 2) - position_icon_width - 10, current_index * 200 + 95)
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
 
         else:
             constants.actor_creation_manager.create_interface_element({
@@ -705,10 +703,10 @@ def ministers_screen(global_manager):
                 'minister_type': constants.minister_types[current_index],
                 'attached_label': 'none',
                 'init_type': 'minister type image'
-            }, global_manager)
+            })
 
             input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200 + 95)
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
 
     available_minister_display_x = constants.default_display_width
     available_minister_display_y = 770
@@ -722,7 +720,7 @@ def ministers_screen(global_manager):
         'init_type': 'cycle available ministers button',
         'direction': 'left'
     }
-    cycle_left_button = constants.actor_creation_manager.create_interface_element(cycle_input_dict, global_manager)
+    cycle_left_button = constants.actor_creation_manager.create_interface_element(cycle_input_dict)
 
     for i in range(0, 5):
         available_minister_display_y -= (position_icon_width + 10)
@@ -734,21 +732,21 @@ def ministers_screen(global_manager):
             'init_type': 'minister portrait image',
             'color': 'gray',
             'minister_type': 'none'
-        }, global_manager)
+        })
 
     available_minister_display_y -= 60                     
     cycle_input_dict['coordinates'] = (cycle_input_dict['coordinates'][0], scaling.scale_height(available_minister_display_y))
     cycle_input_dict['keybind_id'] = pygame.K_s
     cycle_input_dict['image_id'] = 'buttons/cycle_ministers_down_button.png'
     cycle_input_dict['direction'] = 'right'
-    cycle_right_button = constants.actor_creation_manager.create_interface_element(cycle_input_dict, global_manager)
+    cycle_right_button = constants.actor_creation_manager.create_interface_element(cycle_input_dict)
 
-def trial_screen(global_manager):
+def trial_screen():
     '''
     Description:
         Initializes static interface of trial screen
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -771,7 +769,7 @@ def trial_screen(global_manager):
         'allow_minimize': True,
         'allow_move': True,
         'description': 'defense information panel'
-    }, global_manager)
+    })
 
     defense_type_image = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, defense_current_y),
@@ -782,7 +780,7 @@ def trial_screen(global_manager):
         'attached_label': 'none',
         'init_type': 'minister type image',
         'parent_collection': status.defense_info_display
-    }, global_manager)
+    })
 
     defense_current_y -= button_separation * 2
     defense_portrait_image = constants.actor_creation_manager.create_interface_element({
@@ -793,7 +791,7 @@ def trial_screen(global_manager):
         'minister_type': 'none',
         'color': 'gray',
         'parent_collection': status.defense_info_display
-    }, global_manager)
+    })
 
     defense_current_y -= 35
     input_dict = {
@@ -805,7 +803,7 @@ def trial_screen(global_manager):
         'init_type': 'label',
         'parent_collection': status.defense_info_display
     }
-    defense_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    defense_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['actor_type'] = 'minister'
     del input_dict['message']
@@ -815,7 +813,7 @@ def trial_screen(global_manager):
         defense_current_y -= 35
         input_dict['coordinates'] = scaling.scale_coordinates(0, defense_current_y)
         input_dict['actor_label_type'] = current_actor_label_type
-        constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
     prosecution_y = trial_display_default_y
     prosecution_x = (constants.default_display_width / 2) - (distance_to_center + button_separation) - distance_to_notification
@@ -832,7 +830,7 @@ def trial_screen(global_manager):
         'allow_minimize': True,
         'allow_move': True,
         'description': 'prosecution information panel'
-    }, global_manager)
+    })
 
     prosecution_type_image = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, prosecution_current_y),
@@ -843,7 +841,7 @@ def trial_screen(global_manager):
         'attached_label': 'none',
         'init_type': 'minister type image',
         'parent_collection': status.prosecution_info_display
-    }, global_manager)
+    })
 
     prosecution_current_y -= button_separation * 2
     prosecution_portrait_image = constants.actor_creation_manager.create_interface_element({
@@ -853,7 +851,7 @@ def trial_screen(global_manager):
         'minister_type': 'none',
         'color': 'gray',
         'parent_collection': status.prosecution_info_display
-    }, global_manager)
+    })
 
     prosecution_current_y -= 35
     input_dict = {
@@ -864,7 +862,7 @@ def trial_screen(global_manager):
         'init_type': 'label',
         'parent_collection': status.prosecution_info_display
     }
-    prosecution_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    prosecution_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict['actor_type'] = 'minister'
     del input_dict['message']
@@ -875,7 +873,7 @@ def trial_screen(global_manager):
         prosecution_current_y -= 35
         input_dict['coordinates'] = scaling.scale_coordinates(0, prosecution_current_y)
         input_dict['actor_label_type'] = current_actor_label_type 
-        constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
     launch_trial_button_width = 150
 
@@ -886,7 +884,7 @@ def trial_screen(global_manager):
         'modes': ['trial'],
         'image_id': 'buttons/to_trial_button.png',
         'init_type': 'launch trial button'
-    }, global_manager)
+    })
 
     bribed_judge_indicator = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/bribed_judge.png',
@@ -896,7 +894,7 @@ def trial_screen(global_manager):
         'modes': ['trial'],
         'indicator_type': 'prosecution_bribed_judge',
         'init_type': 'indicator image'
-    }, global_manager)
+    })
 
     non_bribed_judge_indicator = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/non_bribed_judge.png',
@@ -906,14 +904,14 @@ def trial_screen(global_manager):
         'modes': ['trial'],
         'indicator_type': 'not prosecution_bribed_judge',
         'init_type': 'indicator image'
-    }, global_manager)
+    })
 
-def new_game_setup_screen(global_manager):
+def new_game_setup_screen():
     '''
     Description:
         Initializes new game setup screen interface
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -931,15 +929,15 @@ def new_game_setup_screen(global_manager):
     for current_country in status.country_list:
         input_dict['coordinates'] = scaling.scale_coordinates((constants.default_display_width / 2) - (countries_per_row * (country_image_width + country_separation) / 2) + (country_image_width + country_separation) * (current_country_index % countries_per_row) + country_separation / 2, constants.default_display_height / 2 + 50 - ((country_image_height + country_separation) * (current_country_index // countries_per_row)))
         input_dict['country'] = current_country
-        constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        constants.actor_creation_manager.create_interface_element(input_dict)
         current_country_index += 1
 
-def mob_interface(global_manager):
+def mob_interface():
     '''
     Description:
         Initializes mob selection interface
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -959,7 +957,7 @@ def mob_interface(global_manager):
         'parent_collection': status.info_displays_collection,
         #'resize_with_contents': True, #need to get resize to work with info displays - would prevent invisible things from taking space
         # - collection with 5 width/height should still take space because of its member rects - the fact that this is not happening means something about resizing is not working
-    }, global_manager)
+    })
 
     #mob background image's tooltip
     mob_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -972,7 +970,7 @@ def mob_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': status.mob_info_display,
         'member_config': {'order_overlap': True}
-    }, global_manager)
+    })
 
     #mob image
     mob_free_image = constants.actor_creation_manager.create_interface_element({
@@ -984,7 +982,7 @@ def mob_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': status.mob_info_display,
         'member_config': {'order_overlap': False}
-    }, global_manager)
+    })
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(125, -115),
@@ -996,12 +994,12 @@ def mob_interface(global_manager):
         'parent_collection': status.mob_info_display,
         'member_config': {'order_exempt': True}
     }
-    fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict)
     
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(actor_display_current_y + 40))
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free unit slaves button'
-    free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
 
     #mob info labels setup
@@ -1026,14 +1024,14 @@ def mob_interface(global_manager):
         }
         if not current_actor_label_type == 'current passenger':
             input_dict['init_type'] = 'actor display label'
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
         else:
             input_dict['init_type'] = 'list item label'
             input_dict['list_type'] = 'ship'
             for i in range(0, 3): #0, 1, 2
                 #label for each passenger
                 input_dict['list_index'] = i
-                constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+                constants.actor_creation_manager.create_interface_element(input_dict)
 
     tab_collection_relative_coordinates = (450, -30)
     status.mob_tabbed_collection = constants.actor_creation_manager.create_interface_element({
@@ -1044,14 +1042,14 @@ def mob_interface(global_manager):
         'parent_collection': status.mob_info_display,
         'member_config': {'order_exempt': True},
         'description': 'unit information tabs'
-    }, global_manager)
+    })
 
-def tile_interface(global_manager):
+def tile_interface():
     '''
     Description:
         Initializes tile selection interface
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -1065,7 +1063,7 @@ def tile_interface(global_manager):
         'actor_type': 'tile',
         'description': 'tile information panel',
         'parent_collection': status.info_displays_collection,
-    }, global_manager)
+    })
 
     separation = scaling.scale_height(3)
     same_tile_ordered_collection = constants.actor_creation_manager.create_interface_element({
@@ -1076,7 +1074,7 @@ def tile_interface(global_manager):
         'parent_collection': status.tile_info_display,
         'member_config': {'order_exempt': True},
         'separation': separation
-    }, global_manager)
+    })
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, separation),
@@ -1087,7 +1085,7 @@ def tile_interface(global_manager):
         'init_type': 'cycle same tile button',
         'parent_collection': same_tile_ordered_collection,
     }
-    cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(input_dict)
     del input_dict['member_config']
     input_dict['coordinates'] = (0, 0)
     input_dict['height'] = scaling.scale_height(25)
@@ -1097,11 +1095,11 @@ def tile_interface(global_manager):
     input_dict['color'] = 'gray'
     for i in range(0, 3): #add button to cycle through
         input_dict['index'] = i
-        same_tile_icon = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        same_tile_icon = constants.actor_creation_manager.create_interface_element(input_dict)
     input_dict['height'] = scaling.scale_height(15)
     input_dict['index'] = i + 1
     input_dict['is_last'] = True
-    same_tile_icon = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    same_tile_icon = constants.actor_creation_manager.create_interface_element(input_dict)
 
     #tile background image's tooltip
     tile_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -1114,7 +1112,7 @@ def tile_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': status.tile_info_display,
         'member_config': {'order_overlap': True}
-    }, global_manager)
+    })
 
     tile_image = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(5, 5),
@@ -1125,7 +1123,7 @@ def tile_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': status.tile_info_display,
         'member_config': {'order_overlap': False}
-    }, global_manager)
+    })
 
     #tile info labels setup
     tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
@@ -1150,24 +1148,24 @@ def tile_interface(global_manager):
         }
         if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = 'actor display label'
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
         elif current_actor_label_type == 'building efficiency':
             input_dict['init_type'] = 'building efficiency label'
             input_dict['building_type'] = 'resource'
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
         elif current_actor_label_type == 'building work crews':
             input_dict['init_type'] = 'building work crews label'
             input_dict['building_type'] = 'resource'
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
         elif current_actor_label_type == 'current building work crew':
             input_dict['init_type'] = 'list item label'
             input_dict['list_type'] = 'resource building'
             for i in range(0, 3):
                 input_dict['list_index'] = i
-                constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+                constants.actor_creation_manager.create_interface_element(input_dict)
         elif current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = current_actor_label_type + ' label'
-            constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(input_dict)
 
     tab_collection_relative_coordinates = (450, -30)
 
@@ -1179,14 +1177,14 @@ def tile_interface(global_manager):
         'parent_collection': status.tile_info_display,
         'member_config': {'order_exempt': True},
         'description': 'tile information tabs'
-    }, global_manager)
+    })
 
-def inventory_interface(global_manager):
+def inventory_interface():
     '''
     Description:
         Initializes the commodity prices display and both mob/tile tabbed collections and inventory interfaces
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -1201,7 +1199,7 @@ def inventory_interface(global_manager):
         'modes': ['europe'],
         'image_id': 'misc/commodity_prices_label.png',
         'init_type': 'commodity prices label'
-    }, global_manager)
+    })
 
     input_dict = {
         'width': scaling.scale_width(30),
@@ -1213,7 +1211,7 @@ def inventory_interface(global_manager):
         input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index))
         input_dict['image_id'] = 'scenery/resources/large/' + constants.commodity_types[current_index] + '.png'
         input_dict['commodity'] = constants.commodity_types[current_index]
-        new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     status.mob_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
@@ -1222,7 +1220,7 @@ def inventory_interface(global_manager):
         'parent_collection': status.mob_tabbed_collection,
         'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
         'description': 'unit inventory panel'
-    }, global_manager)
+    })
 
     input_dict = {
         'minimum_width': scaling.scale_width(10),
@@ -1233,13 +1231,13 @@ def inventory_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': status.mob_inventory_collection,
     }
-    mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
     
     del input_dict['actor_label_type']
     for current_index in range(len(constants.commodity_types)): #commodities held in selected mob
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
-        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
     tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
@@ -1248,7 +1246,7 @@ def inventory_interface(global_manager):
         'parent_collection': status.tile_tabbed_collection,
         'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
         'description': 'tile inventory panel'
-    }, global_manager)
+    })
 
     input_dict = {
         'minimum_width': scaling.scale_width(10),
@@ -1259,20 +1257,20 @@ def inventory_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': tile_inventory_collection,
     }
-    tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
     del input_dict['actor_label_type']
     for current_index in range(len(constants.commodity_types)): #commodities held in selected tile
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
-        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
-def unit_organization_interface(global_manager):
+def unit_organization_interface():
     '''
     Description:
         Initializes the unit organization interface as part of the mob tabbed collection
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -1290,7 +1288,7 @@ def unit_organization_interface(global_manager):
         'description': 'unit organization panel',
         'direction': 'horizontal',
         'autofill_targets': {'officer': [], 'worker': [], 'group': []}
-    }, global_manager)
+    })
 
     #mob background image's tooltip
     lhs_top_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -1303,7 +1301,7 @@ def unit_organization_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
         'member_config': {'calibrate_exempt': True}
-    }, global_manager)
+    })
     unit_organization_collection.autofill_targets['officer'].append(lhs_top_tooltip)
 
     #mob image
@@ -1317,7 +1315,7 @@ def unit_organization_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': unit_organization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset)}
-    }, global_manager)
+    })
     unit_organization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
 
     #mob background image's tooltip
@@ -1331,7 +1329,7 @@ def unit_organization_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
         'member_config': {'calibrate_exempt': True},
-    }, global_manager)
+    })
     unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_tooltip)
 
     #mob image
@@ -1346,7 +1344,7 @@ def unit_organization_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': unit_organization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset), 'y_offset': scaling.scale_height(-1 * (image_height - 5))}
-    }, global_manager)
+    })
     unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
 
     #right side
@@ -1361,7 +1359,7 @@ def unit_organization_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
-    }, global_manager)
+    })
     unit_organization_collection.autofill_targets['group'].append(rhs_top_tooltip)
 
     #mob image
@@ -1378,7 +1376,7 @@ def unit_organization_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': unit_organization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
-    }, global_manager)
+    })
     unit_organization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
 
     #reorganize unit to right button
@@ -1392,7 +1390,7 @@ def unit_organization_interface(global_manager):
         'allowed_procedures': ['merge', 'crew'],
         'keybind_id': pygame.K_m,
         'enable_shader': True
-    }, global_manager)
+    })
 
     #reorganize unit to left button
     reorganize_unit_left_button = constants.actor_creation_manager.create_interface_element({
@@ -1405,7 +1403,7 @@ def unit_organization_interface(global_manager):
         'allowed_procedures': ['split', 'uncrew'],
         'keybind_id': pygame.K_n,
         'enable_shader': True
-    }, global_manager)
+    })
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35/2),
@@ -1416,7 +1414,7 @@ def unit_organization_interface(global_manager):
         'image_id': 'buttons/reset_button.png',
         'autofill_target_type': 'officer'
     }
-    cycle_autofill_officer_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    cycle_autofill_officer_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35/2),
@@ -1427,14 +1425,14 @@ def unit_organization_interface(global_manager):
         'image_id': input_dict['image_id'],
         'autofill_target_type': 'worker'
     }
-    cycle_autofill_worker_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+    cycle_autofill_worker_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
-def minister_interface(global_manager):
+def minister_interface():
     '''
     Description:
         Initializes minister selection interface
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         int actor_display_current_y: Value that tracks the location of interface as it is created, used by other setup functions
     '''
@@ -1453,7 +1451,7 @@ def minister_interface(global_manager):
         'allow_minimize': True,
         'allow_move': True,
         'description': 'minister information panel'
-    }, global_manager)
+    })
 
     #minister background image
     minister_free_image_background = constants.actor_creation_manager.create_interface_element({
@@ -1465,7 +1463,7 @@ def minister_interface(global_manager):
         'init_type': 'minister background image',
         'parent_collection': status.minister_info_display,
         'member_config': {'order_overlap': True}
-    }, global_manager)
+    })
 
     #minister image
     minister_free_image = constants.actor_creation_manager.create_interface_element({
@@ -1477,7 +1475,7 @@ def minister_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': status.minister_info_display,
         'member_config': {'order_overlap': True, 'order_x_offset': 5, 'order_y_offset': -5}
-    }, global_manager)
+    })
 
     #minister background image's tooltip
     minister_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -1490,7 +1488,7 @@ def minister_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': status.minister_info_display,
         'member_config': {'order_overlap': False}
-    }, global_manager)
+    })
 
     minister_display_current_y -= 35
     #minister info images setup
@@ -1509,15 +1507,15 @@ def minister_interface(global_manager):
         x_displacement = 0
         input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y)
         input_dict['actor_label_type'] = current_actor_label_type
-        constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        constants.actor_creation_manager.create_interface_element(input_dict)
     #minister info labels setup
 
-def country_interface(global_manager):
+def country_interface():
     '''
     Description:
         Initializes country selection interface
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         int actor_display_current_y: Value that tracks the location of interface as it is created, used by other setup functions
     '''
@@ -1533,7 +1531,7 @@ def country_interface(global_manager):
         'allow_minimize': True,
         'allow_move': True,
         'description': 'country information panel',
-    }, global_manager)
+    })
 
     #country background image
     country_free_image_background = constants.actor_creation_manager.create_interface_element({
@@ -1545,7 +1543,7 @@ def country_interface(global_manager):
         'init_type': 'mob background image',
         'parent_collection': status.country_info_display,
         'member_config': {'order_overlap': True}
-    }, global_manager)
+    })
 
     #country image
     country_free_image = constants.actor_creation_manager.create_interface_element({
@@ -1557,7 +1555,7 @@ def country_interface(global_manager):
         'init_type': 'actor display free image',
         'parent_collection': status.country_info_display,
         'member_config': {'order_overlap': True, 'order_x_offset': 5, 'order_y_offset': -5}
-    }, global_manager)
+    })
 
     #country background image's tooltip
     country_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -1569,7 +1567,7 @@ def country_interface(global_manager):
         'init_type': 'actor display label',
         'parent_collection': status.country_info_display,
         'member_config': {'order_overlap': False}
-    }, global_manager)
+    })
 
     input_dict = {
         'minimum_width': scaling.scale_width(10),
@@ -1585,14 +1583,14 @@ def country_interface(global_manager):
         x_displacement = 0
         input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, 0)
         input_dict['actor_label_type'] = current_actor_label_type
-        constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
-def debug_tools(global_manager):
+def debug_tools():
     '''
     Description:
         Initializes toggleable effects for debugging
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -1603,7 +1601,7 @@ def debug_tools(global_manager):
     debug_config = json.load(file)
     # Iterating through the json list
     for current_effect in debug_config['effects']:
-        effects.effect('DEBUG_' + current_effect, current_effect, global_manager)
+        effects.effect('DEBUG_' + current_effect, current_effect)
     file.close()
 
     try: #for testing/development, use active effects of local version of config file that is not uploaded to GitHub

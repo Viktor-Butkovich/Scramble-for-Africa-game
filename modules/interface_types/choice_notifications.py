@@ -11,7 +11,7 @@ class choice_notification(action_notifications.action_notification):
     '''
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -31,12 +31,11 @@ class choice_notification(action_notifications.action_notification):
                     - Each button type could also be a dictionary value, in which case the created button will be an anonymous button with
                         functionality decided by the dictionary's contents
                 'choice_info_dict': dictionary value - Dictionary containing any case-specific information for choice buttons to function as intended
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         button_height = scaling.scale_height(50)
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.choice_buttons = []
         self.choice_info_dict = input_dict['choice_info_dict']
         button_types = input_dict['button_types']
@@ -56,7 +55,7 @@ class choice_notification(action_notifications.action_notification):
                 'image_id': 'misc/paper_label.png',
                 'notification': self,
                 'init_type': init_type
-            }, global_manager))
+            }))
         flags.making_choice = True
 
     def on_click(self, choice_button_override=False):
@@ -102,7 +101,7 @@ class choice_button(buttons.button):
     '''
     Button with no keybind that is attached to a choice notification and removes its notification when clicked
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -120,7 +119,6 @@ class choice_button(buttons.button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'notification': choice_notification value: notification to which this choice button is attached
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -163,7 +161,7 @@ class choice_button(buttons.button):
     
         else:
             self.message = input_dict['button_type'].capitalize()
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.font_size = scaling.scale_width(25)
         self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
@@ -192,7 +190,7 @@ class choice_button(buttons.button):
         '''
         super().draw()
         if self.showing:
-            constants.game_display.blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10), constants.display_height -
+            constants.game_display.blit(text_utility.text(self.message, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
     def update_tooltip(self):
@@ -267,7 +265,7 @@ class recruitment_choice_button(choice_button):
             input_dict['name'] = 'slave workers'
             input_dict['init_type'] = 'slaves'
             input_dict['purchased'] = True
-            constants.actor_creation_manager.create(False, input_dict, self.global_manager)
+            constants.actor_creation_manager.create(False, input_dict)
 
         elif self.recruitment_type == 'African worker village':
             status.displayed_tile.cell.get_building('village').recruit_worker()
@@ -286,14 +284,14 @@ class recruitment_choice_button(choice_button):
             input_dict['worker_type'] = 'African'
             constants.money_tracker.change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
-            market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
-            worker = constants.actor_creation_manager.create(False, input_dict, self.global_manager)
+            market_utility.attempt_worker_upkeep_change('decrease', 'African') #adds 1 worker to the pool
+            worker = constants.actor_creation_manager.create(False, input_dict)
             if recruiter.is_vehicle:
                 recruiter.set_movement_points(0)
                 worker.crew_vehicle(recruiter)
             else:
                 recruiter.set_movement_points(0)
-                constants.actor_creation_manager.create_group(worker, recruiter, self.global_manager)
+                constants.actor_creation_manager.create_group(worker, recruiter)
 
         else:
             input_dict['coordinates'] = (0, 0)
@@ -329,5 +327,5 @@ class recruitment_choice_button(choice_button):
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'ship'
                 
-            constants.actor_creation_manager.create(False, input_dict, self.global_manager)
+            constants.actor_creation_manager.create(False, input_dict)
         super().on_click()

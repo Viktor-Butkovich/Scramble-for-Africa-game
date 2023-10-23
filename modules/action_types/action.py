@@ -9,16 +9,15 @@ class action():
     '''
     Generic action class with automatic setup, button creation/functionality, and start/middle/complete logical flow
     '''
-    def __init__(self, global_manager, **kwargs):
+    def __init__(self, **kwargs):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.action_type = self.generate_action_type() #class name
         self.button = None
         self.initial_setup(**kwargs)
@@ -88,14 +87,14 @@ class action():
         Output:
             boolean: Returns whether the subclass on_click can continue with its logic
         '''
-        if not main_loop_utility.action_possible(self.global_manager):
-            text_utility.print_to_screen('You are busy and cannot start a ' + self.name + '.', self.global_manager)
+        if not main_loop_utility.action_possible():
+            text_utility.print_to_screen('You are busy and cannot start a ' + self.name + '.')
             return(False)
         elif not (unit.movement_points >= 1):
-            text_utility.print_to_screen(utility.generate_article(self.name).capitalize() + ' ' + self.name + ' requires all remaining movement points, at least 1.', self.global_manager)
+            text_utility.print_to_screen(utility.generate_article(self.name).capitalize() + ' ' + self.name + ' requires all remaining movement points, at least 1.')
             return(False)
         elif constants.money < self.get_price():
-            text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.', self.global_manager)
+            text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.')
             return(False)
         elif not (unit.ministers_appointed()):
             return(False)
@@ -157,7 +156,6 @@ class action():
                     (0, 0),
                     roll_list[0],
                     self,
-                    self.global_manager,
                     override_input_dict={
                         'member_config':
                         {
@@ -277,7 +275,7 @@ class action():
         for index in range(len(results)):
             result = results[index]
             roll_type = roll_types[index]
-            self.roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result))
+            self.roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result))
 
         self.roll_result = 0
         for roll_list in self.roll_lists:
@@ -357,7 +355,7 @@ class action():
         if self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
             self.current_unit.promote()
             self.current_unit.select()
-        action_utility.cancel_ongoing_actions(self.global_manager)
+        action_utility.cancel_ongoing_actions()
 
 class campaign(action):
     '''
@@ -373,5 +371,5 @@ class campaign(action):
             float: Returns the amount paid
         '''
         price = super().process_payment()
-        actor_utility.double_action_price(self.global_manager, self.action_type)
+        actor_utility.double_action_price(self.action_type)
         return(price)

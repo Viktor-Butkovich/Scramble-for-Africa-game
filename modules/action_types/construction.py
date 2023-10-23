@@ -90,7 +90,7 @@ class construction(action.action):
             None
         '''
         message = []
-        actor_utility.update_descriptions(self.global_manager, self.building_type)
+        actor_utility.update_descriptions(self.building_type)
         message.append('Attempts to build a ' + self.building_name + ' in this tile')
         if self.building_type != 'infrastructure':
             message += constants.list_descriptions[self.building_type]
@@ -113,8 +113,8 @@ class construction(action.action):
         if self.building_type in ['train_station', 'port', 'resource']:
             message.append('Also upgrades this tile\'s warehouses by 9 inventory capacity, or creates new warehouses if none are present')
         
-        base_cost = actor_utility.get_building_cost(self.global_manager, None, self.building_type, self.building_name)
-        cost = actor_utility.get_building_cost(self.global_manager, status.displayed_mob, self.building_type, self.building_name)
+        base_cost = actor_utility.get_building_cost(None, self.building_type, self.building_name)
+        cost = actor_utility.get_building_cost(status.displayed_mob, self.building_type, self.building_name)
         
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
         if self.building_type in ['train', 'steamboat']:
@@ -189,7 +189,7 @@ class construction(action.action):
         Output:
             float: Returns price of this action
         '''
-        return(actor_utility.get_building_cost(self.global_manager, self.current_unit, self.building_type, self.building_name))
+        return(actor_utility.get_building_cost(self.current_unit, self.building_type, self.building_name))
 
     def can_show(self):
         '''
@@ -266,22 +266,22 @@ class construction(action.action):
             if self.attached_resource != 'none':
                 return_value = True
             else:
-                text_utility.print_to_screen('This building can only be built in tiles with resources.', self.global_manager)
+                text_utility.print_to_screen('This building can only be built in tiles with resources.')
         elif self.building_type == 'port':
             if unit.adjacent_to_water() and unit.images[0].current_cell.terrain != 'water':
                 return_value = True
             else:
-                text_utility.print_to_screen('This building can only be built in land tiles adjacent to water.', self.global_manager)
+                text_utility.print_to_screen('This building can only be built in land tiles adjacent to water.')
         elif self.building_type == 'train_station':
             if unit.images[0].current_cell.has_intact_building('railroad'):
                 return_value = True
             else:
-                text_utility.print_to_screen('This building can only be built on railroads.', self.global_manager)
+                text_utility.print_to_screen('This building can only be built on railroads.')
         elif self.building_type in ['trading_post', 'mission']:
             if unit.images[0].current_cell.has_building('village'):
                 return_value = True
             else:
-                text_utility.print_to_screen('This building can only be built in villages.', self.global_manager)
+                text_utility.print_to_screen('This building can only be built in villages.')
         elif self.building_type == 'infrastructure':
             if self.building_name in ['road bridge', 'railroad bridge']:
                 current_cell = unit.images[0].current_cell
@@ -297,19 +297,19 @@ class construction(action.action):
                         if left_cell.visible and right_cell.visible:
                             return_value = True
                 if not return_value:
-                    text_utility.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
+                    text_utility.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles')
             else:
                 return_value = True
         elif self.building_type == 'train':
             if unit.images[0].current_cell.has_intact_building('train_station'):
                 return_value = True
             else:
-                text_utility.print_to_screen('This building can only be built on train stations', self.global_manager)
+                text_utility.print_to_screen('This building can only be built on train stations')
         elif self.building_type == 'steamboat':
             if unit.images[0].current_cell.has_intact_building('port') and unit.adjacent_to_river():
                 return_value = True
             else:
-                text_utility.print_to_screen('This building can only be built on river ports', self.global_manager)
+                text_utility.print_to_screen('This building can only be built on river ports')
         else:
             return_value = True
         return(return_value)
@@ -328,13 +328,13 @@ class construction(action.action):
             current_building = current_cell.get_building(self.building_type)
             if not (current_building == 'none' or (self.building_name in ['railroad', 'railroad bridge'] and current_building.is_road)):
                 if self.building_type == 'infrastructure': #if railroad
-                    text_utility.print_to_screen('This tile already contains a railroad.', self.global_manager)
+                    text_utility.print_to_screen('This tile already contains a railroad.')
                 else:
-                    text_utility.print_to_screen('This tile already contains a ' + self.building_type + ' building.', self.global_manager)
+                    text_utility.print_to_screen('This tile already contains a ' + self.building_type + ' building.')
             elif not status.strategic_map_grid in unit.grids:
-                text_utility.print_to_screen('This building can only be built in Africa.', self.global_manager)
+                text_utility.print_to_screen('This building can only be built in Africa.')
             elif not (current_cell.terrain != 'water' or self.building_name in ['road bridge', 'railroad bridge']):
-                text_utility.print_to_screen('This building cannot be built in water.', self.global_manager)
+                text_utility.print_to_screen('This building cannot be built in water.')
             elif self.can_build(unit):
                 self.start(unit)
 
@@ -358,7 +358,7 @@ class construction(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }
@@ -420,7 +420,7 @@ class construction(action.action):
                 input_dict['init_type'] = 'boat'
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
-            new_building = constants.actor_creation_manager.create(False, input_dict, self.global_manager)
+            new_building = constants.actor_creation_manager.create(False, input_dict)
 
             if self.building_type in ['port', 'train_station', 'resource']:
                 warehouses = self.current_unit.images[0].current_cell.get_building('warehouses')
@@ -432,12 +432,12 @@ class construction(action.action):
                     input_dict['image'] = 'misc/empty.png'
                     input_dict['name'] = 'warehouses'
                     input_dict['init_type'] = 'warehouses'
-                    constants.actor_creation_manager.create(False, input_dict, self.global_manager)
+                    constants.actor_creation_manager.create(False, input_dict)
                     
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show new building
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:
                 new_building.move_to_front()
                 new_building.select()
             else:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self.current_unit) #update mob display to show new upgrade possibilities
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self.current_unit) #update mob display to show new upgrade possibilities
         super().complete()

@@ -12,7 +12,7 @@ class caravan(group):
     '''
     A group with a merchant officer that is able to establish trading posts and trade with native villages
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,23 +27,22 @@ class caravan(group):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.can_hold_commodities = True
         self.can_trade = True
         self.inventory_capacity = 9
         self.trades_remaining = 0
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for inventory capacity changing
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for inventory capacity changing
         else:
             self.load_inventory(input_dict['inventory'])
         self.set_group_type('caravan')
@@ -155,11 +154,11 @@ class caravan(group):
             results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            first_roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0]) #0 requirement for critical fail means critical fails will not occur
+            first_roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[0]) #0 requirement for critical fail means critical fails will not occur
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)         
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1]) #0 requirement for critical fail means critical fails will not occur
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[1]) #0 requirement for critical fail means critical fails will not occur
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -179,7 +178,7 @@ class caravan(group):
         else:
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             result = self.controlling_minister.no_corruption_roll(6)
-            roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result) #0 requirement for critical fail means critical fails will not occur
+            roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result) #0 requirement for critical fail means critical fails will not occur
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                             
             text += roll_list[1]
@@ -284,10 +283,10 @@ class caravan(group):
         roll_result = 0
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, constants.commodity_prices['consumer goods'], 'trade', 2)
-            first_roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
     
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1]) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, results[1]) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -306,7 +305,7 @@ class caravan(group):
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, constants.commodity_prices['consumer goods'], 'trade')
-            roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result) #0 requirement for critical fail means critical fails will not occur
+            roll_list = dice_utility.roll_to_list(6, 'Trade roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result) #0 requirement for critical fail means critical fails will not occur
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                             
             text += roll_list[1]
@@ -376,7 +375,7 @@ class caravan(group):
         '''
         if trade_result[3]: #if gets worker
             self.notification.choice_info_dict['village'].change_available_workers(1)
-            market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+            market_utility.attempt_worker_upkeep_change('decrease', 'African')
         self.change_inventory('consumer goods', -1)
         if gives_commodity:
             commodity_gained = trade_result[2]

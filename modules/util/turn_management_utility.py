@@ -6,53 +6,52 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
-def end_turn(global_manager):
+def end_turn():
     '''
     Description:
         Ends the turn, completing any pending movements, removing any commodities that can't be stored, and doing resource production
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    remove_excess_inventory(global_manager)
+    remove_excess_inventory()
     for current_pmob in status.pmob_list:
         current_pmob.end_turn_move()
 
-    actor_utility.deselect_all(global_manager)
+    actor_utility.deselect_all()
         
     flags.player_turn = False
     status.player_turn_queue = []
-    start_enemy_turn(global_manager)
+    start_enemy_turn()
 
-def start_enemy_turn(global_manager):
+def start_enemy_turn():
     '''
     Description:
         Starts the ai's turn, resetting their units to maximum movement points, spawning warriors, etc.
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         first_turn = False: Whether this is the first turn - do not pay upkeep, etc. when the game first starts
     Output:
         None
     '''
-    manage_warriors(global_manager)
-    manage_beasts(global_manager)
-    reset_mobs('npmobs', global_manager)
-    #manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+    manage_warriors()
+    manage_beasts()
+    reset_mobs('npmobs')
+    #manage_combat() #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
     #the manage_combat function starts the player turn
     
-def start_player_turn(global_manager, first_turn = False):
+def start_player_turn(first_turn = False):
     '''
     Description:
         Starts the player's turn, resetting their units to maximum movement points, adjusting prices, paying upkeep, etc.
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
         first_turn = False: Whether this is the first turn - do not pay upkeep, etc. when the game first starts
     Output:
         None
     '''
-    text_utility.print_to_screen('', global_manager)
-    text_utility.print_to_screen('Turn ' + str(constants.turn + 1), global_manager)
+    text_utility.print_to_screen('')
+    text_utility.print_to_screen('Turn ' + str(constants.turn + 1))
     if not first_turn:
         for current_pmob in status.pmob_list:
             if current_pmob.is_vehicle:
@@ -60,49 +59,48 @@ def start_player_turn(global_manager, first_turn = False):
         for current_building in status.building_list:
             if current_building.building_type == 'resource':
                 current_building.reattach_work_crews()
-        manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
-        reset_mobs('pmobs', global_manager)
-        manage_villages(global_manager)
-        manage_production(global_manager)
-        manage_public_opinion(global_manager)
-        manage_upkeep(global_manager)
-        manage_loans(global_manager)
-        manage_slave_traders(global_manager)
-        manage_worker_price_changes(global_manager)
-        manage_worker_migration(global_manager)
-        manage_commodity_sales(global_manager)
-        manage_ministers(global_manager)
-        manage_subsidies(global_manager) #subsidies given after public opinion changes
-        manage_financial_report(global_manager)
-        manage_lore(global_manager)
-        actor_utility.reset_action_prices(global_manager)
-        game_end_check(global_manager)
+        manage_attrition() #have attrition before or after enemy turn? Before upkeep?
+        reset_mobs('pmobs')
+        manage_villages()
+        manage_production()
+        manage_public_opinion()
+        manage_upkeep()
+        manage_loans()
+        manage_slave_traders()
+        manage_worker_price_changes()
+        manage_worker_migration()
+        manage_commodity_sales()
+        manage_ministers()
+        manage_subsidies() #subsidies given after public opinion changes
+        manage_financial_report()
+        manage_lore()
+        actor_utility.reset_action_prices()
+        game_end_check()
 
     flags.player_turn = True #player_turn also set to True in main_loop when enemies done moving
     flags.enemy_combat_phase = False
     constants.turn_tracker.change(1)
         
     if not first_turn:
-        market_utility.adjust_prices(global_manager)#adjust_prices(global_manager)
+        market_utility.adjust_prices()#adjust_prices()
 
     if status.displayed_mob == None or status.displayed_mob.is_npmob:
-        actor_utility.deselect_all(global_manager)
-        game_transitions.cycle_player_turn(global_manager, True)
+        actor_utility.deselect_all()
+        game_transitions.cycle_player_turn(True)
 
     selected_mob = status.displayed_mob
-    actor_utility.calibrate_actor_info_display(global_manager, status.mob_info_display, None, override_exempt=True)
+    actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
     if selected_mob:
         selected_mob.select()
-        actor_utility.calibrate_actor_info_display(global_manager, status.tile_info_display, selected_mob.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, selected_mob.images[0].current_cell.tile)
        
 
-def reset_mobs(mob_type, global_manager):
+def reset_mobs(mob_type):
     '''
     Description:
         Starts the turn for mobs of the inputed type, resetting their movement points and removing the disorganized status
     Input:
         string mob_type: Can be pmob or npmob, determines which mobs' turn starts
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
@@ -122,13 +120,13 @@ def reset_mobs(mob_type, global_manager):
             current_mob.reset_movement_points()
             current_mob.set_disorganized(False)
 
-def manage_attrition(global_manager):
+def manage_attrition():
     '''
     Description:
         Checks each unit and commodity storage location to see if attrition occurs. Health attrition forces parts of units to die and need to be replaced, costing money, removing experience, and preventing them from acting in the next
             turn. Commodity attrition causes up to half of the commodities stored in a warehouse or carried by a unit to be lost. Both types of attrition are more common in bad terrain and less common in areas with more infrastructure
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -149,12 +147,12 @@ def manage_attrition(global_manager):
             if len(current_tile.get_held_commodities()) > 0:
                 current_tile.manage_inventory_attrition()
 
-def remove_excess_inventory(global_manager):
+def remove_excess_inventory():
     '''
     Description:
         Removes any commodities that exceed their tile's storage capacities
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -165,12 +163,12 @@ def remove_excess_inventory(global_manager):
             if len(current_tile.get_held_commodities()) > 0:
                 current_tile.remove_excess_inventory()
     
-def manage_production(global_manager):
+def manage_production():
     '''
     Description:
         Orders each work crew in a production building to attempt commodity production and displays a production report of commodities for which production was attempted and how much of each was produced
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -190,9 +188,9 @@ def manage_production(global_manager):
             if len(current_resource_building.contained_work_crews) == 0:
                 if not current_resource_building.resource_type in constants.attempted_commodities:
                     constants.attempted_commodities.append(current_resource_building.resource_type)
-    manage_production_report(expected_production, global_manager)
+    manage_production_report(expected_production)
 
-def manage_production_report(expected_production, global_manager):
+def manage_production_report(expected_production):
     '''
     Description:
         Displays a production report at the end of the turn, showing expected and actual production for each commodity the company has the capacity to produce
@@ -215,85 +213,85 @@ def manage_production_report(expected_production, global_manager):
             text += max_commodity.capitalize() + ': ' + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
         production_minister.display_message(text)       
 
-def manage_upkeep(global_manager):
+def manage_upkeep():
     '''
     Description:
         Pays upkeep for all units at the end of a turn. Currently, only workers cost upkeep
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    total_upkeep = market_utility.calculate_total_worker_upkeep(global_manager)
+    total_upkeep = market_utility.calculate_total_worker_upkeep()
     constants.money_tracker.change(round(-1 * total_upkeep, 2), 'worker_upkeep')
 
-def manage_loans(global_manager):
+def manage_loans():
     '''
     Description:
         Pays interest on all current loans at the end of a turn
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     for current_loan in status.loan_list:
         current_loan.make_payment()
 
-def manage_slave_traders(global_manager):
+def manage_slave_traders():
     '''
     Description:
         Regenerates the strength of slave traders up to the natural maximum over time
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     if constants.slave_traders_strength < constants.slave_traders_natural_max_strength and constants.slave_traders_strength > 0: 
         #if below natural max but not eradicated
-        actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1, global_manager)
+        actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1)
 
-def manage_public_opinion(global_manager):
+def manage_public_opinion():
     '''
     Description:
         Changes public opinion at the end of the turn to move back toward 50
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     current_public_opinion = round(constants.public_opinion)
     if current_public_opinion < 50:
         constants.public_opinion_tracker.change(1)
-        text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company increased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion + 1), global_manager)
+        text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company increased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion + 1))
     elif current_public_opinion > 50:
         constants.public_opinion_tracker.change(-1)
-        text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1), global_manager)
+        text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1))
     constants.evil_tracker.change(-1)
     if constants.effect_manager.effect_active('show_evil'):
         print('Evil number: ' + str(constants.evil))
     if constants.effect_manager.effect_active('show_fear'):
         print('Fear number: ' + str(constants.fear))
     
-def manage_subsidies(global_manager):
+def manage_subsidies():
     '''
     Description:
         Receives subsidies at the end of the turn based on public opinion
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    subsidies_received = market_utility.calculate_subsidies(global_manager)
-    text_utility.print_to_screen('You received ' + str(subsidies_received) + ' money in subsidies from the government based on your public opinion and colonial efforts', global_manager)
+    subsidies_received = market_utility.calculate_subsidies()
+    text_utility.print_to_screen('You received ' + str(subsidies_received) + ' money in subsidies from the government based on your public opinion and colonial efforts')
     constants.money_tracker.change(subsidies_received, 'subsidies')
 
 
-def manage_financial_report(global_manager):
+def manage_financial_report():
     '''
     Description:
         Displays a financial report at the end of the turn, showing revenue in each area, costs in each area, and total profit from the last turn
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -304,12 +302,12 @@ def manage_financial_report(global_manager):
     status.previous_financial_report = financial_report_text
     constants.money_tracker.reset_transaction_history()
 
-def manage_worker_price_changes(global_manager):
+def manage_worker_price_changes():
     '''
     Description:
         Randomly changes the prices of slave purchase and European worker upkeep at the end of the turn, generally trending down to compensate for increases when recruited
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -319,12 +317,12 @@ def manage_worker_price_changes(global_manager):
         changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
         if changed_price >= constants.min_european_worker_upkeep:
             constants.european_worker_upkeep = changed_price
-            text_utility.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
+            text_utility.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
     elif european_worker_roll == 1:
         current_price = constants.european_worker_upkeep
         changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
         constants.european_worker_upkeep = changed_price
-        text_utility.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
+        text_utility.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
     if constants.slave_traders_strength > 0:
         slave_worker_roll = random.randrange(1, 7)
         if slave_worker_roll == 6:
@@ -332,48 +330,48 @@ def manage_worker_price_changes(global_manager):
             changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
             if changed_price >= constants.min_slave_worker_recruitment_cost:
                 constants.recruitment_costs['slave workers'] = changed_price
-                text_utility.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
+                text_utility.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         elif slave_worker_roll == 1:
             current_price = constants.recruitment_costs['slave workers']
             changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
             constants.recruitment_costs['slave workers'] = changed_price
-            text_utility.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
+            text_utility.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         
-def manage_worker_migration(global_manager): 
+def manage_worker_migration(): 
     '''
     Description:
         Checks if a workerm migration event occurs and resolves it if it does occur
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + constants.num_wandering_workers
-    num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
+    num_village_workers = actor_utility.get_num_available_workers('village') + constants.num_wandering_workers
+    num_slums_workers = actor_utility.get_num_available_workers('slums')
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
-        trigger_worker_migration(global_manager)
+        trigger_worker_migration()
 
     for current_slums in status.slums_list:
         population_increase = 0
         for current_worker in range(current_slums.available_workers):
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
                 population_increase += 1
-                market_utility.attempt_worker_upkeep_change('decrease', 'African', global_manager)
+                market_utility.attempt_worker_upkeep_change('decrease', 'African')
         if population_increase > 0:
             current_slums.change_population(population_increase)
 
-def trigger_worker_migration(global_manager): #resolves migration if it occurs
+def trigger_worker_migration(): #resolves migration if it occurs
     '''
     Description:
         When a migration event occurs, about half of available workers in villages and all wandering workers move to a slum around a colonial port, train station, or resource production facility. The chance to move to a slum on a tile
             is weighted by the number of people already in that tile's slum and the number of employment buildings on that tile. Also displays a report of the movements that occurred
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    possible_source_village_list = actor_utility.get_migration_sources(global_manager) #list of villages that could have migration
-    destination_cell_list = actor_utility.get_migration_destinations(global_manager)
+    possible_source_village_list = actor_utility.get_migration_sources() #list of villages that could have migration
+    destination_cell_list = actor_utility.get_migration_destinations()
     if not len(destination_cell_list) == 0:
         weighted_destination_cell_list = create_weighted_migration_destinations(destination_cell_list)
         village_destination_dict = {}
@@ -482,24 +480,24 @@ def create_weighted_migration_destinations(destination_cell_list):
             weighted_cell_list.append(current_cell)
     return(weighted_cell_list)
 
-def manage_warriors(global_manager):
+def manage_warriors():
     '''
     Description:
         Controls native warrior spawning/despawning
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     for current_village in status.village_list:
         current_village.manage_warriors()
 
-def manage_villages(global_manager):
+def manage_villages():
     '''
     Description:
         Controls the aggressiveness and population changes of villages and native warrior spawning/despawning
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -524,12 +522,12 @@ def manage_villages(global_manager):
         if roll == 6 and second_roll == 6:
             current_village.change_population(1)
 
-def manage_beasts(global_manager):
+def manage_beasts():
     '''
     Description:
         Controls beast spawning/despawning
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -538,14 +536,14 @@ def manage_beasts(global_manager):
         current_beast.check_despawn()
 
     if random.randrange(1, 7) == 1:
-        actor_utility.spawn_beast(global_manager)
+        actor_utility.spawn_beast()
     
-def manage_enemy_movement(global_manager):
+def manage_enemy_movement():
     '''
     Description:
         Moves npmobs at the end of the turn towards player-controlled mobs/buildings
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -553,26 +551,26 @@ def manage_enemy_movement(global_manager):
         if not current_npmob.creation_turn == constants.turn: #if not created this turn
             current_npmob.end_turn_move()
 
-def manage_combat(global_manager):
+def manage_combat():
     '''
     Description:
         Resolves, in order, each possible combat that was triggered by npmobs moving into cells with pmobs. When a possible combat is resolved, it should call the next possible combat until all are resolved
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     if len(status.attacker_queue) > 0:
         status.attacker_queue.pop(0).attempt_local_combat()
     else:
-        start_player_turn(global_manager)
+        start_player_turn()
 
-def manage_ministers(global_manager):
+def manage_ministers():
     '''
     Description:
         Controls minister retirement, new ministers appearing, and evidence loss over time
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -595,7 +593,7 @@ def manage_ministers(global_manager):
             prosecutor = status.current_ministers['Prosecutor']
             if prosecutor.check_corruption(): #corruption is normally resolved during a trial, but prosecutor can still steal money from unused fabricated evidence if no trial occurs
                 prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated_evidence')
-            text_utility.print_to_screen('The ' + str(current_minister.fabricated_evidence) + ' fabricated evidence against ' + current_minister.name + ' is no longer usable.', global_manager)
+            text_utility.print_to_screen('The ' + str(current_minister.fabricated_evidence) + ' fabricated evidence against ' + current_minister.name + ' is no longer usable.')
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
 
@@ -616,7 +614,7 @@ def manage_ministers(global_manager):
         if removing_minister:
             current_minister.remove_complete()
     if flags.prosecution_bribed_judge:
-        text_utility.print_to_screen('The effect of bribing the judge has faded and will not affect the next trial.', global_manager)
+        text_utility.print_to_screen('The effect of bribing the judge has faded and will not affect the next trial.')
     flags.prosecution_bribed_judge = False
             
     while len(removed_ministers) > 0:
@@ -629,7 +627,7 @@ def manage_ministers(global_manager):
 
     if (len(status.minister_list) <= constants.minister_limit - 2 and random.randrange(1, 7) == 1) or len(status.minister_list) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(status.minister_list) < constants.minister_limit:
-            constants.actor_creation_manager.create_minister(False, {}, global_manager)
+            constants.actor_creation_manager.create_minister(False, {})
         constants.notification_manager.display_notification({
             'message': 'Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n',
         })
@@ -637,14 +635,14 @@ def manage_ministers(global_manager):
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
         constants.fear_tracker.change(-1)
-    manage_minister_rumors(global_manager)
+    manage_minister_rumors()
 
-def manage_minister_rumors(global_manager):
+def manage_minister_rumors():
     '''
     Description:
         Passively checks for rumors on each minister each turn
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -662,12 +660,12 @@ def manage_minister_rumors(global_manager):
         #if currently employed, 1/216 of getting report on each non-working skill
         #if not employed, 1/216 of getting report on each skill
 
-def game_end_check(global_manager):
+def game_end_check():
     '''
     Description:
         Checks each turn if the company is below 0 money, causing the player to lose the game
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -680,12 +678,12 @@ def game_end_check(global_manager):
             'choices': ['confirm main menu', 'quit'],
         })
 
-def manage_commodity_sales(global_manager):
+def manage_commodity_sales():
     '''
     Description:
         Orders the minister of trade to process all commodity sales started in the player's turn, allowing the minister to use skill/corruption to modify how much money is received by the company
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -714,7 +712,7 @@ def manage_commodity_sales(global_manager):
                 reported_revenue += individual_sell_price#constants.money_tracker.change(individual_sell_price, 'commodity sales')
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
-                    market_utility.change_price(current_commodity, -1, global_manager)
+                    market_utility.change_price(current_commodity, -1)
 
             text += str(sold_commodities[current_commodity]) + ' ' + current_commodity + ' sold for ' + str(actual_revenue) + ' money (expected ' + str(expected_revenue) + ') /n /n'
 
@@ -728,15 +726,15 @@ def manage_commodity_sales(global_manager):
     for current_commodity in constants.commodity_types:
         constants.sold_commodities[current_commodity] = 0
 
-def manage_lore(global_manager):
+def manage_lore():
     '''
     Description:
         Controls the spawning of new lore missions
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     if status.current_lore_mission == None:
         if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or constants.effect_manager.effect_active('instant_lore_mission'):
-            constants.actor_creation_manager.create_lore_mission(False, {}, global_manager)
+            constants.actor_creation_manager.create_lore_mission(False, {})

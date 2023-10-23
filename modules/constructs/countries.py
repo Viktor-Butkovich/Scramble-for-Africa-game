@@ -8,7 +8,7 @@ class country:
     '''
     Country with associated flavor text, art, images, and abilities that can be selected to play as
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -23,12 +23,10 @@ class country:
                 'allow_double_last_names': boolean value - Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
                 'background_set': string list value - Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
                 'country_effect': effect value - Effect that is applied when this country is selected and vice versa
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.actor_type = 'country'
-        self.global_manager = global_manager
         status.country_list.append(self)
         self.tooltip_text = []
         self.name = input_dict['name']
@@ -126,21 +124,20 @@ class hybrid_country(country):
     '''
     Country that uses combination of multiple namesets, like Belgium
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object, the same keys as superclass except without allow_particles, aristocratic_particles, 
                 or allow_double_last_names
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['allow_particles'] = False
         input_dict['aristocratic_particles'] = False
         input_dict['allow_double_last_names'] = False
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def select(self):
         '''

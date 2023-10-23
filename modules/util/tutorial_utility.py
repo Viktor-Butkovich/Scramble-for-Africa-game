@@ -3,12 +3,12 @@
 import modules.constants.constants as constants
 import modules.constants.status as status
 
-def show_tutorial_notifications(global_manager):
+def show_tutorial_notifications():
     '''
     Description:
         Displays tutorial messages at various points in the program. The exact message depends on how far the player has advanced through the tutorial   
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''

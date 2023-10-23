@@ -1,16 +1,14 @@
 #Runs setup and main loop on program start
 
 import modules.main_loop as main_loop
-import modules.constants.constants as constants
 from modules.setup import *
 
 try:
-    #global_manager = global_manager_template.global_manager_template() #manages a dictionary of what would be global variables passed between functions and classes
     setup(debug_tools, misc, terrains, commodities, def_ministers, def_countries, transactions, actions, lore, value_trackers, buttons, europe_screen,
             ministers_screen, trial_screen, new_game_setup_screen, mob_interface, tile_interface, unit_organization_interface, inventory_interface, minister_interface,
             country_interface
     )
-    main_loop.main_loop(constants.global_manager)
+    main_loop.main_loop()
 
 except Exception: #displays error message and records error message in crash log file
     manage_crash(Exception)

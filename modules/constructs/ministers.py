@@ -11,7 +11,7 @@ class minister():
     '''
     Person that can be appointed to control a certain part of the company and will affect actions based on how skilled and corrupt they are
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -31,13 +31,11 @@ class minister():
                 'just_removed': boolean value - Whether this minister was just removed from office and will be fired at the end of the turn
                 'corruption_evidence': int value - Number of pieces of evidence that can be used against this minister in a trial, includes fabricated evidence
                 'fabricated_evidence': int value - Number of temporary fabricated pieces of evidence that can be used against this minister in a trial this turn
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.initializing = True
         self.actor_type = 'minister' #used for actor display labels and images
-        self.global_manager = global_manager
         status.minister_list.append(self)
         self.tooltip_text = []
         self.portrait_section_types = ['base_skin', 'mouth', 'nose', 'eyes', 'hair', 'outfit', 'facial_hair', 'hat', 'portrait']
@@ -89,7 +87,7 @@ class minister():
             self.corruption_evidence = 0
             self.fabricated_evidence = 0
             self.just_removed = False
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
         self.stolen_already = False
         self.update_tooltip()
         self.initializing = False
@@ -249,7 +247,7 @@ class minister():
             'audio': audio,
             'attached_minister': self,
             'attached_interface_elements': self.generate_icon_input_dicts(alignment='left'),
-            'transfer_interface_elements': not main_loop_utility.action_possible(self.global_manager) #Transfer if during action, don't transfer if misc. messages
+            'transfer_interface_elements': not main_loop_utility.action_possible() #Transfer if during action, don't transfer if misc. messages
         })
 
     def can_pay(self, value):
@@ -556,9 +554,9 @@ class minister():
             elif current_minister_type_image.minister_type == old_position:
                 current_minister_type_image.calibrate('none')
         if status.displayed_minister == self:
-            minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
+            minister_utility.calibrate_minister_info_display(self) #update minister label
 
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
         
         if not status.minister_appointment_tutorial_completed:
             completed = True
@@ -567,7 +565,7 @@ class minister():
                     completed = False
             if completed:
                 status.minister_appointment_tutorial_completed = True
-                tutorial_utility.show_tutorial_notifications(self.global_manager)
+                tutorial_utility.show_tutorial_notifications()
 
     def skill_setup(self):
         '''
@@ -608,7 +606,7 @@ class minister():
             if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
             if status.displayed_minister == self:
-                minister_utility.calibrate_minister_info_display(self.global_manager, self)
+                minister_utility.calibrate_minister_info_display(self)
 
     def voice_setup(self, from_save=False):
         '''
@@ -692,7 +690,7 @@ class minister():
             if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
             if status.displayed_minister == self:
-                minister_utility.calibrate_minister_info_display(self.global_manager, self)
+                minister_utility.calibrate_minister_info_display(self)
 
     def get_average_apparent_skill(self):
         '''
@@ -995,7 +993,7 @@ class minister():
             self.current_position = 'none'
         status.minister_list = utility.remove_from_list(status.minister_list, self)
         status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
 
     def respond(self, event):
         '''

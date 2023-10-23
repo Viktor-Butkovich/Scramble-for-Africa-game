@@ -12,7 +12,7 @@ class interface_element():
     Object that can be contained in an interface collection and has a location, rect, and image bundle with particular conditions for displaying, along with an optional 
         tooltip when displayed
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -24,11 +24,9 @@ class interface_element():
                 'modes': string list value - Game modes during which this element can appear, optional for elements with parent collections
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'member_config' = {}: Dictionary of extra configuration values for how to add elements to collections
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.can_show_override = 'none'
         self.width = input_dict['width']
         self.height = input_dict['height']
@@ -112,7 +110,7 @@ class interface_element():
             Creates an image associated with this interface element - can be overridden by subclasses to allow different kinds of images to be created at the same initialization 
                 step
         '''
-        self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
+        self.image = images.button_image(self, self.width, self.height, image_id)
 
     def can_draw(self):
         '''
@@ -233,7 +231,7 @@ class interface_element():
         
             self.parent_collection.remove_member(self)
 
-        new_parent_collection = constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager)
+        new_parent_collection = constants.actor_creation_manager.create_interface_element(input_dict)
         
         new_parent_collection.add_member(self, {})
 
@@ -250,7 +248,7 @@ class interface_collection(interface_element):
     Like an image bundle, members of an interface collection should have independent types and characteristics but be controlled as a unit and created in a list with a dictionary or simple 
         string. Unlike an image bundle, a collection does not necessarily have to be saved, and 
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -262,7 +260,6 @@ class interface_collection(interface_element):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'initial_members' = None: members initially created with this collection
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -279,7 +276,7 @@ class interface_collection(interface_element):
 
         self.calibrate_exempt_list = []
 
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.original_coordinates = (self.x, self.y)
         if self.has_parent_collection:
             self.original_offsets = (self.x_offset, self.y_offset)
@@ -302,7 +299,7 @@ class interface_collection(interface_element):
                     'init_type': 'minimize interface collection button',
                     'image_id': 'buttons/minimize_button.png',
                     'member_config': {'order_exempt': True}
-                }, global_manager)
+                })
                 customize_button_x_offset += customize_button_size + 5
 
             if input_dict.get('allow_move', False):
@@ -314,7 +311,7 @@ class interface_collection(interface_element):
                     'init_type': 'move interface collection button',
                     'image_id': 'buttons/reposition_button.png',
                     'member_config': {'order_exempt': True}
-                }, global_manager)
+                })
                 customize_button_x_offset += customize_button_size + 5
                 
                 constants.actor_creation_manager.create_interface_element({
@@ -325,12 +322,12 @@ class interface_collection(interface_element):
                     'init_type': 'reset interface collection button',
                     'image_id': 'buttons/reset_button.png',
                     'member_config': {'order_exempt': True}
-                }, global_manager)
+                })
                 customize_button_x_offset += customize_button_size + 5
 
         for initial_member_dict in input_dict.get('initial_members', []):
             initial_member_dict['parent_collection'] = self
-            constants.actor_creation_manager.create_interface_element(initial_member_dict, global_manager)
+            constants.actor_creation_manager.create_interface_element(initial_member_dict)
 
     def create_image(self, image_id):
         '''
@@ -338,7 +335,7 @@ class interface_collection(interface_element):
             Creates an image associated with this interface element - overrides parent version to create a collection image instead of the default button images at the same
                 initialization step
         '''
-        self.image = images.collection_image(self, self.width, self.height, image_id, self.global_manager)
+        self.image = images.collection_image(self, self.width, self.height, image_id)
 
     def calibrate(self, new_actor, override_exempt=False):
         '''
@@ -516,7 +513,7 @@ class autofill_collection(interface_collection):
     Collection that will calibrate particular 'target' members with specific actors instead of the one the entire collection is calibrating to - such as calibrating the
         group, officer, and worker cells to the corresponding actors in the autofill operation when an officer is selected
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -528,7 +525,6 @@ class autofill_collection(interface_collection):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'autofill target': dict value - Dictionary with lists of the elements to calibrate to each autofill target type, like {'officer': [...], 'group': [...]}
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -538,7 +534,7 @@ class autofill_collection(interface_collection):
             self.autofill_actors[autofill_target_type] = 'none'
         self.autofill_actors['procedure'] = 'none'
         self.search_start_index = 0
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def calibrate(self, new_actor, override_exempt=False):
         '''
@@ -550,7 +546,7 @@ class autofill_collection(interface_collection):
             None
         '''
         #search start index may be changed by cycle autofill buttons between calibrates
-        self.autofill_actors = dummy_utility.generate_autofill_actors(self.global_manager, search_start_index=self.search_start_index)
+        self.autofill_actors = dummy_utility.generate_autofill_actors(search_start_index=self.search_start_index)
         for autofill_target_type in self.autofill_targets:
             for autofill_target in self.autofill_targets[autofill_target_type]:
                 #eg. generate autofill actors gives back a dummy officer, which all autofill targets that accept officers then calibrate to, repeat for worker/group targets
@@ -563,7 +559,7 @@ class tabbed_collection(interface_collection):
     High-level collection that controls a collection of tab buttons that each select an associated member collection "tab" to be shown, with only the tab buttons and the
         currently selected tab showing at a time
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -574,13 +570,12 @@ class tabbed_collection(interface_collection):
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.tabbed_members = []
         self.current_tabbed_member = None
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.tabs_collection = constants.actor_creation_manager.create_interface_element({
             'coordinates': scaling.scale_coordinates(0, 5),
             'width': scaling.scale_width(10),
@@ -588,7 +583,7 @@ class tabbed_collection(interface_collection):
             'init_type': 'ordered collection',
             'parent_collection': self,
             'direction': 'horizontal'
-        }, global_manager)
+        })
 
     def allow_show(self, member):
         '''
@@ -629,7 +624,7 @@ class tabbed_collection(interface_collection):
                 'parent_collection': self.tabs_collection,
                 'image_id': member_config['button_image_id'],
                 'linked_element': new_member
-            }, self.global_manager)
+            })
             self.tabbed_members.append(new_member)
             if len(self.tabbed_members) == 1:
                 self.current_tabbed_member = new_member
@@ -640,7 +635,7 @@ class ordered_collection(interface_collection):
     '''
     Collection that moves its members to display each visible element in order
     '''
-    def __init__(self, input_dict, global_manager): #change inventory display to a collection so that it orders correctly
+    def __init__(self, input_dict): #change inventory display to a collection so that it orders correctly
         '''
         Description:
             Initializes this object
@@ -657,7 +652,6 @@ class ordered_collection(interface_collection):
                 'second_dimension_increment' = 0: int value - Increment between each row/column of this collection - 2 elements with a difference of 1 second dimension
                     coordinate will be the increment away along the second dimension
                 'anchor_coordinate' = None: int value - Optional relative coordinate around which each row/column of collection will be centered 
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -672,7 +666,7 @@ class ordered_collection(interface_collection):
         self.order_exempt_list = []
         if 'anchor_coordinate' in input_dict:
             self.anchor_coordinate = input_dict['anchor_coordinate']
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def add_member(self, new_member, member_config={}):
         '''

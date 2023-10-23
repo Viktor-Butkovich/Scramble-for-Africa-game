@@ -14,7 +14,7 @@ class grid(interface_elements.interface_element):
     '''
     Grid of cells of the same size with different positions based on the grid's size and the number of cells. Each cell contains various actors, terrain, and resources
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -32,11 +32,10 @@ class grid(interface_elements.interface_element):
                 'strategic_grid': boolean value - True if this grid is the primary strategic map of the game, False if it is a different grid, like the minimap or the Europe grid
                 'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         status.grid_list.append(self)
         self.grid_line_width = input_dict['grid_line_width']
         self.from_save = from_save
@@ -64,7 +63,7 @@ class grid(interface_elements.interface_element):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'grid_type': string value - String matching the global manager key of this grid, used to initialize the correct type of grid on loading
+                'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
         save_dict = {}
@@ -324,7 +323,7 @@ class grid(interface_elements.interface_element):
         Output:
             cell: Returns created cell
         '''
-        return(cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, constants.color_dict['bright green'], save_dict, self.global_manager))
+        return(cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, constants.color_dict['bright green'], save_dict))
 
     def create_resource_list_dict(self):
         '''
@@ -505,7 +504,7 @@ class mini_grid(grid):
     '''
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell of the attached grid. Which cell is being centered on can be changed
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -523,12 +522,11 @@ class mini_grid(grid):
                 'attached_grid': grid value - grid to which this grid is attached
                 'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['strategic_grid'] = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_mini_grid = True
         self.attached_grid = input_dict['attached_grid']
         self.attached_grid.mini_grid = self
@@ -548,7 +546,7 @@ class mini_grid(grid):
         if constants.current_game_mode in self.modes:
             self.center_x = center_x
             self.center_y = center_y
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
             for current_cell in self.get_flat_cell_list():
                 attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
                 if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
@@ -666,7 +664,7 @@ class abstract_grid(grid):
     '''
     1-cell grid that is not directly connected to the primary strategic grid but can be moved to by mobs from the strategic grid and vice versa
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -683,14 +681,13 @@ class abstract_grid(grid):
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
                 'tile_image_id': File path to the image used by this grid's tile
                 'name': Name of this grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['coordinate_width'] = 1
         input_dict['coordinate_height'] = 1
         input_dict['strategic_grid'] = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_abstract_grid = True
         self.name = input_dict['name']
         self.tile_image_id = input_dict['tile_image_id']
@@ -704,7 +701,7 @@ class abstract_grid(grid):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'grid_type': string value - String matching the global manager key of this grid, used to initialize the correct type of grid on loading
+                'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
         save_dict = super().to_save_dict()

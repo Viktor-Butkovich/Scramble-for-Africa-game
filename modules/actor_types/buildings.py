@@ -11,7 +11,7 @@ class building(actor):
     '''
     Actor that exists in cells of multiple grids in front of tiles and behind mobs that cannot be clicked
     '''
-    def __init__(self, from_save, input_dict, global_manager): 
+    def __init__(self, from_save, input_dict): 
         '''
         Description:
             Initializes this object
@@ -27,14 +27,13 @@ class building(actor):
                 'building_type': string value - Type of building, like 'port'
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.actor_type = 'building'
         self.building_type = input_dict['building_type']
         self.damaged = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.default_inventory_capacity = 0
         self.inventory_capacity = 0
         no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
@@ -47,7 +46,7 @@ class building(actor):
         self.contained_work_crews = []        
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
-                constants.actor_creation_manager.create(True, current_work_crew, self.global_manager).work_building(self)
+                constants.actor_creation_manager.create(True, current_work_crew).work_building(self)
             if self.can_damage():
                 self.set_damaged(input_dict['damaged'], True)
         elif self.can_damage():
@@ -190,7 +189,7 @@ class building(actor):
         '''
         self.damaged = new_value
         if self.building_type == 'infrastructure':
-            actor_utility.update_roads(self.global_manager)
+            actor_utility.update_roads()
         if self.damaged:
             self.set_inventory_capacity(0)
         else:
@@ -300,7 +299,7 @@ class infrastructure_building(building):
     '''
     Building that eases movement between tiles and is a road or railroad. Has images that show connections with other tiles that have roads or railroads
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -316,7 +315,6 @@ class infrastructure_building(building):
                 'infrastructure_type': string value - Type of infrastructure, like 'road' or 'railroad'
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -353,7 +351,7 @@ class infrastructure_building(building):
             'horizontal_railroad_bridge': 'buildings/infrastructure/horizontal_railroad_bridge.png',
             'vertical_railroad_bridge': 'buildings/infrastructure/vertical_railroad_bridge.png'
         }
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         if self.is_bridge:
             up_cell = self.grids[0].find_cell(self.x, self.y + 1)
             down_cell = self.grids[0].find_cell(self.x, self.y - 1)
@@ -371,7 +369,7 @@ class infrastructure_building(building):
                     self.image_dict['default'] = self.connection_image_dict['horizontal_road_bridge']
                 else:
                     self.image_dict['default'] = self.connection_image_dict['horizontal_railroad_bridge']
-        actor_utility.update_roads(self.global_manager)
+        actor_utility.update_roads()
 
     def to_save_dict(self):
         '''
@@ -431,7 +429,7 @@ class trading_post(building):
     '''
     Building in a village that increases success chance of trading
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -446,18 +444,17 @@ class trading_post(building):
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['building_type'] = 'trading_post'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
 
 class mission(building):
     '''
     Building in village that increases success chance of conversion
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -470,18 +467,17 @@ class mission(building):
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['building_type'] = 'mission'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
 
 class fort(building):
     '''
     Building that grants a +1 combat modifier to your units fighting in its tile
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -496,18 +492,17 @@ class fort(building):
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['building_type'] = 'fort'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
 
 class train_station(building):
     '''
     Building along a railroad that allows the construction of train, allows trains to pick up and drop off cargo/passengers, and increases the tile's inventory capacity
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -522,18 +517,17 @@ class train_station(building):
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['building_type'] = 'train_station'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
 
 class port(building):
     '''
     Building adjacent to water that allows steamships/steamboats to enter the tile, allows ships to travel to this tile if it is along the ocean, and increases the tile's inventory capacity
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -548,12 +542,11 @@ class port(building):
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['building_type'] = 'port'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_port = True #used to determine if port is in a tile to move there
         if (not from_save) and not self.cell.village == 'none':
             constants.sound_manager.play_random_music('europe')
@@ -562,7 +555,7 @@ class warehouses(building):
     '''
     Buiding attached to a port, train station, and/or resource production facility that stores commodities
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -578,13 +571,12 @@ class warehouses(building):
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
                 'warehouse_level': int value - Required if from save, size of warehouse (9 inventory capacity per level)
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['building_type'] = 'warehouses'
         self.warehouse_level = 1
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.set_default_inventory_capacity(9)
         if from_save:
             while self.warehouse_level < input_dict['warehouse_level']:
@@ -652,7 +644,7 @@ class resource_building(building):
     '''
     Building in a resource tile that allows work crews to attach to this building to produce commodities over time
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -670,7 +662,6 @@ class resource_building(building):
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
                 'scale': int value - Required if from save, maximum number of work crews that can be attached to this building
                 'efficiency': int value - Required if from save, number of rolls made by work crews each turn to produce commodities at this building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -680,7 +671,7 @@ class resource_building(building):
         self.efficiency = 1
         self.num_upgrades = 0
         self.ejected_work_crews = []
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         status.resource_building_list.append(self)
         if from_save:
             while self.scale < input_dict['scale']:
@@ -865,7 +856,7 @@ class slums(building):
     '''
     Building automatically formed by unemployed workers and freed slaves around places of employment
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -881,7 +872,7 @@ class slums(building):
                 'building_type': string value - Type of building, like 'port'
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
-            global_manager_template global_manager: Object that accesses shared variables
+
         Output:
             None
         '''
@@ -896,9 +887,9 @@ class slums(building):
             'medium': 'buildings/slums/default.png',
             'large': 'buildings/slums/large.png'
         }
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         if self.cell.tile == status.displayed_tile:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.cell.tile) #show self after creation
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile) #show self after creation
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -958,7 +949,7 @@ class slums(building):
             self.available_workers = 0
         self.cell.tile.update_image_bundle()
         if self.cell.tile == status.displayed_tile: #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.cell.tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
         if self.available_workers == 0:
             self.remove_complete()
             
@@ -980,7 +971,7 @@ class slums(building):
             'name': 'African workers',
             'worker_type': 'African',
             'init_type': 'workers'
-        }, self.global_manager)
+        })
         self.change_population(-1)
 
     def to_save_dict(self):

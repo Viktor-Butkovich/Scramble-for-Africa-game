@@ -117,7 +117,7 @@ class loan_search(action.campaign):
             if status.europe_grid in unit.grids:
                 self.start(unit)
             else:
-                text_utility.print_to_screen('Loan searches are only possible in Europe', self.global_manager)
+                text_utility.print_to_screen('Loan searches are only possible in Europe')
 
     def start(self, unit):
         '''
@@ -141,7 +141,7 @@ class loan_search(action.campaign):
                     'message': 'Find loan'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop search'],
                     'message': 'Stop search'
                     }
@@ -204,7 +204,7 @@ class loan_search(action.campaign):
                 'message': 'Accept'
                 },
                 {
-                'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                'on_click': (action_utility.cancel_ongoing_actions, []),
                 'tooltip': ['Decline'],
                 'message': 'Decline'
                 }
@@ -227,4 +227,4 @@ class loan_search(action.campaign):
             'principal': self.current_proposed_loan['principal'],
             'interest': self.current_proposed_loan['interest'],
             'remaining_duration': 10
-        }, self.global_manager)
+        })

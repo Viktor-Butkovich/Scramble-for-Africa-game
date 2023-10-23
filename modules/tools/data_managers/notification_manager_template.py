@@ -6,17 +6,16 @@ class notification_manager_template():
     '''
     Object that controls the displaying of notifications
     '''
-    def __init__(self, global_manager):
+    def __init__(self):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            None
         Output:
             None
         '''
         self.notification_queue = []
-        self.global_manager = global_manager
         self.locked = False
         self.default_notification_y = 500
         self.default_notification_height = 300
@@ -83,7 +82,7 @@ class notification_manager_template():
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = 25 #scaling.scale_height(25, self.global_manager) #constants.font_size #25
+        font_size = 25 #scaling.scale_height(25) #constants.font_size #25
         font_name = constants.font_name
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
@@ -280,7 +279,7 @@ class notification_manager_template():
             del input_dict['notification_dice']
             input_dict['init_type'] = 'zoom notification'
             input_dict['target'] = notification_dict['zoom_destination']
-        new_notification = constants.actor_creation_manager.create_interface_element(input_dict, self.global_manager)
+        new_notification = constants.actor_creation_manager.create_interface_element(input_dict)
         if notification_type == 'roll':
             for current_die in status.dice_list:
                 current_die.start_rolling()

@@ -8,36 +8,34 @@ from . import utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
-def reset_action_prices(global_manager):
+def reset_action_prices():
     '''
     Description:
         Resets the costs of any actions that were increased during the previous turn
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
     for current_action_type in constants.action_types:
         constants.action_prices[current_action_type] = constants.base_action_prices[current_action_type]
 
-def double_action_price(global_manager, action_type):
+def double_action_price(action_type):
     '''
     Description:
         Doubles the price of a certain action type each time it is done, usually for ones that do not require workers
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         string action_type: Type of action to double the price of
     Output:
         None
     '''
     constants.action_prices[action_type] *= 2
 
-def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
+def get_building_cost(constructor, building_type, building_name = 'n/a'):
     '''
     Description:
         Returns the cost of the inputted unit attempting to construct the inputted building
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         pmob/string constructor: Unit attempting to construct the building, or 'none' if no location/unit type is needed
         string building_type: Type of building to build, like 'infrastructure'
         string building_name = 'n/a': Name of building being built, used to differentiate roads from railroads
@@ -64,13 +62,12 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
 
     return(base_price * cost_multiplier)
 
-def update_descriptions(global_manager, target = 'all'):
+def update_descriptions(target = 'all'):
     '''
     Description:
         Updates the descriptions of recruitable units for use in various parts of the program. Updates all units during setup and can target a certain unit to update prices, etc. when the information is needed later in the game.
             Creates list versions for tooltips and string versions for notifications
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         string target = 'all': Targets a certain unit type, or 'all' by default, to update while minimizing unnecessary calculations
     Output:
         None
@@ -227,12 +224,12 @@ def update_descriptions(global_manager, target = 'all'):
             text += current_line + ' /n /n' #replaces each tooltip list line with newline characters for notification descriptions
         string_descriptions[current_target] = text
             
-def spawn_beast(global_manager):
+def spawn_beast():
     '''
     Description:
         Attempts to spawn a beast at a random part of the map, choosing a tile and then choosing a type of animal that can spawn in that tile. The spawn attepmt fails and does nothing if the chosen tile is next to any player buildings
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -254,9 +251,9 @@ def spawn_beast(global_manager):
         'adjective': random.choice(constants.animal_adjectives),
         'image': 'mobs/beasts/' + animal_type + '.png',
         'init_type': 'beast'
-    }, global_manager)  
+    })  
 
-def find_closest_available_worker(destination, global_manager):
+def find_closest_available_worker(destination):
     '''
     Description:
         Finds one of the closest African workers and returns its slums or village. Weighted based on the amount available such that a village with more available workers at the same distance is more likely to be chosen
@@ -309,12 +306,12 @@ def create_image_dict(stem):
     image_dict['left'] = stem + 'left.png'
     return(image_dict)
 
-def update_roads(global_manager):
+def update_roads():
     '''
     Description:
         Updates the road/railroad connections between tiles when a new one is built
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -322,12 +319,12 @@ def update_roads(global_manager):
         if current_building.building_type == 'infrastructure':
             current_building.cell.tile.update_image_bundle()
 
-def deselect_all(global_manager):
+def deselect_all():
     '''
     Description:
         Deselects all units. Currently, the game will only have 1 selected unit at a time and this should be updated.
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
@@ -335,12 +332,12 @@ def deselect_all(global_manager):
         if current_mob.selected:
             current_mob.selected = False
     
-def get_random_ocean_coordinates(global_manager):
+def get_random_ocean_coordinates():
     '''
     Description:
         Returns a random set of coordinates from the ocean section of the strategic map
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         int tuple: Two values representing x and y coordinates
     '''
@@ -348,12 +345,11 @@ def get_random_ocean_coordinates(global_manager):
     start_y = 0
     return(start_x, start_y)
 
-def calibrate_actor_info_display(global_manager, info_display, new_actor, override_exempt=False):
+def calibrate_actor_info_display(info_display, new_actor, override_exempt=False):
     '''
     Description:
         Updates all relevant objects to display a certain mob or tile
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         interface_collection info_display: Collection of interface elements to calibrate to the inputted actor
         actor new_actor: The new mob or tile that is displayed
         boolean override_exempt=False: Whether to calibrate interface elements that are normally exempt, such as the reorganization interface
@@ -383,12 +379,12 @@ def calibrate_actor_info_display(global_manager, info_display, new_actor, overri
         target = new_actor
     info_display.calibrate(target, override_exempt)
 
-def get_migration_destinations(global_manager):
+def get_migration_destinations():
     '''
     Description:
         Gathers and returns a list of all cells to which migration could occur. Migration can occur to tiles with places of employment, like ports, train stations, and resource production facilities
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         cell list: Returns list of all cells to which migration could occur
     '''
@@ -400,12 +396,12 @@ def get_migration_destinations(global_manager):
                     return_list.append(current_building.cell)
     return(return_list)
 
-def get_migration_sources(global_manager):
+def get_migration_sources():
     '''
     Description:
         Gathers and returns a list of all villages from which migration could occur. Migration can occur from villages with at least 1 available worker
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         village list: Returns list of all villages from which migration could occur
     '''
@@ -415,13 +411,12 @@ def get_migration_sources(global_manager):
             return_list.append(current_village)
     return(return_list)
 
-def get_num_available_workers(location_types, global_manager):
+def get_num_available_workers(location_types):
     '''
     Description:
         Calculates and returns the number of workers currently available in the inputted location type, like how many workers are in slums
     Input:
         string location_types: Types of locations to count workers from, can be 'village', 'slums', or 'all'
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Returns number of workers currently available in the inputted location type
     '''
@@ -435,13 +430,12 @@ def get_num_available_workers(location_types, global_manager):
             num_available_workers += current_village.available_workers
     return(num_available_workers)
 
-def generate_resource_icon(tile, global_manager):
+def generate_resource_icon(tile):
     '''
     Description:
         Generates and returns the correct string image file path based on the resource/village and buildings built in the inputted tile
     Input:
         tile tile: Tile to generate a resource icon for
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         string: Returns string image file path for tile's resource icon
     '''
@@ -515,12 +509,12 @@ def extract_folder_colors(folder_path):
         colors.append((red, green, blue))
     return(colors)
 
-def get_slave_traders_strength_modifier(global_manager):
+def get_slave_traders_strength_modifier():
     '''
     Description:
         Calculates and returns the inverse difficulty modifier for actions related to the slave traders, with a positive modifier making rolls easier
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         string/int: Returns slave traders inverse difficulty modifier, or 'none' if the strength is 0
     '''
@@ -535,13 +529,12 @@ def get_slave_traders_strength_modifier(global_manager):
         strength_modifier = 1
     return(strength_modifier)
 
-def set_slave_traders_strength(new_strength, global_manager):
+def set_slave_traders_strength(new_strength):
     '''
     Description:
         Sets the strength of the slave traders
     Input:
         int new_strength: New slave traders strength value
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
@@ -594,14 +587,13 @@ def generate_unit_component_image_id(base_image, component, to_front=False):
         return_dict['level'] *= -1
     return(return_dict)
 
-def generate_group_image_id_list(worker, officer, global_manager):
+def generate_group_image_id_list(worker, officer):
     '''
     Description:
         Generates and returns an image id list that a group formed from the inputted worker and officer would have
     Input:
         worker worker: Worker to use for group image
         officer officer: Officer to use for group image
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         list: Returns image id list of dictionaries for each part of the group image
     '''
@@ -629,14 +621,13 @@ def generate_group_image_id_list(worker, officer, global_manager):
 
     return([left_worker_dict, right_worker_dict, officer_dict])
 
-def generate_group_name(worker, officer, global_manager, add_veteran=False):
+def generate_group_name(worker, officer, add_veteran=False):
     '''
     Description:
         Generates and returns the name that a group formed from the inputted worker and officer would have
     Input:
         worker worker: Worker to use for group name
         officer officer: Officer to use for group name
-        global_manager_template global_manager: Object that accesses shared variables
         boolean add_veteran=False: Whether veteran should be added to the start of the name if the officer is a veteran - while a mock group needs veteran to be added, a
             group actually being created will add veteran to its name automatically when it promotes
     Output:
@@ -658,14 +649,13 @@ def generate_group_name(worker, officer, global_manager, add_veteran=False):
         name = 'veteran ' + name
     return(name)
 
-def generate_group_movement_points(worker, officer, global_manager, generate_max=False):
+def generate_group_movement_points(worker, officer, generate_max=False):
     '''
     Description:
         Generates and returns either the current or maximum movement points that a group created from the inputted worker and officer would have
     Input:
         worker worker: Worker to use for group
         officer officer: Officer to use for group
-        global_manager_template global_manager: Object that accesses shared variables
         boolean generate_max=False: Whether to return the group's current or maximum number of movement points
     Output:
         list: Returns image id list of dictionaries for each part of the group image
@@ -676,7 +666,7 @@ def generate_group_movement_points(worker, officer, global_manager, generate_max
             max_movement_points = 6
         return(max_movement_points)
     else:
-        max_movement_points = generate_group_movement_points(worker, officer, global_manager, generate_max=True)
+        max_movement_points = generate_group_movement_points(worker, officer, generate_max=True)
         worker_movement_ratio_remaining = worker.movement_points / worker.max_movement_points
         officer_movement_ratio_remaining = officer.movement_points / officer.max_movement_points
         if worker_movement_ratio_remaining > officer_movement_ratio_remaining:

@@ -97,7 +97,6 @@ class religious_campaign(action.campaign):
                         actor_utility.generate_unit_component_image_id('mobs/church_volunteers/default.png', 'right', to_front=True)
                     ],
                     200,
-                    self.global_manager,
                     override_input_dict={'member_config': {'second_dimension_coordinate': -2, 'centered': True}}
             ))
         return(return_list)
@@ -148,7 +147,7 @@ class religious_campaign(action.campaign):
             if status.europe_grid in unit.grids:
                 self.start(unit)
             else:
-                text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe', self.global_manager)
+                text_utility.print_to_screen(self.name.capitalize() + 's are only possible in Europe')
 
     def start(self, unit):
         '''
@@ -170,7 +169,7 @@ class religious_campaign(action.campaign):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }
@@ -196,9 +195,9 @@ class religious_campaign(action.campaign):
                 'modes': ['strategic', 'europe'],
                 'init_type': 'church_volunteers',
                 'worker_type': 'religious' #not european - doesn't count as a European worker for upkeep
-            }, self.global_manager)
+            })
 
-            self.current_unit = constants.actor_creation_manager.create_group(church_volunteers, self.current_unit, self.global_manager)
+            self.current_unit = constants.actor_creation_manager.create_group(church_volunteers, self.current_unit)
 
         elif self.roll_result <= self.current_max_crit_fail:
             self.current_unit.die('quit')

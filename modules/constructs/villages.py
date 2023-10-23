@@ -9,7 +9,7 @@ class village():
     '''
     Object that represents a native village in a cell on the strategic map grid
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -21,11 +21,9 @@ class village():
                 'aggressiveness': int value - Required if from save, starting aggressiveness
                 'available_workers': int value - Required if from save, starting number of available workers
                 'cell': cell value - cell on strategic map grid in which this village exists
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.attached_warriors = []
         if not from_save:
             self.set_initial_population()
@@ -42,7 +40,7 @@ class village():
             self.found_rumors = input_dict['found_rumors']
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
-                constants.actor_creation_manager.create(True, current_save_dict, global_manager)
+                constants.actor_creation_manager.create(True, current_save_dict)
         if constants.effect_manager.effect_active('infinite_village_workers'):
             self.available_workers = self.population
         self.cell = input_dict['cell']
@@ -138,7 +136,7 @@ class village():
             'name': 'native warriors',
             'init_type': 'native_warriors',
             'origin_village': self
-        }, self.global_manager)
+        })
         self.change_population(-1)
         return(new_warrior)
 
@@ -162,7 +160,7 @@ class village():
             'name': 'African workers',
             'init_type': 'workers',
             'worker_type': 'African'
-        }, self.global_manager)
+        })
 
     def set_initial_population(self):
         '''
@@ -295,7 +293,7 @@ class village():
         '''
         self.available_workers += change
         if self.cell.tile == status.displayed_tile: #if being displayed, change displayed available workers value
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.cell.tile)    
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)    
 
     def set_available_workers(self, new_value):
         '''
@@ -308,7 +306,7 @@ class village():
         '''
         self.available_workers = new_value
         if self.cell.tile == status.displayed_tile: #if being displayed, change displayed available workers value
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.cell.tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
     
     def change_population(self, change):
         '''
@@ -330,7 +328,7 @@ class village():
             self.set_aggressiveness(1)
         self.tiles[0].update_image_bundle()
         if self.cell.tile == status.displayed_tile: #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.cell.tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''
@@ -348,4 +346,4 @@ class village():
             self.set_aggressiveness(1)
         self.tiles[0].update_image_bundle()
         if self.cell.tile == status.displayed_tile: #if being displayed, change displayed aggressiveness value
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.cell.tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)

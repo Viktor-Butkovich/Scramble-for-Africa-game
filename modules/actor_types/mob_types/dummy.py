@@ -7,14 +7,13 @@ class dummy(mobs.mob):
     '''
     Mock mob that can take any attribute values needed to get certain image or tooltip outputs without affecting rest of program
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         input dict always includes dummy_type, which is generally equal to the init type of the unit being replicated?
         '''
         for key in input_dict:
             setattr(self, key, input_dict[key])
         self.is_dummy = True
-        self.global_manager = global_manager
 
     def set_tooltip(self, tooltip_text):
         '''

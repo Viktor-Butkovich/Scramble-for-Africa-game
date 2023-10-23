@@ -12,7 +12,7 @@ class vehicle(pmob):
     '''
     pmob that requires an attached worker to function and can carry other mobs as passengers
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,13 +25,12 @@ class vehicle(pmob):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'crew': worker, string, or dictionary value - If no crew, equals 'none'. Otherwise, if creating a new vehicle, equals a worker that serves as crew. If loading, equals a dictionary of the saved information necessary to
                     recreate the worker to serve as crew
                 'passenger_dicts': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each of this vehicle's passengers
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -42,7 +41,7 @@ class vehicle(pmob):
         self.ejected_crew = 'none'
         self.ejected_passengers = []
         self.travel_possible = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.image_dict = input_dict['image_dict'] #should have default and uncrewed
         self.is_vehicle = True
         if not from_save:
@@ -58,17 +57,17 @@ class vehicle(pmob):
                 #self.crew = 'none'
                 self.set_crew('none')
             else:
-                constants.actor_creation_manager.create(True, input_dict['crew'], self.global_manager).crew_vehicle(self) #creates worker and merges it as crew
+                constants.actor_creation_manager.create(True, input_dict['crew']).crew_vehicle(self) #creates worker and merges it as crew
                 #print(self.image_dict)
             for current_passenger in input_dict['passenger_dicts']:
-                constants.actor_creation_manager.create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
+                constants.actor_creation_manager.create(True, current_passenger).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
         self.set_controlling_minister_type(constants.type_minister_dict['transportation'])
         if not self.has_crew:
             self.remove_from_turn_queue()
         if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.tile_info_display, self.images[0].current_cell.tile)
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, None, override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
 
     def set_crew(self, new_crew): #continue adding set_crew
@@ -87,7 +86,7 @@ class vehicle(pmob):
             self.has_crew = True
         self.update_image_bundle()
         if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -342,10 +341,10 @@ class vehicle(pmob):
                 return(super().can_move(x_change, y_change, can_print))
             else:
                 if can_print:
-                    text_utility.print_to_screen('This ' + self.name + ' is still having its crew replaced and cannot move this turn.', self.global_manager)
+                    text_utility.print_to_screen('This ' + self.name + ' is still having its crew replaced and cannot move this turn.')
         else:
             if can_print:
-                text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.', self.global_manager)
+                text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.')
             return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -374,7 +373,7 @@ class train(vehicle):
     '''
     Vehicle that can only move along railroads, has large inventory capacity, and has 10 movement points
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -387,16 +386,15 @@ class train(vehicle):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'crew': worker, string, or dictionary value - If no crew, equals 'none'. Otherwise, if creating a new vehicle, equals a worker that serves as crew. If loading, equals a dictionary of the saved information necessary to
                     recreate the worker to serve as crew
                 'passenger_dicts': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each of this vehicle's passengers
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.set_max_movement_points(16)
         self.has_infinite_movement = False
         #self.has_infinite_movement = True
@@ -407,7 +405,7 @@ class train(vehicle):
         self.inventory_capacity = 27#9
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
         else:
             self.load_inventory(input_dict['inventory'])
 
@@ -427,7 +425,7 @@ class train(vehicle):
         if result:
             if not (self.images[0].current_cell.has_intact_building('railroad') and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_intact_building('railroad')):
                 if can_print:
-                    text_utility.print_to_screen('Trains can only move along railroads.', self.global_manager)
+                    text_utility.print_to_screen('Trains can only move along railroads.')
                 return(False)
         return(result)
 
@@ -447,7 +445,7 @@ class ship(vehicle):
     '''
     Vehicle that can only move in ocean water and into ports, can cross the ocean, has large inventory capacity, and has infinite movement points
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -460,16 +458,15 @@ class ship(vehicle):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'crew': worker, string, or dictionary value - If no crew, equals 'none'. Otherwise, if creating a new vehicle, equals a worker that serves as crew. If loading, equals a dictionary of the saved information necessary to
                     recreate the worker to serve as crew
                 'passenger_dicts': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each of this vehicle's passengers
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.set_max_movement_points(10)
         self.has_infinite_movement = True
         self.vehicle_type = 'ship'
@@ -482,7 +479,7 @@ class ship(vehicle):
         self.inventory_capacity = 27
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, status.mob_info_display, self) #updates mob info display list to account for travel_possible changing
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for travel_possible changing
         else:
             self.load_inventory(input_dict['inventory'])
 
@@ -504,7 +501,7 @@ class ship(vehicle):
             if self.images[0].current_cell.terrain == 'water':
                 for current_mob in self.images[0].current_cell.contained_mobs:
                     if current_mob.is_pmob and not current_mob.can_swim_at(self.images[0].current_cell):
-                        text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot leave without taking unaccompanied units as passengers.', self.global_manager)
+                        text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot leave without taking unaccompanied units as passengers.')
                         return(False)
         return(True)
 
@@ -527,7 +524,7 @@ class boat(ship):
     '''
     Vehicle that behaves similarly to a ship but moves in river water instead and has large inventory capacity and limited movement points
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -540,16 +537,15 @@ class boat(ship):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'crew': worker, string, or dictionary value - If no crew, equals 'none'. Otherwise, if creating a new vehicle, equals a worker that serves as crew. If loading, equals a dictionary of the saved information necessary to
                     recreate the worker to serve as crew
                 'passenger_dicts': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each of this vehicle's passengers
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.set_max_movement_points(12)
         self.has_infinite_movement = False
         self.vehicle_type = 'ship'

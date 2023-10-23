@@ -164,11 +164,11 @@ class conversion(action.action):
             current_cell = unit.images[0].current_cell
             self.current_village = current_cell.get_building('village')
             if not current_cell.has_building('village'):
-                text_utility.print_to_screen('Converting is only possible in a village.', self.global_manager)
+                text_utility.print_to_screen('Converting is only possible in a village.')
             elif not self.current_village.aggressiveness > 1:
-                text_utility.print_to_screen('This village already has the minimum aggressiveness and cannot be converted.', self.global_manager)
+                text_utility.print_to_screen('This village already has the minimum aggressiveness and cannot be converted.')
             elif not self.current_village.aggressiveness > 0:
-                text_utility.print_to_screen('This village has no population and cannot be converted.', self.global_manager)
+                text_utility.print_to_screen('This village has no population and cannot be converted.')
             else:
                 self.start(unit)
 
@@ -192,7 +192,7 @@ class conversion(action.action):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, [self.global_manager]),
+                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }
