@@ -471,7 +471,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'evidence':
             tooltip_text = []
             if not self.actor == 'none':
-                if self.global_manager.get('current_game_mode') == 'trial':
+                if constants.current_game_mode == 'trial':
                     real_evidence = self.actor.corruption_evidence - self.actor.fabricated_evidence
                     tooltip_text.append('Your prosecutor has found ' + str(real_evidence) + ' piece' + utility.generate_plural(real_evidence) + ' of evidence of corruption against this minister.')
                     if self.actor.fabricated_evidence > 0:

@@ -131,7 +131,7 @@ class minister():
                             outfit_type = 'armored'
                     elif self.background == 'royal heir':
                         outfit_type = 'armored'
-                    elif (self.background != 'lowborn' and not self.global_manager.get('current_country').has_aristocracy):
+                    elif (self.background != 'lowborn' and not status.current_country.has_aristocracy):
                         if random.randrange(0, 5) == 0:
                             outfit_type = 'armored'
                 if outfit_type != 'default':
@@ -152,7 +152,7 @@ class minister():
                 self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': skin_color}
             elif image_type in ['outfit', 'hat']:
                 if outfit_type in ['military', 'armored']:
-                    self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': self.global_manager.get('current_country').colors}
+                    self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': status.current_country.colors}
                 else:
                     self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': suit_colors}
             else:
@@ -543,13 +543,13 @@ class minister():
         self.global_manager.get('current_ministers')[new_position] = self
         for current_pmob in status.pmob_list:
             current_pmob.update_controlling_minister()
-        if not new_position == 'none': #if appointing
+        if new_position != 'none': #if appointing
             status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
-            if self.global_manager.get('available_minister_left_index') >= len(status.available_minister_list) - 3:
-                self.global_manager.set('available_minister_left_index', len(status.available_minister_list) - 3) #move available minister display up because available minister was removed
+            if constants.available_minister_left_index >= len(status.available_minister_list) - 3:
+                constants.available_minister_left_index = len(status.available_minister_list) - 3 #move available minister display up because available minister was removed
         else:
             status.available_minister_list.append(self)
-            self.global_manager.set('available_minister_left_index', len(status.available_minister_list) - 3) #move available minister display to newly fired minister
+            constants.available_minister_left_index = len(status.available_minister_list) - 3 #move available minister display to newly fired minister
         for current_minister_type_image in status.minister_image_list:
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)

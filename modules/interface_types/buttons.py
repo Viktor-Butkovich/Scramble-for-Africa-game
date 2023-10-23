@@ -478,7 +478,7 @@ class button(interface_elements.interface_element):
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
         elif self.button_type == 'fabricate evidence':
-            if self.global_manager.get('current_game_mode') == 'trial':
+            if constants.current_game_mode == 'trial':
                 self.set_tooltip(['Creates a unit of fake evidence against this minister to improve the trial\'s success chance for ' + str(self.get_cost()) + ' money',
                                   'Each piece of evidence fabricated in a trial becomes increasingly expensive.',
                                   'Unlike real evidence, fabricated evidence disappears at the end of the turn and is never preserved after a failed trial'])
@@ -804,7 +804,7 @@ class button(interface_elements.interface_element):
                 if minister_utility.positions_filled(self.global_manager):
                     current_mob = status.displayed_mob
                     if current_mob:
-                        if self.global_manager.get('current_game_mode') == 'strategic':
+                        if constants.current_game_mode == 'strategic':
                             if current_mob.can_move(x_change, y_change):
                                 current_mob.move(x_change, y_change)
                                 flags.show_selection_outlines = True
@@ -835,7 +835,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'execute movement routes':
             if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
-                    if not self.global_manager.get('current_game_mode') == 'strategic':
+                    if not constants.current_game_mode == 'strategic':
                         game_transitions.set_game_mode('strategic', self.global_manager)
                                 
                     unit_types = ['porters', 'steamboat', 'steamship', 'train']
@@ -995,7 +995,7 @@ class button(interface_elements.interface_element):
                 if stopping:
                     game_transitions.force_minister_appointment(self.global_manager)
                 else:
-                    if not self.global_manager.get('current_game_mode') == 'strategic':
+                    if not constants.current_game_mode == 'strategic':
                         game_transitions.set_game_mode('strategic', self.global_manager)
                     for current_minister in status.minister_list:
                         if current_minister.just_removed and current_minister.current_position == 'none':
@@ -1042,7 +1042,7 @@ class button(interface_elements.interface_element):
                 text_utility.print_to_screen('You are busy and cannot cycle through units.', self.global_manager)
 
         elif self.button_type == 'new game':
-            if self.global_manager.get('current_game_mode') == 'new_game_setup':
+            if constants.current_game_mode == 'new_game_setup':
                 if status.displayed_country:
                     constants.save_load_manager.new_game(status.displayed_country)
                 else:
@@ -1905,12 +1905,12 @@ class minister_portrait_image(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
+            if constants.current_game_mode == 'ministers' and not self.current_minister == 'none':
                 if self.current_minister != 'none':
                     self.current_minister.play_voice_line('acknowledgement')
                 if self in status.available_minister_portrait_list: #if available minister portrait
                     own_index = status.available_minister_list.index(self.current_minister)
-                    self.global_manager.set('available_minister_left_index', own_index - 2)
+                    constants.available_minister_left_index = own_index - 2
                     minister_utility.update_available_minister_display(self.global_manager)
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
@@ -2083,12 +2083,12 @@ class cycle_available_ministers_button(button):
             boolean: Returns False if clicking this button would move more than 1 past the edge of the list of available ministers, otherwise returns same as superclass
         '''
         if self.direction == 'left':
-            if self.global_manager.get('available_minister_left_index') > -2:
+            if constants.available_minister_left_index > -2:
                 return(super().can_show(skip_parent_collection=skip_parent_collection))
             else:
                 return(False)
         elif self.direction == 'right': #left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
-            if not self.global_manager.get('available_minister_left_index') + 4 > len(status.available_minister_list):
+            if not constants.available_minister_left_index + 4 > len(status.available_minister_list):
                 return(super().can_show(skip_parent_collection=skip_parent_collection))
             else:
                 return(False)
@@ -2104,9 +2104,9 @@ class cycle_available_ministers_button(button):
         '''
         if main_loop_utility.action_possible(self.global_manager):
             if self.direction == 'left':
-                self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
+                constants.available_minister_left_index -= 1
             if self.direction == 'right':
-                self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
+                constants.available_minister_left_index += 1
             minister_utility.update_available_minister_display(self.global_manager)
             status.available_minister_portrait_list[2].on_click() #select new middle portrait
         else:

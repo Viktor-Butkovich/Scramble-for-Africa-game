@@ -98,7 +98,7 @@ def update_available_minister_display(global_manager):
         None
     '''
     available_minister_portrait_list = status.available_minister_portrait_list
-    available_minister_left_index = global_manager.get('available_minister_left_index')
+    available_minister_left_index = constants.available_minister_left_index
     available_minister_list = status.available_minister_list
     for current_index in range(len(available_minister_portrait_list)):
         minister_index = available_minister_left_index + current_index
@@ -106,7 +106,7 @@ def update_available_minister_display(global_manager):
             available_minister_portrait_list[current_index].calibrate(available_minister_list[minister_index])
         else:
             available_minister_portrait_list[current_index].calibrate('none')
-    if global_manager.get('current_game_mode') == 'ministers' and len(available_minister_list) > 0 and not available_minister_left_index + 2 >= len(available_minister_list):
+    if constants.current_game_mode == 'ministers' and len(available_minister_list) > 0 and not available_minister_left_index + 2 >= len(available_minister_list):
         calibrate_minister_info_display(global_manager, available_minister_list[available_minister_left_index + 2])
 
 def positions_filled(global_manager):

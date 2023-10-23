@@ -40,7 +40,7 @@ class cell_icon(actor):
         Output:
             boolean: Returns True if this grid can appear during the current game mode, otherwise returns False
         '''
-        return(self.global_manager.get('current_game_mode') in self.modes)
+        return(constants.current_game_mode in self.modes)
 
     def can_draw(self):
         '''

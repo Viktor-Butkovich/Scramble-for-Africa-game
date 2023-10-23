@@ -26,7 +26,7 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
             text_utility.print_to_screen('There are no other units left to move this turn.', global_manager)
-        if global_manager.get('current_game_mode') == 'europe' and not status.europe_grid in turn_queue[0].grids:
+        if constants.current_game_mode == 'europe' and not status.europe_grid in turn_queue[0].grids:
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:
             turn_queue[0].selection_sound()
@@ -52,7 +52,7 @@ def set_game_mode(new_game_mode, global_manager):
     Output:
         None
     '''
-    previous_game_mode = global_manager.get('current_game_mode')
+    previous_game_mode = constants.current_game_mode
     if new_game_mode == previous_game_mode:
         return()
     else:
@@ -63,11 +63,11 @@ def set_game_mode(new_game_mode, global_manager):
             constants.event_manager.clear()
             constants.sound_manager.play_random_music('main menu')
 
-        if not (new_game_mode == 'trial' or global_manager.get('current_game_mode') == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
-            global_manager.set('previous_game_mode', global_manager.get('current_game_mode'))
+        if not (new_game_mode == 'trial' or constants.current_game_mode == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
+            global_manager.set('previous_game_mode', constants.current_game_mode)
         start_loading(global_manager)
+        constants.current_game_mode = new_game_mode
         if new_game_mode == 'strategic':
-            global_manager.set('current_game_mode', 'strategic')
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
@@ -75,24 +75,16 @@ def set_game_mode(new_game_mode, global_manager):
                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), centered_cell.tile)
                 #calibrate tile info to minimap center
         elif new_game_mode == 'europe':
-            global_manager.set('current_game_mode', 'europe')
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main_menu':
-            global_manager.set('current_game_mode', 'main_menu')
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             status.text_list = [] #clear text box when going to main menu
         elif new_game_mode == 'ministers':
-            global_manager.set('current_game_mode', 'ministers')
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
-        elif new_game_mode == 'trial':
-            global_manager.set('current_game_mode', 'trial')
-        elif new_game_mode == 'new_game_setup':
-            global_manager.set('current_game_mode', 'new_game_setup')
-        else:
+        elif not new_game_mode in ['trial', 'new_game_setup']:
             global_manager.set('default_text_box_height', scaling.scale_height(90))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
-            global_manager.set('current_game_mode', new_game_mode)
     for current_mob in status.mob_list:
         current_mob.selected = False
         
@@ -103,7 +95,7 @@ def set_game_mode(new_game_mode, global_manager):
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), None)
 
     if new_game_mode == 'ministers':
-        global_manager.set('available_minister_left_index', -2)
+        constants.available_minister_left_index = -2
         minister_utility.update_available_minister_display(global_manager)
         minister_utility.calibrate_minister_info_display(global_manager, None)
         
@@ -200,8 +192,8 @@ def to_main_menu(global_manager, override = False):
     if status.current_instructions_page:
         status.current_instructions_page.remove_complete()
         status.current_instructions_page = None
-    if global_manager.get('current_country') != 'none':
-        global_manager.get('current_country').deselect()
+    if status.current_country:
+        status.current_country.deselect()
     for current_completed_lore_type in global_manager.get('completed_lore_mission_types'):
         global_manager.get('lore_types_effects_dict')[current_completed_lore_type].remove()
     set_game_mode('main_menu', global_manager)

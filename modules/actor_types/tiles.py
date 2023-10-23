@@ -385,7 +385,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         if self.show_terrain == True:
-            if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability
+            if self.touching_mouse() and constants.current_game_mode in self.modes: #and not targeting_ability
                 if self.cell.terrain == 'none':
                     return(False)
                 else:
@@ -465,7 +465,7 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
+        if self.touching_mouse() and constants.current_game_mode in self.modes:
             return(True)
         else:
             return(False)

@@ -54,10 +54,10 @@ class country:
         Output:
             None
         '''
-        if not self.global_manager.get('current_country') == 'none':
-            self.global_manager.get('current_country').country_effect.remove()
-        self.global_manager.set('current_country', self)
-        self.global_manager.set('current_country_name', self.name)
+        if status.current_country:
+            status.current_country.country_effect.remove()
+        status.current_country = self
+        status.current_country_name = self.name
         
         constants.flavor_text_manager.set_flavor_text('minister_first_names', 'text/names/' + self.adjective + '_first_names.csv')
         constants.flavor_text_manager.allow_particles = self.allow_particles
@@ -83,9 +83,9 @@ class country:
         Output:
             None
         '''
-        self.global_manager.get('current_country').country_effect.remove()
-        self.global_manager.set('current_country', 'none')
-        self.global_manager.set('current_country_name', 'none')
+        status.current_country.country_effect.remove()
+        status.current_country = None
+        status.current_country_name = None
 
     def get_effect_descriptor(self):
         '''
@@ -151,10 +151,10 @@ class hybrid_country(country):
         Output:
             None
         '''
-        if not self.global_manager.get('current_country') == 'none':
-            self.global_manager.get('current_country').country_effect.remove()
-        self.global_manager.set('current_country', self)
-        self.global_manager.set('current_country_name', self.name)
+        if status.current_country:
+            status.current_country.country_effect.remove()
+        status.current_country = self
+        status.current_country_name = self.name
         
         #specific text files are managed in flavor_text_manager for the time being, don't try to set to nonexistent belgium nameset
         constants.flavor_text_manager.allow_particles = self.allow_particles

@@ -51,12 +51,17 @@ fps_tracker: value_tracker_template = None
 frames_this_second: int = 0
 last_fps_update: float = 0.0
 
+current_game_mode: str = None
+
 loading_start_time: float = 0.0
 previous_turn_time: float = 0.0
 current_time: float = 0.0
 last_selection_outline_switch: float = 0.0
 mouse_moved_time: float = 0.0
 end_turn_wait_time: float = 0.8
+
+old_mouse_x: int = pygame.mouse.get_pos()[0]
+old_mouse_y: int = pygame.mouse.get_pos()[1]
 
 font_name: str = 'times new roman'
 default_font_size: int = 15
@@ -70,6 +75,13 @@ current_instructions_page_text: str = ''
 message: str = ''
 
 grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid']
+minimap_grid_x: int = default_display_width - (640 + 100)
+europe_grid_x: int = default_display_width - (320 + 100 + 120 + 25)
+europe_grid_y: int = default_display_height - (300 + 25)
+
+mob_ordered_list_start_y: int = 0
+
+available_minister_left_index: int = -2 #so that first index is in middle
 
 building_prices: Dict[str, int] = {
     'resource': 10,

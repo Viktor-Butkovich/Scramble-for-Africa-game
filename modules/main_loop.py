@@ -114,12 +114,10 @@ def main_loop(global_manager):
             elif event.type == pygame.mixer.music.get_endevent():
                 constants.sound_manager.song_done()
 
-        global_manager.set('old_lmb_down', flags.lmb_down)
-        global_manager.set('old_rmb_down', flags.rmb_down)
-        global_manager.set('old_mmb_down', flags.mmb_down)
+        flags.old_lmb_down, flags.old_rmb_down, flags.old_mmb_down = flags.lmb_down, flags.rmb_down, flags.mmb_down
         flags.lmb_down, flags.mmb_down, flags.rmb_down = pygame.mouse.get_pressed()
 
-        if not global_manager.get('old_rmb_down') == flags.rmb_down: #if rmb changes
+        if flags.old_rmb_down != flags.rmb_down: #if rmb changes
             if not flags.rmb_down: #if user just released rmb
                 clicked_button = False
                 stopping = False
@@ -144,7 +142,7 @@ def main_loop(global_manager):
                             clicked_button = True
                 main_loop_utility.manage_rmb_down(clicked_button, global_manager)
 
-        if not global_manager.get('old_lmb_down') == flags.lmb_down: #if lmb changes
+        if flags.old_lmb_down != flags.lmb_down: #if lmb changes
             if not flags.lmb_down: #if user just released lmb
                 clicked_button = False #if any button, including a panel, is clicked, do not deselect units
                 allow_on_click = True #certain buttons, like panels, allow clicking on another button at the same time

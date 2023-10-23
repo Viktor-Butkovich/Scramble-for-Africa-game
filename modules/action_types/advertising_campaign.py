@@ -180,7 +180,7 @@ class advertising_campaign(action.campaign):
         '''
         if super().on_click(unit):
             if status.europe_grid in unit.grids:
-                if not self.global_manager.get('current_game_mode') == 'europe':
+                if not constants.current_game_mode == 'europe':
                     game_transitions.set_game_mode('europe', self.global_manager)
                     unit.select()
                 text_utility.print_to_screen('Select a commodity to advertise, or click elsewhere to cancel: ', self.global_manager)

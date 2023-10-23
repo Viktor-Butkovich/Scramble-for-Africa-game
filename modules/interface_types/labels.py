@@ -372,7 +372,7 @@ class commodity_prices_label(label):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
@@ -428,7 +428,7 @@ class multi_line_label(label):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]

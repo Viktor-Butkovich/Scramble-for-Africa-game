@@ -552,7 +552,7 @@ class free_image(image):
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if (self.has_parent_collection and self.parent_collection.showing) or not self.has_parent_collection:
-            if self.global_manager.get('current_game_mode') in self.modes:
+            if constants.current_game_mode in self.modes:
                 return(True)
         return(False)
 
@@ -658,10 +658,10 @@ class background_image(free_image):
             boolean: Returns True if this image can currently appear, otherwise returns False
         '''
         if super().can_show():
-            if self.global_manager.get('safe_click_area').showing != self.previous_safe_click_area_showing:
-                self.previous_safe_click_area_showing = self.global_manager.get('safe_click_area').showing
+            if status.safe_click_area.showing != self.previous_safe_click_area_showing:
+                self.previous_safe_click_area_showing = status.safe_click_area.showing
                 if self.previous_safe_click_area_showing:
-                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': self.global_manager.get('safe_click_area').width}])
+                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': status.safe_click_area.width}])
                 else:
                     self.set_image('misc/background.png')
             return(True)
@@ -1227,7 +1227,7 @@ class actor_image(image):
         Output:
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             return(True)
         else:
             return(False)

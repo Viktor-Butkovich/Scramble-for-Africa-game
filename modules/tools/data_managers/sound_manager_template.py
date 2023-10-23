@@ -2,6 +2,7 @@ import random
 import pygame
 import os
 import modules.constants.constants as constants
+import modules.constants.status as status
 import modules.constants.flags as flags
 
 class sound_manager_template():
@@ -142,9 +143,9 @@ class sound_manager_template():
         else:
             state_changed = False
         self.previous_state = current_state
-        current_country = self.global_manager.get('current_country')
-        if current_state == 'europe' and current_country != 'none':
-            adjective = self.global_manager.get('current_country').adjective
+        status.current_country
+        if current_state == 'europe' and status.current_country:
+            adjective = status.current_country.adjective
             country_songs = [(adjective + '/' + current_song)[:-4] for current_song in os.listdir('sounds/music/' + adjective)] #remove file extensions
             if flags.creating_new_game and country_songs:
                 possible_songs = country_songs #ensures that country song plays when starting a game as that country

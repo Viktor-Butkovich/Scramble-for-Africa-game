@@ -138,10 +138,10 @@ class interface_element():
             if (not self.has_parent_collection) or skip_parent_collection:
                 if skip_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:
                     #skip_parent_collection ignores the immediate parent collection to avoid recursion, but can still check grandparent collection in most cases
-                    return(self.parent_collection.parent_collection.allow_show(self) and self.global_manager.get('current_game_mode') in self.modes)
-                return(self.global_manager.get('current_game_mode') in self.modes)
+                    return(self.parent_collection.parent_collection.allow_show(self) and constants.current_game_mode in self.modes)
+                return(constants.current_game_mode in self.modes)
             elif self.parent_collection.allow_show(self):
-                return(self.global_manager.get('current_game_mode') in self.modes)
+                return(constants.current_game_mode in self.modes)
             return(False)
         else:
             return(self.can_show_override.can_show(skip_parent_collection=True))

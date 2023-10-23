@@ -614,9 +614,9 @@ def generate_group_image_id_list(worker, officer, global_manager):
         else:
             soldier = worker.image_dict['default']
         left_worker_dict['image_id'] = soldier
-        left_worker_dict['green_screen'] = global_manager.get('current_country').colors
+        left_worker_dict['green_screen'] = status.current_country.colors
         right_worker_dict['image_id'] = soldier
-        right_worker_dict['green_screen'] = global_manager.get('current_country').colors
+        right_worker_dict['green_screen'] = status.current_country.colors
     elif officer.officer_type in ['merchant', 'driver']:
         if 'porter' in worker.image_dict:
             porter = worker.image_dict['porter']

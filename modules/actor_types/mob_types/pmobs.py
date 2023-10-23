@@ -297,9 +297,9 @@ class pmob(mob):
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
                 constants.sound_manager.play_sound('bolt_action_2')
-            if self.global_manager.get('current_country').name == 'France':
+            if status.current_country.name == 'France':
                 possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
-            elif self.global_manager.get('current_country').name == 'Germany':
+            elif status.current_country.name == 'Germany':
                 possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
             else:
                 possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']

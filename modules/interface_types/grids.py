@@ -476,7 +476,7 @@ class grid(interface_elements.interface_element):
         Output:
             boolean: Returns True if this grid can appear during the current game mode, otherwise returns False
         '''
-        return(self.global_manager.get('current_game_mode') in self.modes)
+        return(constants.current_game_mode in self.modes)
 
     def can_draw(self):
         '''
@@ -545,7 +545,7 @@ class mini_grid(grid):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             self.center_x = center_x
             self.center_y = center_y
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile

@@ -1,5 +1,6 @@
 import random
 import modules.constants.constants as constants
+import modules.constants.status as status
 from ...util import csv_utility
 
 class flavor_text_manager_template():
@@ -98,7 +99,7 @@ class flavor_text_manager_template():
         Output:
             string: Returns a random combination of minister first and last names
         '''
-        if self.global_manager.get('current_country') == self.global_manager.get('Belgium'):
+        if status.current_country == status.Belgium:
             self.allow_particles = True
             if random.randrange(1, 7) >= 4:
                 self.set_flavor_text('minister_first_names', 'text/names/dutch_first_names.csv')
@@ -118,7 +119,7 @@ class flavor_text_manager_template():
                     'Herzog', 'Markgraf', 'Landgraf', 'Pfalzgraf', 'Reichsgraf', 'Burggraf', 'Reichsfürst', 'Graf', 'Freiherr', 'Herr',
                     'Principe', 'Duca', 'Marchese', 'Conte', 'Visconte', 'Barone', 'Nobile', 'Cavaliere', 'Patrizio'                  
                 ]
-        if self.global_manager.get('current_country') == self.global_manager.get('Germany'): #Most German nobility had von particle but no inherited title
+        if status.current_country == status.Germany: #Most German nobility had von particle but no inherited title
             if background == 'royal heir' or (background == 'aristocrat' and random.randrange(1, 7) >= 5):
                 while not first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')

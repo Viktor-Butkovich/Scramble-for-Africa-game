@@ -98,7 +98,7 @@ class exploration(action.action):
             else:
                 text += 'The expedition has discovered a ' + self.future_cell.terrain.upper() + ' tile. /n /n'
             if self.public_relations_change > 0: #Royal/National/Imperial
-                text += 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(self.public_relations_change) + '. /n /n'
+                text += 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(self.public_relations_change) + '. /n /n'
         elif subject == 'failure':
             text += 'The expedition was not able to explore the tile. /n /n'
         elif subject == 'critical_failure':

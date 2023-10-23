@@ -130,7 +130,7 @@ class expedition(group):
                         text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
 
                     if public_opinion_increase > 0: #Royal/National/Imperial
-                        text += 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
+                        text += 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
                     
                     self.destination_cells.append(target_cell)
                     self.public_opinion_increases.append(public_opinion_increase)
@@ -498,7 +498,7 @@ class expedition(group):
             location = self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.x, self.y)
             if location == self.global_manager.get('current_lore_mission').artifact_location:
                 text += 'The expedition successfully found the ' + self.global_manager.get('current_lore_mission').name + '! /n /n'
-                text += 'These findings will be reported to the ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society as soon as possible. /n /n'
+                text += 'These findings will be reported to the ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society as soon as possible. /n /n'
             else:
                 text += 'The expedition successfully verified that the ' + self.global_manager.get('current_lore_mission').name + ' is not at this location. /n /n'
 
@@ -543,7 +543,7 @@ class expedition(group):
             if location == self.global_manager.get('current_lore_mission').artifact_location:
                 prize_money = random.randrange(25, 51) * 10
                 public_opinion_increase = random.randrange(30, 61)
-                text = 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society awarded ' + str(prize_money) + ' money for finding the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+                text = 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society awarded ' + str(prize_money) + ' money for finding the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
                 text += 'Additionally, public opinion has increased by ' + str(public_opinion_increase) + '. /n /n'
                 lore_type = self.global_manager.get('current_lore_mission').lore_type
                 if not lore_type in self.global_manager.get('completed_lore_mission_types'):

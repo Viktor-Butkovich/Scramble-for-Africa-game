@@ -465,7 +465,7 @@ class actor():
         Output:
             None
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability 
+        if self.touching_mouse() and constants.current_game_mode in self.modes: #and not targeting_ability 
             return(True)
         else:
             return(False)

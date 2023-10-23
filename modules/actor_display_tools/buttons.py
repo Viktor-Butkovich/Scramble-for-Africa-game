@@ -1447,7 +1447,7 @@ class switch_theatre_button(button):
                     if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
                         if current_mob.sentry_mode:
                             current_mob.set_sentry_mode(False)
-                        if not self.global_manager.get('current_game_mode') == 'strategic':
+                        if not constants.current_game_mode == 'strategic':
                             game_transitions.set_game_mode('strategic', self.global_manager)
                             current_mob.select()
                         current_mob.clear_automatic_route()

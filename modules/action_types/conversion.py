@@ -130,9 +130,9 @@ class conversion(action.action):
         audio = super().generate_audio(subject)
         if subject == 'roll_finished':
             if self.roll_result >= self.current_min_success:
-                if self.global_manager.get('current_country').religion == 'protestant':
+                if status.current_country.religion == 'protestant':
                     sound_id = 'onward christian soldiers'
-                elif self.global_manager.get('current_country').religion == 'catholic':
+                elif status.current_country.religion == 'catholic':
                     sound_id = 'ave maria'
                 audio.append({'sound_id': sound_id, 'dampen_music': True})
         return(audio)

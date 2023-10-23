@@ -5,11 +5,12 @@ from modules.actor_types.tiles import tile
 from modules.actor_types.mobs import mob
 from modules.constructs.ministers import minister
 from modules.constructs.countries import country
+from modules.constructs.images import image, free_image
+from modules.interface_types.panels import safe_click_panel
 from modules.interface_types.notifications import notification
 from modules.interface_types.buttons import button
 from modules.interface_types.instructions import instructions_page
 from modules.interface_types.dice import die
-from modules.constructs.images import free_image
 from modules.actor_types.actors import actor
 from modules.actor_types.buildings import building, slums, resource_building
 from modules.actor_types.mobs import mob
@@ -19,10 +20,17 @@ from modules.actor_types.mob_types.npmob_types.beasts import beast
 from modules.constructs.villages import village
 from modules.util.market_utility import loan
 
-strategic_map_grid:grid = None
-minimap_grid:grid = None
-europe_grid:grid = None
-slave_traders_grid:grid = None
+strategic_map_grid: grid = None
+minimap_grid: grid = None
+europe_grid: grid = None
+slave_traders_grid: grid = None
+
+Britain: country = None
+France: country = None
+Germany: country = None
+Belgium: country = None
+Portugal: country = None
+Italy: country = None
 
 displayed_mob: mob = None
 displayed_tile: tile = None
@@ -63,5 +71,10 @@ independent_interface_elements: List[Any] = []
 dice_list: List[die] = []
 draw_list: List[Any] = []
 
+loading_image: image = None
+safe_click_area: safe_click_panel = None
+
 current_instructions_page: instructions_page = None
+current_country: country = None
+current_country_name: str = None
 ongoing_action_type: str = None

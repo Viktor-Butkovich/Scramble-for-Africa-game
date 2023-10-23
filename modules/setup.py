@@ -48,48 +48,25 @@ def misc(global_manager):
     instructions_message = 'Placeholder instructions, use += to add'
     status.instructions_list.append(instructions_message)
 
-    old_mouse_x, old_mouse_y = pygame.mouse.get_pos() #used in tooltip drawing timing
-    global_manager.set('old_mouse_x', old_mouse_x)
-    global_manager.set('old_mouse_y', old_mouse_y)
-    global_manager.set('available_minister_left_index', -2) #so that first index is in middle
-
-    global_manager.set('loading_image', constants.actor_creation_manager.create_interface_element({
+    status.loading_image = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/loading.png',
         'init_type': 'loading image template image'
-    }, global_manager))
-
-    global_manager.set('current_game_mode', 'none')
+    }, global_manager)
 
     strategic_background_image = constants.actor_creation_manager.create_interface_element({
         'modes': ['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'],
         'init_type': 'background image'
     }, global_manager)
 
-    global_manager.set('safe_click_area', constants.actor_creation_manager.create_interface_element({
+    status.safe_click_area = constants.actor_creation_manager.create_interface_element({
         'width': constants.display_width / 2 - scaling.scale_width(35),
         'height': constants.display_height,
         'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'image_id': 'misc/empty.png', #make a good image for this
         'init_type': 'safe click panel',
-    }, global_manager))
+    }, global_manager)
     #safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
 
-    strategic_grid_height = 300
-    strategic_grid_width = 320
-    mini_grid_width = 640
-
-    global_manager.set('minimap_grid_x', constants.default_display_width - (mini_grid_width + 100))
-
-    global_manager.set('europe_grid_x', constants.default_display_width - (strategic_grid_width + 100 + 120 + 25)) 
-    #100 for gap on right side of screen, 120 for width of europe grid, 25 for gap between europe and strategic grids
-    global_manager.set('europe_grid_y', constants.default_display_height - (strategic_grid_height + 25))
-
-    global_manager.set('mob_ordered_list_start_y', 0)
-    global_manager.set('tile_ordered_list_start_y', 0)
-    global_manager.set('minister_ordered_list_start_y', 0)
-
-    global_manager.set('current_game_mode', 'none') #set game mode only works if current game mode is defined and not the same as the new game mode
-    global_manager.set('current_country', 'none') #current country needs to be defined for music to start playing correctly on set game mode
     game_transitions.set_game_mode('main_menu', global_manager)
     global_manager.set('previous_game_mode', 'main_menu') #after set game mode, both previous and current game modes should be main_menu
 
@@ -451,8 +428,6 @@ def def_countries(global_manager):
         None
     '''
     global_manager.set('country_specific_units', ['major'])
-    global_manager.set('current_country', 'none')
-    global_manager.set('current_country_name', 'none')
 
     #25 backgrounds by default
     default_weighted_backgrounds = [
@@ -481,7 +456,7 @@ def def_countries(global_manager):
         ]
     british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
 
-    global_manager.set('Britain', countries.country({
+    status.Britain = countries.country({
         'name': 'Britain',
         'adjective': 'british',
         'government_type_adjective': 'royal',
@@ -491,7 +466,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
         'country_effect': british_country_effect,
-    }, global_manager))
+    }, global_manager)
 
     french_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -506,7 +481,7 @@ def def_countries(global_manager):
         'business magnate',
         ]
     french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
-    global_manager.set('France', countries.country({
+    status.France = countries.country({
         'name': 'France',
         'adjective': 'french',
         'government_type_adjective': 'national',
@@ -517,7 +492,7 @@ def def_countries(global_manager):
         'background_set': french_weighted_backgrounds,
         'country_effect': french_country_effect,
         'has_aristocracy': False
-    }, global_manager))
+    }, global_manager)
 
     german_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -530,7 +505,7 @@ def def_countries(global_manager):
         'royal heir',
         ]
     german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
-    global_manager.set('Germany', countries.country({
+    status.Germany = countries.country({
         'name': 'Germany',
         'adjective': 'german',
         'government_type_adjective': 'imperial',
@@ -540,7 +515,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
         'country_effect': german_country_effect,
-    }, global_manager))
+    }, global_manager)
 
     belgian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -554,14 +529,14 @@ def def_countries(global_manager):
         'royal heir',
         ]
     belgian_country_effect = effects.effect('belgian_country_modifier', 'slave_capture_plus_modifier', global_manager)
-    global_manager.set('Belgium', countries.hybrid_country({
+    status.Belgium = countries.hybrid_country({
         'name': 'Belgium',
         'adjective': 'belgian',
         'government_type_adjective': 'royal',
         'religion': 'catholic',
         'background_set': belgian_weighted_backgrounds,
         'country_effect': belgian_country_effect,
-    }, global_manager)) 
+    }, global_manager)
 
     portuguese_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -574,7 +549,7 @@ def def_countries(global_manager):
         'royal heir',
         ]
     portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
-    global_manager.set('Portugal', countries.country({
+    status.Portugal = countries.country({
         'name': 'Portugal',
         'adjective': 'portuguese',
         'government_type_adjective': 'royal',
@@ -584,7 +559,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': portuguese_weighted_backgrounds,
         'country_effect': portuguese_country_effect,
-    }, global_manager))
+    }, global_manager)
 
     italian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -598,7 +573,7 @@ def def_countries(global_manager):
         'royal heir',
         ]
     italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier', global_manager)
-    global_manager.set('Italy', countries.country({
+    status.Italy = countries.country({
         'name': 'Italy',
         'adjective': 'italian',
         'government_type_adjective': 'royal',
@@ -608,7 +583,7 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': italian_weighted_backgrounds,
         'country_effect': italian_country_effect,
-    }, global_manager)) 
+    }, global_manager)
     
 def transactions(global_manager):
     '''
@@ -801,7 +776,7 @@ def buttons(global_manager):
     europe_button_width = 150
     europe_button_height = 100
     input_dict = {
-        'coordinates': scaling.scale_coordinates(global_manager.get('europe_grid_x') - europe_button_width - 25, global_manager.get('europe_grid_y') + 10),
+        'coordinates': scaling.scale_coordinates(constants.europe_grid_x - europe_button_width - 25, constants.europe_grid_y + 10),
         'width': scaling.scale_width(europe_button_width),
         'height': scaling.scale_height(europe_button_height),
         'keybind_id': pygame.K_e,
@@ -815,7 +790,7 @@ def buttons(global_manager):
 
     europe_button_width = 60
     europe_button_height = 60
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(global_manager.get('europe_grid_y')))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.europe_grid_y))
     input_dict['width'] = scaling.scale_width(europe_button_width)
     input_dict['height'] = scaling.scale_height(europe_button_height)
     input_dict['modes'] = ['europe']
@@ -1299,7 +1274,7 @@ def mob_interface(global_manager):
     '''
     actor_display_top_y = constants.default_display_height - 205 + 125 + 10
     actor_display_current_y = actor_display_top_y
-    global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
+    constants.mob_ordered_list_start_y = actor_display_current_y
 
     mob_info_display = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
@@ -1796,8 +1771,7 @@ def minister_interface(global_manager):
         int actor_display_current_y: Value that tracks the location of interface as it is created, used by other setup functions
     '''
     #minister info images setup
-    minister_display_top_y = global_manager.get('mob_ordered_list_start_y')
-    global_manager.set('minister_ordered_list_start_y', minister_display_top_y)
+    minister_display_top_y = constants.mob_ordered_list_start_y
     minister_display_current_y = 0
 
     minister_info_display = constants.actor_creation_manager.create_interface_element({
@@ -1881,7 +1855,7 @@ def country_interface(global_manager):
     '''
 
     country_info_display = constants.actor_creation_manager.create_interface_element({
-        'coordinates': (0, global_manager.get('mob_ordered_list_start_y')),
+        'coordinates': (0, constants.mob_ordered_list_start_y),
         'width': 10,
         'height': 10,
         'modes': ['new_game_setup'],

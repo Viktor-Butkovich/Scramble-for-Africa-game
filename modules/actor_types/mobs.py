@@ -286,7 +286,7 @@ class mob(actor):
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if not (self.in_vehicle or self.in_group or self.in_building):
-            if self.images[0].current_cell != 'none' and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
+            if self.images[0].current_cell != 'none' and self.images[0].current_cell.contained_mobs[0] == self and constants.current_game_mode in self.modes:
                 if self.images[0].current_cell.visible:
                     return(True)
         return(False)
@@ -782,7 +782,7 @@ class mob(actor):
                 self.set_disorganized(True)
             if not (self.images[0].current_cell == 'none' or self.images[0].current_cell.terrain == 'water' or self.is_vehicle):
                 possible_sounds = ['voices/forward march 1', 'voices/forward march 2']
-                if self.global_manager.get('current_country').name == 'Germany':
+                if status.current_country.name == 'Germany':
                     possible_sounds.append('voices/german forward march 1')
                 constants.sound_manager.play_sound(random.choice(possible_sounds))
 

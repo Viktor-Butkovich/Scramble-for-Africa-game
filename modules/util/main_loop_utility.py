@@ -71,11 +71,9 @@ def update_display(global_manager):
             status.current_instructions_page.draw()
             if status.current_instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
                 possible_tooltip_drawers = [status.current_instructions_page] #instructions have priority over everything
-        if (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) != pygame.mouse.get_pos():
+        if (constants.old_mouse_x, constants.old_mouse_y) != pygame.mouse.get_pos():
             constants.mouse_moved_time = constants.current_time
-            old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
-            global_manager.set('old_mouse_x', old_mouse_x)
-            global_manager.set('old_mouse_y', old_mouse_y)
+            constants.old_mouse_x, constants.old_mouse_y = pygame.mouse.get_pos()
         if time.time() > constants.mouse_moved_time + 0.15: #show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         
@@ -123,7 +121,7 @@ def draw_loading_screen(global_manager):
     Output:
         None
     '''
-    global_manager.get('loading_image').draw() 
+    status.loading_image.draw()
     if flags.loading_start_time + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
         flags.loading = False
 
@@ -274,7 +272,7 @@ def manage_rmb_down(clicked_button, global_manager):
     stopping = False
     if (not clicked_button) and action_possible(global_manager):
         for current_grid in status.grid_list:
-            if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
+            if current_grid.showing: #if constants.current_game_mode in current_grid.modes:
                 for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         stopping = True #if doesn't reach this point, do same as lmb
@@ -327,7 +325,7 @@ def manage_lmb_down(clicked_button, global_manager):
         if (not clicked_button and (not (flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
             selected_mob = False
             for current_grid in status.grid_list:
-                if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
+                if current_grid.showing: #if constants.current_game_mode in current_grid.modes:
                     for current_cell in current_grid.get_flat_cell_list():
                         if current_cell.touching_mouse():
                             if current_cell.visible:
@@ -351,9 +349,9 @@ def manage_lmb_down(clicked_button, global_manager):
                 if unit and unit.grids[0] == status.minimap_grid.attached_grid:
                     status.minimap_grid.calibrate(unit.x, unit.y)
             else:
-                if global_manager.get('current_game_mode') == 'ministers':
+                if constants.current_game_mode == 'ministers':
                     minister_utility.calibrate_minister_info_display(global_manager, None)
-                elif global_manager.get('current_game_mode') == 'new_game_setup':
+                elif constants.current_game_mode == 'new_game_setup':
                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), None, override_exempt=True)
                 else:
                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), None, override_exempt=True)
