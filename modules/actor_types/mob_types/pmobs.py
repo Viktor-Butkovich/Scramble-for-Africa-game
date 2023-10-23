@@ -316,7 +316,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if new_value == True and self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
+        if new_value == True and self.is_worker and self.worker_type == 'slave' and constants.slave_traders_strength <= 0:
             text_utility.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
             return()
         self.automatically_replace = new_value
@@ -471,9 +471,9 @@ class pmob(mob):
         '''
         text = 'The unit will remain inactive for the next turn as replacements are found. /n /n'
         if self.is_officer:
-            text += str(self.global_manager.get('recruitment_costs')['officer']) + ' money has automatically been spent to recruit a replacement. /n /n'
+            text += str(constants.recruitment_costs['officer']) + ' money has automatically been spent to recruit a replacement. /n /n'
         elif self.is_worker and self.worker_type == 'slave':
-            text += str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money has automatically been spent to purchase replacements. /n /n'
+            text += str(constants.recruitment_costs['slave workers']) + ' money has automatically been spent to purchase replacements. /n /n'
         return(text)
 
     def remove(self):

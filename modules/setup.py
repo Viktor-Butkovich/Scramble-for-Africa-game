@@ -336,42 +336,10 @@ def transactions(global_manager):
     Output:
         None
     '''
-    global_manager.set('recruitment_types', constants.officer_types + ['European workers', 'steamship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10, 'officer': 5})
     for current_officer in constants.officer_types:
-        global_manager.get('recruitment_costs')[current_officer] = global_manager.get('recruitment_costs')['officer']
-
-    global_manager.set('num_african_workers', 0)
-    global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
-    global_manager.set('initial_african_worker_upkeep', 4)
-    global_manager.set('min_african_worker_upkeep', 0.5)
-
-    global_manager.set('num_european_workers', 0)
-    global_manager.set('european_worker_upkeep', 0)
-    global_manager.set('initial_european_worker_upkeep', 6)
-    global_manager.set('min_european_worker_upkeep', 0.5)
-
-    global_manager.set('num_slave_workers', 0)
-    global_manager.set('initial_slave_worker_upkeep', 2)
-    global_manager.set('slave_worker_upkeep', 0)
-    global_manager.set('base_slave_recruitment_cost', 5)
-    global_manager.get('recruitment_costs')['slave workers'] = global_manager.get('base_slave_recruitment_cost')
-    global_manager.set('min_slave_worker_recruitment_cost', 2)
-
-    global_manager.set('num_wandering_workers', 0)
-    global_manager.set('num_church_volunteers', 0)
-
-    global_manager.set('list_descriptions', {})
-    global_manager.set('string_descriptions', {})
+        constants.recruitment_costs[current_officer] = constants.recruitment_costs['officer']
     actor_utility.update_descriptions(global_manager)
-
-    global_manager.set('worker_upkeep_fluctuation_amount', 0.25)
-    global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
-    global_manager.set('base_upgrade_price', 20) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
-    global_manager.set('consumer_goods_starting_price', 1)
     actor_utility.reset_action_prices(global_manager)
-
-    global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
     actor_utility.set_slave_traders_strength(0, global_manager)
 
 def lore(global_manager):
@@ -707,9 +675,9 @@ def europe_screen(global_manager):
         'modes': ['europe'],
         'init_type': 'recruitment button'
     }
-    for recruitment_index in range(len(global_manager.get('recruitment_types'))):
+    for recruitment_index in range(len(constants.recruitment_types)):
         input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
-        input_dict['recruitment_type'] = global_manager.get('recruitment_types')[recruitment_index]
+        input_dict['recruitment_type'] = constants.recruitment_types[recruitment_index]
         new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict, global_manager)
 
     new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({

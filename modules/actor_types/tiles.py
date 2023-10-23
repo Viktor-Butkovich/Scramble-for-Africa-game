@@ -405,7 +405,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         if flags.player_turn and main_loop_utility.action_possible(self.global_manager): #(not flags.choosing_destination):
-            if self.name == 'Slave traders' and self.global_manager.get('slave_traders_strength') > 0:
+            if self.name == 'Slave traders' and constants.slave_traders_strength > 0:
                 if constants.sound_manager.previous_state != 'slave traders':
                     constants.event_manager.clear()
                     constants.sound_manager.play_random_music('slave traders')
@@ -452,7 +452,7 @@ class abstract_tile(tile):
             None
         '''
         if self.name == 'Slave traders':
-            self.set_tooltip([self.name, 'Slave traders strength: ' + str(self.global_manager.get('slave_traders_strength'))])
+            self.set_tooltip([self.name, 'Slave traders strength: ' + str(constants.slave_traders_strength)])
         else:
             self.set_tooltip([self.name])
 

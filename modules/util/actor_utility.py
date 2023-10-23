@@ -76,15 +76,15 @@ def update_descriptions(global_manager, target = 'all'):
         None
     '''
     if target == 'all':
-        targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
+        targets_to_update = constants.recruitment_types + ['slums workers', 'village workers', 'slaves']
         targets_to_update += constants.building_types + ['road', 'railroad', 'road_bridge', 'railroad_bridge']
         targets_to_update += constants.upgrade_types
     else:
         targets_to_update = [target]
 
     for current_target in targets_to_update:
-        list_descriptions = global_manager.get('list_descriptions')
-        string_descriptions = global_manager.get('string_descriptions')
+        list_descriptions = constants.list_descriptions
+        string_descriptions = constants.string_descriptions
         text_list = []
         if current_target in constants.officer_types:
             first_line = utility.capitalize(current_target) + 's are controlled by the ' + constants.officer_minister_dict[current_target]
@@ -129,13 +129,13 @@ def update_descriptions(global_manager, target = 'all'):
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
                 
         elif current_target == 'European workers':
-            text_list.append('European workers have an upkeep of ' + str(global_manager.get('european_worker_upkeep')) + ' money each turn.')
+            text_list.append('European workers have an upkeep of ' + str(constants.european_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of European workers hired or sent as replacements may increase the upkeep of all European workers.')
             text_list.append('European workers tend to be more susceptible to attrition but are more accustomed to using modern weaponry.')
             
         elif current_target == 'slave workers':
-            text_list.append('Slave workers have a constant upkeep of ' + str(global_manager.get('slave_worker_upkeep')) + ' money each turn.')
+            text_list.append('Slave workers have a constant upkeep of ' + str(constants.slave_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
@@ -145,14 +145,14 @@ def update_descriptions(global_manager, target = 'all'):
                 text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
             
         elif current_target == 'slums workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
             
         elif current_target == 'village workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
@@ -524,12 +524,12 @@ def get_slave_traders_strength_modifier(global_manager):
     Output:
         string/int: Returns slave traders inverse difficulty modifier, or 'none' if the strength is 0
     '''
-    strength = global_manager.get('slave_traders_strength')
+    strength = constants.slave_traders_strength
     if strength == 0:
         strength_modifier = 'none'
-    elif strength >= global_manager.get('slave_traders_natural_max_strength') * 2: #>= 20
+    elif strength >= constants.slave_traders_natural_max_strength * 2: #>= 20
         strength_modifier = -1
-    elif strength >= global_manager.get('slave_traders_natural_max_strength'): #>= 10
+    elif strength >= constants.slave_traders_natural_max_strength: #>= 10
         strength_modifier = 0
     else: # < 10
         strength_modifier = 1
@@ -547,7 +547,7 @@ def set_slave_traders_strength(new_strength, global_manager):
     '''
     if new_strength < 0:
         new_strength = 0
-    global_manager.set('slave_traders_strength', new_strength)
+    constants.slave_traders_strength = new_strength
     if status.slave_traders_grid != None:
         slave_traders_tile = status.slave_traders_grid.cell_list[0][0].tile
         slave_traders_tile.update_image_bundle()

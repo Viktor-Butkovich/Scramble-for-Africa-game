@@ -193,7 +193,6 @@ def manage_production(global_manager):
                     global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
     manage_production_report(expected_production, global_manager)
 
-    
 def manage_production_report(expected_production, global_manager):
     '''
     Description:
@@ -226,11 +225,7 @@ def manage_upkeep(global_manager):
     Output:
         None
     '''
-    african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 2)
-    european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 2)
-    slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 2)
-    num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
-    total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 2)
+    total_upkeep = market_utility.calculate_total_worker_upkeep(global_manager)
     constants.money_tracker.change(round(-1 * total_upkeep, 2), 'worker_upkeep')
 
 def manage_loans(global_manager):
@@ -254,10 +249,9 @@ def manage_slave_traders(global_manager):
     Output:
         None
     '''
-    if global_manager.get('slave_traders_strength') < global_manager.get('slave_traders_natural_max_strength') and global_manager.get('slave_traders_strength') > 0: 
+    if constants.slave_traders_strength < constants.slave_traders_natural_max_strength and constants.slave_traders_strength > 0: 
         #if below natural max but not eradicated
-        actor_utility.set_slave_traders_strength(global_manager.get('slave_traders_strength') + 1, global_manager)
-        #global_manager.set('slave_traders_strength', global_manager.get('slave_traders_strength') + 1)
+        actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1, global_manager)
 
 def manage_public_opinion(global_manager):
     '''
@@ -322,28 +316,28 @@ def manage_worker_price_changes(global_manager):
     '''
     european_worker_roll = random.randrange(1, 7)
     if european_worker_roll >= 5:
-        current_price = global_manager.get('european_worker_upkeep')
-        changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 2)
-        if changed_price >= global_manager.get('min_european_worker_upkeep'):
-            global_manager.set('european_worker_upkeep', changed_price)
+        current_price = constants.european_worker_upkeep
+        changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
+        if changed_price >= constants.min_european_worker_upkeep:
+            constants.european_worker_upkeep = changed_price
             text_utility.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
     elif european_worker_roll == 1:
-        current_price = global_manager.get('european_worker_upkeep')
-        changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
-        global_manager.set('european_worker_upkeep', changed_price)
+        current_price = constants.european_worker_upkeep
+        changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
+        constants.european_worker_upkeep = changed_price
         text_utility.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
-    if global_manager.get('slave_traders_strength') > 0:
+    if constants.slave_traders_strength > 0:
         slave_worker_roll = random.randrange(1, 7)
         if slave_worker_roll == 6:
-            current_price = global_manager.get('recruitment_costs')['slave workers']
-            changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
-            if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
-                global_manager.get('recruitment_costs')['slave workers'] = changed_price
+            current_price = constants.recruitment_costs['slave workers']
+            changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
+            if changed_price >= constants.min_slave_worker_recruitment_cost:
+                constants.recruitment_costs['slave workers'] = changed_price
                 text_utility.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         elif slave_worker_roll == 1:
-            current_price = global_manager.get('recruitment_costs')['slave workers']
-            changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
-            global_manager.get('recruitment_costs')['slave workers'] = changed_price
+            current_price = constants.recruitment_costs['slave workers']
+            changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
+            constants.recruitment_costs['slave workers'] = changed_price
             text_utility.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         
 def manage_worker_migration(global_manager): 
@@ -355,7 +349,7 @@ def manage_worker_migration(global_manager):
     Output:
         None
     '''
-    num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + global_manager.get('num_wandering_workers')
+    num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + constants.num_wandering_workers
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
         trigger_worker_migration(global_manager)
@@ -421,7 +415,7 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
         wandering_destination_dict = {}
         wandering_destination_coordinates_dict = {}
         wandering_num_migrated_dict = {}
-        num_migrated = global_manager.get('num_wandering_workers')
+        num_migrated = constants.num_wandering_workers
         if num_migrated > 0:
             any_migrated = True
             for i in range(num_migrated):
@@ -429,7 +423,7 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
                 if not destination.has_building('slums'):
                     destination.create_slums()
                 destination.get_building('slums').change_population(1) #num_migrated
-                global_manager.set('num_wandering_workers', global_manager.get('num_wandering_workers') - 1)
+                constants.num_wandering_workers -= 1
                 if destination.has_intact_building('port'):
                     destination_type = 'port'
                 elif destination.has_intact_building('resource'):

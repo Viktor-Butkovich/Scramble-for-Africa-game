@@ -42,12 +42,12 @@ class worker(pmob):
         self.worker_type = input_dict['worker_type'] #European, African, religious, slave
         
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
-            self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') + 1)
+            constants.num_european_workers += 1
             if not from_save:
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
             
         elif self.worker_type == 'African':
-            self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') + 1)
+            constants.num_african_workers -= 1
             if not from_save:
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
                 
@@ -106,10 +106,9 @@ class worker(pmob):
                 text_utility.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
                 
         elif self.worker_type == 'slave':
-            constants.money_tracker.change(self.global_manager.get('recruitment_costs')['slave workers'] * -1, 'attrition_replacements')
-            actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') + 1, self.global_manager)
-            #self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
-            text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
+            constants.money_tracker.change(constants.recruitment_costs['slave workers'] * -1, 'attrition_replacements')
+            actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1, self.global_manager)
+            text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(constants.recruitment_costs['slave workers']) + ' money.', self.global_manager)
             market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
 
             if constants.effect_manager.effect_active('no_slave_trade_penalty'):
@@ -155,7 +154,7 @@ class worker(pmob):
             market_utility.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
         if self.worker_type == 'African' and wander:
             text_utility.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.', self.global_manager)
-            self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+            constants.num_wandering_workers += 1
         elif self.worker_type in ['European', 'religious']:
             current_public_opinion = constants.public_opinion
             constants.public_opinion_tracker.change(-1)
@@ -271,9 +270,9 @@ class worker(pmob):
         '''
         super().remove()
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
-            self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') - 1)
+            constants.num_european_workers -= 1
         elif self.worker_type == 'African':
-            self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
+            constants.num_african_workers -= 1
         constants.money_label.check_for_updates()
 
     def image_variants_setup(self, from_save, input_dict):
@@ -348,7 +347,7 @@ class slave_worker(worker):
                         text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
                 market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
                 constants.evil_tracker.change(6)
-                actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') + 1, self.global_manager)
+                actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1, self.global_manager)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = constants.public_opinion_tracker.get()
@@ -357,12 +356,12 @@ class slave_worker(worker):
                 if not resulting_public_opinion == current_public_opinion:
                     text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
                 constants.evil_tracker.change(6)
-        self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
+        constants.num_slave_workers += 1
         self.set_controlling_minister_type(constants.type_minister_dict['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
         constants.money_label.check_for_updates()
-        if self.global_manager.get('slave_traders_strength') <= 0:
+        if constants.slave_traders_strength <= 0:
             self.automatically_replace = False
 
     def fire(self, wander = True):
@@ -392,7 +391,7 @@ class slave_worker(worker):
             text_utility.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
         if wander:
             text_utility.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
-            self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+            constants.num_wandering_workers += 1
         constants.evil_tracker.change(-2)
 
     def free_and_replace(self):
@@ -430,7 +429,7 @@ class slave_worker(worker):
             None
         '''
         super().remove()
-        self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') - 1)
+        constants.num_slave_workers -= 1
         constants.money_label.check_for_updates()
 
 class church_volunteers(worker):
@@ -461,7 +460,7 @@ class church_volunteers(worker):
         input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict, global_manager)
         self.set_controlling_minister_type(constants.type_minister_dict['religion'])
-        self.global_manager.set('num_church_volunteers', self.global_manager.get('num_church_volunteers') + 1)
+        constants.num_church_volunteers += 1
 
     def remove(self):
         '''
@@ -473,5 +472,5 @@ class church_volunteers(worker):
             None
         '''
         super().remove()
-        self.global_manager.set('num_church_volunteers', self.global_manager.get('num_church_volunteers') - 1)
+        constants.num_church_volunteers -= 1
         constants.money_label.check_for_updates()

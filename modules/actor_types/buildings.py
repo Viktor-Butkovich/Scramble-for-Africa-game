@@ -832,7 +832,7 @@ class resource_building(building):
         Output:
             None
         '''
-        return(self.global_manager.get('base_upgrade_price') * (2 ** self.num_upgrades)) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
+        return(constants.base_upgrade_price * (2 ** self.num_upgrades)) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 
     def get_build_cost(self):
         '''
@@ -845,7 +845,7 @@ class resource_building(building):
         '''
         cost = super().get_build_cost()
         for i in range(0, self.num_upgrades): #adds cost of each upgrade, each of which is more expensive than the last
-            cost += (self.global_manager.get('base_upgrade_price') * (i + 1))
+            cost += (constants.base_upgrade_price * (i + 1))
         return(cost)
     
     def produce(self):

@@ -37,7 +37,7 @@ class recruitment_button(button):
                 self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + status.current_country.adjective + '/default.png'
             else:
                 self.mob_image_id = 'mobs/default/default.png'
-        elif self.recruitment_type in global_manager.get('recruitment_types'):
+        elif self.recruitment_type in constants.recruitment_types:
             self.mob_image_id = 'mobs/' + self.recruitment_type + '/default.png'
         else:
             self.mob_image_id = 'mobs/default/default.png'
@@ -47,7 +47,7 @@ class recruitment_button(button):
                 self.recruitment_name += character
             else:
                 self.recruitment_name += ' '
-        self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
+        self.cost = constants.recruitment_costs[self.recruitment_type]
         status.recruitment_button_list.append(self)
         if self.recruitment_name in ['European workers']:
             image_id_list = ['mobs/default/button.png']
@@ -112,9 +112,9 @@ class recruitment_button(button):
         '''
         actor_utility.update_descriptions(self.global_manager, self.recruitment_type)
         if self.recruitment_type == 'European workers':
-            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('list_descriptions')[self.recruitment_type])
+            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
         else:
-            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('list_descriptions')[self.recruitment_type])
+            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
 
     def remove(self):
         '''

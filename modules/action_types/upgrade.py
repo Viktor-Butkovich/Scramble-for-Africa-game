@@ -84,7 +84,7 @@ class upgrade(action.action):
                 noun = self.current_building.name
             value = getattr(self.current_building, self.building_type)
             message.append('Attempts to increase this ' + noun + '\'s ' + self.building_name + ' from ' + str(value) + ' to ' + str(value + 1) + ' for ' + str(self.get_price()) + ' money')
-            message += self.global_manager.get('list_descriptions')[self.building_type]
+            message += constants.list_descriptions[self.building_type]
             message.append('Unlike new buildings, the cost of building upgrades is not impacted by local terrain')
             message.append('An upgrade\'s cost is doubled for each previous upgrade to that ' + noun)
             message.append('Costs all remaining movement points, at least 1')
@@ -111,7 +111,7 @@ class upgrade(action.action):
             text += 'Are you sure you want to start upgrading this ' + noun + '\'s ' + self.building_name + '? /n /n'
             text += 'The planning and materials will cost ' + str(self.get_price()) + ' money. Each upgrade to a building doubles the cost of all future upgrades to that building. /n /n'
             text += 'If successful, this ' + noun + '\'s ' + self.building_name + ' will increase from ' + str(value) + ' to ' + str(value + 1) + '. /n /n'
-            text += self.global_manager.get('string_descriptions')[self.building_type]
+            text += constants.string_descriptions[self.building_type]
         elif subject == 'initial':
             text += 'The ' + self.current_unit.name + ' attempts to upgrade the ' + noun + '\'s ' + self.building_name + '. /n /n'
         elif subject == 'success':

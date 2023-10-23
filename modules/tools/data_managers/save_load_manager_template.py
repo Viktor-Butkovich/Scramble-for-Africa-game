@@ -39,17 +39,10 @@ class save_load_manager_template():
             None
         '''
         self.copied_globals = []
-        self.copied_globals.append('african_worker_upkeep')
-        self.copied_globals.append('european_worker_upkeep')
-        self.copied_globals.append('slave_worker_upkeep')
-        self.copied_globals.append('recruitment_costs')
         self.copied_globals.append('minister_appointment_tutorial_completed')
         self.copied_globals.append('exit_minister_screen_tutorial_completed')
         self.copied_globals.append('transaction_history')
         self.copied_globals.append('previous_financial_report')
-        self.copied_globals.append('num_wandering_workers')
-        self.copied_globals.append('slave_traders_strength')
-        self.copied_globals.append('slave_traders_natural_max_strength')
         self.copied_globals.append('completed_lore_mission_types')
 
         self.copied_constants = []
@@ -62,6 +55,13 @@ class save_load_manager_template():
         self.copied_constants.append('current_game_mode')
         self.copied_constants.append('sold_commodities')
         self.copied_constants.append('commodity_prices')
+        self.copied_constants.append('recruitment_costs')
+        self.copied_constants.append('num_wandering_workers')
+        self.copied_constants.append('african_worker_upkeep')
+        self.copied_constants.append('european_worker_upkeep')
+        self.copied_constants.append('slave_worker_upkeep')
+        self.copied_constants.append('slave_traders_strength')
+        self.copied_constants.append('slave_traders_natural_max_strength')
 
         self.copied_statuses = []
         self.copied_statuses.append('current_country_name')
@@ -162,7 +162,7 @@ class save_load_manager_template():
                 price += increase    
                 market_utility.set_price(current_commodity, price, self.global_manager) #2-5
             else:
-                market_utility.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
+                market_utility.set_price(current_commodity, constants.consumer_goods_starting_price, self.global_manager)
 
         constants.money_tracker.reset_transaction_history()
         constants.money_tracker.set(500)
@@ -172,8 +172,8 @@ class save_load_manager_template():
         constants.evil_tracker.set(0)
         constants.fear_tracker.set(1)
 
-        self.global_manager.set('slave_traders_natural_max_strength', 10) #regenerates to natural strength, can increase indefinitely when slaves are purchased
-        actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_natural_max_strength'), self.global_manager)
+        constants.slave_traders_natural_max_strength = 10 #regenerates to natural strength, can increase indefinitely when slaves are purchased
+        actor_utility.set_slave_traders_strength(constants.slave_traders_natural_max_strength, self.global_manager)
         flags.player_turn = True
         self.global_manager.set('previous_financial_report', 'none')
 
@@ -181,15 +181,15 @@ class save_load_manager_template():
 
         constants.available_minister_left_index = -2
 
-        self.global_manager.set('num_african_workers', 0)
-        self.global_manager.set('num_european_workers', 0)
-        self.global_manager.set('num_slave_workers', 0)
-        self.global_manager.set('num_wandering_workers', 0)
-        self.global_manager.set('num_church_volunteers', 0)
-        self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
-        self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
-        self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
-        self.global_manager.get('recruitment_costs')['slave workers'] = self.global_manager.get('base_slave_recruitment_cost')
+        constants.num_african_workers = 0
+        constants.num_european_workers = 0
+        constants.num_slave_workers = 0
+        constants.num_wandering_workers = 0
+        constants.num_church_volunteers = 0
+        constants.african_worker_upkeep = constants.initial_african_worker_upkeep
+        constants.european_worker_upkeep = constants.initial_european_worker_upkeep
+        constants.slave_worker_upkeep = constants.initial_slave_worker_upkeep
+        constants.recruitment_costs['slave workers'] = constants.base_slave_recruitment_cost
         actor_utility.reset_action_prices(self.global_manager)
         for current_commodity in constants.commodity_types:
             constants.sold_commodities[current_commodity] = 0
@@ -400,7 +400,7 @@ class save_load_manager_template():
         if constants.effect_manager.effect_active('eradicate_slave_trade'):
             actor_utility.set_slave_traders_strength(0, self.global_manager)
         else:
-            actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength'), self.global_manager)
+            actor_utility.set_slave_traders_strength(constants.slave_traders_strength, self.global_manager)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:

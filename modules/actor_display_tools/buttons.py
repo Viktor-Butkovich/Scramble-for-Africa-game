@@ -1975,7 +1975,7 @@ class buy_slaves_button(button):
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
             if status.displayed_tile and status.displayed_tile.cell.grid == status.slave_traders_grid:
-                if self.global_manager.get('slave_traders_strength') > 0:
+                if constants.slave_traders_strength > 0:
                     return(True)
         return(False)
 
@@ -1989,7 +1989,7 @@ class buy_slaves_button(button):
             None
         '''
         if main_loop_utility.action_possible(self.global_manager):
-            self.cost = self.global_manager.get('recruitment_costs')['slave workers']
+            self.cost = constants.recruitment_costs['slave workers']
             if constants.money_tracker.get() >= self.cost:
                 choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
                 constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers', self.global_manager)

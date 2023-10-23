@@ -143,7 +143,7 @@ class suppress_slave_trade(action.action):
         if super().on_click(unit):
             if unit.images[0].current_cell.grid != status.slave_traders_grid:
                 text_utility.print_to_screen('Suppressing the slave trade is only possible in the slave traders tile.', self.global_manager)
-            elif self.global_manager.get('slave_traders_strength') <= 0:
+            elif constants.slave_traders_strength <= 0:
                 text_utility.print_to_screen('The slave trade has already been eradicated.', self.global_manager)
             else:
                 self.start(unit)
@@ -185,16 +185,16 @@ class suppress_slave_trade(action.action):
             None
         '''
         if self.roll_result >= self.current_min_success: #if campaign succeeded
-            actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') - self.strength_decrease, self.global_manager)
-            if self.global_manager.get('slave_traders_strength') <= 0:
-                self.global_manager.set('slave_traders_strength', 0)
+            actor_utility.set_slave_traders_strength(constants.slave_traders_strength - self.strength_decrease, self.global_manager)
+            if constants.slave_traders_strength <= 0:
+                constants.slave_traders_strength = 0
                 num_freed_slaves = random.randrange(1, 7) + random.randrange(1, 7)
                 initial_public_opinion_increase = self.public_opinion_increase
                 for i in range(num_freed_slaves):
                     self.public_opinion_increase += 4 + random.randrange(-3, 4) #1-7 each
                     market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
                     constants.evil_tracker.change(-2)
-                    self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+                    constants.num_wandering_workers += 1
                 text = 'The slave trade has been eradicated. /n /n'
                 text += str(num_freed_slaves) + ' freed slaves have entered the labor pool, increasing public opinion by ' + str(self.public_opinion_increase - initial_public_opinion_increase) + '. /n /n'
                 text += 'Slaves are no longer able to be purchased, and existing slave units will no longer be automatically replaced. /n /n'
@@ -210,5 +210,5 @@ class suppress_slave_trade(action.action):
 
         super().complete()
 
-        if self.global_manager.get('slave_traders_strength') <= 0:
+        if constants.slave_traders_strength <= 0:
             status.displayed_tile.select() #sets music to switch from slave traders music

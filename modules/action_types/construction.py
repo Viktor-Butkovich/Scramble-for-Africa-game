@@ -93,9 +93,9 @@ class construction(action.action):
         actor_utility.update_descriptions(self.global_manager, self.building_type)
         message.append('Attempts to build a ' + self.building_name + ' in this tile')
         if self.building_type != 'infrastructure':
-            message += self.global_manager.get('list_descriptions')[self.building_type]
+            message += constants.list_descriptions[self.building_type]
         else:
-            message += self.global_manager.get('list_descriptions')[self.building_name.replace(' ', '_')]
+            message += constants.list_descriptions[self.building_name.replace(' ', '_')]
             if self.building_name == 'railroad':
                 message += ['Upgrades this tile\'s road into a railroad, retaining the benefits of a road']
             elif self.building_name == 'railroad bridge':
@@ -148,7 +148,7 @@ class construction(action.action):
             text += 'Are you sure you want to start building a ' + self.building_name + '? /n /n'
             text += 'The planning and materials will cost ' + str(self.get_price()) + ' money. /n /n'
             text += 'If successful, a ' + self.building_name + ' will be built. '
-            text += self.global_manager.get('string_descriptions')[self.building_type]
+            text += constants.string_descriptions[self.building_type]
         elif subject == 'initial':
             text += 'The ' + self.current_unit.name + ' attempts to ' + verb + ' a ' + self.building_name + '. /n /n'
         elif subject == 'success':

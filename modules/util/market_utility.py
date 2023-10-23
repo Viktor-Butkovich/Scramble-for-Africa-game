@@ -112,15 +112,15 @@ def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
         None
     '''
     if random.randrange(1, 7) >= 4: #half chance of change
-        current_price = global_manager.get(worker_type.lower() + '_worker_upkeep')
+        current_price = getattr(constants, worker_type.lower() + '_worker_upkeep')
         if change_type == 'increase':
-            changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
-            global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
+            changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
+            setattr(constants, worker_type.lower() + '_worker_upkeep', changed_price)
             text_utility.print_to_screen('Hiring ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker increased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         elif change_type == 'decrease':
-            changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 2)
-            if changed_price >= global_manager.get('min_' + worker_type.lower() + '_worker_upkeep'):
-                global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
+            changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
+            if changed_price >= getattr(constants, 'min_' + worker_type.lower() + '_worker_upkeep'):
+                setattr(constants, worker_type.lower() + '_worker_upkeep', changed_price)
                 text_utility.print_to_screen('Adding ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker to the labor pool decreased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         constants.money_label.check_for_updates()
 
@@ -136,15 +136,15 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
         None
     '''
     if random.randrange(1, 7) >= 4:
-        current_price = global_manager.get('recruitment_costs')['slave workers']
+        current_price = constants.recruitment_costs['slave workers']
         if change_type == 'increase':
-            changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
-            global_manager.get('recruitment_costs')['slave workers'] = changed_price
+            changed_price = round(current_price + constants.slave_recruitment_cost_fluctuation_amount, 2)
+            constants.recruitment_costs['slave workers'] = changed_price
             text_utility.print_to_screen('Buying slave workers increased the recruitment cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         elif change_type == 'decrease':
-            changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
-            if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
-                global_manager.get('recruitment_costs')['slave workers'] = changed_price
+            changed_price = round(current_price - constants.slave_recruitment_cost_fluctuation_amount, 2)
+            if changed_price >= constants.min_slave_worker_recruitment_cost:
+                constants.recruitment_costs['slave workers'] = changed_price
                 text_utility.print_to_screen('Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
 
 def calculate_subsidies(global_manager, projected = False):
@@ -182,19 +182,9 @@ def calculate_total_worker_upkeep(global_manager):
     Output:
         double: Returns the total upkeep of the company's workers
     '''
-    num_african_workers = global_manager.get('num_african_workers')
-    african_worker_upkeep = global_manager.get('african_worker_upkeep')
-    total_african_worker_upkeep = round(num_african_workers * african_worker_upkeep, 2)
-
-    num_european_workers = global_manager.get('num_european_workers')
-    european_worker_upkeep = global_manager.get('european_worker_upkeep')
-    total_european_worker_upkeep = round(num_european_workers * european_worker_upkeep, 2)
-
-    num_slave_workers = global_manager.get('num_slave_workers')
-    slave_worker_upkeep = global_manager.get('slave_worker_upkeep')
-    total_slave_worker_upkeep = round(num_slave_workers * slave_worker_upkeep, 2)
-        
-    num_workers = num_african_workers + num_european_workers + num_slave_workers
+    total_african_worker_upkeep = round(constants.num_african_workers * constants.african_worker_upkeep, 2)
+    total_european_worker_upkeep = round(constants.num_european_workers * constants.european_worker_upkeep, 2)
+    total_slave_worker_upkeep = round(constants.num_slave_workers * constants.slave_worker_upkeep, 2)
     total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
     return(total_upkeep)
 
@@ -229,7 +219,7 @@ def count_available_workers(global_manager):
         num_available_workers += current_village.available_workers
     for current_slums in status.slums_list:
         num_available_workers += current_slums.available_workers
-    num_available_workers += global_manager.get('num_wandering_workers')
+    num_available_workers += constants.num_wandering_workers
     return(num_available_workers)
     
 class loan():
