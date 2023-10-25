@@ -37,6 +37,8 @@ class notification(multi_line_label):
         constants.sound_manager.play_sound('opening_letter')
         self.creation_time = time.time()
         self.notification_type = input_dict['notification_type']
+        if input_dict.get('on_reveal', None):
+            input_dict['on_reveal']()
         self.on_remove = input_dict.get('on_remove', None)
 
     def format_message(self):

@@ -201,10 +201,6 @@ class notification_manager_template():
         if 'transfer_interface_elements' in notification_dict:
             transfer_interface_elements = notification_dict['transfer_interface_elements']
 
-        on_remove = None
-        if 'on_remove' in notification_dict:
-            on_remove = notification_dict['on_remove']
-
         if 'extra_parameters' in notification_dict and notification_dict['extra_parameters'] != 'none':
             extra_parameters = notification_dict['extra_parameters']
         else:
@@ -222,9 +218,11 @@ class notification_manager_template():
             'notification_type': notification_type,
             'attached_interface_elements': attached_interface_elements,
             'transfer_interface_elements': transfer_interface_elements,
-            'on_remove': on_remove,
             'extra_parameters': extra_parameters
         }
+
+        input_dict['on_reveal'] = notification_dict.get('on_reveal', None)
+        input_dict['on_remove'] = notification_dict.get('on_remove', None)
 
         if notification_type == 'roll':
             input_dict['init_type'] = 'dice rolling notification'
@@ -247,12 +245,6 @@ class notification_manager_template():
             input_dict['init_type'] = 'trade notification'
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
-        elif notification_type == 'artifact_search':
-            input_dict['init_type'] = 'artifact search notification'
-            input_dict['is_last'] = False
-        elif notification_type == 'final_artifact_search':
-            input_dict['init_type'] = 'artifact search notification'
-            input_dict['is_last'] = True
         elif notification_type == 'slave_capture':
             input_dict['init_type'] = 'capture slaves notification'
             input_dict['is_last'] = False

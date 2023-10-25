@@ -23,7 +23,6 @@ class rumor_search(action.action):
         super().initial_setup()
         constants.transaction_descriptions[self.action_type] = 'artifact rumor searches'
         self.name = 'rumor search'
-        self.current_village = None
         self.aggressiveness_modifier = 0
 
     def button_setup(self, initial_input_dict):
@@ -48,12 +47,11 @@ class rumor_search(action.action):
         Output:
             None
         '''
-        message = []
         if status.current_lore_mission:
             description = 'the location of the ' + status.current_lore_mission.name
         else:
             description = 'a lore mission artifact\'s location'
-        return(['Attempts to search this village for rumors of ' + description + ' for ' + str(constants.action_prices['rumor_search']) + ' money',
+        return(['Attempts to search this village for rumors of ' + description + ' for ' + str(constants.action_prices[self.action_type]) + ' money',
                 'Can only be done in a village',
                 'If successful, reveals the coordinates of a possible location for the current lore mission\'s artifact',
                 'Costs all remaining movement points, at least 1'
@@ -165,7 +163,7 @@ class rumor_search(action.action):
                 'choices': [
                     {
                     'on_click': (self.middle, []),
-                    'tooltip': ['Starts rumor search'],
+                    'tooltip': ['Start rumor search'],
                     'message': 'Start search'
                     },
                     {

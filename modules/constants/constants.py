@@ -114,7 +114,6 @@ base_action_prices: Dict[str, int] = {
     'slave_capture': 5,
     'trial': 5,
     'active_investigation': 5,
-    'artifact_search': 5,
     'track_beasts': 0
 }
 action_types: List[str] = [current_key for current_key in base_action_prices]
@@ -126,7 +125,6 @@ transaction_descriptions: Dict[str, str] = {
     'slave_capture': 'capturing slaves',
     'trial': 'trial fees',
     'active_investigation': 'investigations',
-    'artifact_search': 'artifact searches',
     'production': 'production',
     'bribery': 'bribery',
     'loan_interest': 'loan interest',

@@ -152,7 +152,7 @@ class lore_mission():
         '''
         num_revealed = 0
         for current_possible_artifact_location in self.possible_artifact_locations:
-            if current_possible_artifact_location.revealed:
+            if current_possible_artifact_location.revealed or current_possible_artifact_location.proven_false:
                 num_revealed += 1
         return(num_revealed)
 
@@ -168,7 +168,7 @@ class lore_mission():
         if self.get_num_revealed_possible_artifact_locations() == len(self.possible_artifact_locations):
             return('none')
         current_possible_artifact_location = random.choice(self.possible_artifact_locations)
-        while current_possible_artifact_location.revealed:
+        while current_possible_artifact_location.revealed or current_possible_artifact_location.proven_false:
             current_possible_artifact_location = random.choice(self.possible_artifact_locations)
         return(current_possible_artifact_location)
 

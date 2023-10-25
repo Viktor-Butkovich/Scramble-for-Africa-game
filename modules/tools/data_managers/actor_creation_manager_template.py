@@ -243,8 +243,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.work_crew_to_building_button(input_dict)
                 elif base == 'trade':
                     new_element = actor_display_buttons.trade_button(input_dict)
-                elif base == 'artifact search':
-                    new_element = actor_display_buttons.artifact_search_button(input_dict)
                 elif base == 'capture slaves':
                     new_element = actor_display_buttons.capture_slaves_button(input_dict)
                 elif base == 'labor broker':
@@ -381,8 +379,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.trade_notification(input_dict)
                 elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict)
-                elif base == 'artifact search':
-                    new_element = action_notifications.artifact_search_notification(input_dict)
                 elif base == 'capture slaves':
                     new_element = action_notifications.capture_slaves_notification(input_dict)
                 else:

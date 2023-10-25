@@ -428,57 +428,6 @@ class trial_notification(action_notification):
         if len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
-class artifact_search_notification(action_notification):
-    '''
-    Notification that does not automatically prompt the user to remove it and shows the results of an artifact search attempt when the last notification is removed
-    '''
-    def __init__(self, input_dict):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'message': string value - Default text for this label, with lines separated by /n
-                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
-                    will be started
-                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-                'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-        Output:
-            None
-        '''
-        self.is_last = input_dict['is_last']
-        if self.is_last: #if last, show result
-            self.notification_images = []
-        super().__init__(input_dict)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
-                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove(handle_next_notification=False)
-        notification_manager = constants.notification_manager
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(notification_manager.notification_queue) > 0 and notification_manager.notification_type_queue[0] in ['final_artifact_search', 'default'] and not self.is_last: #if roll failed or succeeded and about to complete
-            #artifact_search_result[0].complete_artifact_search()
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-
-        elif len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-
 class capture_slaves_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a slave capture attempt when the last notification is removed

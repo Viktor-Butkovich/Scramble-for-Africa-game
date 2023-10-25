@@ -90,11 +90,6 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_r
             self.add_attached_button(input_dict)
 
-            input_dict['init_type'] = 'artifact search button'
-            input_dict['image_id'] = 'buttons/artifact_search_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
             for action_type in status.actions:
                 button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
                 if button_input_dict:
