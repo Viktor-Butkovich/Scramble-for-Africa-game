@@ -82,6 +82,7 @@ europe_grid_x: int = default_display_width - (320 + 100 + 120 + 25)
 europe_grid_y: int = default_display_height - (300 + 25)
 strategic_map_width: int = 15
 strategic_map_height: int = 16
+minimap_grid_coordinate_size: int = 5
 
 default_text_box_height: int = 0
 text_box_height: int = 0
@@ -113,7 +114,6 @@ base_action_prices: Dict[str, int] = {
     'slave_capture': 5,
     'trial': 5,
     'active_investigation': 5,
-    'rumor_search': 5,
     'artifact_search': 5,
     'track_beasts': 0
 }
@@ -126,7 +126,6 @@ transaction_descriptions: Dict[str, str] = {
     'slave_capture': 'capturing slaves',
     'trial': 'trial fees',
     'active_investigation': 'investigations',
-    'rumor_search': 'artifact rumor searches',
     'artifact_search': 'artifact searches',
     'production': 'production',
     'bribery': 'bribery',

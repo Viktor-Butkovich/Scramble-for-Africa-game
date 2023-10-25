@@ -24,6 +24,8 @@ class conversion(action.action):
         constants.transaction_descriptions[self.action_type] = 'religious conversion'
         self.name = 'religious conversion'
         self.current_village = None
+        self.aggressiveness_modifier = 0
+        self.population_modifier = 0
 
     def button_setup(self, initial_input_dict):
         '''
@@ -96,7 +98,6 @@ class conversion(action.action):
         elif subject == 'critical_success':
             text += self.generate_notification_text('success')
             text += 'The evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n /n'
-            text += 'The evangelist is now a veteran and will be more successful in future ventures. /n /n'
         return(text)
 
     def generate_current_roll_modifier(self):
@@ -163,11 +164,11 @@ class conversion(action.action):
         if super().on_click(unit):
             current_cell = unit.images[0].current_cell
             self.current_village = current_cell.get_building('village')
-            if not current_cell.has_building('village'):
+            if self.current_village == 'none':
                 text_utility.print_to_screen('Converting is only possible in a village.')
-            elif not self.current_village.aggressiveness > 1:
+            elif self.current_village.aggressiveness <= 1:
                 text_utility.print_to_screen('This village already has the minimum aggressiveness and cannot be converted.')
-            elif not self.current_village.aggressiveness > 0:
+            elif self.current_village.population <= 0:
                 text_utility.print_to_screen('This village has no population and cannot be converted.')
             else:
                 self.start(unit)

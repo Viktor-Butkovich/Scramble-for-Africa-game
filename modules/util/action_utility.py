@@ -143,6 +143,18 @@ def generate_background_image_input_dict():
         'level': -10
     })
 
+def generate_tile_image_id_list(cell, force_visibility=False):
+    '''
+    Description:
+        Creates and returns an image id list to display an image of the inputted cell's tile
+    Input:
+        cell cell: Cell to make a tile image for
+        boolean force_visibility=False: Whether to ignore the tile's explored/unexplored status in the image created
+    Output:
+        string/dict list: Generated image id list
+    '''
+    return([generate_background_image_input_dict()] + cell.tile.get_image_id_list(force_visibility=force_visibility) + ['misc/tile_outline.png'])
+
 def generate_risk_message(action, unit):
     '''
     Description:

@@ -14,7 +14,7 @@ import modules.constructs.countries as countries
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
-    construction, upgrade, repair, loan_search
+    construction, upgrade, repair, loan_search, rumor_search
 
 def setup(*args):
     '''
@@ -123,6 +123,7 @@ def actions():
     combat.combat()
     exploration.exploration()
     loan_search.loan_search()
+    rumor_search.rumor_search()
     for building_type in constants.building_types + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(building_type=building_type)

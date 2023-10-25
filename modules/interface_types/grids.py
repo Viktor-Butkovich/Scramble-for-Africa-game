@@ -143,7 +143,7 @@ class grid(interface_elements.interface_element):
         pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
         pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
         pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
-        if (not self.mini_grid == 'none') and flags.show_minimap_outlines:
+        if self.mini_grid != 'none' and flags.show_minimap_outlines:
             mini_map_outline_color = self.mini_grid.external_line_color
             left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
             right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1

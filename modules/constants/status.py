@@ -6,7 +6,7 @@ from modules.constructs.ministers import minister
 from modules.constructs.countries import country
 from modules.constructs.images import image, free_image
 from modules.interface_types.interface_elements import interface_collection, tabbed_collection, ordered_collection
-from modules.interface_types.grids import grid
+from modules.interface_types.grids import grid, mini_grid, abstract_grid
 from modules.interface_types.panels import safe_click_panel
 from modules.interface_types.notifications import notification
 from modules.interface_types.buttons import button, same_tile_icon
@@ -26,9 +26,9 @@ from modules.action_types.action import action
 from modules.tools.effects import effect
 
 strategic_map_grid: grid = None
-minimap_grid: grid = None
-europe_grid: grid = None
-slave_traders_grid: grid = None
+minimap_grid: mini_grid = None
+europe_grid: abstract_grid = None
+slave_traders_grid: abstract_grid = None
 
 Britain: country = None
 France: country = None

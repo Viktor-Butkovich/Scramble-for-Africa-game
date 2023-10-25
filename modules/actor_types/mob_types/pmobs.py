@@ -568,6 +568,8 @@ class pmob(mob):
             self.controlling_minister = 'none'
         else:
             self.controlling_minister = status.current_ministers[self.controlling_minister_type]
+            if self.controlling_minister == None:
+                self.controlling_minister = 'none'
             for current_minister_type_image in status.minister_image_list:
                 if current_minister_type_image.minister_type == self.controlling_minister_type:
                     current_minister_type_image.calibrate(self.controlling_minister)

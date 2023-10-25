@@ -105,7 +105,7 @@ class combat(action.action):
             pmob_image_id_list = [background_dict] + self.current_unit.get_image_id_list() + ['misc/pmob_outline.png']
             npmob_image_id_list = [background_dict] + self.opponent.get_image_id_list() + ['misc/pmob_outline.png']
 
-            image_size = 125
+            image_size = 120
             return_list.append(action_utility.generate_free_image_input_dict(pmob_image_id_list, image_size,
                                 override_input_dict={
                                     'member_config': {'centered': True}

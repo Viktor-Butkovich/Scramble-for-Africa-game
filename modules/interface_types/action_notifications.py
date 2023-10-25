@@ -1,12 +1,15 @@
 #Contains functionality for multi-step notifications
 
 from .notifications import notification
-from ..util import scaling, actor_utility, trial_utility, action_utility
+from ..util import scaling, trial_utility, action_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
 class action_notification(notification):
+    '''
+    Notification that supports attached interface elements
+    '''
     def __init__(self, input_dict):
         '''
         Description:
@@ -226,50 +229,28 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        self.current_expedition = status.displayed_mob
-        self.notification_images = []
-        
-        explored_cell = self.current_expedition.destination_cells.pop(0)
-        public_opinion_increase = self.current_expedition.public_opinion_increases.pop(0)
-        explored_tile = explored_cell.tile
-        if self.current_expedition.current_action_type == 'exploration': #use non-hidden version if exploring
-            explored_terrain_image_id = explored_cell.tile.image_dict['default']
-            new_visibility = True
-        elif self.current_expedition.current_action_type == 'rumor_search': #use current tile image if found rumor location
-            explored_terrain_image_id = explored_cell.tile.image.image_id
-            new_visibility = explored_cell.visible
-        image_id_list = explored_tile.get_image_id_list(force_visibility = new_visibility)
+        cell = input_dict['extra_parameters']['cell']
+        reveal_cell = input_dict['extra_parameters'].get('reveal_cell', True)
+        public_opinion_increase = input_dict['extra_parameters'].get('public_opinion_increase', 0)
 
-        self.notification_images.append(constants.actor_creation_manager.create_interface_element({
-            'image_id': explored_terrain_image_id,
-            'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 225, 400),
-            'width': scaling.scale_width(200),
-            'height': scaling.scale_height(200),
-            'modes': input_dict['modes'],
-            'to_front': True,
-            'init_type': 'free image'
-        }))
+        if (not 'attached_interface_elements' in input_dict) or not input_dict['attached_interface_elements']:
+            input_dict['attached_interface_elements'] = []
+        input_dict['attached_interface_elements'].append(action_utility.generate_free_image_input_dict(
+                action_utility.generate_tile_image_id_list(cell, force_visibility=(reveal_cell or cell.visible)),
+                250,
+                override_input_dict={
+                    'member_config': {
+                        'second_dimension_coordinate': -1, 'centered': True
+                    }
+                }
+            ))
 
-        if new_visibility == True and not explored_tile.cell.resource == 'none':
-            image_id_list.append(actor_utility.generate_resource_icon(explored_tile))
-        image_id_list.append('misc/tile_outline.png')
         flags.ongoing_action = True
-        status.ongoing_action_type = self.current_expedition.current_action_type
-        if self.current_expedition.current_action_type == 'exploration':
-            explored_cell.set_visibility(True)
-
-        self.notification_images.append(constants.actor_creation_manager.create_interface_element({
-            'image_id': image_id_list,
-            'coordinates': scaling.scale_coordinates(constants.notification_manager.notification_x - 225, 400),
-            'width': scaling.scale_width(200),
-            'height': scaling.scale_height(200),
-            'modes': input_dict['modes'],
-            'to_front': True,
-            'init_type': 'free image'
-        }))
-
+        status.ongoing_action_type = 'exploration'
+        if reveal_cell:
+            cell.set_visibility(True)
         constants.public_opinion_tracker.change(public_opinion_increase)
-        status.minimap_grid.calibrate(explored_cell.x, explored_cell.y)
+        status.minimap_grid.calibrate(cell.x, cell.y)
         super().__init__(input_dict)
 
     def remove(self):
@@ -281,23 +262,11 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        super().remove(handle_next_notification=False)
+        status.minimap_grid.calibrate(status.displayed_mob.x, status.displayed_mob.y)
         flags.ongoing_action = False
         status.ongoing_action_type = None
-        notification_manager = constants.notification_manager
-        
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(constants.notification_manager.notification_queue) == 1:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-        elif len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-        else:
-            current_expedition = status.displayed_mob
-            status.minimap_grid.calibrate(current_expedition.x, current_expedition.y)
-        for current_image in self.notification_images:
-            current_image.remove_complete()
-        
+        super().remove()
+
 class trade_notification(action_notification):
     '''
     Notification used during trading that has various behaviors relevant to trading based on the values in its inputted trade_info_dict
@@ -458,60 +427,6 @@ class trial_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-
-class rumor_search_notification(action_notification):
-    '''
-    Notification that does not automatically prompt the user to remove it and shows the results of a rumor search attempt when the last notification is removed
-    '''
-    def __init__(self, input_dict):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'message': string value - Default text for this label, with lines separated by /n
-                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
-                    will be started
-                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-                'notification_dice': int value - Number of dice allowed to be shown during this notification, allowign the correct set of dice to be shown when multiple notifications queued
-                'is_last': boolean value - Whether this is the last exploration notification - if it is last, its side images will be removed along with it
-        Output:
-            None
-        '''
-        self.is_last = input_dict['is_last']
-        if self.is_last: #if last, show result
-            self.notification_images = []
-        super().__init__(input_dict)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
-                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove(handle_next_notification=False)
-        notification_manager = constants.notification_manager
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(constants.notification_manager.notification_queue) == 1 and not constants.notification_manager.notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            #rumor_search_result[0].complete_rumor_search()
-            
-        elif len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
-        if self.is_last: #if is last notification in successful campaign, remove any attached images
-            for current_image in self.notification_images:
-                current_image.remove_complete()
 
 class artifact_search_notification(action_notification):
     '''

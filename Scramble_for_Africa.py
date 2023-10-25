@@ -32,3 +32,4 @@ except Exception: #displays error message and records error message in crash log
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
 # clicking on reorganization cell should select that unit
+# improve tooltip performance

@@ -422,23 +422,12 @@ class button(interface_elements.interface_element):
                               'Cannot reveal beasts in unexplored tiles',
                               'Costs 1 movement point'])
 
-        elif self.button_type == 'rumor search':
-            if status.current_lore_mission == None:
-                intro = 'Attempts to search this village for rumors of a lore mission artifact\'s location for '
-            else:
-                intro = 'Attempts to search this village for rumors of the location of the ' + status.current_lore_mission.name + ' for '
-            self.set_tooltip([intro + str(constants.action_prices['rumor_search']) + ' money',
-                              'Can only be done in a village',
-                              'If successful, reveals the coordinates of a possible location for the current lore mission\'s artifact',
-                              'Has higher success chance and lower risk when a mission is present',
-                              'Costs all remaining movement points, at least 1'])
-
         elif self.button_type == 'artifact search':
             if status.current_lore_mission == None:
                 intro = 'Attempts to search for a lore mission\'s artifact at a location revealed by rumors for '
             else:
                 intro = 'Attempts to search for the ' + status.current_lore_mission.name + ' at a location revealed by rumors for '
-            self.set_tooltip([intro + str(constants.action_prices['rumor_search']) + ' money',
+            self.set_tooltip([intro + str(constants.action_prices['artifact_search']) + ' money',
                               'Can only be done on a revealed possible artifact location',
                               'If successful, reveals whether this is the artifact\'s actual location, finding it and completing the lore mission if it is present',
                               'Costs all remaining movement points, at least 1'])
@@ -1100,10 +1089,6 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start capture slaves':
             battalion = self.notification.choice_info_dict['battalion']
             battalion.capture_slaves()
-
-        elif self.button_type == 'start rumor search':
-            expedition = self.notification.choice_info_dict['expedition']
-            expedition.rumor_search()
 
         elif self.button_type == 'start artifact search':
             expedition = self.notification.choice_info_dict['expedition']
