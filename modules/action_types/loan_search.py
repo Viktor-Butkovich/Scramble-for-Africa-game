@@ -122,8 +122,7 @@ class loan_search(action.campaign):
     def start(self, unit):
         '''
         Description:
-            Used when the player clicks on the start PR campaign button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign process and consumes the unit's
-                movement points
+            Used when the player clicks on the start action button, displays a choice notification that allows the player to start or not
         Input:
             pmob unit: Unit selected when the linked button is clicked
         Output:

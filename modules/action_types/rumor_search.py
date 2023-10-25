@@ -153,8 +153,7 @@ class rumor_search(action.action):
     def start(self, unit):
         '''
         Description:
-            Used when the player clicks on the start campaign button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign process and consumes the evangelist's
-                movement points
+            Used when the player clicks on the start action button, displays a choice notification that allows the player to start or not
         Input:
             pmob unit: Unit selected when the linked button is clicked
         Output:
@@ -180,7 +179,7 @@ class rumor_search(action.action):
     def complete(self):
         '''
         Description:
-            Used when the player finishes rolling for a PR campaign, shows the campaign's results and making any changes caused by the result
+            Used when the player finishes rolling, shows the action's results and makes any changes caused by the result
         Input:
             None
         Output:
