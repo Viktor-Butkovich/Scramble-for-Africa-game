@@ -213,12 +213,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'attack':
             self.set_tooltip(['Supply an attack for ' + str(self.cost) + ' money'])
-            
-        elif self.button_type == 'trade':
-            self.set_tooltip(['Attempt to trade by giving consumer goods'])
-
-        elif self.button_type == 'start trading':
-            self.set_tooltip(['Start trading, allowing consumer goods to be sold for commodities if the villagers are willing'])
 
         elif self.button_type == 'start rumor search':
             self.set_tooltip(['Start searching for rumors about the artifact\'s location'])

@@ -241,8 +241,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.cycle_work_crews_button(input_dict)
                 elif base == 'work crew to building':
                     new_element = actor_display_buttons.work_crew_to_building_button(input_dict)
-                elif base == 'trade':
-                    new_element = actor_display_buttons.trade_button(input_dict)
                 elif base == 'capture slaves':
                     new_element = actor_display_buttons.capture_slaves_button(input_dict)
                 elif base == 'labor broker':
@@ -375,8 +373,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.dice_rolling_notification(input_dict)
                 elif base == 'off tile exploration':
                     new_element = action_notifications.off_tile_exploration_notification(input_dict)
-                elif base == 'trade':
-                    new_element = action_notifications.trade_notification(input_dict)
                 elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict)
                 elif base == 'capture slaves':

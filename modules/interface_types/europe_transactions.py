@@ -172,6 +172,7 @@ class buy_commodity_button(button):
             self.cost = constants.commodity_prices[self.commodity_type]
             if constants.money_tracker.get() >= self.cost:
                 if minister_utility.positions_filled():
+                    actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile)
                     status.europe_grid.cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
                     constants.money_tracker.change(-1 * self.cost, 'consumer_goods')
                     text_utility.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.')

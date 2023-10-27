@@ -84,12 +84,8 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             self.add_attached_button(input_dict)
-            input_dict['width'], input_dict['height'] = (s_size, s_size)
-            input_dict['init_type'] = 'trade button'
-            input_dict['image_id'] = 'buttons/trade_button.png'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
 
+            input_dict['width'], input_dict['height'] = (s_size, s_size)
             for action_type in status.actions:
                 button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
                 if button_input_dict:
@@ -1056,14 +1052,14 @@ class commodity_display_label(actor_display_label):
         self.insert_collection_above()
 
         self.commodity_image = constants.actor_creation_manager.create_interface_element({
-            'coordinates': (self.x - self.height, self.y),
-            'width': self.height,
-            'height': self.height,
+            'coordinates': (0, 0),
+            'width': self.height + 10,
+            'height': self.height + 10,
             'modes': self.modes,
             'attached_label': self,
             'init_type': 'label image',
             'parent_collection': self.parent_collection,
-            'member_config': {'x_offset': -1 * self.height - 5}
+            'member_config': {'x_offset': -1 * self.height - 10, 'y_offset': -5}
         })
 
         input_dict['coordinates'] = (0, 0)
@@ -1103,7 +1099,7 @@ class commodity_display_label(actor_display_label):
             None
         '''
         super().set_label(new_message)
-        if not self.actor == 'none':
+        if self.actor != 'none':
             commodity_list = self.actor.get_held_commodities()
             if len(commodity_list) > self.commodity_index:
                 commodity = commodity_list[self.commodity_index]

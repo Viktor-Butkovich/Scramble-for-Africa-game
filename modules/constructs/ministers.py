@@ -470,7 +470,7 @@ class minister():
             int list: Returns a list of the rolls' modified results
         '''
         results = []
-        if self.check_corruption():
+        if self.check_corruption() and value > 0:
             self.steal_money(value, roll_type)
             self.stolen_already = True
             corrupt_index = random.randrange(0, num_dice)

@@ -29,7 +29,6 @@ class village():
             self.set_initial_population()
             self.set_initial_aggressiveness()
             self.available_workers = 0
-            self.attempted_trades = 0
             self.name = village_name_generator.create_village_name()
             self.found_rumors = False
         else: #village recreated through saved dictionary given by tile.set_resource from the cell's save_dict

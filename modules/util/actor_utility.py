@@ -45,7 +45,7 @@ def get_building_cost(constructor, building_type, building_name = 'n/a'):
     if building_type == 'infrastructure':
         building_type = building_name.replace(' ', '_') #road, railroad, road_bridge, or railroad_bridge
     if building_type == 'warehouses':
-        if constructor == None:
+        if constructor in ['none', None]:
             base_price = 5
         else:
             base_price = constructor.images[0].current_cell.get_warehouses_cost()
@@ -54,7 +54,7 @@ def get_building_cost(constructor, building_type, building_name = 'n/a'):
 
     if building_type in ['train', 'steamboat']:
         cost_multiplier = 1
-    elif constructor == None or not status.strategic_map_grid in constructor.grids:
+    elif constructor in ['none', None] or not status.strategic_map_grid in constructor.grids:
         cost_multiplier = 1
     else:
         terrain = constructor.images[0].current_cell.terrain

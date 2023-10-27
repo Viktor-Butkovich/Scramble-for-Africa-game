@@ -400,14 +400,6 @@ class button(interface_elements.interface_element):
                 for current_pmob in turn_queue:
                     tooltip_text.append('    ' + utility.capitalize(current_pmob.name))
             self.set_tooltip(tooltip_text)
-                   
-        elif self.button_type == 'trade':
-            self.set_tooltip(['Attempts to trade with natives, paying consumer goods for random commodities',
-                              'Can only be done in a village', 'The number of possible trades per turn depends on the village\'s population and aggressiveness',
-                              'Each trade spends a unit of consumer goods for a chance of a random commodity',
-                              'Regardless of a trade\'s success, the lure of consumer goods has a chance of convincing natives to become available workers',
-                              'Has higher success chance and lower risk when a trading post is present',
-                              'Costs all remaining movement points, at least 1'])
 
         elif self.button_type == 'capture slaves':
             self.set_tooltip(['Attempts to capture villagers as slaves for ' + str(constants.action_prices['slave_capture']) + ' money',
@@ -1072,17 +1064,9 @@ class button(interface_elements.interface_element):
             else:
                 text_utility.print_to_screen('Your company has no slaves to free.')
 
-        elif self.button_type == 'start trading':
-            caravan = self.notification.choice_info_dict['caravan']
-            caravan.willing_to_trade(self.notification)
-
         elif self.button_type == 'start capture slaves':
             battalion = self.notification.choice_info_dict['battalion']
             battalion.capture_slaves()
-
-        elif self.button_type == 'trade':
-            caravan = self.notification.choice_info_dict['caravan']
-            caravan.trade(self.notification)
 
         elif self.button_type == 'start trial':
             trial_utility.trial()

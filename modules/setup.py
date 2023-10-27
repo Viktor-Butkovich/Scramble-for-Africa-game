@@ -14,7 +14,7 @@ import modules.constructs.countries as countries
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
-    construction, upgrade, repair, loan_search, rumor_search, artifact_search
+    construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade
 
 def setup(*args):
     '''
@@ -125,6 +125,8 @@ def actions():
     loan_search.loan_search()
     rumor_search.rumor_search()
     artifact_search.artifact_search()
+    willing_to_trade.willing_to_trade()
+    trade.trade()
     for building_type in constants.building_types + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(building_type=building_type)
@@ -1241,7 +1243,7 @@ def inventory_interface():
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
+    status.tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
@@ -1257,7 +1259,7 @@ def inventory_interface():
         'actor_label_type': 'tile inventory capacity',
         'actor_type': 'tile',
         'init_type': 'actor display label',
-        'parent_collection': tile_inventory_collection,
+        'parent_collection': status.tile_inventory_collection,
     }
     tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 

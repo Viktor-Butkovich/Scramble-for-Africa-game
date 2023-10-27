@@ -134,6 +134,10 @@ class tile(actor): #to do: make terrain tiles a subclass
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
             if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
+                for tab_button in status.tile_tabbed_collection.tabs_collection.members:
+                    if tab_button.linked_element == status.tile_inventory_collection:
+                        tab_button.on_click()
+                        continue
 
     def set_inventory(self, commodity, new_value):
         '''

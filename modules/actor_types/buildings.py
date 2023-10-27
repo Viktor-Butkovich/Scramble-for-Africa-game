@@ -951,7 +951,10 @@ class slums(building):
         if self.cell.tile == status.displayed_tile: #if being displayed, change displayed population value
             actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
         if self.available_workers == 0:
+            tile = self.cell.tile
             self.remove_complete()
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, tile)
+            status.minimap_grid.calibrate(tile.x, tile.y)
             
     def recruit_worker(self):
         '''

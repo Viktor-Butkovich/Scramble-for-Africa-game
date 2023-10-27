@@ -47,10 +47,11 @@ class action():
         if not self.action_type in constants.action_types:
             constants.action_types.append(self.action_type)
             constants.transaction_types.append(self.action_type)
-        constants.action_prices[self.action_type] = 5
-        constants.base_action_prices[self.action_type] = 5
+        constants.action_prices[self.action_type] = self.get_default_price()
+        constants.base_action_prices[self.action_type] = self.get_default_price()
         self.roll_lists = []
         self.allow_critical_failures = True
+        self.allow_critical_successes = True
 
     def button_setup(self, initial_input_dict):
         '''
@@ -101,6 +102,17 @@ class action():
         if unit.sentry_mode:
             unit.set_sentry_mode(False)
         return(True)
+
+    def get_default_price(self):
+        '''
+        Description:
+            Returns the unmodified price of this action
+        Input:
+            None
+        Output:
+            int: Returns the unmodified price of this action
+        '''
+        return(5)
 
     def get_price(self):
         '''
@@ -214,6 +226,8 @@ class action():
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         if not self.allow_critical_failures:
             self.current_max_crit_fail = 0
+        if not self.allow_critical_successes:
+            self.current_min_crit_success = 7
         self.current_unit = unit
 
     def start(self, unit):

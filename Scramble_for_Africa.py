@@ -22,7 +22,7 @@ except Exception: #displays error message and records error message in crash log
 # later test conversion with 0 population villages, combat, and villages with missions - relies on other actions working
 # make generic contested action type
 # change all notification interface to automatically be centered
-# add horizontal ordered collection for double combat dice  
+# add horizontal ordered collection for double combat dice
 # switching to Europe screen should select top unit in Europe, rather than just deselecting all
 # modify notification or inventory spacing to not show tile inventory commodity icon just past left edge of notification
 # financial report notification should say click to remove, possibly also production report
@@ -32,4 +32,4 @@ except Exception: #displays error message and records error message in crash log
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
 # clicking on reorganization cell should select that unit
-# improve tooltip performance
+# allow keybinds to switch tabs, even if not currently displayed

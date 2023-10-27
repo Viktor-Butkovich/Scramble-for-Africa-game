@@ -34,10 +34,10 @@ class notification_manager_template():
         self.notification_width = 500
         self.notification_height = self.default_notification_height
         self.notification_y = self.default_notification_y
-        if constants.current_game_mode in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-            self.notification_x = constants.minimap_grid_x - (self.notification_width + 40)
-        else: #show notifications in center on europe mode
-            self.notification_x = 610
+        #if constants.current_game_mode in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
+        #    self.notification_x = constants.minimap_grid_x - (self.notification_width + 40)
+        #else: #show notifications in center on europe mode
+        self.notification_x = 610
         if notification_height > self.notification_height:
             self.notification_height = notification_height
         self.notification_y -= self.notification_height / 2
@@ -226,23 +226,6 @@ class notification_manager_template():
 
         if notification_type == 'roll':
             input_dict['init_type'] = 'dice rolling notification'
-        elif notification_type in ['stop_trade', 'stop_trade_attacked', 'trade', 'trade_promotion', 'final_trade', 'successful_commodity_trade', 'failed_commodity_trade']:
-            is_last = False
-            commodity_trade = False
-            stops_trade = False
-            dies = False
-            if notification_type == 'stop_trade':
-                stops_trade = True
-            elif notification_type == 'stop_trade_attacked':
-                stops_trade = True
-                dies = True
-            elif notification_type == 'final_trade':
-                is_last = True
-            elif notification_type in ['successful_commodity_trade', 'failed_commodity_trade']:
-                commodity_trade = True
-            trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade, 'dies': dies}
-            input_dict['trade_info_dict'] = trade_info_dict
-            input_dict['init_type'] = 'trade notification'
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
         elif notification_type == 'slave_capture':
