@@ -91,6 +91,7 @@ class minister():
         self.stolen_already = False
         self.update_tooltip()
         self.initializing = False
+        self.most_recent_corruption = False
 
     def portrait_sections_setup(self):
         '''
@@ -860,19 +861,20 @@ class minister():
             boolean: Returns True if this minister will be corrupt for the roll
         '''
         if constants.effect_manager.effect_active('band_of_thieves') or ((constants.effect_manager.effect_active('lawbearer') and self != status.current_ministers['Prosecutor'])):
-            return(True)
+            return_value = True
         elif constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == status.current_ministers['Prosecutor']):
-            return(False)
-            
-        if random.randrange(1, 7) >= self.corruption_threshold:
+            return_value = False
+        elif random.randrange(1, 7) >= self.corruption_threshold:
             if random.randrange(1, 7) >= constants.fear: #higher fear reduces chance of exceeding threshold and stealing
-                return(True)
+                return_value = True
             else:
                 if constants.effect_manager.effect_active('show_fear'):
                     print(self.name + ' was too afraid to steal money')
-                return(False)
+                return_value = False
         else:
-            return(False)
+            return_value = False
+        self.most_recent_corruption = return_value
+        return(return_value)
 
     def gain_experience(self):
         '''

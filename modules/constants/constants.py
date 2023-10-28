@@ -110,7 +110,6 @@ building_prices: Dict[str, int] = {
     'steamboat': 10
 } 
 base_action_prices: Dict[str, int] = {
-    'slave_capture': 5,
     'trial': 5,
     'active_investigation': 5,
     'track_beasts': 0
@@ -120,7 +119,6 @@ action_prices: Dict[str, float] = {}
 
 transaction_descriptions: Dict[str, str] = {
     'loan': 'loans',
-    'slave_capture': 'capturing slaves',
     'trial': 'trial fees',
     'active_investigation': 'investigations',
     'production': 'production',

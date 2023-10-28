@@ -302,7 +302,8 @@ class action():
             'message': text + roll_message,
             'notification_type': 'action',
             'attached_interface_elements': self.generate_attached_interface_elements('dice'),
-            'transfer_interface_elements': True
+            'transfer_interface_elements': True,
+            'audio': self.generate_audio('initial')
         }, insert_index=0)
 
         constants.notification_manager.display_notification({
@@ -329,7 +330,7 @@ class action():
                 else:
                     word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += 'The higher result, ' + str(self.roll_result) + ': ' + result_outcome_dict[self.roll_result] + ', was used. /n'
+            text += 'The higher result, ' + str(self.roll_result) + ': ' + result_outcome_dict[self.roll_result] + ', was used. /n /n'
         else:
             text += '/n'
         constants.notification_manager.display_notification({

@@ -134,22 +134,6 @@ class choice_button(buttons.button):
             self.cost = self.notification.choice_info_dict['cost']
             self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
 
-        elif input_dict['button_type'] == 'attack':
-            self.message = 'Attack'
-            self.cost = self.notification.choice_info_dict['cost']
-            self.battalion = self.notification.choice_info_dict['battalion']
-            self.x_change = self.notification.choice_info_dict['x_change']
-            self.y_change = self.notification.choice_info_dict['y_change']
-
-        elif input_dict['button_type'] in ['start rumor search', 'start artifact search']:
-            self.message = 'Search'
-
-        elif input_dict['button_type'] == 'start capture slaves':
-            self.message = 'Capture slaves'
-            
-        elif input_dict['button_type'] in ['none', 'stop attack', 'stop capture slaves', 'stop rumor search', 'stop artifact search']:
-            self.message = 'Do nothing'
-
         elif input_dict['button_type'] == 'confirm main menu':
             self.message = 'Main menu'
 
@@ -210,18 +194,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])
-
-        elif self.button_type == 'attack':
-            self.set_tooltip(['Supply an attack for ' + str(self.cost) + ' money'])
-
-        elif self.button_type == 'start rumor search':
-            self.set_tooltip(['Start searching for rumors about the artifact\'s location'])
-
-        elif self.button_type == 'start artifact search':
-            self.set_tooltip(['Start searching for an artifact at a rumored location'])
-
-        elif self.button_type == 'start capture slaves':
-            self.set_tooltip(['Start attempting to capture native villagers as slaves'])
 
         elif self.button_type == 'confirm main menu':
             self.set_tooltip(['Exits to the main menu without saving'])

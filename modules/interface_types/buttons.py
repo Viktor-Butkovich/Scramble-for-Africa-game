@@ -401,13 +401,6 @@ class button(interface_elements.interface_element):
                     tooltip_text.append('    ' + utility.capitalize(current_pmob.name))
             self.set_tooltip(tooltip_text)
 
-        elif self.button_type == 'capture slaves':
-            self.set_tooltip(['Attempts to capture villagers as slaves for ' + str(constants.action_prices['slave_capture']) + ' money',
-                              'Can only be done in a village',
-                              'Regardless the capture\'s success, this may increase the village\'s aggressiveness and/or decrease public opinion',
-                              'Has higher success chance and lower risk when aggressiveness is low',
-                              'Costs all remaining movement points, at least 1'])
-
         elif self.button_type == 'track beasts':
             self.set_tooltip(['Attempts to reveal beasts in this tile and adjacent tiles',
                               'If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them',
@@ -1064,17 +1057,11 @@ class button(interface_elements.interface_element):
             else:
                 text_utility.print_to_screen('Your company has no slaves to free.')
 
-        elif self.button_type == 'start capture slaves':
-            battalion = self.notification.choice_info_dict['battalion']
-            battalion.capture_slaves()
-
         elif self.button_type == 'start trial':
             trial_utility.trial()
 
-        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop capture slaves', 'stop rumor search', 'stop artifact search', 'stop trial']:
+        elif self.button_type in ['stop action', 'stop trial']:
             action_utility.cancel_ongoing_actions()
-            if self.button_type == 'stop attack':
-                self.notification.choice_info_dict['battalion'].clear_attached_cell_icons()
 
         elif self.button_type == 'launch trial':
             if main_loop_utility.action_possible():

@@ -73,20 +73,6 @@ class combat(action.action):
         message.append(text)
         return(message)
 
-    def generate_audio(self, subject):
-        '''
-        Description:
-            Returns list of audio dicts of sounds to play when notification appears, based on the inputted subject and other current circumstances
-        Input:
-            string subject: Determines sound dicts
-        Output:
-            dictionary list: Returns list of sound dicts for inputted subject
-        '''
-        audio = super().generate_audio(subject)
-        if subject == 'roll_started':
-            audio.append('gunfire')
-        return(audio)
-
     def generate_attached_interface_elements(self, subject):
         '''
         Description:
@@ -416,6 +402,9 @@ class combat(action.action):
         if subject == 'initial':
             if self.current_unit.is_battalion or self.current_unit.is_safari:
                 audio.append('bolt_action_1')
+        elif subject == 'roll_started':
+            if self.current_unit.is_battalion or self.current_unit.is_safari:
+                audio.append('gunfire')
         return(audio)
 
     def middle(self, combat_info_dict=None):
