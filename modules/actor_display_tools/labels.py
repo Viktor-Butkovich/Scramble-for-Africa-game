@@ -87,9 +87,10 @@ class actor_display_label(label):
 
             input_dict['width'], input_dict['height'] = (s_size, s_size)
             for action_type in status.actions:
-                button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
-                if button_input_dict:
-                    self.add_attached_button(button_input_dict)
+                if status.actions[action_type].actor_type in ['mob', 'tile']:
+                    button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
+                    if button_input_dict:
+                        self.add_attached_button(button_input_dict)
 
             input_dict['init_type'] = 'track beasts button'
             input_dict['image_id'] = 'buttons/track_beasts_button.png'
@@ -275,8 +276,12 @@ class actor_display_label(label):
         elif self.actor_label_type in ['minister_name', 'country_name']:
             self.message_start = 'Name: '
             if self.actor_label_type == 'minister_name':
-                input_dict['init_type'] = 'active investigation button'
-                self.add_attached_button(input_dict)
+                input_dict['width'], input_dict['height'] = (s_size, s_size)
+                for action_type in status.actions:
+                    if status.actions[action_type].actor_type == 'minister':
+                        button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
+                        if button_input_dict:
+                            self.add_attached_button(button_input_dict)
         
         elif self.actor_label_type == 'country_effect':
             self.message_start = 'Effect: '

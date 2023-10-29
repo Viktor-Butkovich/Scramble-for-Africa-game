@@ -142,6 +142,9 @@ class choice_button(buttons.button):
 
         elif input_dict['button_type'] == 'quit':
             self.message = 'Exit game'
+
+        elif input_dict['button_type'] == 'none':
+            self.message = 'Do nothing'
     
         else:
             self.message = input_dict['button_type'].capitalize()

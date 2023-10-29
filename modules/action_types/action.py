@@ -44,6 +44,7 @@ class action():
         '''
         status.actions[self.action_type] = self
         self.current_unit = 'none'
+        self.actor_type = 'mob'
         if not self.action_type in constants.action_types:
             constants.action_types.append(self.action_type)
             constants.transaction_types.append(self.action_type)
@@ -65,7 +66,7 @@ class action():
         '''
         initial_input_dict['init_type'] = 'action button'
         initial_input_dict['corresponding_action'] = self
-        initial_input_dict['image_id'] = 'buttons/' + self.action_type + '_button.png'
+        initial_input_dict['image_id'] = 'buttons/actions/' + self.action_type + '_button.png'
         return(initial_input_dict)
 
     def can_show(self):
@@ -91,15 +92,15 @@ class action():
         if not main_loop_utility.action_possible():
             text_utility.print_to_screen('You are busy and cannot start a ' + self.name + '.')
             return(False)
-        elif not (unit.movement_points >= 1):
+        elif self.actor_type == 'mob' and not (unit.movement_points >= 1):
             text_utility.print_to_screen(utility.generate_article(self.name).capitalize() + ' ' + self.name + ' requires all remaining movement points, at least 1.')
             return(False)
         elif constants.money < self.get_price():
             text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.')
             return(False)
-        elif not (unit.ministers_appointed()):
+        elif self.actor_type == 'mob' and not (unit.ministers_appointed()):
             return(False)
-        if unit.sentry_mode:
+        if self.actor_type == 'mob' and unit.sentry_mode:
             unit.set_sentry_mode(False)
         return(True)
 
@@ -367,7 +368,7 @@ class action():
         Output:
             None
         '''
-        if self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
+        if self.actor_type == 'mob' and self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
             self.current_unit.promote()
             self.current_unit.select()
         action_utility.cancel_ongoing_actions()

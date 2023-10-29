@@ -56,7 +56,7 @@ class upgrade(action.action):
             None
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
-        initial_input_dict['image_id'] = 'buttons/upgrade_' + self.building_type + '_button.png'
+        initial_input_dict['image_id'] = 'buttons/actions/upgrade_' + self.building_type + '_button.png'
         initial_input_dict['keybind_id'] = {
             'scale': 'none',
             'efficiency': 'none',

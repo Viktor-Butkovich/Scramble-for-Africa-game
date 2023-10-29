@@ -733,59 +733,6 @@ class minister():
                     max_skills.append(skill_type)
         return(max_skills[0])
 
-    def attempt_active_investigation(self, prosecutor, cost):
-        #1/2 chance of success - if successful:
-            #1/6 chance of report for each secondary, 1/2 for loyalty and main ability
-        previous_values = {}
-        new_values = {}
-        roll_result = prosecutor.roll(6, 4, 0, constants.action_prices['active_investigation'], 'active_investigation')
-        if roll_result >= 4:
-            for category in constants.minister_types + ['loyalty']:
-                if category == 'loyalty' or category == self.current_position: #simplify this
-                    if random.randrange(1, 7) >= 4:
-                        if category == 'loyalty':
-                            previous_values[category] = self.apparent_corruption_description
-                        else:
-                            previous_values[category] = self.apparent_skill_descriptions[category]
-                        self.attempt_rumor(category, prosecutor)
-                        if category == 'loyalty':
-                            if self.apparent_corruption_description != previous_values[category]:
-                                new_values[category] = self.apparent_corruption_description
-                        else:
-                            if self.apparent_skill_descriptions[category] != previous_values[category]:
-                                new_values[category] = self.apparent_skill_descriptions[category]
-                else:
-                    if random.randrange(1, 7) == 1:
-                        if category == 'loyalty':
-                            previous_values[category] = self.apparent_corruption_description
-                        else:
-                            previous_values[category] = self.apparent_skill_descriptions[category]
-                        self.attempt_rumor(category, prosecutor)
-                        if category == 'loyalty':
-                            if self.apparent_corruption_description != previous_values[category]:
-                                new_values[category] = self.apparent_corruption_description
-                        else:
-                            if self.apparent_skill_descriptions[category] != previous_values[category]:
-                                new_values[category] = self.apparent_skill_descriptions[category]
-        message = ''
-        if new_values:
-            message = 'The investigation launched against ' + self.name + ' for ' + str(cost) + ' money resulted in the following discoveries: /n /n'
-            for category in new_values:
-                if category == 'loyalty':
-                    category_name = category
-                else:
-                    category_name = constants.minister_type_dict[category]
-                message += '    ' + category_name.capitalize() + ': ' + new_values[category]
-                if previous_values[category] == 'unknown': #if unknown
-                    message += ' /n'
-                else:
-                    message += ' (formerly ' + previous_values[category] + ') /n'
-
-        else:
-            message = 'The investigation launched against ' + self.name + ' for ' + str(cost) + ' money failed to make any significant discoveries. /n'
-        message += ' /n'
-        self.display_message(message)
-
     def attempt_rumor(self, rumor_type, prosecutor):
         '''
         Description:

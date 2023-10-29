@@ -1361,69 +1361,6 @@ class to_trial_button(button):
         else:
             text_utility.print_to_screen('You are busy and cannot start a trial.')
 
-class active_investigation_button(button):
-    '''
-    Button that starts an active investigation on a minister
-    '''
-    def __init__(self, input_dict):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-        Output:
-            None
-        '''
-        input_dict['button_type'] = 'active investigation'
-        input_dict['modes'] = ['ministers']
-        input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
-        super().__init__(input_dict)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_minister = status.displayed_minister
-            if displayed_minister and displayed_minister.current_position != 'Prosecutor':
-                return(True)
-        return(False)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button goes to the trial screen to remove the selected minister from the game and confiscate a portion of their
-                stolen money
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_utility.action_possible():
-            if constants.money >= constants.action_prices['active_investigation']:
-                if minister_utility.positions_filled():
-                    cost = constants.action_prices['active_investigation']
-                    constants.money_tracker.change(-1 * cost, 'active_investigation')
-                    status.displayed_minister.attempt_active_investigation(status.current_ministers['Prosecutor'], cost)
-                    actor_utility.double_action_price('active_investigation')
-                else:
-                    game_transitions.force_minister_appointment()
-            else:
-                text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['active_investigation']) + ' money needed to start an active investigation.')
-        else:
-            text_utility.print_to_screen('You are busy and cannot start an active investigation.')
-
 class fabricate_evidence_button(button):
     '''
     Button in the trial screen that fabricates evidence to use against the defense in the current trial. Fabricated evidence disappears at the end of the trial or at the end of the turn

@@ -431,10 +431,6 @@ class button(interface_elements.interface_element):
                               'While entering this screen is free, a trial costs ' + str(constants.action_prices['trial']) + ' money once started',
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
-        elif self.button_type == 'active investigation':
-            if status.displayed_minister:
-                self.set_tooltip(['Orders your Prosecutor to conduct an active investigation against ' + status.displayed_minister.name + ' for ' + str(constants.action_prices['active_investigation']) + ' money'])
-
         elif self.button_type == 'launch trial':
             self.set_tooltip(['Tries the defending minister in an attempt to remove him from office and imprison him for corruption',
                               'Costs ' + str(constants.action_prices['trial']) + ' money',
@@ -2482,6 +2478,22 @@ class action_button(button):
         '''
         self.set_tooltip(self.corresponding_action.update_tooltip())
 
+    def get_unit(self):
+        '''
+        Description:
+            Returns the unit this button appears next to
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.corresponding_action.actor_type == 'mob':
+            return(status.displayed_mob)
+        elif self.corresponding_action.actor_type == 'tile':
+            return(status.displayed_tile)
+        elif self.corresponding_action.actor_type == 'minister':
+            return(status.displayed_minister)
+
     def on_click(self):
         '''
         Description:
@@ -2491,7 +2503,7 @@ class action_button(button):
         Output:
             None
         '''
-        self.corresponding_action.on_click(status.displayed_mob)
+        self.corresponding_action.on_click(self.get_unit())
 
 class anonymous_button(button):
     '''

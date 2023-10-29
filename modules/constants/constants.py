@@ -111,7 +111,6 @@ building_prices: Dict[str, int] = {
 } 
 base_action_prices: Dict[str, int] = {
     'trial': 5,
-    'active_investigation': 5,
     'track_beasts': 0
 }
 action_types: List[str] = [current_key for current_key in base_action_prices]
@@ -120,7 +119,6 @@ action_prices: Dict[str, float] = {}
 transaction_descriptions: Dict[str, str] = {
     'loan': 'loans',
     'trial': 'trial fees',
-    'active_investigation': 'investigations',
     'production': 'production',
     'bribery': 'bribery',
     'loan_interest': 'loan interest',
