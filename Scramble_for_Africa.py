@@ -33,6 +33,6 @@ except Exception: #displays error message and records error message in crash log
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
 # clicking on reorganization cell should select that unit
 # allow keybinds to switch tabs, even if not currently displayed
-# convert active investigation, track beasts, and trial actions
+# convert track beasts trial action
 # allow multiple warriors to fight at once withs tacking penalty? Would prevent battalions from being able to fight infinite warriors
 # ^ Could have similar mechanic for stacked battalions

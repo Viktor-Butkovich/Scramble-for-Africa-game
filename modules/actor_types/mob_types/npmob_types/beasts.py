@@ -37,7 +37,7 @@ class beast(npmob):
         self.animal_type = input_dict['animal_type']
         self.adjective = input_dict['adjective']
         if self.adjective == 'king':
-            input_dict['name'] = self.animal_type + ' ' + self.adjective + ' '
+            input_dict['name'] = self.animal_type + ' ' + self.adjective
         else:
             input_dict['name'] = self.adjective + ' ' + self.animal_type
         super().__init__(from_save, input_dict)

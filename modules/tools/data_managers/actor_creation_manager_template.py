@@ -243,8 +243,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.work_crew_to_building_button(input_dict)
                 elif base == 'labor broker':
                     new_element = actor_display_buttons.labor_broker_button(input_dict)
-                elif base == 'track beasts':
-                    new_element = actor_display_buttons.track_beasts_button(input_dict)
                 elif base == 'switch theatre':
                     new_element = actor_display_buttons.switch_theatre_button(input_dict)
                 elif base == 'appoint minister':

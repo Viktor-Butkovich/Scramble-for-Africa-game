@@ -326,6 +326,7 @@ class combat(action.action):
                     self.direction = 'none'
                 if (not on_click_info_dict['attack_confirmed']) and opponent != 'none': #if enemy in destination tile and attack not confirmed yet
                     self.opponent = opponent
+                    self.defending = False
                     self.start(unit)
                     unit.create_cell_icon(unit.x + self.x_change, unit.y + self.y_change, 'misc/attack_mark/' + self.direction + '.png')
             return(True)

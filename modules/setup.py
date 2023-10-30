@@ -13,8 +13,9 @@ import modules.util.game_transitions as game_transitions
 import modules.constructs.countries as countries
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
-from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, exploration, \
-    construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade, slave_capture, active_investigation
+from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
+    exploration, construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade, slave_capture, \
+    active_investigation, track_beasts
 
 def setup(*args):
     '''
@@ -129,6 +130,7 @@ def actions():
     trade.trade()
     slave_capture.slave_capture()
     active_investigation.active_investigation()
+    track_beasts.track_beasts()
     for building_type in constants.building_types + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(building_type=building_type)

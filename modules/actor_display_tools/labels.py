@@ -91,11 +91,6 @@ class actor_display_label(label):
                     button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
                     if button_input_dict:
                         self.add_attached_button(button_input_dict)
-
-            input_dict['init_type'] = 'track beasts button'
-            input_dict['image_id'] = 'buttons/track_beasts_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
             
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '

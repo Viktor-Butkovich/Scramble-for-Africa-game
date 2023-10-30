@@ -1,9 +1,7 @@
 #Contains functionality for battalions
 
-import time
-import random
 from ..groups import group
-from ....util import actor_utility, utility, dice_utility
+from ....util import actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -155,52 +153,3 @@ class safari(battalion):
         self.set_group_type('safari')
         if not from_save:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates label to show new combat strength
-
-    def track_beasts(self):
-        '''
-        Description:
-            Spends 1 movement point to check this tile and all adjacent explored tiles for beasts, revealing all nearby beasts on a 4+ roll. If a 6 is rolled, hunter becomes veteran. If a beast is found on the safari's tile, it will
-                attack and be revealed afterward for the safari to follow up against
-        '''
-        result = self.controlling_minister.no_corruption_roll(6)
-        if self.veteran:
-            second_result = self.controlling_minister.no_corruption_roll(6)
-            if second_result > result:
-                result = second_result
-        beasts_found = []
-        ambush_list = []
-        if result >= 4:
-            for current_beast in status.beast_list:
-                if current_beast.hidden:
-                    if utility.find_grid_distance(self, current_beast) <= 1: #if different by 1 in x or y or at same coordinates
-                        beast_cell = self.grids[0].find_cell(current_beast.x, current_beast.y)
-                        if beast_cell.visible: #if beasts's cell has been discovered
-                            current_beast.set_hidden(False)
-                            beasts_found.append(current_beast)
-        text = ''
-        if len(beasts_found) == 0:
-            text += 'Though beasts may still be hiding nearby, the safari was not able to successfully track any beasts. /n /n'
-        else:
-            text = ''
-            for current_beast in beasts_found:
-                if current_beast.x == self.x and current_beast.y == self.y:
-                    text += 'As the safari starts searching for their quarry, they soon realize that the ' + current_beast.name + ' had been stalking them the whole time. They have only moments to prepare for the ambush. /n /n'
-                    ambush_list.append(current_beast)
-                elif current_beast.x > self.x:
-                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the east. /n /n'
-                elif current_beast.x < self.x:
-                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the west. /n /n'
-                elif current_beast.y > self.y:
-                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the north. /n /n'
-                elif current_beast.y < self.y:
-                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the south. /n /n'
-                current_beast.set_hidden(False)
-                current_beast.just_revealed = True
-            if result == 6 and not self.veteran:
-                text += 'This safari\'s hunter tracked the ' + random.choice(beasts_found).name + ' well enough to become a veteran. /n /n'
-                self.promote()
-
-        self.controlling_minister.display_message(text)
-        for current_beast in ambush_list:
-            current_beast.attempt_local_combat()
-        self.change_movement_points(-1)
