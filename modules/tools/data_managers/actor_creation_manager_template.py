@@ -205,20 +205,10 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = europe_transactions.buy_commodity_button(input_dict)
 
                 #actor_display_buttons buttons
-                elif base == 'worker crew vehicle':
-                    new_element = actor_display_buttons.worker_crew_vehicle_button(input_dict)
                 elif base == 'embark all passengers':
                     new_element = actor_display_buttons.embark_all_passengers_button(input_dict)
                 elif base == 'disembark all passengers':
                     new_element = actor_display_buttons.disembark_all_passengers_button(input_dict)
-                elif base == 'crew vehicle':
-                    new_element = actor_display_buttons.crew_vehicle_button(input_dict)
-                elif base == 'uncrew vehicle':
-                    new_element = actor_display_buttons.uncrew_vehicle_button(input_dict)
-                elif base == 'merge':
-                    new_element = actor_display_buttons.merge_button(input_dict)
-                elif base == 'split':
-                    new_element = actor_display_buttons.split_button(input_dict)
                 elif base == 'enable sentry mode':
                     new_element = actor_display_buttons.enable_sentry_mode_button(input_dict)
                 elif base == 'disable sentry mode':
@@ -351,9 +341,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 new_element = notifications.notification(input_dict)
             else:
                 base = base.removesuffix(' ')
-                if base == 'minister':
-                    new_element = notifications.minister_notification(input_dict)
-                elif base == 'zoom':
+                if base == 'zoom':
                     new_element = notifications.zoom_notification(input_dict)
 
                 #choice_notifications notifications
@@ -367,8 +355,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.dice_rolling_notification(input_dict)
                 elif base == 'off tile exploration':
                     new_element = action_notifications.off_tile_exploration_notification(input_dict)
-                elif base == 'trial':
-                    new_element = action_notifications.trial_notification(input_dict)
                 else:
                     new_element = notifications.notification(input_dict)
         return(new_element)

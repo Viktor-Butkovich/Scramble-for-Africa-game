@@ -24,6 +24,19 @@ class active_investigation(action.campaign):
         self.name = 'active investigation'
         self.actor_type = 'minister'
 
+    def button_setup(self, initial_input_dict):
+        '''
+        Description:
+            Completes the inputted input_dict with any values required to create a button linked to this action - automatically called during actor display label
+                setup
+        Input:
+            None
+        Output:
+            None
+        '''
+        initial_input_dict['modes'] = ['ministers']
+        return(super().button_setup(initial_input_dict))
+
     def update_tooltip(self):
         '''
         Description:

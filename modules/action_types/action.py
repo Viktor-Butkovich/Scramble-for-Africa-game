@@ -45,6 +45,7 @@ class action():
         status.actions[self.action_type] = self
         self.current_unit = 'none'
         self.actor_type = 'mob'
+        self.placement_type = 'label'
         if not self.action_type in constants.action_types:
             constants.action_types.append(self.action_type)
             constants.transaction_types.append(self.action_type)
@@ -140,7 +141,7 @@ class action():
             base_roll_message = 'Click to roll. '
             full_roll_message = base_roll_message + str(self.current_min_success) + '+ required '
             officer_name = self.current_unit.name
-            if self.current_unit.veteran:
+            if self.actor_type == 'mob' and self.current_unit.veteran:
                 text += 'The ' + officer_name + ' can roll twice and pick the higher result. /n /n'
                 full_roll_message += 'on at least 1 die to succeed.'
             else:
@@ -163,21 +164,37 @@ class action():
             dictionary list: Returns list of input dicts for inputted subject
         '''
         return_list = []
-        if subject == 'dice':
-            return_list += [
-                action_utility.generate_die_input_dict(
-                    (0, 0),
-                    roll_list[0],
-                    self,
-                    override_input_dict={
-                        'member_config':
-                        {
-                            'centered': True
+        if subject == 'dice' or subject == 'die':
+            if subject == 'dice':
+                return_list += [
+                    action_utility.generate_die_input_dict(
+                        (0, 0),
+                        roll_list[0],
+                        self,
+                        override_input_dict={
+                            'member_config':
+                            {
+                                'centered': True
+                            }
                         }
-                    }
-                )
-            for roll_list in self.roll_lists]
-            return_list += self.current_unit.controlling_minister.generate_icon_input_dicts(alignment='leftmost')
+                    )
+                for roll_list in self.roll_lists]
+            else:
+                return_list.append(action_utility.generate_die_input_dict(
+                        (0, 0),
+                        self.roll_lists[0][0],
+                        self,
+                        override_input_dict={
+                            'member_config':
+                            {
+                                'centered': True
+                            }
+                        }
+                ))
+            if self.actor_type == 'mob':
+                return_list += self.current_unit.controlling_minister.generate_icon_input_dicts(alignment='leftmost')
+            elif self.actor_type == 'minister':
+                return_list += self.current_unit.generate_icon_input_dicts(alignment='leftmost')
         return(return_list)
 
     def generate_audio(self, subject):
@@ -264,6 +281,15 @@ class action():
         constants.money_tracker.change(price * -1, self.action_type)
         return(price)
 
+    def generate_roll_lists(self, results):
+        return_list = []
+        roll_type = self.name.capitalize() + ' roll'
+        for index in range(len(results)):
+            result = results[index]
+            return_list.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result))
+            roll_type = 'second'
+        return(return_list)
+
     def middle(self):
         '''
         Description:
@@ -279,18 +305,13 @@ class action():
 
         price = self.process_payment()
 
-        self.roll_lists = []
         if self.current_unit.veteran:
             num_dice = 2
         else:
             num_dice = 1
 
         results = self.current_unit.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, self.action_type, num_dice)
-        roll_types = (self.name.capitalize() + ' roll', 'second')
-        for index in range(len(results)):
-            result = results[index]
-            roll_type = roll_types[index]
-            self.roll_lists.append(dice_utility.roll_to_list(6, roll_type, self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, result))
+        self.roll_lists = self.generate_roll_lists(results)
 
         self.roll_result = 0
         for roll_list in self.roll_lists:

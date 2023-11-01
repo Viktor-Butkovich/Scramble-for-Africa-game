@@ -107,4 +107,3 @@ transaction_history: Dict[str, float] = {}
 
 minister_appointment_tutorial_completed: bool = False
 exit_minister_screen_tutorial_completed: bool = False
-trial_rolls: List[int] = []

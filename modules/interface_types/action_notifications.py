@@ -1,7 +1,7 @@
 #Contains functionality for multi-step notifications
 
 from .notifications import notification
-from ..util import scaling, trial_utility, action_utility
+from ..util import scaling, action_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -241,34 +241,3 @@ class off_tile_exploration_notification(action_notification):
         flags.ongoing_action = False
         status.ongoing_action_type = None
         super().remove()
-
-class trial_notification(action_notification):
-    '''
-    Notification that does not automatically prompt the user to remove it and shows the results of a trial when the last notification is removed
-    '''
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
-                such as recruiting a unit, as applicable. Removes dice and other side images as applicable. A trial notification in a series of evidence rolls stops the series and wins the trial if it rolls a 6
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove(handle_next_notification=False)
-        for current_die in status.dice_list:
-            current_die.remove_complete()
-        previous_roll = status.trial_rolls.pop(0)
-        if previous_roll >= 5:
-            status.trial_rolls = [] #stop trial after success
-        if len(status.trial_rolls) > 0:
-            trial_utility.display_evidence_roll()
-        else:
-            trial_utility.complete_trial(previous_roll)
-
-        notification_manager = constants.notification_manager
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])

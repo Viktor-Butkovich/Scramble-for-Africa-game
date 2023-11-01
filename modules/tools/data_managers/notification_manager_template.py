@@ -228,9 +228,6 @@ class notification_manager_template():
             input_dict['init_type'] = 'dice rolling notification'
         elif notification_type == 'off_tile_exploration':
             input_dict['init_type'] = 'off tile exploration notification'
-        elif notification_type == 'trial':
-            input_dict['init_type'] = 'trial notification'
-            input_dict['is_last'] = True
         elif notification_type == 'choice':
             del input_dict['notification_dice']
             input_dict['init_type'] = 'choice notification'

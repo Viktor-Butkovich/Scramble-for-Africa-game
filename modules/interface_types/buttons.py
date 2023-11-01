@@ -1,9 +1,8 @@
 #Contains functionality for buttons
 
 import pygame
-import time
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
-    minister_utility, trial_utility, action_utility
+    minister_utility
 from . import interface_elements
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -429,11 +428,6 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Opens the trial planning screen to attempt to imprison this minister for corruption',
                               'A trial has a higher success chance as more evidence of that minister\'s corruption is found',
                               'While entering this screen is free, a trial costs ' + str(constants.action_prices['trial']) + ' money once started',
-                              'Each trial attempted doubles the cost of other trials in the same turn'])
-
-        elif self.button_type == 'launch trial':
-            self.set_tooltip(['Tries the defending minister in an attempt to remove him from office and imprison him for corruption',
-                              'Costs ' + str(constants.action_prices['trial']) + ' money',
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
         elif self.button_type == 'fabricate evidence':
@@ -1052,24 +1046,6 @@ class button(interface_elements.interface_element):
                 })
             else:
                 text_utility.print_to_screen('Your company has no slaves to free.')
-
-        elif self.button_type == 'start trial':
-            trial_utility.trial()
-
-        elif self.button_type in ['stop action', 'stop trial']:
-            action_utility.cancel_ongoing_actions()
-
-        elif self.button_type == 'launch trial':
-            if main_loop_utility.action_possible():
-                if constants.money >= constants.action_prices['trial']:
-                    if status.displayed_defense.corruption_evidence > 0:
-                        trial_utility.start_trial()
-                    else:
-                        text_utility.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.')
-                else:
-                    text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.')
-            else:
-                text_utility.print_to_screen('You are busy and cannot start a trial.')
 
         elif self.button_type == 'confirm main menu':
             flags.game_over = False

@@ -15,7 +15,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
     exploration, construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade, slave_capture, \
-    active_investigation, track_beasts
+    active_investigation, track_beasts, trial
 
 def setup(*args):
     '''
@@ -131,6 +131,7 @@ def actions():
     slave_capture.slave_capture()
     active_investigation.active_investigation()
     track_beasts.track_beasts()
+    trial.trial()
     for building_type in constants.building_types + ['train', 'steamboat']:
         if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
             construction.construction(building_type=building_type)
@@ -138,6 +139,12 @@ def actions():
                 repair.repair(building_type=building_type)
     for upgrade_type in constants.upgrade_types:
         upgrade.upgrade(building_type=upgrade_type)
+
+    for action_type in status.actions:
+        if status.actions[action_type].placement_type == 'free':
+            button_input_dict = status.actions[action_type].button_setup({})
+            if button_input_dict:
+                constants.actor_creation_manager.create_interface_element(button_input_dict)
     #action imports hardcoded here, alternative to needing to keep module files in .exe version
 
 def commodities():
@@ -882,17 +889,6 @@ def trial_screen():
         input_dict['coordinates'] = scaling.scale_coordinates(0, prosecution_current_y)
         input_dict['actor_label_type'] = current_actor_label_type 
         constants.actor_creation_manager.create_interface_element(input_dict)
-
-    launch_trial_button_width = 150
-
-    launch_trial_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates((constants.default_display_width / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300),
-        'width': scaling.scale_width(launch_trial_button_width),
-        'height': scaling.scale_height(launch_trial_button_width),
-        'modes': ['trial'],
-        'image_id': 'buttons/to_trial_button.png',
-        'init_type': 'launch trial button'
-    })
 
     bribed_judge_indicator = constants.actor_creation_manager.create_interface_element({
         'image_id': 'misc/bribed_judge.png',
