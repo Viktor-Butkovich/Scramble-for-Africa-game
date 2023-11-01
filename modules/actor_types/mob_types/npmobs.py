@@ -2,13 +2,16 @@
 
 import random
 from ..mobs import mob
-from ...util import utility, turn_management_utility, notification_utility
+from ...util import utility, turn_management_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
-class npmob(mob): #if enemy.turn_done
+class npmob(mob):
     '''
     Short for non-player-controlled mob, mob not controlled by the player
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -24,11 +27,10 @@ class npmob(mob): #if enemy.turn_done
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.can_swim = True
         self.can_swim_river = True
         self.can_swim_ocean = False
@@ -43,7 +45,7 @@ class npmob(mob): #if enemy.turn_done
             self.last_move_direction = (0, 1)
         else:
             self.last_move_direction = (0, -1)
-        global_manager.get('npmob_list').append(self)
+        status.npmob_list.append(self)
         self.turn_done = True
     
     def remove(self):
@@ -56,7 +58,7 @@ class npmob(mob): #if enemy.turn_done
             None
         '''
         super().remove()
-        self.global_manager.set('npmob_list', utility.remove_from_list(self.global_manager.get('npmob_list'), self)) #make a version of npmob_list without self and set npmob_list to it
+        status.npmob_list = utility.remove_from_list(status.npmob_list, self)
 
     def visible(self):
         '''
@@ -85,10 +87,10 @@ class npmob(mob): #if enemy.turn_done
             string/actor: Returns one of the closest reachable pmobs or buildings, or returns 'none' if none are reachable
         '''
         target_list = []
-        for current_building in self.global_manager.get('building_list'):
+        for current_building in status.building_list:
             if current_building.can_damage() and not current_building.damaged:
                 target_list.append(current_building)
-        target_list += self.global_manager.get('pmob_list')
+        target_list += status.pmob_list
         min_distance = -1
         closest_targets = ['none']
         for possible_target in target_list:
@@ -122,7 +124,7 @@ class npmob(mob): #if enemy.turn_done
             current_cell = self.grids[0].find_cell(self.x, self.y)
         else:
             current_cell = self.images[0].current_cell
-        self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        status.minimap_grid.calibrate(self.x, self.y)
         for current_mob in current_cell.contained_mobs:
             if current_mob.is_vehicle:
                 current_mob.eject_passengers()
@@ -130,16 +132,16 @@ class npmob(mob): #if enemy.turn_done
         if current_cell.has_intact_building('resource'):
             current_cell.get_intact_building('resource').eject_work_crews()
         defender = current_cell.get_best_combatant('pmob', self.npmob_type)
-        if not defender == 'none':
-            defender.start_combat('defending', self)
+        if defender != 'none':
+            status.actions['combat'].middle({'defending': True, 'opponent': self, 'current_unit': defender})
         else:
             self.kill_noncombatants()
             self.damage_buildings()
             
-            if len(self.global_manager.get('attacker_queue')) > 0:
-                self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-            elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
-                turn_management_utility.start_player_turn(self.global_manager)
+            if len(status.attacker_queue) > 0:
+                status.attacker_queue.pop(0).attempt_local_combat()
+            elif flags.enemy_combat_phase: #if enemy combat phase done, go to player turn
+                turn_management_utility.start_player_turn()
 
     def kill_noncombatants(self):
         '''
@@ -157,7 +159,9 @@ class npmob(mob): #if enemy.turn_done
             
         noncombatants = current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
-            notification_utility.display_notification('The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
+            constants.notification_manager.display_notification({
+                'message': 'The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
+            })
             current_noncombatant.die()
 
     def damage_buildings(self):
@@ -176,7 +180,9 @@ class npmob(mob): #if enemy.turn_done
         
         for current_building in current_cell.get_intact_buildings():
             if current_building.can_damage():
-                notification_utility.display_notification('The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
+                constants.notification_manager.display_notification({
+                    'message': 'The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
+                })
                 current_building.set_damaged(True)
             
     def end_turn_move(self):
@@ -247,7 +253,7 @@ class npmob(mob): #if enemy.turn_done
             else:
                 self.movement_points -= 1
             if self.combat_possible():
-                self.global_manager.get('attacker_queue').append(self)
+                status.attacker_queue.append(self)
                 self.movement_points = 0
             else:
                 if not self.visible():
@@ -285,9 +291,9 @@ class npmob(mob): #if enemy.turn_done
                 current_image.add_to_cell()
             if self.visible():
                 if self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-                    self.global_manager.get('sound_manager').play_sound('water')
+                    constants.sound_manager.play_sound('water')
                 else:
-                    self.global_manager.get('sound_manager').play_sound('footsteps')
+                    constants.sound_manager.play_sound('footsteps')
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)

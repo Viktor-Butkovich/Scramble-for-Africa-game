@@ -3,15 +3,15 @@
 import pygame
 
 from ..interface_types.labels import label
-from ..constructs.images import minister_type_image
 from ..util import utility, scaling
-from . import images
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class actor_display_label(label):
     '''
     Label that changes its text to match the information of selected mobs or tiles
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,7 +27,6 @@ class actor_display_label(label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_label_type': string value - Type of actor information shown
                 'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -38,11 +37,11 @@ class actor_display_label(label):
         self.actor_type = input_dict['actor_type'] #mob or tile, none if does not scale with shown labels, like tooltip labels
         self.image_y_displacement = 0
         input_dict['message'] = ''
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
-        s_increment = scaling.scale_width(6, self.global_manager)
-        m_increment = scaling.scale_width(11, self.global_manager)
-        l_increment = scaling.scale_width(30, self.global_manager)
+        s_increment = scaling.scale_width(6)
+        m_increment = scaling.scale_width(11)
+        l_increment = scaling.scale_width(30)
 
         s_size = self.height + s_increment
         m_size = self.height + m_increment
@@ -86,145 +85,12 @@ class actor_display_label(label):
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             self.add_attached_button(input_dict)
 
-            del input_dict['image_id']
-            input_dict['init_type'] = 'construction button'
-            input_dict['building_type'] = 'resource'
-            input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (s_size, s_size)
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'port'
-            input_dict['keybind_id'] = pygame.K_p
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'infrastructure'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'train_station'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'trading_post'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'mission'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'fort'
-            input_dict['keybind_id'] = pygame.K_v
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'repair button'
-            input_dict['building_type'] = 'resource'
-            input_dict['keybind_id'] = pygame.K_g
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'port'
-            input_dict['keybind_id'] = pygame.K_p
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'train_station'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['building_type'] = 'trading_post'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-            
-            input_dict['building_type'] = 'mission'
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-            
-            input_dict['building_type'] = 'fort'
-            input_dict['keybind_id'] = pygame.K_v
-            self.add_attached_button(input_dict)
-            del input_dict['building_type']
-            del input_dict['keybind_id']
-            
-            input_dict['init_type'] = 'upgrade button'
-            input_dict['base_building_type'] = 'resource'
-            input_dict['upgrade_type'] = 'scale'
-            self.add_attached_button(input_dict)
-
-            input_dict['upgrade_type'] = 'efficiency'
-            self.add_attached_button(input_dict)
-
-            input_dict['base_building_type'] = 'warehouses'
-            input_dict['upgrade_type'] = 'warehouse_level'
-            input_dict['keybind_id'] = pygame.K_k
-            self.add_attached_button(input_dict)
-            del input_dict['base_building_type']
-            del input_dict['upgrade_type']
-            
-            input_dict['init_type'] = 'build train button'
-            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-            input_dict['keybind_id'] = pygame.K_y
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'build steamboat button'
-            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-            input_dict['keybind_id'] = pygame.K_u
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'trade button'
-            input_dict['image_id'] = 'buttons/trade_button.png'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'convert button'
-            input_dict['image_id'] = 'buttons/convert_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'rumor search button'
-            input_dict['image_id'] = 'buttons/rumor_search_button.png'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'artifact search button'
-            input_dict['image_id'] = 'buttons/artifact_search_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'evangelist campaign button'
-            input_dict['image_id'] = 'buttons/public_relations_campaign_button.png'
-            input_dict['campaign_type'] = 'public relations campaign'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'evangelist campaign button'
-            input_dict['image_id'] = 'buttons/religious_campaign_button.png'
-            input_dict['campaign_type'] = 'religious campaign'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'advertising campaign button'
-            input_dict['image_id'] = 'ministers/icons/trade.png'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'take loan button'
-            input_dict['image_id'] = 'buttons/take_loan_button.png'
-            input_dict['keybind_id'] = pygame.K_l
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'track beasts button'
-            input_dict['image_id'] = 'buttons/track_beasts_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'capture slaves button'
-            input_dict['image_id'] = 'buttons/capture_slaves_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'suppress slave trade button'
-            input_dict['image_id'] = 'buttons/suppress_slave_trade_button.png'
-            input_dict['keybind_id'] = pygame.K_r
-            self.add_attached_button(input_dict)
+            for action_type in status.actions:
+                if status.actions[action_type].actor_type in ['mob', 'tile'] and status.actions[action_type].placement_type == 'label':
+                    button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
+                    if button_input_dict:
+                        self.add_attached_button(button_input_dict)
             
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
@@ -385,16 +251,32 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
-            attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
-            self.insert_collection_above().add_member(attached_minister_type_image, {'x_offset': -1 * attached_minister_type_image.height, 'y_offset': -0.5 * m_increment}) #offsets are being ignored
+            
+            attached_minister_position_image = constants.actor_creation_manager.create_interface_element({
+                'coordinates': (self.x - self.height - m_increment, self.y),
+                'width': self.height + m_increment,
+                'height': self.height + m_increment,
+                'modes': self.modes,
+                'minister_type': 'none',
+                'attached_label': self,
+                'init_type': 'minister type image',
+                'minister_image_type': 'portrait',
+                'parent_collection': self.insert_collection_above(),
+                'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
+            })
+
             self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
             self.message_start = 'Name: '
             if self.actor_label_type == 'minister_name':
-                input_dict['init_type'] = 'active investigation button'
-                self.add_attached_button(input_dict)
+                input_dict['width'], input_dict['height'] = (s_size, s_size)
+                for action_type in status.actions:
+                    if status.actions[action_type].actor_type == 'minister' and status.actions[action_type].placement_type == 'label':
+                        button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
+                        if button_input_dict:
+                            self.add_attached_button(button_input_dict)
         
         elif self.actor_label_type == 'country_effect':
             self.message_start = 'Effect: '
@@ -404,7 +286,7 @@ class actor_display_label(label):
             input_dict['init_type'] = 'remove minister button'
             self.add_attached_button(input_dict)
             input_dict['init_type'] = 'appoint minister button'
-            for current_position in global_manager.get('minister_types'):
+            for current_position in constants.minister_types:
                 input_dict['appoint_type'] = current_position
                 self.add_attached_button(input_dict)
 
@@ -477,7 +359,7 @@ class actor_display_label(label):
             member_config = {}
         if not 'order_y_offset' in member_config:
             member_config['order_y_offset'] = abs(input_dict['height'] - self.height) / -2
-        self.parent_collection.add_member(self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager), member_config)
+        self.parent_collection.add_member(constants.actor_creation_manager.create_interface_element(input_dict), member_config)
 
     def update_tooltip(self):
         '''
@@ -569,7 +451,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'evidence':
             tooltip_text = []
             if not self.actor == 'none':
-                if self.global_manager.get('current_game_mode') == 'trial':
+                if constants.current_game_mode == 'trial':
                     real_evidence = self.actor.corruption_evidence - self.actor.fabricated_evidence
                     tooltip_text.append('Your prosecutor has found ' + str(real_evidence) + ' piece' + utility.generate_plural(real_evidence) + ' of evidence of corruption against this minister.')
                     if self.actor.fabricated_evidence > 0:
@@ -607,7 +489,7 @@ class actor_display_label(label):
                     for skill_type in self.actor.apparent_skills:
                         if self.actor.apparent_skills[skill_type] == skill_value:
                             rank += 1
-                            skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                            skill_name = constants.minister_type_dict[skill_type] #like General to military
                             tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.actor.apparent_skill_descriptions[skill_type])
             self.set_tooltip(tooltip_text)
 
@@ -660,7 +542,7 @@ class actor_display_label(label):
             tooltip_text.append('Any actions to combat the slave traders will be more difficult when strength is 20 or higher and easier when strength is 9 or lower')
             tooltip_text.append('The slave trade will be permanently eradicated once strength has been decreased to 0')
             tooltip_text.append('Strength will increase by 1 for each slave purchased')
-            tooltip_text.append('Additionally, when decreased, strength will increase by 1 each turn until it returns to its original value of ' + str(self.global_manager.get('slave_traders_natural_max_strength')))
+            tooltip_text.append('Additionally, when decreased, strength will increase by 1 each turn until it returns to its original value of ' + str(constants.slave_traders_natural_max_strength))
             self.set_tooltip(tooltip_text)
 
         else:
@@ -839,7 +721,7 @@ class actor_display_label(label):
                     displayed_skill = new_actor.current_position
                     message += 'Current ability: '
                 if displayed_skill != 'unknown':
-                    displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military
+                    displayed_skill_name = constants.minister_type_dict[displayed_skill] #like General to military
                     message += new_actor.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
                 else:
                     message += displayed_skill
@@ -864,7 +746,7 @@ class actor_display_label(label):
                 self.set_label('Equipped with canoes to move along rivers')
             
             elif self.actor_label_type == 'slave_traders_strength':
-                self.set_label('Strength: ' + str(self.global_manager.get('slave_traders_strength')) + '/' + str(self.global_manager.get('slave_traders_natural_max_strength')))
+                self.set_label('Strength: ' + str(constants.slave_traders_strength) + '/' + str(constants.slave_traders_natural_max_strength))
 
         elif self.actor_label_type == 'tooltip':
             return #do not set text for tooltip label
@@ -907,7 +789,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'canoes' and not self.actor.has_canoes:
             return(False)
-        elif self.actor_label_type == 'slave_traders_strength' and self.actor.grid != self.global_manager.get('slave_traders_grid'):
+        elif self.actor_label_type == 'slave_traders_strength' and self.actor.grid != status.slave_traders_grid:
             return(False)
         elif self.actor_label_type == 'loyalty' and self.actor.apparent_corruption_description == 'unknown':
             return(False)
@@ -927,7 +809,7 @@ class list_item_label(actor_display_label):
     '''
     Label that shows the information of a certain item in a list, like a train passenger among a list of passengers
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -946,7 +828,6 @@ class list_item_label(actor_display_label):
                 'list_index': int value - Index to determine item of list reflected
                 'list_type': string value - Type of list associated with, like 'resource building' along with label type of 'building work crew' to show work crews attached to a resource 
                     building
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -954,7 +835,7 @@ class list_item_label(actor_display_label):
         self.list_type = input_dict['list_type']
         #input_dict['actor_label_type'] = self.list_type + ' list item'
         self.attached_list = []
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def calibrate(self, new_actor):
         '''
@@ -986,7 +867,7 @@ class building_work_crews_label(actor_display_label):
     '''
     Label at the top of the list of work crews in a building that shows how many work crews are in it
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1002,7 +883,6 @@ class building_work_crews_label(actor_display_label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'building_type': string value - Type of building associated with, like 'resource building'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -1010,7 +890,7 @@ class building_work_crews_label(actor_display_label):
         self.show_label = False
         self.attached_building = 'none'
         input_dict['actor_label_type'] = 'building work crews'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.building_type = input_dict['building_type']
 
     def calibrate(self, new_actor):
@@ -1048,7 +928,7 @@ class building_efficiency_label(actor_display_label):
     '''
     Label that shows a production building's efficiency, which is the number of attempts work crews at the building have to produce commodities
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -1064,14 +944,13 @@ class building_efficiency_label(actor_display_label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'building_type': string value - Type of building associated with, like 'resource building'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.remove_work_crew_button = 'none'
         self.show_label = False
         input_dict['actor_label_type'] = 'building efficiency'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.building_type = input_dict['building_type']
         self.attached_building = 'none'
 
@@ -1130,7 +1009,7 @@ class commodity_display_label(actor_display_label):
     '''
     Label that changes its text and attached image and button to match the commodity in a certain part of a currently selected actor's inventory    
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
 
         '''
         Description:
@@ -1147,16 +1026,15 @@ class commodity_display_label(actor_display_label):
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'commodity_index': int value - Index of actor's inventory reflected
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.current_commodity = 'none'
         input_dict['actor_label_type'] = 'commodity'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.showing_commodity = False
         self.commodity_index = input_dict['commodity_index']
-        self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager)
+
         input_dict = {
             'coordinates': (self.x, self.y + 200),
             'width': self.height,
@@ -1167,7 +1045,18 @@ class commodity_display_label(actor_display_label):
         }
 
         self.insert_collection_above()
-        self.parent_collection.add_member(self.commodity_image, {'x_offset': -1 * self.height - 5})
+
+        self.commodity_image = constants.actor_creation_manager.create_interface_element({
+            'coordinates': (0, 0),
+            'width': self.height + 10,
+            'height': self.height + 10,
+            'modes': self.modes,
+            'attached_label': self,
+            'init_type': 'label image',
+            'parent_collection': self.parent_collection,
+            'member_config': {'x_offset': -1 * self.height - 10, 'y_offset': -5}
+        })
+
         input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':
             input_dict['init_type'] = 'drop commodity button'
@@ -1205,7 +1094,7 @@ class commodity_display_label(actor_display_label):
             None
         '''
         super().set_label(new_message)
-        if not self.actor == 'none':
+        if self.actor != 'none':
             commodity_list = self.actor.get_held_commodities()
             if len(commodity_list) > self.commodity_index:
                 commodity = commodity_list[self.commodity_index]

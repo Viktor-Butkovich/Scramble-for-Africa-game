@@ -13,6 +13,7 @@ infinite_commodities: gives 10 of each commodity in Europe on new game
 band_of_thieves: causes all ministers to be corrupt whenever possible
 nine_mortal_men: causes ministers to roll 1 on all rolls
 ministry_of_magic: causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
+lawbearer: causes prosecutor to never be corrupt and succeed at all rolls, while causing other ministers to be corrupt whenever possible
 farm_upstate: retires all appointed ministers at the end of the turn
 show_modifiers: prints how and when a minister or country modifiers affects a roll
 hide_grid_lines: hides interior grid lines

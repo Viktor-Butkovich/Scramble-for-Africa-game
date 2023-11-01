@@ -1,6 +1,8 @@
 #Contains functions that manage the text box and other miscellaneous text display utility
 
 import pygame
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 def message_width(message, fontsize, font_name):
     '''
@@ -18,32 +20,30 @@ def message_width(message, fontsize, font_name):
     return(text_width)
 
 
-def get_input(solicitant, message, global_manager):
+def get_input(solicitant, message):
     '''
     Description:
         Tells the input manager to displays the prompt for the user to enter input and prepare to receive input and send it to the part of the program requesting input
     Input:
         string solicitant: Represents the part of the program to send input to
         string message: Prompt given to the player to enter input
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
-    global_manager.get('input_manager').start_receiving_input(solicitant, message)
+    constants.input_manager.start_receiving_input(solicitant, message)
 
-def text(message, font, global_manager):
+def text(message, font):
     '''
     Description:
         Returns a rendered pygame.Surface of the inputted text
     Input:
         string message: Text to be rendered
         pygame.font font: pygame font with which the text is rendered
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         pygame.Surface: Rendered pygame.Surface of the inputted text
     '''
     try:
-        text_surface = font.render(message, False, global_manager.get('color_dict')['black'])
+        text_surface = font.render(message, False, constants.color_dict['black'])
     except:
         text_surface = pygame.Surface((1, 1)) #prevents error when trying to render very small text (of width 0) on very low resolutions
     return(text_surface)
@@ -64,42 +64,28 @@ def manage_text_list(text_list, max_length):
     return(text_list)
 
 
-def print_to_screen(input_message, global_manager):
+def print_to_screen(input_message):
     '''
     Description:
         Adds the inputted message to the bottom of the text box
     Input:
         string input_message: Message to be added to the text box
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
-    global_manager.get('text_list').append(input_message)
+    status.text_list.append(input_message)
 
     
-def print_to_previous_message(message, global_manager):
+def print_to_previous_message(message):
     '''
     Description:
         Adds the inputted message to the most recently displayed message of the text box
     Input:
         string message: Message to be added to the text box
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
-    global_manager.get('text_list')[-1] = global_manager.get('text_list')[-1] + message
-
-    
-def clear_message(global_manager):
-    '''
-    Description:
-        Deletes the text box line that is currently being typed
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        None
-    '''
-    global_manager.set('message', '')
+    status.text_list[-1] = status.text_list[-1] + message
 
 def remove_underscores(message):
     '''
@@ -110,10 +96,4 @@ def remove_underscores(message):
     Output:
         string: the inputted message but with spaces
     '''
-    return_message = ''
-    for current_character in message:
-        if current_character == '_':
-            return_message += ' '
-        else:
-            return_message += current_character
-    return(return_message)
+    return(message.replace('_', ' '))

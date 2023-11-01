@@ -5,12 +5,14 @@ import time
 import random
 from .buttons import button
 from ..util import utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class die(button):
     '''
     A die with a predetermined result that will appear, show random rolling, and end with the predetermined result and an outline with a color based on the result
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,7 +29,6 @@ class die(button):
                     critical successes/failures
                 'outcome_color_dict': string/int dictionary value - Dictionary of string color name keys and int die result values determining colors shown for certain die results
                 'final_result': int value - Predetermined final result of roll for die to end on
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -35,7 +36,7 @@ class die(button):
         self.outcome_color_dict = input_dict['outcome_color_dict'] #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
         self.rolls_completed = 0
         self.num_sides = input_dict['num_sides']
-        if global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+        if constants.effect_manager.effect_active('ministry_of_magic'):
             self.num_rolls = 1
         else:
             self.num_rolls = random.randrange(-3, 4) + 7 #4-10
@@ -44,6 +45,7 @@ class die(button):
         self.last_roll = 0
         self.highlighted = False
         self.normal_die = True
+
         if (self.result_outcome_dict['min_success'] <= 0 or self.result_outcome_dict['min_success'] >= 7) and self.result_outcome_dict['max_crit_fail'] <= 0: # and result_outcome_dict['min_crit_success'] >= 7
             #if roll without normal success/failure results, like combat
             input_dict['image_id'] = 'misc/dice/4.png'
@@ -54,11 +56,11 @@ class die(button):
             input_dict['image_id'] = 'misc/dice/impossible.png'
         input_dict['color'] = 'white'
         input_dict['button_type'] = 'die'
-        super().__init__(input_dict, global_manager)
-        global_manager.get('dice_list').append(self)
+        super().__init__(input_dict)
+        status.dice_list.append(self)
         self.final_result = input_dict['final_result']
-        #self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
-        self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + self.height + 3), self.width + 6, self.height + 6) #could implement as outline rect instead, with larger outline width passed to superclass
+        #self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
+        self.highlight_Rect = pygame.Rect(self.x - 3, constants.display_height - (self.y + self.height + 3), self.width + 6, self.height + 6) #could implement as outline rect instead, with larger outline width passed to superclass
         if self.normal_die:
             self.outline_color = self.outcome_color_dict['default']
         else:
@@ -79,8 +81,20 @@ class die(button):
         Output:
             None
         '''
-        if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
-            self.global_manager.get('displayed_notification').on_click()#self.start_rolling()
+        if self.rolls_completed == 0:
+            self.find_sibling_notification().on_click()
+
+    def find_sibling_notification(self):
+        notification_found = False
+        current_parent_collection = self.parent_collection
+        while not notification_found:
+            for current_member in current_parent_collection.members:
+                if hasattr(current_member, 'notification_type'):
+                    return(current_member)
+            if current_parent_collection.parent_collection != 'none':
+                current_parent_collection = current_parent_collection.parent_collection
+            else:
+                return(None)
 
     def update_tooltip(self):
         '''
@@ -114,7 +128,7 @@ class die(button):
             tooltip_list.append(str(self.roll_result))
             if not self.rolling: #if rolls completed
                 tooltip_list.append('Finished rolling')
-                if self.highlighted and len(self.global_manager.get('dice_list')) > 1: #if other dice present and this die chosen
+                if self.highlighted and len(status.dice_list) > 1: #if other dice present and this die chosen
                     tooltip_list.append('This result was chosen')
         self.set_tooltip(tooltip_list)
 
@@ -129,14 +143,14 @@ class die(button):
         '''
         self.last_roll = time.time()
         self.rolling = True
-        dice_list = self.global_manager.get('dice_list')
+        dice_list = status.dice_list
         if self == dice_list[0]: #only 1 die at a time makes noise
             if len(dice_list) == 1:
-                self.global_manager.get('sound_manager').play_sound('dice_1')
+                constants.sound_manager.play_sound('dice_1')
             elif len(dice_list) == 2:
-                self.global_manager.get('sound_manager').play_sound('dice_2')
+                constants.sound_manager.play_sound('dice_2')
             else:
-                self.global_manager.get('sound_manager').play_sound('dice_3')
+                constants.sound_manager.play_sound('dice_3')
                 
     def roll(self):
         '''
@@ -151,11 +165,11 @@ class die(button):
         if self.rolls_completed == self.num_rolls: #if last roll just happened, stop rolling - allows slight pause after last roll during which you don't know if it is the final one
             self.rolling = False
             dice_rolling = False
-            for current_die in self.global_manager.get('dice_list'):
+            for current_die in status.dice_list:
                 if current_die.rolling:
                     dice_rolling = True
-            if (not self.global_manager.get('current_dice_rolling_notification') == 'none') and not dice_rolling: #if notification present and dice finished rolling, remove notification
-                self.global_manager.get('current_dice_rolling_notification').remove_complete()
+            if not dice_rolling:
+                self.find_sibling_notification().on_click(die_override=True)
         else:
             self.roll_result = 0
             if self.rolls_completed == self.num_rolls - 1: #if last roll
@@ -191,9 +205,9 @@ class die(button):
                 self.roll()
             super().draw()
             if self.highlighted or not self.normal_die:
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.outline_color], self.Rect, 6)
+                pygame.draw.rect(constants.game_display, constants.color_dict[self.outline_color], self.Rect, 6)
             else:
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)     
+                pygame.draw.rect(constants.game_display, constants.color_dict['black'], self.Rect, 6)     
 
     def remove(self):
         '''
@@ -205,25 +219,4 @@ class die(button):
             None
         '''
         super().remove()
-        self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))
-        if self.global_manager.get('displayed_mob') in self.global_manager.get('mob_list'): #only need to remove die from mob's list if mob still alive
-            self.global_manager.get('displayed_mob').attached_dice_list = utility.remove_from_list(self.global_manager.get('displayed_mob').attached_dice_list, self)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this die should be shown. The currently displayed notification should have a number of dice attached to it, and only that many of existing dice are shown at once, starting from the those first created
-        Input:
-            None
-        Output:
-            boolean: Returns whether this die should be shown
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if self.global_manager.get('ongoing_action_type') == 'trial': #rolls during a trial are not done through a mob, so always show them
-                return(True)
-            displayed_mob_dice_list = self.global_manager.get('displayed_mob').attached_dice_list
-            num_notification_dice = self.global_manager.get('displayed_notification').notification_dice
-            if self in displayed_mob_dice_list:
-                if displayed_mob_dice_list.index(self) <= (num_notification_dice - 1): #if 1 notification die, index must be <= 0 to be shown
-                    return(True)
-        return(False)
+        status.dice_list = utility.remove_from_list(status.dice_list, self)

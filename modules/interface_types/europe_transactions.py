@@ -2,13 +2,15 @@
 
 import random
 from .buttons import button
-from ..util import main_loop_utility, text_utility, market_utility, utility, actor_utility
+from ..util import main_loop_utility, text_utility, market_utility, utility, actor_utility, minister_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class recruitment_button(button):
     '''
     Button that creates a new unit with a type depending on recruitment_type and places it in Europe
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,17 +27,16 @@ class recruitment_button(button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'recruitment_type': string value - Type of unit recruited by this button, like 'explorer'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.recruitment_type = input_dict['recruitment_type']
-        if self.recruitment_type in global_manager.get('country_specific_units'):
-            if global_manager.get('current_country') != 'none':
-                self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
+        if self.recruitment_type in constants.country_specific_units:
+            if status.current_country:
+                self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + status.current_country.adjective + '/default.png'
             else:
                 self.mob_image_id = 'mobs/default/default.png'
-        elif self.recruitment_type in global_manager.get('recruitment_types'):
+        elif self.recruitment_type in constants.recruitment_types:
             self.mob_image_id = 'mobs/' + self.recruitment_type + '/default.png'
         else:
             self.mob_image_id = 'mobs/default/default.png'
@@ -45,8 +46,8 @@ class recruitment_button(button):
                 self.recruitment_name += character
             else:
                 self.recruitment_name += ' '
-        self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
-        global_manager.get('recruitment_button_list').append(self)
+        self.cost = constants.recruitment_costs[self.recruitment_type]
+        status.recruitment_button_list.append(self)
         if self.recruitment_name in ['European workers']:
             image_id_list = ['mobs/default/button.png']
             left_worker_dict = {
@@ -65,7 +66,7 @@ class recruitment_button(button):
             image_id_list = ['mobs/default/button.png', {'image_id': self.mob_image_id, 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
         input_dict['image_id'] = image_id_list
         input_dict['button_type'] = 'recruitment'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):
         '''
@@ -76,14 +77,14 @@ class recruitment_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
-            if self.global_manager.get('money_tracker').get() >= self.cost:
+        if main_loop_utility.action_possible():
+            if constants.money_tracker.get() >= self.cost:
                 choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
-                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, self.recruitment_name)
             else:
-                text_utility.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
+                text_utility.print_to_screen('You do not have enough money to recruit this unit')
         else:
-            text_utility.print_to_screen('You are busy and cannot recruit a unit', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot recruit a unit')
 
     def calibrate(self, country):
         '''
@@ -108,17 +109,29 @@ class recruitment_button(button):
         Output:
             None
         '''
-        actor_utility.update_recruitment_descriptions(self.global_manager, self.recruitment_type)
+        actor_utility.update_descriptions(self.recruitment_type)
         if self.recruitment_type == 'European workers':
-            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('recruitment_list_descriptions')[self.recruitment_type])
+            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
         else:
-            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('recruitment_list_descriptions')[self.recruitment_type])
+            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        status.recruitment_button_list = utility.remove_from_list(status.recruitment_button_list, self)
 
 class buy_commodity_button(button):
     '''
     Button that buys a unit of commodity_type when clicked and has an image matching that of its commodity
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -133,20 +146,18 @@ class buy_commodity_button(button):
                 'button_type': string value - Determines the function of this button, like 'end turn'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'commodity_type': string value - Type of commodity that this button buys, like 'consumer goods'
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        possible_commodity_types = global_manager.get('commodity_types')
+        possible_commodity_types = constants.commodity_types
         self.commodity_type = input_dict['commodity_type']
         if self.commodity_type in possible_commodity_types:
             input_dict['image_id'] = 'scenery/resources/buttons/' + self.commodity_type + '.png'
         else:
             input_dict['image_id'] = 'buttons/default_button.png'
-        self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
-        global_manager.set(self.commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
+        self.cost = constants.commodity_prices[self.commodity_type] #update this when price changes
         input_dict['button_type'] = 'buy commodity'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):
         '''
@@ -157,20 +168,21 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible(self.global_manager):
-            self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
-            if self.global_manager.get('money_tracker').get() >= self.cost:
-                if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
-                    self.global_manager.get('europe_grid').cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
-                    self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
-                    text_utility.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)
+        if main_loop_utility.action_possible():
+            self.cost = constants.commodity_prices[self.commodity_type]
+            if constants.money_tracker.get() >= self.cost:
+                if minister_utility.positions_filled():
+                    actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile)
+                    status.europe_grid.cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
+                    constants.money_tracker.change(-1 * self.cost, 'consumer_goods')
+                    text_utility.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.')
                     if random.randrange(1, 7) == 1: #1/6 chance
-                        market_utility.change_price('consumer goods', 1, self.global_manager)
-                        text_utility.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.', self.global_manager)
+                        market_utility.change_price('consumer goods', 1)
+                        text_utility.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.')
             else:
-                text_utility.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
+                text_utility.print_to_screen('You do not have enough money to purchase this commodity')
         else:
-            text_utility.print_to_screen('You are busy and cannot purchase commodities', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot purchase commodities')
 
     def update_tooltip(self):
         '''
@@ -181,6 +193,6 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
+        self.cost = constants.commodity_prices[self.commodity_type]
         self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])
         

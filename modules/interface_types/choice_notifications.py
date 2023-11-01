@@ -1,14 +1,17 @@
 #Contains functionality for choice notifications
 
 import pygame
-from . import buttons, notifications
+from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
-class choice_notification(notifications.notification):
+class choice_notification(action_notifications.action_notification):
     '''
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,47 +28,37 @@ class choice_notification(notifications.notification):
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
                 'button_types': string list value - List of string corresponding to the button types of this notification's choice buttons, like ['end turn', 'none']
+                    - Each button type could also be a dictionary value, in which case the created button will be an anonymous button with
+                        functionality decided by the dictionary's contents
                 'choice_info_dict': dictionary value - Dictionary containing any case-specific information for choice buttons to function as intended
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        button_height = scaling.scale_height(50, global_manager)
-        super().__init__(input_dict, global_manager)
+        button_height = scaling.scale_height(50)
+        super().__init__(input_dict)
         self.choice_buttons = []
         self.choice_info_dict = input_dict['choice_info_dict']
         button_types = input_dict['button_types']
         for current_button_type_index in range(len(button_types)):
-            input_dict = {
+            if type(button_types[current_button_type_index]) == dict:
+                init_type = 'anonymous button'
+            elif button_types[current_button_type_index] == 'recruitment':
+                init_type = 'recruitment choice button'
+            else:
+                init_type = 'choice button'
+            self.choice_buttons.append(constants.actor_creation_manager.create_interface_element({
                 'coordinates': (self.x + (current_button_type_index * round(self.width / len(button_types))), self.y - button_height),
                 'width': round(self.width / len(button_types)),
                 'height': button_height,
                 'modes': self.modes,
                 'button_type': button_types[current_button_type_index],
                 'image_id': 'misc/paper_label.png',
-                'notification': self
-            }
-            if input_dict['button_type'] == 'recruitment':
-                input_dict['init_type'] = 'recruitment choice button'
-            else:
-                input_dict['init_type'] = 'choice button'
-            self.choice_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-        self.global_manager.set('making_choice', True)
+                'notification': self,
+                'init_type': init_type
+            }))
+        flags.making_choice = True
 
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
-
-    def on_click(self):
+    def on_click(self, choice_button_override=False):
         '''
         Description:
             Controls this notification's behavior when clicked. Choice notifications do nothing when clicked, instead acting when their choice buttons are clicked
@@ -74,6 +67,8 @@ class choice_notification(notifications.notification):
         Output:
             None
         '''
+        if choice_button_override:
+            super().on_click()
         return #does not remove self when clicked
 
     def update_tooltip(self):
@@ -97,7 +92,7 @@ class choice_notification(notifications.notification):
         Output:
             None
         '''
-        self.global_manager.set('making_choice', False)
+        flags.making_choice = False
         super().remove()
         for current_choice_button in self.choice_buttons:
             current_choice_button.remove_complete()
@@ -106,7 +101,7 @@ class choice_button(buttons.button):
     '''
     Button with no keybind that is attached to a choice notification and removes its notification when clicked
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -124,7 +119,6 @@ class choice_button(buttons.button):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'notification': choice_notification value: notification to which this choice button is attached
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -139,52 +133,6 @@ class choice_button(buttons.button):
                 self.verb = 'hire'
             self.cost = self.notification.choice_info_dict['cost']
             self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
-            
-        elif input_dict['button_type'] == 'exploration':
-            self.message = 'Explore'
-            self.cost = self.notification.choice_info_dict['cost']
-            self.expedition = self.notification.choice_info_dict['expedition']
-            self.x_change = self.notification.choice_info_dict['x_change']
-            self.y_change = self.notification.choice_info_dict['y_change']
-
-        elif input_dict['button_type'] == 'attack':
-            self.message = 'Attack'
-            self.cost = self.notification.choice_info_dict['cost']
-            self.battalion = self.notification.choice_info_dict['battalion']
-            self.x_change = self.notification.choice_info_dict['x_change']
-            self.y_change = self.notification.choice_info_dict['y_change']
-            
-        elif input_dict['button_type'] in ['start religious campaign', 'start public relations campaign', 'start advertising campaign', 'start suppress slave trade']:
-            self.message = 'Start campaign'
-            if input_dict['button_type'] == 'start advertising campaign':
-                self.commodity = self.notification.choice_info_dict['commodity']
-
-        elif input_dict['button_type'] == 'start loan search':
-            self.message = 'Find loan'
-
-        elif input_dict['button_type'] == 'start converting':
-            self.message = 'Convert'
-
-        elif input_dict['button_type'] in ['start rumor search', 'start artifact search']:
-            self.message = 'Search'
-
-        elif input_dict['button_type'] == 'start capture slaves':
-            self.message = 'Capture slaves'
-            
-        elif input_dict['button_type'] in ['stop religious campaign', 'stop public relations campaign', 'stop advertising campaign']:
-            self.message = 'Stop campaign'
-
-        elif input_dict['button_type'] == 'stop loan search':
-            self.message = 'Stop search'
-
-        elif input_dict['button_type'] == 'accept loan offer':
-            self.message = 'Accept'
-
-        elif input_dict['button_type'] == 'decline loan offer':
-            self.message = 'Decline'
-            
-        elif input_dict['button_type'] in ['none', 'stop exploration', 'stop attack', 'stop capture slaves', 'stop suppress slave trade', 'stop converting', 'stop rumor search', 'stop artifact search']:
-            self.message = 'Do nothing'
 
         elif input_dict['button_type'] == 'confirm main menu':
             self.message = 'Main menu'
@@ -194,12 +142,15 @@ class choice_button(buttons.button):
 
         elif input_dict['button_type'] == 'quit':
             self.message = 'Exit game'
+
+        elif input_dict['button_type'] == 'none':
+            self.message = 'Do nothing'
     
         else:
             self.message = input_dict['button_type'].capitalize()
-        super().__init__(input_dict, global_manager)
-        self.font_size = scaling.scale_width(25, global_manager)
-        self.font_name = self.global_manager.get('font_name')
+        super().__init__(input_dict)
+        self.font_size = scaling.scale_width(25)
+        self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True
 
@@ -226,7 +177,7 @@ class choice_button(buttons.button):
         '''
         super().draw()
         if self.showing:
-            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+            constants.game_display.blit(text_utility.text(self.message, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
     def update_tooltip(self):
@@ -246,48 +197,6 @@ class choice_button(buttons.button):
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])
-            
-        elif self.button_type == 'exploration':
-            self.set_tooltip(['Attempt an exploration for ' + str(self.cost) + ' money'])
-
-        elif self.button_type == 'attack':
-            self.set_tooltip(['Supply an attack for ' + str(self.cost) + ' money'])
-            
-        elif self.button_type == 'trade':
-            self.set_tooltip(['Attempt to trade by giving consumer goods'])
-
-        elif self.button_type == 'start trading':
-            self.set_tooltip(['Start trading, allowing consumer goods to be sold for commodities if the villagers are willing'])
-
-        elif self.button_type == 'start religious campaign':
-            self.set_tooltip(['Start a religious campaign, possibly convincing church volunteers to join you'])
-
-        elif self.button_type == 'start public relations campaign':
-            self.set_tooltip(['Start a public relations campaign, possibly improving your company\'s public opinion'])
-
-        elif self.button_type == 'start advertising campaign':
-            self.set_tooltip(['Starts an advertising campaign for ' + self.commodity])
-
-        elif self.button_type == 'start loan search':
-            self.set_tooltip(['Starts a search for a low-interest loan offer'])
-
-        elif self.button_type == 'start converting':
-            self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
-
-        elif self.button_type == 'start rumor search':
-            self.set_tooltip(['Start searching for rumors about the artifact\'s location'])
-
-        elif self.button_type == 'start artifact search':
-            self.set_tooltip(['Start searching for an artifact at a rumored location'])
-
-        elif self.button_type == 'start capture slaves':
-            self.set_tooltip(['Start attempting to capture native villagers as slaves'])
-
-        elif self.button_type == 'accept loan offer':
-            self.set_tooltip(['Accepts the loan offer'])
-
-        elif self.button_type == 'reject loan offer':
-            self.set_tooltip(['Rejects the loan offer'])
 
         elif self.button_type == 'confirm main menu':
             self.set_tooltip(['Exits to the main menu without saving'])
@@ -316,8 +225,8 @@ class recruitment_choice_button(choice_button):
         '''
         input_dict = {'select_on_creation': True}
         if self.recruitment_type == 'slave workers':
-            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
-            input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
+            constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
+            input_dict['grids'] = [status.slave_traders_grid]
             attached_cell = input_dict['grids'][0].cell_list[0][0]
             input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
             input_dict['image'] = 'mobs/slave workers/default.png'
@@ -325,16 +234,16 @@ class recruitment_choice_button(choice_button):
             input_dict['name'] = 'slave workers'
             input_dict['init_type'] = 'slaves'
             input_dict['purchased'] = True
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            constants.actor_creation_manager.create(False, input_dict)
 
         elif self.recruitment_type == 'African worker village':
-            self.global_manager.get('displayed_tile').cell.get_building('village').recruit_worker()
+            status.displayed_tile.cell.get_building('village').recruit_worker()
 
         elif self.recruitment_type == 'African worker slums':
-            self.global_manager.get('displayed_tile').cell.get_building('slums').recruit_worker()
+            status.displayed_tile.cell.get_building('slums').recruit_worker()
 
         elif self.recruitment_type == 'African worker labor broker':
-            recruiter = self.global_manager.get('displayed_mob')
+            recruiter = status.displayed_mob
             input_dict['coordinates'] = (recruiter.x, recruiter.y)
             input_dict['grids'] = recruiter.grids
             input_dict['image'] = 'mobs/African workers/default.png'
@@ -342,24 +251,24 @@ class recruitment_choice_button(choice_button):
             input_dict['name'] = 'African workers'
             input_dict['init_type'] = 'workers'
             input_dict['worker_type'] = 'African'
-            self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
+            constants.money_tracker.change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
-            market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
-            worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            market_utility.attempt_worker_upkeep_change('decrease', 'African') #adds 1 worker to the pool
+            worker = constants.actor_creation_manager.create(False, input_dict)
             if recruiter.is_vehicle:
                 recruiter.set_movement_points(0)
                 worker.crew_vehicle(recruiter)
             else:
                 recruiter.set_movement_points(0)
-                self.global_manager.get('actor_creation_manager').create_group(worker, recruiter, self.global_manager)
+                constants.actor_creation_manager.create_group(worker, recruiter)
 
         else:
             input_dict['coordinates'] = (0, 0)
-            input_dict['grids'] = [self.global_manager.get('europe_grid')]
+            input_dict['grids'] = [status.europe_grid]
             input_dict['image'] = self.mob_image_id
             input_dict['modes'] = ['strategic', 'europe']
-            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
-            if self.recruitment_type in self.global_manager.get('officer_types'):
+            constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
+            if self.recruitment_type in constants.officer_types:
                 name = ''
                 for character in self.recruitment_type:
                     if not character == '_':
@@ -387,5 +296,5 @@ class recruitment_choice_button(choice_button):
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'ship'
                 
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            constants.actor_creation_manager.create(False, input_dict)
         super().on_click()

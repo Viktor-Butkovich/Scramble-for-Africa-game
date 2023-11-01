@@ -3,14 +3,16 @@
 import pygame
 import random
 from ..mobs import mob
-from ...util import text_utility, utility, actor_utility, notification_utility, scaling, dice_utility, turn_management_utility, minister_utility
-from ...constructs import images
+from ...util import text_utility, utility, actor_utility, minister_utility, game_transitions
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class pmob(mob):
     '''
     Short for player-controlled mob, mob controlled by the player
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,7 +27,7 @@ class pmob(mob):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'sentry_mode': boolean value - Required if from save, whether this unit is in sentry mode, preventing it from being in the turn order
@@ -33,20 +35,19 @@ class pmob(mob):
                 'base_automatic_route': int tuple list value - Required if from save, list of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - Required if from save, list of the coordinates and string commands this unit will execute, changes as the route is executed
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.sentry_mode = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.selection_outline_color = 'bright green'
-        global_manager.get('pmob_list').append(self)
+        status.pmob_list.append(self)
         self.is_pmob = True
         self.set_controlling_minister_type('none')
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
-                end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
+                end_turn_destination_grid = getattr(status, input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
             self.default_name = input_dict['default_name']
             self.set_name(self.default_name)
@@ -66,16 +67,11 @@ class pmob(mob):
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
-            actor_utility.deselect_all(self.global_manager)
+            actor_utility.deselect_all()
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
                 self.select()
-        self.current_roll_modifier = 0
-        self.default_min_success = 4
-        self.default_max_crit_fail = 1
-        self.default_min_crit_success = 6
-        self.attached_dice_list = []
         self.attached_cell_icon_list = []
 
     def to_save_dict(self):
@@ -89,7 +85,7 @@ class pmob(mob):
                 Along with superclass outputs, also saves the following values:
                 'default_name': string value - This actor's name without modifications like veteran
                 'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'sentry_mode': boolean value - Whether this unit is in sentry mode, preventing it from being in the turn order
                 'in_turn_queue': boolean value - Whether this unit is in the turn order, allowing end unit turn commands, etc. to persist after saving/loading
                 'base_automatic_route': int tuple list value - List of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
@@ -101,13 +97,13 @@ class pmob(mob):
         if self.end_turn_destination == 'none':
             save_dict['end_turn_destination'] = 'none'
         else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
-            for grid_type in self.global_manager.get('grid_types_list'):
-                if self.end_turn_destination.grid == self.global_manager.get(grid_type):
+            for grid_type in constants.grid_types_list:
+                if self.end_turn_destination.grid == getattr(status, grid_type):
                     save_dict['end_turn_destination_grid_type'] = grid_type
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['default_name'] = self.default_name
         save_dict['sentry_mode'] = self.sentry_mode
-        save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
+        save_dict['in_turn_queue'] = (self in status.player_turn_queue)
         save_dict['base_automatic_route'] = self.base_automatic_route
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
         save_dict['automatically_replace'] = self.automatically_replace
@@ -137,14 +133,13 @@ class pmob(mob):
             string init_type='cell icon': init type of actor to create
             dictionary extra_parameters=None: dictionary of any extra parameters to pass to the created actor
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (x, y)
-        input_dict['grids'] = self.grids
-        input_dict['image'] = image_id
-        input_dict['modes'] = ['strategic']
-        input_dict['init_type'] = 'cell icon'
-        from_save = False
-        self.attached_cell_icon_list.append(self.global_manager.get('actor_creation_manager').create(from_save, input_dict, self.global_manager))
+        self.attached_cell_icon_list.append(constants.actor_creation_manager.create(False, {
+            'coordinates': (x, y),
+            'grids': self.grids,
+            'image': image_id,
+            'modes': ['strategic'],
+            'init_type': 'cell icon'
+        }))
 
     def add_to_automatic_route(self, new_coordinates):
         '''
@@ -157,8 +152,8 @@ class pmob(mob):
         '''
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
-        if self == self.global_manager.get('displayed_mob'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+        if self == status.displayed_mob:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def calculate_automatic_route(self):
         '''
@@ -224,7 +219,6 @@ class pmob(mob):
             None
         '''
         progressed = False
-        
         if len(self.in_progress_automatic_route) > 0:
             while self.can_follow_automatic_route():
                 next_step = self.in_progress_automatic_route[0]
@@ -233,6 +227,9 @@ class pmob(mob):
                 elif next_step == 'end':
                     self.drop_inventory()
                 else:
+                    if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')):
+                        if self.get_next_automatic_stop() == 'end': #only pick up commodities on way to end
+                            self.pick_up_all_commodities(True) #attempt to pick up commodities both before and after moving
                     x_change = next_step[0] - self.x
                     y_change = next_step[1] - self.y
                     self.move(x_change, y_change)
@@ -284,8 +281,8 @@ class pmob(mob):
         '''
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
-        if self == self.global_manager.get('displayed_mob'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+        if self == status.displayed_mob:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def selection_sound(self):
         '''
@@ -298,16 +295,16 @@ class pmob(mob):
         '''
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
-                self.global_manager.get('sound_manager').play_sound('bolt_action_2')
-            if self.global_manager.get('current_country').name == 'France':
+                constants.sound_manager.play_sound('bolt_action_2')
+            if status.current_country.name == 'France':
                 possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
-            elif self.global_manager.get('current_country').name == 'Germany':
+            elif status.current_country.name == 'Germany':
                 possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
             else:
                 possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
                 if self.is_vehicle and self.vehicle_type == 'ship':
                     possible_sounds.append('voices/steady she goes')
-            self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+            constants.sound_manager.play_sound(random.choice(possible_sounds))
 
     def set_automatically_replace(self, new_value):
         '''
@@ -318,15 +315,15 @@ class pmob(mob):
         Output:
             None
         '''
-        if new_value == True and self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
-            text_utility.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
+        if new_value == True and self.is_worker and self.worker_type == 'slave' and constants.slave_traders_strength <= 0:
+            text_utility.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible')
             return()
         self.automatically_replace = new_value
-        displayed_mob = self.global_manager.get('displayed_mob')
+        displayed_mob = status.displayed_mob
         if self == displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
-        elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+        elif displayed_mob and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -360,13 +357,13 @@ class pmob(mob):
             self.update_image_bundle()
             if new_value == True:
                 self.remove_from_turn_queue()
-                if self.global_manager.get('displayed_mob') == self:
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with sentry icon
+                if status.displayed_mob == self:
+                    actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with sentry icon
             else:
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
-            if self == self.global_manager.get('displayed_mob'):
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            if self == status.displayed_mob:
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def add_to_turn_queue(self):
         '''
@@ -378,7 +375,7 @@ class pmob(mob):
             None
         '''
         if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none':
-            turn_queue = self.global_manager.get('player_turn_queue')
+            turn_queue = status.player_turn_queue
             if not self in turn_queue:
                 turn_queue.append(self)
 
@@ -391,8 +388,8 @@ class pmob(mob):
         Output:
             None
         '''
-        turn_queue = self.global_manager.get('player_turn_queue')
-        self.global_manager.set('player_turn_queue', utility.remove_from_list(turn_queue, self))
+        turn_queue = status.player_turn_queue
+        status.player_turn_queue = utility.remove_from_list(status.player_turn_queue, self)
 
     def replace(self):
         '''
@@ -423,8 +420,8 @@ class pmob(mob):
         if current_cell == 'none':
             return()
         if current_cell.local_attrition():
-            transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type
@@ -441,17 +438,25 @@ class pmob(mob):
         Output:
             None
         '''
-        self.global_manager.get('evil_tracker').change(3)
+        constants.evil_tracker.change(3)
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
-                notification_utility.display_zoom_notification(text, self.images[0].current_cell.tile, self.global_manager)
+                constants.notification_manager.display_notification({
+                    'message': text,
+                    'zoom_destination': self.images[0].current_cell.tile,
+                })
+
             self.temp_disable_movement()
             self.replace()
             self.death_sound('violent')
         else:
             if show_notification:
-                notification_utility.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
+                constants.notification_manager.display_notification({
+                    'message': utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')',
+                    'zoom_destination': self.images[0].current_cell.tile,
+                })
+
             self.die()
 
     def generate_attrition_replacement_text(self):
@@ -465,9 +470,9 @@ class pmob(mob):
         '''
         text = 'The unit will remain inactive for the next turn as replacements are found. /n /n'
         if self.is_officer:
-            text += str(self.global_manager.get('recruitment_costs')['officer']) + ' money has automatically been spent to recruit a replacement. /n /n'
+            text += str(constants.recruitment_costs['officer']) + ' money has automatically been spent to recruit a replacement. /n /n'
         elif self.is_worker and self.worker_type == 'slave':
-            text += str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money has automatically been spent to purchase replacements. /n /n'
+            text += str(constants.recruitment_costs['slave workers']) + ' money has automatically been spent to purchase replacements. /n /n'
         return(text)
 
     def remove(self):
@@ -481,11 +486,11 @@ class pmob(mob):
         '''
         if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
             current_tile = self.images[0].current_cell.tile
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                 current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.remove_from_turn_queue()
         super().remove()
-        self.global_manager.set('pmob_list', utility.remove_from_list(self.global_manager.get('pmob_list'), self)) #make a version of pmob_list without self and set pmob_list to it
+        status.pmob_list = utility.remove_from_list(status.pmob_list, self)
 
     def draw_outline(self):
         '''
@@ -496,10 +501,10 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.global_manager.get('show_selection_outlines'):
+        if flags.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+                    pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
 
                     if len(self.base_automatic_route) > 0:
                         start_coordinates = self.base_automatic_route[0]
@@ -532,12 +537,10 @@ class pmob(mob):
         Output:
             boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
         '''
-        if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
+        if minister_utility.positions_filled(): #not self.controlling_minister == 'none':
             return(True)
         else:
-            text_utility.print_to_screen('', self.global_manager)
-            text_utility.print_to_screen('You cannot do that until all ministers have been appointed', self.global_manager)
-            text_utility.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', self.global_manager)
+            game_transitions.force_minister_appointment()
             return(False)
 
     def set_controlling_minister_type(self, new_type):
@@ -564,8 +567,10 @@ class pmob(mob):
         if self.controlling_minister_type == 'none':
             self.controlling_minister = 'none'
         else:
-            self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
-            for current_minister_type_image in self.global_manager.get('minister_image_list'):
+            self.controlling_minister = status.current_ministers[self.controlling_minister_type]
+            if self.controlling_minister == None:
+                self.controlling_minister = 'none'
+            for current_minister_type_image in status.minister_image_list:
                 if current_minister_type_image.minister_type == self.controlling_minister_type:
                     current_minister_type_image.calibrate(self.controlling_minister)
 
@@ -610,8 +615,12 @@ class pmob(mob):
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] += change
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            if status.displayed_mob == self:
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+                for tab_button in status.mob_tabbed_collection.tabs_collection.members:
+                    if tab_button.linked_element == status.mob_inventory_collection:
+                        tab_button.on_click()
+                        continue
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -625,8 +634,8 @@ class pmob(mob):
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            if status.displayed_mob == self:
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def fire(self):
         '''
@@ -652,7 +661,7 @@ class pmob(mob):
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
-        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
         if not transportation_minister == 'none':
             if self.can_leave():
                 if not self.grid.is_abstract_grid:
@@ -679,9 +688,9 @@ class pmob(mob):
                                             if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and (not self.can_swim_river) and (not self.can_walk)):
                                                 if can_print:
                                                     if future_y == 0:
-                                                        text_utility.print_to_screen('This unit cannot move into the ocean.', self.global_manager)
+                                                        text_utility.print_to_screen('This unit cannot move into the ocean.')
                                                     elif future_y > 0:
-                                                        text_utility.print_to_screen('This unit cannot move through rivers.', self.global_manager)
+                                                        text_utility.print_to_screen('This unit cannot move through rivers.')
                                                 return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
@@ -689,35 +698,35 @@ class pmob(mob):
                                         return(True)
                                     else:
                                         if can_print:
-                                            text_utility.print_to_screen('You cannot move through enemy units.', self.global_manager)
+                                            text_utility.print_to_screen('You cannot move through enemy units.')
                                         return(False)
                                 else:
                                     if can_print:
-                                        text_utility.print_to_screen('You do not have enough movement points to move.', self.global_manager)
-                                        text_utility.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.', self.global_manager)
+                                        text_utility.print_to_screen('You do not have enough movement points to move.')
+                                        text_utility.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.')
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 if can_print:
-                                    text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.', self.global_manager)
+                                    text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.')
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 if can_print:
-                                    text_utility.print_to_screen('You cannot move on ocean with this unit.', self.global_manager)
+                                    text_utility.print_to_screen('You cannot move on ocean with this unit.')
                                 return(False)
                         else:
                             if can_print:
-                                text_utility.print_to_screen('You cannot move into an unexplored tile.', self.global_manager)
+                                text_utility.print_to_screen('You cannot move into an unexplored tile.')
                             return(False)
                     else:
-                        text_utility.print_to_screen('You cannot move off of the map.', self.global_manager)
+                        text_utility.print_to_screen('You cannot move off of the map.')
                         return(False)
                 else:
                     if can_print:
-                        text_utility.print_to_screen('You cannot move while in this area.', self.global_manager)
+                        text_utility.print_to_screen('You cannot move while in this area.')
                     return(False)
         else:
             if can_print:
-                text_utility.print_to_screen('You cannot move units before a Minister of Transportation has been appointed.', self.global_manager)
+                text_utility.print_to_screen('You cannot move units before a Minister of Transportation has been appointed.')
             return(False)
 
     def can_show_tooltip(self):
@@ -761,10 +770,10 @@ class pmob(mob):
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             vehicle.select()
-        if not self.global_manager.get('loading_save'):
-            self.global_manager.get('sound_manager').play_sound('footsteps')
+        if not flags.loading_save:
+            constants.sound_manager.play_sound('footsteps')
         self.clear_automatic_route()
 
     def disembark_vehicle(self, vehicle, focus = True):
@@ -785,7 +794,7 @@ class pmob(mob):
         for current_image in self.images:
             current_image.add_to_cell()
         vehicle.selected = False
-        if self.images[0].current_cell.get_intact_building('port') == 'none':
+        if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
         if self.can_trade and self.can_hold_commodities: #if caravan
             consumer_goods_present = vehicle.get_inventory('consumer goods')
@@ -795,806 +804,13 @@ class pmob(mob):
                     consumer_goods_transferred = self.inventory_capacity
                 vehicle.change_inventory('consumer goods', -1 * consumer_goods_transferred)
                 self.change_inventory('consumer goods', consumer_goods_transferred)
-                text_utility.print_to_screen(utility.capitalize(self.name) + ' automatically took ' + str(consumer_goods_transferred) + ' consumer goods from ' + vehicle.name + '\'s cargo.', self.global_manager)
+                text_utility.print_to_screen(utility.capitalize(self.name) + ' automatically took ' + str(consumer_goods_transferred) + ' consumer goods from ' + vehicle.name + '\'s cargo.')
 
         self.add_to_turn_queue()
         if focus:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
-            if self.global_manager.get('minimap_grid') in self.grids:
-                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-            #self.update_image_bundle()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
-            self.global_manager.get('sound_manager').play_sound('footsteps')
-
-    def start_combat(self, combat_type, enemy):
-        '''
-        Description
-            Used when any player unit is involved in combat, displays a notification that combat is starting and starts the combat process. Unlike most action start functions, the choice to start combat is in a separate
-                battalion-specific function
-        Input:
-            string combat_type: Type of combat, either defending or attacking
-            npmob enemy: Enemy that the combat is being fought against
-        Output:
-            None
-        '''
-        if combat_type == 'defending': #if being attacked on main grid, move minimap there to show location
-            if self.sentry_mode:
-                self.set_sentry_mode(False)
-            if self.global_manager.get('strategic_map_grid') in self.grids:
-                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                self.select()
-                self.move_to_front()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'combat')
-        if combat_type == 'defending':
-            message = utility.capitalize(enemy.name) + ' ' + utility.conjugate('be', enemy.number) + ' attacking your ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'
-        elif combat_type == 'attacking':
-            message = 'Your ' + self.name + ' ' + utility.conjugate('be', self.number) + ' attacking the ' + enemy.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'
-        self.current_combat_type = combat_type
-        self.current_enemy = enemy
-        
-        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling. Has 1 more die than usual because enemy also rolls
-            num_dice = 3
-        else:
-            num_dice = 2
-            
-        notification_utility.display_notification(message, 'combat', self.global_manager, num_dice)
-        if self.is_battalion or self.is_safari:
-            self.global_manager.get('sound_manager').play_sound('bolt_action_1')
-        self.combat() #later call next step when closing combat action notification instead of immediately
-
-    def combat(self):
-        '''
-        Description:
-            Controls the combat process, determining and displaying its result through a series of notifications. Unlike most action functions, uses 2 competing rolls instead of a roll against a difficulty class
-        Input:
-            None
-        Output:
-            None
-        '''
-        combat_type = self.current_combat_type
-        enemy = self.current_enemy
-        own_combat_modifier = self.get_combat_modifier()
-        enemy_combat_modifier = enemy.get_combat_modifier()
-        if combat_type == 'attacking' or (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
-            uses_minister = True
-        else:
-            uses_minister = False
-        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling. Has 1 more die than usual because enemy also rolls
-            num_dice = 3
-        else:
-            num_dice = 2
-
-        text = ''
-        text += 'The ' + self.name + ' ' + utility.conjugate('attempt', self.number) +' to defeat the ' + enemy.name + '. /n /n'
-
-        if self.veteran:
-            if self.is_officer:
-                text += 'The ' + self.name + ' can roll twice and pick the higher result. /n'
-            elif self.is_group:
-                text += 'The ' + self.officer.name + ' can roll twice and pick the higher result. /n'
-
-        if self.is_battalion:
-            if self.battalion_type == 'imperial':
-                text += 'Your professional imperial soldiers will receive a +2 bonus after their roll. /n'
-            else:
-                text += 'Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n'
-        elif self.is_safari:
-            if enemy.npmob_type == 'beast':
-                text += 'Your safari is trained in hunting beasts and will receive a +2 bonus after their roll. /n'
-                own_combat_modifier += 3 #target-based modifiers not included in initial combat modifier calculation, cancels out -1 non-combat unit penalty
-            else:
-                text += 'Your safari is not accustomed to conventional combat and will receive a -1 penalty after their roll. /n'
-        elif self.is_officer:
-            text += 'As a lone officer, your ' + self.name + ' will receive a -2 penalty after their roll. /n'
-        else:
-            text += 'As a non-military unit, your ' + self.name + ' will receive a -1 penalty after their roll. /n'
-            
-        if self.disorganized:
-            text += 'The ' + self.name + ' ' + utility.conjugate('be', self.number) + ' disorganized and will receive a -1 penalty after their roll. /n'
-        elif enemy.disorganized:
-            if enemy.npmob_type == 'beast':
-                text += 'The ' + enemy.name + ' ' + utility.conjugate('be', enemy.number) + ' injured and will receive a -1 after its roll. /n'
-            else:
-                text += 'The ' + enemy.name + ' ' + utility.conjugate('be', enemy.number) + ' disorganized and will receive a -1 after their roll. /n'
-
-        if enemy.npmob_type == 'beast' and not self.is_safari:
-            text += 'The ' + self.name + ' ' + utility.conjugate('be', self.number) + ' not trained in hunting beasts and will receive a -1 penalty after their roll. /n'
-            own_combat_modifier -= 1
-
-
-        if self.images[0].current_cell.has_intact_building('fort'):
-            text += 'The fort in this tile grants your ' + self.name + ' a +1 bonus after their roll. /n'
-            own_combat_modifier += 1
-            
-        if self.veteran:
-            text += 'The outcome will be based on the difference between your highest roll and the enemy\'s roll. /n /n'
-        else:
-            text += 'The outcome will be based on the difference between your roll and the enemy\'s roll. /n /n'
-
-        notification_utility.display_notification(text + 'Click to roll. ', 'combat', self.global_manager, num_dice)
-
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
-
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
-        allow_promotion = False
-        if self.veteran:
-            if combat_type == 'attacking': #minister only involved in attacks
-                if self.is_battalion:
-                    cost_type = 'attack'
-                elif self.is_safari:
-                    cost_type = 'hunting'
-                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
-                enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
-                results = minister_rolls
-            elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
-                results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
-            else:
-                results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
-
-            if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
-                results = [6, 6]
-
-            first_roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, results[0], own_combat_modifier)
-            self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #only 1 die needs uses_minister because only 1 minister portrait should be displayed
-           
-            second_roll_list = dice_utility.combat_roll_to_list(6, 'second_combat', self.global_manager, results[1], own_combat_modifier)
-            self.display_die((die_x - 120, 440), second_roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
-                                
-            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-            roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {}
-            text += ('The higher result, ' + str(roll_result + own_combat_modifier) + ', was used. /n')
-        else:
-            if combat_type == 'attacking': #minister only involved in attacks
-                if self.is_battalion:
-                    cost_type = 'attack'
-                elif self.is_safari:
-                    cost_type = 'hunting'
-                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
-                enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
-                result = minister_rolls[0]
-                allow_promotion = True
-            elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
-                result = self.controlling_minister.no_corruption_roll(6)
-                allow_promotion = True
-            else:
-                result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
-                result = 6
-            roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, result, own_combat_modifier)
-            min_crit_success = 7
-            if allow_promotion:
-                min_crit_success = 6  
-            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green     
-            text += roll_list[1]
-            roll_result = roll_list[0]
-
-        own_roll = roll_result
-        if not combat_type == 'attacking':
-            enemy_roll = random.randrange(1, 7)
-
-        text += 'The enemy rolled a ' + str(enemy_roll)
-        if enemy_combat_modifier > 0:
-            text += ' + ' + str(enemy_combat_modifier) + ' = ' + str(enemy_roll + enemy_combat_modifier)
-        elif enemy_combat_modifier < 0:
-            text += ' - ' + str(enemy_combat_modifier * -1) + ' = ' + str(enemy_roll + enemy_combat_modifier)
-        text += ' /n'
-
-        
-        if num_dice == 2: #displays enemy dice
-            self.display_die((die_x, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
-        elif num_dice == 3:
-            self.display_die((die_x - 60, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
-
-        overall_result = own_roll + own_combat_modifier - (enemy_roll + enemy_combat_modifier)
-        
-        if overall_result <= -2:
-            conclusion = 'lose'
-            description = 'DEFEAT'
-        elif overall_result <= 1:
-            conclusion = 'draw'
-            description = 'STALEMATE'
-        else:
-            conclusion = 'win'
-            description = 'VICTORY'
-
-        text += 'Overall result: /n'
-        text += str(own_roll + own_combat_modifier) + ' - ' + str(enemy_roll + enemy_combat_modifier) + ' = ' + str(overall_result) + ': ' + description + ' /n' #1 - 6 = -5: DEFEAT
-        
-        notification_utility.display_notification(text + 'Click to continue.', 'combat', self.global_manager, num_dice)
-
-        text += '/n'
-        if conclusion == 'win':
-            if combat_type == 'attacking':
-                if enemy.npmob_type == 'beast':
-                    text += 'Your ' + self.name + ' tracked down and killed the ' + enemy.name + '. /n /n'
-                    self.public_opinion_increase = random.randrange(1, 7)
-                    text += 'Sensationalized stories of your safari\'s exploits and the death of the ' + enemy.name + ' increase public opinion by ' + str(self.public_opinion_increase) + '. /n /n'
-                else:
-                    text += 'Your ' + self.name + ' decisively defeated and destroyed the ' + enemy.name + '. /n /n'
-            elif combat_type == 'defending':
-                if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
-                    retreat_direction = 'west'
-                elif enemy.last_move_direction[0] < 0: #if enemy attacked by going west
-                    retreat_direction = 'east'
-                elif enemy.last_move_direction[1] > 0: #if enemy attacked by going north
-                    retreat_direction = 'south'
-                elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
-                    retreat_direction = 'north'
-                if enemy.npmob_type == 'beast':
-                    text += 'Your ' + self.name + ' injured and scared off the attacking ' + enemy.name + ', which was seen running to the ' + retreat_direction + ' and will be vulnerable as it heals. /n /n'           
-                else:
-                    text += 'Your ' + self.name + ' decisively routed the attacking ' + enemy.name + ', who ' + utility.conjugate('be', enemy.number, 'preterite') + ' seen scattering to the ' + retreat_direction
-                    text += ' and will be vulnerable to counterattack. /n /n'
-            
-        elif conclusion == 'draw':
-            if combat_type == 'attacking':
-                if enemy.npmob_type == 'beast':
-                    text += 'Your ' + self.name + ' failed to track the ' + enemy.name + ' to its lair and ' + utility.conjugate('be', self.number, 'preterite') + ' forced to withdraw. /n /n'
-                else:
-                    text += 'Your ' + self.name + ' failed to push back the defending ' + enemy.name + ' and ' + utility.conjugate('be', self.number, 'preterite') + ' forced to withdraw. /n /n'
-            if combat_type == 'defending':
-                if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
-                    retreat_direction = 'west'
-                elif enemy.last_move_direction[0] < 0: #if enemy attacked by going west
-                    retreat_direction = 'east'
-                elif enemy.last_move_direction[1] > 0: #if enemy attacked by going north
-                    retreat_direction = 'south'
-                elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
-                    retreat_direction = 'north'
-                if enemy.npmob_type == 'beast':
-                    text += 'Your ' + self.name + ' managed to scare off the attacking ' + enemy.name + ', which was seen running to the ' + retreat_direction + '. /n /n'           
-                else:
-                    text += 'Your ' + self.name + ' managed to repel the attacking ' + enemy.name + ', who ' + utility.conjugate('be', enemy.number, 'preterite') + ' seen withdrawing to the ' + retreat_direction + '. /n /n'
-
-        elif conclusion == 'lose':
-            if combat_type == 'attacking':
-                if enemy.npmob_type == 'beast':
-                    text += 'Your ' + self.name + ' were slowly picked off as they tracked the ' + enemy.name + ' to its lair. The survivors eventually fled in terror and will be vulnerable to counterattack. /n /n'
-                else:
-                    text += 'The ' + enemy.name + ' decisively routed your ' + self.name + ', who ' + utility.conjugate('be', enemy.number) +'  scattered and will be vulnerable to counterattack. /n /n'
-            elif combat_type == 'defending':
-                if enemy.npmob_type == 'beast':
-                    self.public_opinion_change = random.randrange(1, 4) * -1
-                    if self.number == 1:
-                        text += 'The ' + enemy.name + ' slaughtered your ' + self.name + '. /n /n'
-                    else:
-                        text += 'The ' + enemy.name + ' slaughtered most of your ' + self.name + ' and the survivors deserted, promising to never return. /n /n'
-                    killed_by_beast_flavor = ['Onlookers in Europe wonder how the world\'s greatest empire could be bested by mere beasts. /n /n',
-                                              'Parliament concludes that its subsidies are being wasted on incompetents who can\'t deal with a few wild animals.',
-                                              'Sensationalized news stories circulate of \'brave conquerors\' aimlessly wandering the jungle at the mercy of beasts, no better than savages.']
-                    text += random.choice(killed_by_beast_flavor) + ' Public opinion has decreased by ' + str(self.public_opinion_change * -1) + '. /n /n'
-                else:
-                    self.public_opinion_change = random.randrange(-3, 4)
-                    if self.number == 1:
-                        text += 'The ' + enemy.name + ' decisively defeated your ' + self.name + ', who was either slain or captured. /n /n'
-                    else:
-                        text += 'The ' + enemy.name + ' decisively defeated your ' + self.name + ', who have all been slain or captured. /n /n'
-                    if self.public_opinion_change > 0:
-                        killed_by_natives_flavor = ['Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n',
-                                                  'Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.',
-                                                  'Sensationalized news stories circulate of ungrateful savages attempting to resist their benevolent saviors.']
-                        text += random.choice(killed_by_natives_flavor) + ' Public opinion has increased by ' + str(self.public_opinion_change) + '. /n /n'
-                    elif self.public_opinion_change < 0:
-                        killed_by_natives_flavor = ['Onlookers in Europe wonder how the world\'s greatest empire could be bested by mere savages. /n /n',
-                                                  'Parliament concludes that its subsidies are being wasted on incompetents who can\'t deal with a few savages and considers lowering them in the future.',
-                                                  'Sensationalized news stories circulate of indolent ministers sending the empire\'s finest to die in some jungle.']
-                        text += random.choice(killed_by_natives_flavor) + ' Public opinion has decreased by ' + str(self.public_opinion_change * -1) + '. /n /n'
-        if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units cannot become veterans through combat
-            if self.is_battalion:
-                self.just_promoted = True
-                text += ' This battalion\'s major is now a veteran. /n /n'  
-            elif self.is_safari:
-                self.just_promoted = True
-                text += ' This safari\'s hunter is now a veteran. /n /n'
-        notification_utility.display_notification(text + ' Click to remove this notification.', 'final_combat', self.global_manager)
-        self.global_manager.set('combat_result', [self, conclusion])
-
-    def complete_combat(self):
-        '''
-        Description:
-            Used when the player finishes rolling for combat, shows the combat's results and makes any changes caused by the result. If attacking, outcomes include destroying the enemy unit, retreating, and retreating with a temporary
-                debuff against counterattacks. If defending, outcomes include forcing enemy to retreat with a temporary debuff against counterattacks, forcing enemy to retreat, and being destroyed.
-        Input:
-            None
-        Output:
-            None
-        '''
-        combat_type = self.current_combat_type
-        enemy = self.current_enemy
-        conclusion = self.global_manager.get('combat_result')[1]
-        combat_cell = self.images[0].current_cell
-        if conclusion == 'win':
-            if combat_type == 'attacking':
-                if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
-                    self.retreat() #attacker retreats in draw or if more defenders remaining
-                elif not self.movement_points >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
-                    notification_utility.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
-                        'default', self.global_manager)
-                    self.retreat()
-                enemy.die()
-                if not enemy.npmob_type == 'beast':
-                    self.global_manager.get('evil_tracker').change(8)
-                else:
-                    self.global_manager.get('public_opinion_tracker').change(self.public_opinion_increase)
-            elif combat_type == 'defending':
-                enemy.retreat()
-                enemy.set_disorganized(True)
-        elif conclusion == 'draw': #attacker retreats in draw or if more defenders remaining
-            if combat_type == 'attacking':
-                self.retreat()
-                if not enemy.npmob_type == 'beast':
-                    self.global_manager.get('evil_tracker').change(4)
-            elif combat_type == 'defending':
-                enemy.retreat()
-        elif conclusion == 'lose':
-            if combat_type == 'attacking':
-                self.retreat()
-                self.set_disorganized(True)
-                if not enemy.npmob_type == 'beast':
-                    self.global_manager.get('evil_tracker').change(4)
-            elif combat_type == 'defending':
-                current_cell = self.images[0].current_cell
-                self.die()
-                if current_cell.get_best_combatant('pmob') == 'none':
-                    enemy.kill_noncombatants()
-                    enemy.damage_buildings()
-                    if enemy.npmob_type == 'beast':
-                        enemy.set_hidden(True)
-                else: #return to original tile if non-defenseless enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
-                    enemy.retreat()
-                self.global_manager.get('public_opinion_tracker').change(self.public_opinion_change)
-
-        if combat_type == 'attacking':
-            self.set_movement_points(0)
-            if combat_cell.terrain == 'water' and combat_cell.y > 0 and not self.can_swim_river: #if attacked river and can't swim, become disorganized after combat
-                self.set_disorganized(True)
-        
-        if self.just_promoted:
-            self.promote()
-            
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
-        if len(self.global_manager.get('attacker_queue')) > 0:
-            self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-        elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
-            turn_management_utility.start_player_turn(self.global_manager)
-
-    def start_construction(self, building_info_dict):
-        '''
-        Description
-            Used when the player clicks on a construct building or train button, displays a choice notification that allows the player to construct it or not. Choosing to construct starts the construction process, costs an amount based
-                on the building built, and consumes the group's movement points
-        Input:
-            dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
-                string building_type: type of building, like 'resource'
-                string building_name: name of building, like 'ivory camp'
-                string attached_resource: optional, type of resource building produces, like 'ivory'
-        Output:
-            None
-        '''
-        self.building_type = building_info_dict['building_type']
-        self.building_name = building_info_dict['building_name']
-        if self.building_type == 'resource':
-            self.attached_resource = building_info_dict['attached_resource']
-        else:
-            self.attached_resource = ''
-        
-        self.current_roll_modifier = 0
-        self.current_min_success = self.default_min_success
-        self.current_max_crit_fail = 0 #construction shouldn't have critical failures
-        self.current_min_crit_success = self.default_min_crit_success
-        
-        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
-        self.current_max_crit_fail -= self.current_roll_modifier
-        if self.current_min_success > self.current_min_crit_success:
-            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
-        choice_info_dict = {'constructor': self, 'type': 'start construction'}
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'construction')
-        message = 'Are you sure you want to start constructing a ' + text_utility.remove_underscores(self.building_name) + '? /n /n'
-        
-        cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
-
-        message += 'The planning and materials will cost ' + str(cost) + ' money. /n /n'
-        
-        message += 'If successful, a ' + text_utility.remove_underscores(self.building_name) + ' will be built. ' #change to match each building
-        if self.building_type == 'resource':
-            message += 'A ' + text_utility.remove_underscores(self.building_name) + ' expands the tile\'s warehouse capacity, and each work crew attached to it can attempt to produce ' + self.attached_resource + ' each turn. /n /n'
-            message += 'Upgrades to the ' + text_utility.remove_underscores(self.building_name) + ' can increase the maximum number of work crews attached and/or how much ' + self.attached_resource + ' each attached work crew can attempt to produce each turn. '
-        elif self.building_type == 'infrastructure':
-            if self.building_name == 'road':
-                message += 'A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad. '
-            elif self.building_name == 'railroad':
-                message += 'A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. '
-                message += 'It is also required for trains to move and for a train station to be built.'
-            elif self.building_name == 'road_bridge':
-                message += 'A bridge built on a river tile between 2 land tiles allows movement across the river. '
-                message += 'A road bridge acts as a road between the tiles it connects and can later be upgraded to a railroad bridge. '
-            elif self.building_name == 'railroad_bridge':
-                message += 'A bridge built on a river tile between 2 land tiles allows movement across the river. '
-                message += 'A railroad bridge acts as a railroad between the tiles it connects. '
-        elif self.building_type == 'port':
-            message += 'A port allows steamboats and steamships to enter the tile and expands the tile\'s warehouse capacity. '
-            if self.y == 1:
-                message += '/n /nThis port would be adjacent to the ocean, allowing it to be used as a destination or starting point for steamships traveling between theatres. '
-            else:
-                message += '/n /nThis port would not be adjacent to the ocean. '
-                
-            if self.adjacent_to_river():
-                message += '/n /nThis port would be adjacent to a river, allowing steamboats to be built there. '
-            else:
-                message += '/n /nThis port would not be adjacent to a river.'
-        elif self.building_type == 'train_station':
-            message += 'A train station is required for a train to exchange cargo and passengers, allows trains to be built, and expands the tile\'s warehouse capacity'
-        elif self.building_type == 'trading_post':
-            message += 'A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading.'
-        elif self.building_type == 'mission':
-            message += 'A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting.'
-        elif self.building_type == 'fort':
-            message += 'A fort increases the combat effectiveness of your units standing in this tile.'
-        elif self.building_type == 'train':
-            message += 'A train is a unit that can carry commodities and passengers at very high speed along railroads. It can only exchange cargo and passengers at a train station. '
-            message += 'It also requires an attached worker as crew to function.'
-        elif self.building_type == 'steamboat':
-            message += 'A steamboat is a unit that can carry commodities and passengers at high speed along rivers. '
-            message += 'It also requires an attached worker as crew to function.'
-        else:
-            message += 'Placeholder building description'
-        message += ' /n /n'
-            
-        notification_utility.display_choice_notification(message, ['start construction', 'stop construction'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-        
-    def construct(self):
-        '''
-        Description:
-            Controls the construction process, determining and displaying its result through a series of notifications
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.current_construction_type = 'default'
-        roll_result = 0
-        self.just_promoted = False
-        self.set_movement_points(0)
-        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
-            num_dice = 2
-        else:
-            num_dice = 1
-            
-        cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
-
-        if self.building_name in ['train', 'steamboat']:
-            verb = 'assemble'
-            preterit_verb = 'assembled'
-            noun = 'assembly'
-        else:
-            verb = 'construct'
-            preterit_verb = 'constructed'
-            noun = 'construction'
-
-        self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
-        text = ''
-
-        text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + text_utility.remove_underscores(self.building_name) + '. /n /n'
-        if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
-        else:
-            text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
-
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
-
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
-
-        if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, cost, 'construction', 2)
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            first_roll_list = dice_utility.roll_to_list(6, noun.capitalize() + ' roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
-            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
-                                
-            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-            roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {}
-            for i in range(1, 7):
-                if i <= self.current_max_crit_fail:
-                    word = 'CRITICAL FAILURE'
-                elif i >= self.current_min_crit_success:
-                    word = 'CRITICAL SUCCESS'
-                elif i >= self.current_min_success:
-                    word = 'SUCCESS'
-                else:
-                    word = 'FAILURE'
-                result_outcome_dict[i] = word
-            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
-        else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, cost, 'construction')
-            roll_list = dice_utility.roll_to_list(6, noun.capitalize() + ' roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
-            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-                
-            text += roll_list[1]
-            roll_result = roll_list[0]
-
-        notification_utility.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
-            
-        text += '/n'
-        if roll_result >= self.current_min_success:
-            text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + text_utility.remove_underscores(self.building_name) + '. /n'
-        else:
-            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + text_utility.remove_underscores(self.building_name) + '. /n'
-
-        if (not self.veteran) and roll_result >= self.current_min_crit_success:
-            self.just_promoted = True
-            text += ' /nThe ' + self.officer.name + ' managed the ' + noun + ' well enough to become a veteran. /n'
-        if roll_result >= 4:
-            success = True
-            notification_utility.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
-        else:
-            success = False
-            notification_utility.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])
-        
-    def complete_construction(self):
-        '''
-        Description:
-            Used when the player finishes rolling for construction, shows the construction's results and makes any changes caused by the result. If successful, the building is constructed, promotes engineer to a veteran on critical
-                success
-        Input:
-            None
-        Output:
-            None
-        '''
-        roll_result = self.global_manager.get('construction_result')[1]
-        if roll_result >= self.current_min_success: #if campaign succeeded
-            if roll_result >= self.current_min_crit_success and not self.veteran:
-                self.promote()
-            self.set_movement_points(0)
-
-            input_dict = {}
-            input_dict['coordinates'] = (self.x, self.y)
-            input_dict['grids'] = self.grids
-            input_dict['name'] = self.building_name
-            input_dict['modes'] = ['strategic']
-            input_dict['init_type'] = self.building_type
-            if not self.building_type in ['train', 'steamboat']:
-                if self.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
-                    self.images[0].current_cell.get_building(self.building_type).remove_complete()
-            if self.building_type == 'resource':
-                input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
-                input_dict['resource_type'] = self.attached_resource
-            elif self.building_type == 'infrastructure':
-                building_image_id = 'none'
-                if self.building_name == 'road':
-                    building_image_id = 'buildings/infrastructure/road.png'
-                elif self.building_name == 'railroad':
-                    building_image_id = 'buildings/infrastructure/railroad.png'
-                else: #bridge image handled in infrastructure initialization to use correct horizontal/vertical version
-                    building_image_id = 'buildings/infrastructure/road.png'
-                input_dict['image'] = building_image_id
-                input_dict['infrastructure_type'] = self.building_name
-            elif self.building_type == 'port':
-                input_dict['image'] = 'buildings/port.png'
-            elif self.building_type == 'train_station':
-                input_dict['image'] = 'buildings/train_station.png'
-            elif self.building_type == 'trading_post':
-                input_dict['image'] = 'buildings/trading_post.png'
-            elif self.building_type == 'mission':
-                input_dict['image'] = 'buildings/mission.png'
-            elif self.building_type == 'fort':
-                input_dict['image'] = 'buildings/fort.png'
-            elif self.building_type == 'train':
-                image_dict = {'default': 'mobs/train/default.png', 'crewed': 'mobs/train/default.png', 'uncrewed': 'mobs/train/uncrewed.png'}
-                input_dict['image_dict'] = image_dict
-                input_dict['crew'] = 'none'
-            elif self.building_type == 'steamboat':
-                image_dict = {'default': 'mobs/steamboat/default.png', 'crewed': 'mobs/steamboat/default.png', 'uncrewed': 'mobs/steamboat/uncrewed.png'}
-                input_dict['image_dict'] = image_dict
-                input_dict['crew'] = 'none'
-                input_dict['init_type'] = 'boat'
-            else:
-                input_dict['image'] = 'buildings/' + self.building_type + '.png'
-            new_building = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
-
-            if self.building_type in ['port', 'train_station', 'resource']:
-                warehouses = self.images[0].current_cell.get_building('warehouses')
-                if not warehouses == 'none':
-                    if warehouses.damaged:
-                        warehouses.set_damaged(False)
-                    warehouses.upgrade()
-                else:
-                    input_dict['image'] = 'misc/empty.png'
-                    input_dict['name'] = 'warehouses'
-                    input_dict['init_type'] = 'warehouses'
-                    self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
-                    
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile display to show new building
-            if self.building_type in ['steamboat', 'train']:
-                new_building.move_to_front()
-                new_building.select()
-            else:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #update mob display to show new upgrade possibilities
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
-
-    def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail, uses_minister = True):
-        '''
-        Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
-                the result
-        Input:
-            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
-            int result: Predetermined result that the die will end on after rolling
-            int min_success: Minimum roll required for a success
-            int min_crit_success: Minimum roll required for a critical success
-            int max_crit_fail: Maximum roll required for a critical failure
-            boolean uses_minister = True: Determines if the roll is controlled by a minister and whether a minister portrait should be shown during the roll
-        Output:
-            None
-        '''
-        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
-        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        input_dict = {
-            'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager),
-            'width': scaling.scale_width(100, self.global_manager),
-            'height': scaling.scale_height(100, self.global_manager),
-            'modes': self.modes,
-            'num_sides': 6,
-            'result_outcome_dict': result_outcome_dict,
-            'outcome_color_dict': outcome_color_dict,
-            'final_result': result,
-            'init_type': 'die'
-        }
-        new_die = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
-        self.attached_dice_list.append(new_die)
-        if uses_minister:
-            if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
-                minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
-            else:
-                minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-            minister_position_icon = images.dice_roll_minister_image(scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-                'position', self.global_manager)
-            minister_portrait_icon = images.dice_roll_minister_image(scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-                'portrait', self.global_manager)
-        
-    def start_repair(self, building_info_dict):
-        '''
-        Description
-            Used when the player clicks on a repair building button, displays a choice notification that allows the player to repair it or not. Choosing to repair starts the repair process, costs an amount based on the building's total
-                cost with upgrades, and consumes the construction gang's movement points
-        Input:
-            dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
-                string building_type: type of building to repair, like 'resource'
-                string building_name: name of building, like 'ivory camp'
-        Output:
-            None
-        '''
-        self.building_type = building_info_dict['building_type']
-        self.building_name = building_info_dict['building_name']
-        self.repaired_building = self.images[0].current_cell.get_building(self.building_type)
-        
-        self.current_roll_modifier = 0
-        self.current_min_success = self.default_min_success - 1 #easier than building new building
-        self.current_max_crit_fail = 0 #construction shouldn't have critical failures
-        self.current_min_crit_success = self.default_min_crit_success
-        
-        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
-        self.current_max_crit_fail -= self.current_roll_modifier
-        if self.current_min_success > self.current_min_crit_success:
-            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
-        choice_info_dict = {'constructor': self, 'type': 'start repair'}
-        self.global_manager.set('ongoing_action', True)
-        self.global_manager.set('ongoing_action_type', 'construction')
-        message = 'Are you sure you want to start repairing the ' + text_utility.remove_underscores(self.building_name) + '? /n /n'
-        message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
-        message += 'If successful, the ' + text_utility.remove_underscores(self.building_name) + ' will be restored to full functionality. /n /n'
-            
-        notification_utility.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-
-    def repair(self):
-        '''
-        Description:
-            Controls the repair process, determining and displaying its result through a series of notifications
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.current_construction_type = 'repair'
-        roll_result = 0
-        self.just_promoted = False
-        self.set_movement_points(0)
-
-        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
-            num_dice = 2
-        else:
-            num_dice = 1
-        
-        self.global_manager.get('money_tracker').change(self.repaired_building.get_repair_cost() * -1, 'construction')
-        text = ''
-        text += 'The ' + self.name + ' attempts to repair the ' + text_utility.remove_underscores(self.building_name) + '. /n /n'
-        if not self.veteran:    
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
-        else:
-            text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
-            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
-
-        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
-
-        die_x = self.global_manager.get('notification_manager').notification_x - 140
-
-        if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.repaired_building.get_repair_cost(), 'construction', 2)
-            first_roll_list = dice_utility.roll_to_list(6, 'Construction roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
-            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-
-            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
-                                
-            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-            roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {}
-            for i in range(1, 7):
-                if i <= self.current_max_crit_fail:
-                    word = 'CRITICAL FAILURE'
-                elif i >= self.current_min_crit_success:
-                    word = 'CRITICAL SUCCESS'
-                elif i >= self.current_min_success:
-                    word = 'SUCCESS'
-                else:
-                    word = 'FAILURE'
-                result_outcome_dict[i] = word
-            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
-        else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.repaired_building.get_repair_cost(), 'construction')
-            roll_list = dice_utility.roll_to_list(6, 'Construction roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
-            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-                
-            text += roll_list[1]
-            roll_result = roll_list[0]
-
-        notification_utility.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
-            
-        text += '/n'
-        if roll_result >= self.current_min_success: #3+ required on D6 for repair
-            text += 'The ' + self.name + ' successfully repaired the ' + text_utility.remove_underscores(self.building_name) + '. /n'
-        else:
-            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the repair. /n'
-
-        if (not self.veteran) and roll_result >= self.current_min_crit_success:
-            self.just_promoted = True
-            text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
-        if roll_result >= 4:
-            success = True
-            notification_utility.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
-        else:
-            success = False
-            notification_utility.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])  
-
-    def complete_repair(self):
-        '''
-        Description:
-            Used when the player finishes rolling for a repair, shows the repair's results and makes any changes caused by the result. If successful, the building is repaired and returned to full functionality, promotes engineer to a
-                veteran on critical success
-        Input:
-            None
-        Output:
-            None
-        '''
-        roll_result = self.global_manager.get('construction_result')[1]
-        if roll_result >= self.current_min_success: #if repair succeeded
-            if roll_result >= self.current_min_crit_success and not self.veteran:
-                self.promote()
-            self.set_movement_points(0)
-            self.repaired_building.set_damaged(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #update mob info display to hide repair button
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')
+            if status.minimap_grid in self.grids:
+                status.minimap_grid.calibrate(self.x, self.y)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+            constants.sound_manager.play_sound('footsteps')

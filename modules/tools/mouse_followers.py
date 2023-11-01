@@ -2,22 +2,28 @@
 
 import pygame
 from ..constructs.images import free_image
+import modules.constants.constants as constants
+import modules.constants.flags as flags
 
-class mouse_follower(free_image):
+class mouse_follower_template(free_image):
     '''
     Free image that follows the mouse pointer and appears in certain situations, such as when choosing on a movement destination
     '''
-    def __init__(self, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            global_manager_template global_manager: Object that accesses shared variables
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
         Output:
             None
         '''
-        x, y = pygame.mouse.get_pos()
-        super().__init__('misc/targeting_mouse.png', (x, y), 50, 50, ['strategic', 'europe'], global_manager)
+        input_dict['image_id'] = 'misc/targeting_mouse.png'
+        input_dict['coordinates'] = pygame.mouse.get_pos()
+        input_dict['width'] = 50
+        input_dict['height'] = 50
+        input_dict['modes'] = ['strategic', 'europe']
+        super().__init__(input_dict)
         
     def update(self):
         ''''
@@ -41,6 +47,6 @@ class mouse_follower(free_image):
         Output:
             None
         '''
-        if self.global_manager.get('choosing_destination') or self.global_manager.get('choosing_advertised_commodity') or self.global_manager.get('drawing_automatic_route'):
+        if flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route:
             self.update()
             super().draw()

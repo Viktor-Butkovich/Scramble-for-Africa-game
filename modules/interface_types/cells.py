@@ -3,12 +3,14 @@
 import pygame
 import random
 from ..util import actor_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class cell():
     '''
     Object representing one cell of a grid corresponding to one of its coordinates, able to contain terrain, resources, mobs, and tiles
     '''
-    def __init__(self, x, y, width, height, grid, color, save_dict, global_manager):
+    def __init__(self, x, y, width, height, grid, color, save_dict):
         '''
         Description:
             Initializes this object
@@ -20,11 +22,9 @@ class cell():
             grid grid: The grid that this cell is attached to
             string color: Color in the color_dict dictionary for this cell when nothing is covering it
             string or dictionary save_dict: Equals 'none' if creating new grid, equals dictionary of saved information necessary to recreate this cell if loading grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.move_priority = 99
         self.x = x
         self.y = y
@@ -44,15 +44,15 @@ class cell():
         self.set_terrain('clear')
         self.contained_mobs = []
         self.reset_buildings()
-        self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
+        self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        
         if not save_dict == 'none': #if from save
             self.save_dict = save_dict
-            if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
+            if constants.effect_manager.effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
             self.terrain_variant = save_dict['terrain_variant']
         else: #if creating new map
-            if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
+            if constants.effect_manager.effect_active('remove_fog_of_war'):
                 self.set_visibility(True)
             else:
                 self.set_visibility(False)
@@ -85,7 +85,7 @@ class cell():
 
         saved_inventory = {}
         if self.tile.can_hold_commodities: #only save inventory if not empty
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                if self.tile.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
         save_dict['inventory'] = saved_inventory
@@ -140,8 +140,7 @@ class cell():
         Output:
             boolean: Returns whether attrition should happen here based on this cell's terrain and buildings
         '''
-        #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
-        if self.grid in [self.global_manager.get('europe_grid'), self.global_manager.get('slave_traders_grid')]: #no attrition in Europe or with slave traders
+        if self.grid in [status.europe_grid, status.slave_traders_grid]: #no attrition in Europe or with slave traders
             if attrition_type == 'health':
                 return(False)
             elif attrition_type == 'inventory': #losing inventory in warehouses and such is uncommon but not impossible in Europe, but no health attrition in Europe
@@ -181,7 +180,6 @@ class cell():
                 return(False)
             else:
                 return(True)
-            
         elif building_type in ['road', 'railroad']:
             if self.contained_buildings['infrastructure'] == 'none':
                 return(False)
@@ -191,7 +189,8 @@ class cell():
                 return(True)
             else:
                 return(False)
-            
+        elif not building_type in self.contained_buildings: #if checking for something that is not actually a building, like 'train'
+            return(False)
         else:
             if self.contained_buildings[building_type] == 'none':
                 return(False)
@@ -211,8 +210,8 @@ class cell():
             if self.village == 'none':
                 return(False)
             else:
-                returned_building = self.village
-                
+                return(True)
+
         elif building_type in ['road', 'railroad']:
             if self.contained_buildings['infrastructure'] == 'none':
                 return(False)
@@ -222,7 +221,10 @@ class cell():
                 returned_building = self.contained_buildings['infrastructure']
             else:
                 return(False)
-            
+
+        elif not building_type in self.contained_buildings: #if checking for something that is not actually a building, like 'train'
+            return(False)
+
         else:
             if self.contained_buildings[building_type] == 'none':
                 return(False)
@@ -288,7 +290,7 @@ class cell():
             None
         '''
         self.contained_buildings = {}
-        for current_building_type in self.global_manager.get('building_types'):
+        for current_building_type in constants.building_types:
             self.contained_buildings[current_building_type] = 'none'
 
     def get_buildings(self):
@@ -301,7 +303,7 @@ class cell():
             building list contained_buildings_list: buildings contained in this cell
         '''
         contained_buildings_list = []
-        for current_building_type in self.global_manager.get('building_types'):
+        for current_building_type in constants.building_types:
             if self.has_building(current_building_type):
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
@@ -316,7 +318,7 @@ class cell():
             building list contained_buildings_list: nondamaged buildings contained in this cell
         '''
         contained_buildings_list = []
-        for current_building_type in self.global_manager.get('building_types'):
+        for current_building_type in constants.building_types:
             if self.has_intact_building(current_building_type):
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
@@ -370,7 +372,7 @@ class cell():
         if self.has_building('resource'):
             warehouses_built -= 1
 
-        return(self.global_manager.get('building_prices')['warehouses'] * (2 ** warehouses_built)) #5 * 2^0 = 5 if none built, 5 * 2^1 = 10 if 1 built, 20, 40...
+        return(constants.building_prices['warehouses'] * (2 ** warehouses_built)) #5 * 2^0 = 5 if none built, 5 * 2^1 = 10 if 1 built, 20, 40...
     
     def create_slums(self):
         '''
@@ -381,15 +383,15 @@ class cell():
         Outptu:
             None
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.x, self.y)
-        input_dict['grids'] = [self.grid, self.grid.mini_grid]
-        input_dict['name'] = 'slums'
-        input_dict['modes'] = ['strategic']
-        input_dict['init_type'] = 'slums'
-        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
-        if self.tile == self.global_manager.get('displayed_tile'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.tile) #update tile display to show new building
+        constants.actor_creation_manager.create(False, {
+            'coordinates': (self.x, self.y),
+            'grids': [self.grid, self.grid.mini_grid],
+            'name': 'slums',
+            'modes': ['strategic'],
+            'init_type': 'slums'
+        })
+        if self.tile == status.displayed_tile:
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.tile) #update tile display to show new building
 
     def has_vehicle(self, vehicle_type, is_worker = False):
         '''
@@ -681,7 +683,7 @@ class cell():
         self.terrain = new_terrain
         if self.tile != 'none':
             self.tile.set_terrain(new_terrain, update_image_bundle)
-        self.color = self.global_manager.get('terrain_colors')[new_terrain]
+        self.color = constants.terrain_colors[new_terrain]
 
     def copy(self, other_cell):
         '''
@@ -715,8 +717,8 @@ class cell():
         green = current_color[1]
         blue = current_color[2]
         if not self.visible:
-            red, green, blue = self.global_manager.get('color_dict')['blonde']
-        pygame.draw.rect(self.global_manager.get('game_display'), (red, green, blue), self.Rect)
+            red, green, blue = constants.color_dict['blonde']
+        pygame.draw.rect(constants.game_display, (red, green, blue), self.Rect)
         if self.tile != 'none':
             for current_image in self.tile.images:
                 current_image.draw()
@@ -739,11 +741,11 @@ class cell():
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)
-            current_font = pygame.font.SysFont(self.global_manager.get('font_name'), font_size)
-            textsurface = current_font.render(message, False, self.global_manager.get('color_dict')[color])
+            current_font = pygame.font.SysFont(constants.font_name, font_size)
+            textsurface = current_font.render(message, False, constants.color_dict[color])
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size
-            self.global_manager.get('game_display').blit(textsurface, (text_x, text_y))
+            constants.game_display.blit(textsurface, (text_x, text_y))
 
     def touching_mouse(self):
         '''

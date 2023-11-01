@@ -1,6 +1,7 @@
 #Contains functionality for timed function call events
 
 from ..util import utility
+import modules.constants.constants as constants
 
 class event():
     def __init__(self, function, inputs, activation_time, event_manager):

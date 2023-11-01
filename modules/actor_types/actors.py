@@ -2,13 +2,15 @@
 
 import pygame
 import random
-from ..util import text_utility, notification_utility, utility, actor_utility, scaling, market_utility
+from ..util import text_utility, utility, actor_utility, scaling, market_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class actor():
     '''
     Object that can exist within certain coordinates on one or more grids and can optionally be able to hold an inventory of commodities
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -18,16 +20,14 @@ class actor():
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grid': grid value - grid in which this tile can appear
                 'modes': string list value - Game modes during which this actor's images can appear
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.from_save = from_save
-        global_manager.get('actor_list').append(self)
+        status.actor_list.append(self)
         self.modes = input_dict['modes']
         if self.from_save:
-            self.grid = self.global_manager.get(input_dict['grid_type'])
+            self.grid = getattr(status, input_dict['grid_type'])
             self.grids = [self.grid]
             if self.grid.mini_grid != 'none':
                 self.grids.append(self.grid.mini_grid)
@@ -56,7 +56,7 @@ class actor():
                 'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
+                'grid_type': string value - String matching the status key of this actor's primary grid, allowing loaded object to start in that grid
                 'name': string value - This actor's name
                 'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
         '''
@@ -93,13 +93,13 @@ class actor():
         
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['modes'] = self.modes
-        for grid_type in self.global_manager.get('grid_types_list'):
-            if self.global_manager.get(grid_type) == self.grid:
+        for grid_type in constants.grid_types_list:
+            if getattr(status, grid_type) == self.grid:
                 save_dict['grid_type'] = grid_type
         save_dict['name'] = self.name
         saved_inventory = {}
         if self.can_hold_commodities: #only save inventory if not empty
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                if self.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.inventory[current_commodity]
         save_dict['inventory'] = saved_inventory
@@ -118,11 +118,11 @@ class actor():
             if current_image.change_with_other_images:
                 current_image.set_image(new_image)
         if self.actor_type == 'mob':
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            if status.displayed_mob == self:
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
         elif self.actor_type == 'tile':
-            if self.global_manager.get('displayed_tile') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
+            if status.displayed_tile == self:
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
 
     def load_inventory(self, inventory_dict):
         '''
@@ -133,7 +133,7 @@ class actor():
         Output:
             None
         '''
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             if current_commodity in inventory_dict:
                 self.set_inventory(current_commodity, inventory_dict[current_commodity])
             else:
@@ -151,8 +151,8 @@ class actor():
             None
         '''
         self.inventory = {}
-        for current_commodity in self.global_manager.get('commodity_types'):
-            if self.global_manager.get('effect_manager').effect_active('infinite_commodities') and self.name == 'Europe':
+        for current_commodity in constants.commodity_types:
+            if constants.effect_manager.effect_active('infinite_commodities') and self.name == 'Europe':
                 self.inventory[current_commodity] = 10
             else:
                 self.inventory[current_commodity] = 0
@@ -168,7 +168,7 @@ class actor():
         Output:
             None
         '''
-        for current_commodity in self.get_held_commodities(): #current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in self.get_held_commodities(): #current_commodity in constants.commodity_types:
             self.images[0].current_cell.tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
             self.set_inventory(current_commodity, 0)
 
@@ -251,7 +251,7 @@ class actor():
         '''
         if self.can_hold_commodities:
             held_commodities = []
-            for current_commodity in self.global_manager.get('commodity_types'):
+            for current_commodity in constants.commodity_types:
                 if self.get_inventory(current_commodity) > 0:
                     if not (current_commodity == 'consumer goods' and ignore_consumer_goods):
                         held_commodities.append(current_commodity)
@@ -269,8 +269,8 @@ class actor():
             None
         '''
         if self.get_inventory_used() > 0:
-            if random.randrange(1, 7) <= 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
-                transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+            if random.randrange(1, 7) <= 1 or constants.effect_manager.effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
+                transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
                 if self.actor_type == 'tile':
                     current_cell = self.cell
                 elif self.actor_type == 'mob':
@@ -289,7 +289,9 @@ class actor():
             #this part of function only reached if no inventory attrition was triggered
             if self.actor_type == 'mob' and self.is_pmob and self.is_group and self.group_type == 'porters' and (not self.veteran) and random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6: #1/36 chance of porters promoting on successful inventory attrition roll
                 self.promote()
-                notification_utility.display_notification('By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.', 'default', self.global_manager)
+                constants.notification_manager.display_notification({
+                    'message': 'By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.',
+                })
 
     def trigger_inventory_attrition(self, transportation_minister, stealing = False): #later add input to see if corruption or real attrition to change how much minister has stolen
         '''
@@ -316,10 +318,10 @@ class actor():
                 amounts_lost_list.append(amount_lost)
                 self.change_inventory(current_commodity, -1 * amount_lost)
                 if stealing:
-                    value_stolen += (self.global_manager.get('commodity_prices')[current_commodity] * amount_lost)
+                    value_stolen += (constants.commodity_prices[current_commodity] * amount_lost)
                     for i in range(amount_lost):
                         if random.randrange(1, 7) <= 1: #1/6 chance
-                            market_utility.change_price(current_commodity, -1, self.global_manager)
+                            market_utility.change_price(current_commodity, -1)
         for current_index in range(0, len(types_lost_list)):
             lost_commodity = types_lost_list[current_index]
             amount_lost = amounts_lost_list[current_index]
@@ -349,23 +351,19 @@ class actor():
                 was_word = 'was'
             else:
                 was_word = 'were'
-            if self.global_manager.get('strategic_map_grid') in self.grids:
+            if status.strategic_map_grid in self.grids:
                 location_message = 'at (' + str(self.x) + ', ' + str(self.y) + ')'
-            elif self.global_manager.get('europe_grid') in self.grids:
+            elif status.europe_grid in self.grids:
                 location_message = 'in Europe'
-            elif self.global_manager.get('slave_traders_grid') in self.grids:
+            elif status.slave_traders_grid in self.grids:
                 location_message = 'in the Arab slave markets'
             
             if self.actor_type == 'tile':
                 transportation_minister.display_message('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' ' + location_message + ' ' +
                     was_word + ' lost, damaged, or misplaced. /n /n')
-                #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' ' + location_message + ' ' +
-                #    was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
             elif self.actor_type == 'mob':
                 transportation_minister.display_message('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
                     self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n')
-                #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
-                #    self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
         if stealing and value_stolen > 0:
             transportation_minister.steal_money(value_stolen, 'inventory_attrition')
     
@@ -438,7 +436,7 @@ class actor():
         Output:
             None
         '''
-        self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
+        status.actor_list = utility.remove_from_list(status.actor_list, self)
 
     def touching_mouse(self):
         '''
@@ -463,7 +461,7 @@ class actor():
         Output:
             None
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability 
+        if self.touching_mouse() and constants.current_game_mode in self.modes: #and not targeting_ability 
             return(True)
         else:
             return(False)
@@ -484,9 +482,9 @@ class actor():
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         if below_screen:
-            mouse_y = self.global_manager.get('display_height') + 10 - height
+            mouse_y = constants.display_height + 10 - height
         if beyond_screen:
-            mouse_x = self.global_manager.get('display_width') - width
+            mouse_x = constants.display_width - width
         mouse_y += y_displacement
 
         if hasattr(self, 'images'):
@@ -497,18 +495,18 @@ class actor():
         else:
             tooltip_image = self
 
-        if (mouse_x + tooltip_image.tooltip_box.width) > self.global_manager.get('display_width'):
-            mouse_x = self.global_manager.get('display_width') - tooltip_image.tooltip_box.width
+        if (mouse_x + tooltip_image.tooltip_box.width) > constants.display_width:
+            mouse_x = constants.display_width - tooltip_image.tooltip_box.width
         tooltip_image.tooltip_box.x = mouse_x
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width
         tooltip_image.tooltip_outline.y = tooltip_image.tooltip_box.y - tooltip_image.tooltip_outline_width
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], tooltip_image.tooltip_outline)
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], tooltip_image.tooltip_box)
+        pygame.draw.rect(constants.game_display, constants.color_dict['black'], tooltip_image.tooltip_outline)
+        pygame.draw.rect(constants.game_display, constants.color_dict['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
-                tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+            constants.game_display.blit(text_utility.text(text_line, constants.myfont), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
+                tooltip_image.tooltip_box.y + (text_line_index * constants.font_size)))
 
     def get_image_id_list(self, override_values={}):
         '''

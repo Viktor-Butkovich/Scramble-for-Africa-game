@@ -3,12 +3,14 @@
 import random
 from ..npmobs import npmob
 from ....util import utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class beast(npmob):
     '''
     Beasts that wander the map hidden, prefer certain terrains, attack/demoralize nearby units, and can be tracked down by a safari
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,30 +29,29 @@ class beast(npmob):
                 'animal_type': string value - Type of beast, like 'lion'
                 'adjective': string value - Descriptor for beast, like 'man-eating'
                 'hidden': boolean value - Whether this beast is currently hidden
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.hidden = False
-        global_manager.get('beast_list').append(self)
+        status.beast_list.append(self)
         self.animal_type = input_dict['animal_type']
         self.adjective = input_dict['adjective']
         if self.adjective == 'king':
-            input_dict['name'] = self.animal_type + ' ' + self.adjective + ' '
+            input_dict['name'] = self.animal_type + ' ' + self.adjective
         else:
             input_dict['name'] = self.adjective + ' ' + self.animal_type
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         
         self.npmob_type = 'beast'
         self.hostile = True
-        self.preferred_terrains = global_manager.get('animal_terrain_dict')[self.animal_type]
+        self.preferred_terrains = constants.animal_terrain_dict[self.animal_type]
         if from_save:
             self.set_hidden(input_dict['hidden'], True)
         else:
             self.set_hidden(True, True)
             self.set_max_movement_points(4)
             
-        if global_manager.get('effect_manager').effect_active('reveal_beasts'):
+        if constants.effect_manager.effect_active('reveal_beasts'):
             self.set_hidden(False, True)
             
         self.just_revealed = False
@@ -150,7 +151,6 @@ class beast(npmob):
             self.set_hidden(True)
         super().retreat()
 
-        
     def set_hidden(self, new_hidden, on_load = False):
         '''
         Description:
@@ -158,14 +158,13 @@ class beast(npmob):
                 beasts nearby 
         '''
         self.hidden = new_hidden
-        if new_hidden == True:
+        if new_hidden:
             self.hide_images()
         else:
             self.show_images()
             if not on_load:
-                self.global_manager.get('sound_manager').play_sound('beasts/' + self.animal_type, 0.6)
-            
-    
+                constants.sound_manager.play_sound('beasts/' + self.animal_type, 0.6)
+
     def check_despawn(self):
         '''
         Description:
@@ -188,7 +187,7 @@ class beast(npmob):
             None
         '''
         super().remove()
-        self.global_manager.set('beast_list', utility.remove_from_list(self.global_manager.get('beast_list'), self))
+        status.beast_list = utility.remove_from_list(status.beast_list, self)
 
     def damage_buildings(self):
         '''

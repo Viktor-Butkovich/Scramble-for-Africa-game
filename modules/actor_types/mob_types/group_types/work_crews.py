@@ -2,13 +2,15 @@
 
 import random
 from ..groups import group
-from ....util import actor_utility, utility, market_utility, notification_utility
+from ....util import actor_utility, utility, market_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class work_crew(group):
     '''
     A group with a foreman officer that can work in buildings
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -23,20 +25,19 @@ class work_crew(group):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_work_crew = True
         self.set_group_type('work_crew')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for new button available
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for new button available
 
     def work_building(self, building):
         '''
@@ -54,8 +55,8 @@ class work_crew(group):
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), building.cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, building.cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
 
     def leave_building(self, building):
         '''
@@ -71,8 +72,8 @@ class work_crew(group):
         self.show_images()
         self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         self.select()
 
     def attempt_production(self, building):
@@ -87,8 +88,8 @@ class work_crew(group):
         '''
         value_stolen = 0
         if self.movement_points >= 1: #do not attempt production if unit already did something this turn or suffered from attrition #not self.temp_movement_disabled:
-            if not building.resource_type in self.global_manager.get('attempted_commodities'):
-                self.global_manager.get('attempted_commodities').append(building.resource_type)
+            if not building.resource_type in constants.attempted_commodities:
+                constants.attempted_commodities.append(building.resource_type)
             for current_attempt in range(building.efficiency):
                 if self.veteran:
                     results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
@@ -99,16 +100,19 @@ class work_crew(group):
                 if roll_result >= 4: #4+ required on D6 for production
                     if not self.controlling_minister.check_corruption():
                         building.cell.tile.change_inventory(building.resource_type, 1)
-                        self.global_manager.get('commodities_produced')[building.resource_type] += 1
+                        constants.commodities_produced[building.resource_type] += 1
 
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
                             message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
                             message += ') has become a veteran and will be more successful in future production attempts.'
-                            notification_utility.display_zoom_notification(message, building.cell.tile, self.global_manager)
+                            constants.notification_manager.display_notification({
+                                'message': message,
+                                'zoom_destination': building.cell.tile,
+                            })
                     else:
-                        value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
+                        value_stolen += constants.commodity_prices[building.resource_type]
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
                 if random.randrange(1, 7) <= 1: #1/6 chance
-                    market_utility.change_price(building.resource_type, -1, self.global_manager)
+                    market_utility.change_price(building.resource_type, -1)

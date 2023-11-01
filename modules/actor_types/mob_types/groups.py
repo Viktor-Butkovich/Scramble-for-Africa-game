@@ -3,13 +3,15 @@
 import random
 import math
 from .pmobs import pmob
-from ...util import actor_utility, notification_utility
+from ...util import actor_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class group(pmob):
     '''
     pmob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -24,12 +26,11 @@ class group(pmob):
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the status key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -37,26 +38,22 @@ class group(pmob):
             self.worker = input_dict['worker']
             self.officer = input_dict['officer']
         else:
-            self.worker = global_manager.get('actor_creation_manager').create(True, input_dict['worker'], global_manager)
-            self.officer = global_manager.get('actor_creation_manager').create(True, input_dict['officer'], global_manager)
+            self.worker = constants.actor_creation_manager.create(True, input_dict['worker'])
+            self.officer = constants.actor_creation_manager.create(True, input_dict['officer'])
         self.group_type = 'none'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
+        for current_commodity in constants.commodity_types: #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        self.current_roll_modifier = 0
-        self.default_min_success = 4
-        self.default_max_crit_fail = 1
-        self.default_min_crit_success = 6
         self.set_group_type('none')
         self.update_image_bundle()
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
         if self.officer.veteran:
             self.promote()
@@ -64,7 +61,7 @@ class group(pmob):
             self.status_icons = self.officer.status_icons
             for current_status_icon in self.status_icons:
                 current_status_icon.actor = self
-            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer, global_manager))
+            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer))
 
     def replace_worker(self, new_worker_type):
         '''
@@ -75,10 +72,12 @@ class group(pmob):
         Output:
             None
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.x, self.y)
-        input_dict['grids'] = self.grids
-        input_dict['modes'] = self.modes
+        input_dict = {
+            'coordinates': (self.x, self.y),
+            'grids': self.grids,
+            'modes': self.modes
+        }
+
         if new_worker_type == 'European':
             input_dict['image'] = 'mobs/European workers/default.png'
             input_dict['name'] = 'European workers'
@@ -90,13 +89,13 @@ class group(pmob):
             input_dict['init_type'] = 'workers'
             input_dict['worker_type'] = 'African'
         elif new_worker_type == 'slaves':
-            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
+            constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
             input_dict['image'] = 'mobs/slave workers/default.png'
             input_dict['name'] = 'slave workers'
             input_dict['init_type'] = 'slaves'
             input_dict['purchased'] = False
-        previous_selected = self.global_manager.get('displayed_mob')#self.selected
-        new_worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        previous_selected = status.displayed_mob
+        new_worker = constants.actor_creation_manager.create(False, input_dict)
         new_worker.set_automatically_replace(self.worker.automatically_replace)
         self.worker.fire(wander = False)
         self.worker = new_worker
@@ -105,13 +104,13 @@ class group(pmob):
         self.update_image_bundle()
         if previous_selected == self:
             self.select()
-        elif previous_selected != 'none':
+        elif previous_selected:
             previous_selected.select()
         else:
-            actor_utility.deselect_all(self.global_manager)
+            actor_utility.deselect_all()
 
-        if self.images[0].current_cell != 'none' and self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
+        if self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -154,13 +153,13 @@ class group(pmob):
         if current_cell == 'none':
             return()
 
-        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
     
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                 self.attrition_death('officer')
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                 worker_type = self.worker.worker_type
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                     self.attrition_death('worker')
@@ -174,7 +173,7 @@ class group(pmob):
         Output:
             None
         '''
-        self.global_manager.get('evil_tracker').change(3)
+        constants.evil_tracker.change(3)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle
@@ -207,7 +206,11 @@ class group(pmob):
                 officer.attrition_death(False)
                 if self.in_vehicle:
                     worker.embark_vehicle(zoom_destination)
-            notification_utility.display_zoom_notification(text, zoom_destination, self.global_manager)
+
+            constants.notification_manager.display_notification({
+                'message': text,
+                'zoom_destination': zoom_destination,
+            })
 
         elif target == 'worker':
             text = 'The ' + self.worker.name + destination_message + 'have died from attrition. /n /n '
@@ -226,7 +229,11 @@ class group(pmob):
                 worker.attrition_death(False)
                 if self.in_vehicle:
                     officer.embark_vehicle(zoom_destination)
-            notification_utility.display_zoom_notification(text, zoom_destination, self.global_manager)
+
+            constants.notification_manager.display_notification({
+                'message': text,
+                'zoom_destination': zoom_destination,
+            })
 
     def fire(self):
         '''
@@ -252,7 +259,7 @@ class group(pmob):
         '''
         self.group_type = new_type
         if not new_type == 'none':
-            self.set_controlling_minister_type(self.global_manager.get('group_minister_dict')[self.group_type])
+            self.set_controlling_minister_type(constants.group_minister_dict[self.group_type])
         else:
             self.set_controlling_minister_type('none')
         self.update_image_bundle()
@@ -284,7 +291,6 @@ class group(pmob):
         Output:
             None
         '''
-        self.just_promoted = False
         if not self.veteran:
             self.veteran = True
             self.set_name('veteran ' + self.name)
@@ -294,8 +300,8 @@ class group(pmob):
         self.update_image_bundle()
         self.officer.update_image_bundle()
         #self.officer.update_image_bundle()
-        if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with veteran icon
+        if status.displayed_mob == self:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -364,5 +370,5 @@ class group(pmob):
         #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
         image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default']) #group default image is empty
-        image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer, self.global_manager)
+        image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer)
         return(image_id_list)

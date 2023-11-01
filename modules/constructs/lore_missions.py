@@ -1,14 +1,16 @@
 #Contains functionality for lore missions
 
 import random
-from ..util import utility, notification_utility
+from ..util import utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class lore_mission():
     '''
     Mission from geographic society for an artifact that can be searched for at locations based on leads from villages, artifact gives permanent positive effect modifier and other bonuses when 
         found
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -22,13 +24,11 @@ class lore_mission():
                     possible artifact locations
                 'confirmed_all_locations_revealed': boolean value - Required if from save, whether an expedition has already searched for rumors at a village and confirmed that all locations 
                     have been revealed
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
-        self.global_manager.get('lore_mission_list').append(self)
-        self.global_manager.set('current_lore_mission', self)
+        status.lore_mission_list.append(self)
+        status.current_lore_mission = self
         self.possible_artifact_locations = []
         if from_save:
             self.lore_type = input_dict['lore_type']
@@ -37,33 +37,36 @@ class lore_mission():
             self.name = self.adjective + self.artifact_type
             for current_save_dict in input_dict['possible_artifact_location_dicts']:
                 current_save_dict['lore_mission'] = self
-                new_possible_artifact_location = possible_artifact_location(True, current_save_dict, self.global_manager)
+                new_possible_artifact_location = possible_artifact_location(True, current_save_dict)
                 if current_save_dict['coordinates'] == input_dict['artifact_coordinates']:
                     self.artifact_location = new_possible_artifact_location
             self.confirmed_all_locations_revealed = input_dict['confirmed_all_locations_revealed']
         else:
-            self.lore_type = random.choice(global_manager.get('lore_types'))
-            self.artifact_type = random.choice(global_manager.get('lore_types_artifact_dict')[self.lore_type])
-            self.adjective = random.choice(global_manager.get('lore_types_adjective_dict')[self.lore_type])
+            self.lore_type = random.choice(constants.lore_types)
+            self.artifact_type = random.choice(constants.lore_types_artifact_dict[self.lore_type])
+            self.adjective = random.choice(constants.lore_types_adjective_dict[self.lore_type])
             self.name = self.adjective + self.artifact_type
             num_possible_artifact_locations = random.randrange(1, 7)
             while len(self.possible_artifact_locations) < num_possible_artifact_locations:
-                input_dict = {
+
+                new_possible_artifact_location = possible_artifact_location(False, {
                     'lore_mission': self,
                     'coordinates': self.generate_possible_artifact_coordinates(),
                     'revealed': False,
                     'proven_false': False
-                }
-                new_possible_artifact_location = possible_artifact_location(False, input_dict, self.global_manager)
-            for current_village in self.global_manager.get('village_list'):
+                })
+
+            for current_village in status.village_list:
                 current_village.found_rumors = False
             self.confirmed_all_locations_revealed = False
             self.artifact_location = random.choice(self.possible_artifact_locations)
-            text = 'A new ' + self.lore_type + ' mission has been issued by the ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society'
+            text = 'A new ' + self.lore_type + ' mission has been issued by the ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society'
             text += ' to find the ' + self.name + '. /n /n'
-            notification_utility.display_notification(text, 'none', self.global_manager)
+            constants.notification_manager.display_notification({
+                'message': text,
+            })
 
-        if self.global_manager.get('effect_manager').effect_active('show_lore_mission_locations'):
+        if constants.effect_manager.effect_active('show_lore_mission_locations'):
             print('new mission for ' + self.name)
             for current_possible_artifact_location in self.possible_artifact_locations:
                 print('possible location at (' + str(current_possible_artifact_location.x) + ', ' + str(current_possible_artifact_location.y) + ')')
@@ -106,9 +109,9 @@ class lore_mission():
         used_coordinates = []
         for current_possible_artifact_location in self.possible_artifact_locations:
             used_coordinates.append((current_possible_artifact_location.x, current_possible_artifact_location.y))
-        possible_coordinates = (random.randrange(0, self.global_manager.get('strategic_map_width')), random.randrange(1, self.global_manager.get('strategic_map_height')))
+        possible_coordinates = (random.randrange(0, constants.strategic_map_width), random.randrange(1, constants.strategic_map_height))
         while possible_coordinates in used_coordinates: #would cause infinite loop if too many possible locations existed
-            possible_coordinates = (random.randrange(0, self.global_manager.get('strategic_map_width')), random.randrange(1, self.global_manager.get('strategic_map_height')))
+            possible_coordinates = (random.randrange(0, constants.strategic_map_width), random.randrange(1, constants.strategic_map_height))
         return(possible_coordinates)
 
     def remove_complete(self):
@@ -132,8 +135,8 @@ class lore_mission():
         Output:
             None
         '''
-        self.global_manager.set('current_lore_mission', 'none')
-        self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
+        status.current_lore_mission = None
+        status.lore_mission_list = utility.remove_from_list(status.lore_mission_list, self)
         for current_possible_artifact_location in self.possible_artifact_locations:
             current_possible_artifact_location.remove_complete()
         self.possible_artifact_locations = []
@@ -149,7 +152,7 @@ class lore_mission():
         '''
         num_revealed = 0
         for current_possible_artifact_location in self.possible_artifact_locations:
-            if current_possible_artifact_location.revealed:
+            if current_possible_artifact_location.revealed or current_possible_artifact_location.proven_false:
                 num_revealed += 1
         return(num_revealed)
 
@@ -165,7 +168,7 @@ class lore_mission():
         if self.get_num_revealed_possible_artifact_locations() == len(self.possible_artifact_locations):
             return('none')
         current_possible_artifact_location = random.choice(self.possible_artifact_locations)
-        while current_possible_artifact_location.revealed:
+        while current_possible_artifact_location.revealed or current_possible_artifact_location.proven_false:
             current_possible_artifact_location = random.choice(self.possible_artifact_locations)
         return(current_possible_artifact_location)
 
@@ -203,7 +206,7 @@ class possible_artifact_location():
     '''
     Possible location for a lore mission's artifact that can be located from village rumors and investigated
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -214,11 +217,9 @@ class possible_artifact_location():
                 'coordinates': int tuple value - Two values representing this location's x and y coordinates on the strategic grid
                 'revealed': boolean value - Whether rumors of this location have been revealed yet
                 'proven_false': boolean value - Whether it has been confirmed that this is not the location of the artifact
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.lore_mission = input_dict['lore_mission']
         self.lore_mission.possible_artifact_locations.append(self)
         self.x, self.y = input_dict['coordinates']
@@ -237,7 +238,7 @@ class possible_artifact_location():
         '''
         if (not hasattr(self, 'revealed')) or new_revealed != self.revealed:
             self.revealed = new_revealed
-            host_tile = self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile
+            host_tile = status.strategic_map_grid.find_cell(self.x, self.y).tile
             if self.revealed:
                 host_tile.hosted_images.append(self)
             else:

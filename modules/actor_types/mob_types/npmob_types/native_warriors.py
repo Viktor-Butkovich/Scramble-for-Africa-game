@@ -3,12 +3,15 @@
 import random
 from ..npmobs import npmob
 from ....util import utility
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class native_warriors(npmob):
     '''
     npmob that represents a population unit that temporarily leaves an aggressive village to attack player-controlled mobs/buildings
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -25,11 +28,10 @@ class native_warriors(npmob):
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'canoes_image': string value - File path to the image used by this object when it is in a river
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.number = 2 #native warriors is plural
         self.hostile = True
         self.can_damage_buildings = True
@@ -41,7 +43,7 @@ class native_warriors(npmob):
         self.despawning = False
         if not from_save:
             self.set_max_movement_points(4)
-            if not global_manager.get('creating_new_game'):
+            if not flags.creating_new_game:
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
             self.second_image_variant = random.randrange(0, len(self.image_variants))
         self.set_has_canoes(True)
@@ -60,19 +62,19 @@ class native_warriors(npmob):
             possible_directions = [] #only directions that can be retreated in
             for direction in available_directions:
                 cell = self.images[0].current_cell.grid.find_cell(self.x - direction[0], self.y - direction[1])
-                if not cell == 'none':
+                if cell:
                     if not cell.has_pmob() and not cell.y == 0: #can't retreat to ocean or into player units
                         possible_directions.append(direction)
             if len(possible_directions) > 0:
                 self.last_move_direction = random.choice(possible_directions)
-                if self.global_manager.get('player_turn'):
+                if flags.player_turn:
                     if self.grids[0].find_cell(self.x, self.y).get_best_combatant('pmob', self.npmob_type) == 'none':
                         self.kill_noncombatants()
                         self.damage_buildings()
                     else:
                         self.attempt_local_combat() #if spawned by failed trade or conversion during player turn, attack immediately
                 else:
-                    self.global_manager.get('attacker_queue').append(self)
+                    status.attacker_queue.append(self)
             else:
                 self.remove_complete()
                 self.origin_village.change_population(1) #despawn if pmob on tile and can't retreat anywhere

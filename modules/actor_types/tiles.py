@@ -5,12 +5,15 @@ import random
 from ..constructs import images, villages
 from ..util import utility, actor_utility, main_loop_utility
 from .actors import actor
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class tile(actor): #to do: make terrain tiles a subclass
     '''
     An actor that appears under other actors and occupies a grid cell, being able to act as a passive icon, resource, terrain, or a hidden area
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -23,7 +26,6 @@ class tile(actor): #to do: make terrain tiles a subclass
                 'name': string value - This tile's name
                 'modes': string list value - Game modes during which this actor's images can appear
                 'show_terrain': boolean value - True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -31,10 +33,10 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.selection_outline_color = 'yellow'#'bright blue'
         self.actor_match_outline_color = 'white'
         input_dict['grids'] = [input_dict['grid']] #give actor a 1-item list of grids as input
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.set_name(input_dict['name'])
         self.image_dict = {'default': input_dict['image']}
-        self.image = images.tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), input_dict['grid'], 'default', global_manager)
+        self.image = images.tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), input_dict['grid'], 'default')
         self.images = [self.image] #tiles only appear on 1 grid, but have a list of images defined to be more consistent with other actor subclasses
         self.show_terrain = input_dict['show_terrain']
         self.cell = self.grid.find_cell(self.x, self.y)
@@ -72,10 +74,10 @@ class tile(actor): #to do: make terrain tiles a subclass
         for current_image in self.images:
             outline = self.cell.Rect
             if color == 'default':
-                color = self.global_manager.get('color_dict')[self.selection_outline_color]
+                color = constants.color_dict[self.selection_outline_color]
             else:
-                color = self.global_manager.get('color_dict')[color] #converts input string to RGB tuple
-            pygame.draw.rect(self.global_manager.get('game_display'), color, (outline), current_image.outline_width)
+                color = constants.color_dict[color] #converts input string to RGB tuple
+            pygame.draw.rect(constants.game_display, color, (outline), current_image.outline_width)
 
     def draw_actor_match_outline(self, called_by_equivalent):
         '''
@@ -90,7 +92,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.images[0].can_show():
             for current_image in self.images:
                 outline = self.cell.Rect
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.actor_match_outline_color], (outline), current_image.outline_width)
+                pygame.draw.rect(constants.game_display, constants.color_dict[self.actor_match_outline_color], (outline), current_image.outline_width)
                 equivalent_tile = self.get_equivalent_tile()
                 if (not equivalent_tile == 'none') and (not called_by_equivalent):
                     equivalent_tile.draw_actor_match_outline(True)
@@ -130,8 +132,12 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory[commodity] += change
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
-            if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
+            if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
+                for tab_button in status.tile_tabbed_collection.tabs_collection.members:
+                    if tab_button.linked_element == status.tile_inventory_collection:
+                        tab_button.on_click()
+                        continue
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -147,8 +153,8 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory[commodity] = new_value
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile.inventory[commodity] = new_value
-            if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
+            if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
 
     def get_main_grid_coordinates(self):
         '''
@@ -173,16 +179,16 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             tile: tile on the corresponding tile on the grid attached to this tile's grid
         '''
-        if self.grid == self.global_manager.get('minimap_grid'):
+        if self.grid == status.minimap_grid:
             main_x, main_y = self.grid.get_main_grid_coordinates(self.x, self.y)
             attached_cell = self.grid.attached_grid.find_cell(main_x, main_y)
-            if not attached_cell == 'none':
+            if attached_cell:
                 return(attached_cell.tile)
             return('none')
-        elif self.grid == self.global_manager.get('strategic_map_grid'):
+        elif self.grid == status.strategic_map_grid:
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
             equivalent_cell = self.grid.mini_grid.find_cell(mini_x, mini_y)
-            if not equivalent_cell == 'none':
+            if equivalent_cell:
                 return(equivalent_cell.tile)
             else:
                 return('none')
@@ -208,7 +214,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 image_id_list.append(self.image_dict['default']) #blank void image if outside of matched area
         elif self.cell.grid.is_abstract_grid and self.cell.tile.name == 'Slave traders':
             image_id_list.append(self.image_dict['default'])
-            strength_modifier = actor_utility.get_slave_traders_strength_modifier(self.global_manager)
+            strength_modifier = actor_utility.get_slave_traders_strength_modifier()
             if strength_modifier == 'none':
                 adjective = 'no'
             elif strength_modifier < 0:
@@ -222,8 +228,8 @@ class tile(actor): #to do: make terrain tiles a subclass
             if self.cell.visible or force_visibility: #force visibility shows full tile even if tile is not yet visible
                 image_id_list.append({'image_id': self.image_dict['default'], 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -9})
                 if self.cell.resource != 'none':
-                    image_id_list.append(actor_utility.generate_resource_icon(self, self.global_manager))
-                for current_building_type in self.global_manager.get('building_types'):
+                    image_id_list.append(actor_utility.generate_resource_icon(self))
+                for current_building_type in constants.building_types:
                     current_building = self.cell.get_building(current_building_type)
                     if current_building != 'none':
                         image_id_list += current_building.get_image_id_list()
@@ -249,7 +255,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.set_image(override_image)
         else:
             self.set_image(self.get_image_id_list())
-        if self.grid == self.global_manager.get('strategic_map_grid'):
+        if self.grid == status.strategic_map_grid:
             equivalent_tile = self.get_equivalent_tile()
             if equivalent_tile != 'none':
                 equivalent_tile.update_image_bundle(override_image=override_image)
@@ -279,18 +285,21 @@ class tile(actor): #to do: make terrain tiles a subclass
                         else:
                             self.cell.village.cell = self.cell
                 if not village_exists: #make new village if village not present
-                    input_dict = {'cell': self.cell}
                     if self.cell.grid.from_save:
-                        input_dict['name'] = self.cell.save_dict['village_name']
-                        input_dict['population'] = self.cell.save_dict['village_population']
-                        input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
-                        input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
-                        input_dict['attached_warriors'] = self.cell.save_dict['village_attached_warriors']
-                        input_dict['found_rumors'] = self.cell.save_dict['village_found_rumors']
-                        self.cell.village = villages.village(True, input_dict, self.global_manager)
+                        self.cell.village = villages.village(True, {
+                            'name': self.cell.save_dict['village_name'],
+                            'population': self.cell.save_dict['village_population'],
+                            'aggressiveness': self.cell.save_dict['village_aggressiveness'],
+                            'available_workers': self.cell.save_dict['village_available_workers'],
+                            'attached_warriors': self.cell.save_dict['village_attached_warriors'],
+                            'found_rumors': self.cell.save_dict['village_found_rumors'],
+                            'cell': self.cell
+                        })
                         self.cell.village.tiles.append(self)
                     else:
-                        self.cell.village = villages.village(False, input_dict, self.global_manager)
+                        self.cell.village = villages.village(False, {
+                            'cell': self.cell
+                        })
                         self.cell.village.tiles.append(self)
         if update_image_bundle:
             self.update_image_bundle()
@@ -305,7 +314,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if new_terrain in self.global_manager.get('terrain_list') + ['water']:
+        if new_terrain in constants.terrain_list + ['water']:
             base_word = new_terrain
             if new_terrain == 'water':
                 current_y = self.y
@@ -349,9 +358,9 @@ class tile(actor): #to do: make terrain tiles a subclass
                     tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource')
             else:
                 tooltip_message .append('This tile has not been explored')
-            if not self.global_manager.get('current_lore_mission') == 'none':
-                if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(coordinates[0], coordinates[1]):
-                    tooltip_message.append('There are rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be found here')
+            if status.current_lore_mission:
+                if status.current_lore_mission.has_revealed_possible_artifact_location(coordinates[0], coordinates[1]):
+                    tooltip_message.append('There are rumors that the ' + status.current_lore_mission.name + ' may be found here')
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])
@@ -379,7 +388,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         if self.show_terrain == True:
-            if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability
+            if self.touching_mouse() and constants.current_game_mode in self.modes: #and not targeting_ability
                 if self.cell.terrain == 'none':
                     return(False)
                 else:
@@ -398,26 +407,26 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.global_manager.get('player_turn') and main_loop_utility.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
-            if self.name == 'Slave traders' and self.global_manager.get('slave_traders_strength') > 0:
-                if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
-                    self.global_manager.get('event_manager').clear()
-                    self.global_manager.get('sound_manager').play_random_music('slave traders')
-            elif (not self.cell.village == 'none') and self.cell.visible and self.cell.village.population > 0 and not self.cell.has_intact_building('port'):
+        if flags.player_turn and main_loop_utility.action_possible(): #(not flags.choosing_destination):
+            if self.name == 'Slave traders' and constants.slave_traders_strength > 0:
+                if constants.sound_manager.previous_state != 'slave traders':
+                    constants.event_manager.clear()
+                    constants.sound_manager.play_random_music('slave traders')
+            elif self.cell.village != 'none' and self.cell.visible and self.cell.village.population > 0 and not self.cell.has_intact_building('port'):
                 new_state = 'village ' + self.cell.village.get_aggressiveness_adjective()
-                if not self.global_manager.get('sound_manager').previous_state == new_state: #village_peaceful/neutral/aggressive
-                    self.global_manager.get('event_manager').clear()
-                    self.global_manager.get('sound_manager').play_random_music(new_state)
+                if constants.sound_manager.previous_state != new_state: #village_peaceful/neutral/aggressive
+                    constants.event_manager.clear()
+                    constants.sound_manager.play_random_music(new_state)
             else:
-                if not self.global_manager.get('sound_manager').previous_state == 'europe': #if self.global_manager.get('sound_manager').previous_state == 'slave traders':
-                    self.global_manager.get('event_manager').clear()
-                    self.global_manager.get('sound_manager').play_random_music('europe')
+                if constants.sound_manager.previous_state != 'europe':
+                    constants.event_manager.clear()
+                    constants.sound_manager.play_random_music('europe')
 
 class abstract_tile(tile):
     '''
     tile for 1-cell abstract grids like Europe, can have a tooltip but has no terrain, instead having a unique image
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -428,13 +437,12 @@ class abstract_tile(tile):
                 'image': string value - File path to the image used by this object
                 'name': string value - This tile's name
                 'modes': string list value - Game modes during which this actor's images can appear
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['coordinates'] = (0, 0)
         input_dict['show_terrain'] = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
 
     def update_tooltip(self):
         '''
@@ -446,7 +454,7 @@ class abstract_tile(tile):
             None
         '''
         if self.name == 'Slave traders':
-            self.set_tooltip([self.name, 'Slave traders strength: ' + str(self.global_manager.get('slave_traders_strength'))])
+            self.set_tooltip([self.name, 'Slave traders strength: ' + str(constants.slave_traders_strength)])
         else:
             self.set_tooltip([self.name])
 
@@ -459,7 +467,7 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
+        if self.touching_mouse() and constants.current_game_mode in self.modes:
             return(True)
         else:
             return(False)

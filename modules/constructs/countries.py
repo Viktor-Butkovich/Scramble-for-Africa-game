@@ -1,12 +1,14 @@
 #Contains functionality for different player countries
 
 from ..util import actor_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class country:
     '''
     Country with associated flavor text, art, images, and abilities that can be selected to play as
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -21,13 +23,11 @@ class country:
                 'allow_double_last_names': boolean value - Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
                 'background_set': string list value - Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
                 'country_effect': effect value - Effect that is applied when this country is selected and vice versa
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.actor_type = 'country'
-        self.global_manager = global_manager
-        self.global_manager.get('country_list').append(self)
+        status.country_list.append(self)
         self.tooltip_text = []
         self.name = input_dict['name']
         self.adjective = input_dict['adjective']
@@ -40,10 +40,7 @@ class country:
         self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
         self.background_set = input_dict['background_set']
         self.country_effect = input_dict['country_effect']
-        if 'has_aristocracy' in input_dict:
-            self.has_aristocracy = input_dict['has_aristocracy']
-        else:
-            self.has_aristocracy = True
+        self.has_aristocracy = input_dict.get('has_aristocracy', True)
         self.colors = actor_utility.extract_folder_colors('locations/country_colors/' + self.adjective + '/')
 
     def select(self):
@@ -55,27 +52,25 @@ class country:
         Output:
             None
         '''
-        if not self.global_manager.get('current_country') == 'none':
-            self.global_manager.get('current_country').country_effect.remove()
-        self.global_manager.set('current_country', self)
-        self.global_manager.set('current_country_name', self.name)
+        if status.current_country:
+            status.current_country.country_effect.remove()
+        status.current_country = self
+        status.current_country_name = self.name
         
-        self.global_manager.get('flavor_text_manager').set_flavor_text('minister_first_names', 'text/names/' + self.adjective + '_first_names.csv')
-        self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
+        constants.flavor_text_manager.set_flavor_text('minister_first_names', 'text/names/' + self.adjective + '_first_names.csv')
+        constants.flavor_text_manager.allow_particles = self.allow_particles
         if self.allow_particles:
-            self.global_manager.get('flavor_text_manager').set_flavor_text('minister_particles', 'text/names/' + self.adjective + '_particles.csv')
-        self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
-        self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
-        self.global_manager.get('flavor_text_manager').set_flavor_text('minister_last_names', 'text/names/' + self.adjective + '_last_names.csv')
-        self.global_manager.set('weighted_backgrounds', self.background_set)
-        for current_recruitment_button in self.global_manager.get('recruitment_button_list'):
-            if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):
+            constants.flavor_text_manager.set_flavor_text('minister_particles', 'text/names/' + self.adjective + '_particles.csv')
+        constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
+        constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
+        constants.flavor_text_manager.set_flavor_text('minister_last_names', 'text/names/' + self.adjective + '_last_names.csv')
+        constants.weighted_backgrounds = self.background_set
+        for current_recruitment_button in status.recruitment_button_list:
+            if current_recruitment_button.recruitment_type in constants.country_specific_units:
                 current_recruitment_button.calibrate(self)
-        for current_flag_icon in self.global_manager.get('flag_icon_list'):
+        for current_flag_icon in status.flag_icon_list:
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
-        #if self.name == 'France':
-        #    self.global_manager.get('sound_manager').play_music('La Marseillaise 1', 0.08)
 
     def deselect(self):
         '''
@@ -86,9 +81,9 @@ class country:
         Output:
             None
         '''
-        self.global_manager.get('current_country').country_effect.remove()
-        self.global_manager.set('current_country', 'none')
-        self.global_manager.set('current_country_name', 'none')
+        status.current_country.country_effect.remove()
+        status.current_country = None
+        status.current_country_name = None
 
     def get_effect_descriptor(self):
         '''
@@ -129,21 +124,20 @@ class hybrid_country(country):
     '''
     Country that uses combination of multiple namesets, like Belgium
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object, the same keys as superclass except without allow_particles, aristocratic_particles, 
                 or allow_double_last_names
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['allow_particles'] = False
         input_dict['aristocratic_particles'] = False
         input_dict['allow_double_last_names'] = False
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def select(self):
         '''
@@ -154,19 +148,19 @@ class hybrid_country(country):
         Output:
             None
         '''
-        if not self.global_manager.get('current_country') == 'none':
-            self.global_manager.get('current_country').country_effect.remove()
-        self.global_manager.set('current_country', self)
-        self.global_manager.set('current_country_name', self.name)
+        if status.current_country:
+            status.current_country.country_effect.remove()
+        status.current_country = self
+        status.current_country_name = self.name
         
         #specific text files are managed in flavor_text_manager for the time being, don't try to set to nonexistent belgium nameset
-        self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
-        self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
-        self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
-        self.global_manager.set('weighted_backgrounds', self.background_set)
-        for current_recruitment_button in self.global_manager.get('recruitment_button_list'):
-            if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):
+        constants.flavor_text_manager.allow_particles = self.allow_particles
+        constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
+        constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
+        constants.weighted_backgrounds = self.background_set
+        for current_recruitment_button in status.recruitment_button_list:
+            if current_recruitment_button.recruitment_type in constants.country_specific_units:
                 current_recruitment_button.calibrate(self)
-        for current_flag_icon in self.global_manager.get('flag_icon_list'):
+        for current_flag_icon in status.flag_icon_list:
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()

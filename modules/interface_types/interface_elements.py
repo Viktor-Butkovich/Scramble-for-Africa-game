@@ -2,7 +2,9 @@
 
 import pygame
 from ..constructs import images
-from ..util import scaling, dummy_utility, utility
+from ..util import scaling, utility, dummy_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class interface_element():
     '''
@@ -10,7 +12,7 @@ class interface_element():
     Object that can be contained in an interface collection and has a location, rect, and image bundle with particular conditions for displaying, along with an optional 
         tooltip when displayed
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -22,33 +24,25 @@ class interface_element():
                 'modes': string list value - Game modes during which this element can appear, optional for elements with parent collections
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'member_config' = {}: Dictionary of extra configuration values for how to add elements to collections
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.can_show_override = 'none'
         self.width = input_dict['width']
         self.height = input_dict['height']
-        self.Rect = pygame.Rect(0, self.global_manager.get('display_height') - (self.height), self.width, self.height)
+        self.Rect = pygame.Rect(0, constants.display_height - (self.height), self.width, self.height)
         self.showing = False
-        if not 'parent_collection' in input_dict:
-            input_dict['parent_collection'] = 'none'
-        self.parent_collection = input_dict['parent_collection']
+        self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
         if not self.has_parent_collection:
-            self.global_manager.get('independent_interface_elements').append(self)
+            status.independent_interface_elements.append(self)
 
-        if not 'coordinates' in input_dict:
-            input_dict['coordinates'] = (0, 0)
+        input_dict['coordinates'] = input_dict.get('coordinates', (0, 0))
         self.x, self.y = input_dict['coordinates']
         if self.has_parent_collection:
-            if not 'member_config' in input_dict:
-                input_dict['member_config'] = {}
-            if not 'x_offset' in input_dict['member_config']:
-                input_dict['member_config']['x_offset'] = input_dict['coordinates'][0]
-            if not 'y_offset' in input_dict['member_config']:
-                input_dict['member_config']['y_offset'] = input_dict['coordinates'][1]
+            input_dict['member_config'] = input_dict.get('member_config', {})
+            input_dict['member_config']['x_offset'] = input_dict['member_config'].get('x_offset', input_dict['coordinates'][0])
+            input_dict['member_config']['y_offset'] = input_dict['member_config'].get('y_offset', input_dict['coordinates'][1])
             self.parent_collection.add_member(self, input_dict['member_config'])
         else:
             self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
@@ -60,6 +54,20 @@ class interface_element():
 
         if 'image_id' in input_dict:
             self.create_image(input_dict['image_id'])
+
+    def remove_recursive(self, complete=False):
+        '''
+        Description:
+            Recursively removes a collection and its members
+        Input:
+            boolean complete=False: Whether to use remove_complete or remove for each item
+        Output:
+            None
+        '''
+        if complete:
+            self.remove_complete()
+        else:
+            self.remove()
 
     def remove_complete(self):
         '''
@@ -82,8 +90,8 @@ class interface_element():
         Output:
             None
         '''
-        if self in self.global_manager.get('independent_interface_elements'):
-            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
+        if self in status.independent_interface_elements:
+            status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
 
     def draw(self):
         '''
@@ -102,7 +110,7 @@ class interface_element():
             Creates an image associated with this interface element - can be overridden by subclasses to allow different kinds of images to be created at the same initialization 
                 step
         '''
-        self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
+        self.image = images.button_image(self, self.width, self.height, image_id)
 
     def can_draw(self):
         '''
@@ -128,10 +136,10 @@ class interface_element():
             if (not self.has_parent_collection) or skip_parent_collection:
                 if skip_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:
                     #skip_parent_collection ignores the immediate parent collection to avoid recursion, but can still check grandparent collection in most cases
-                    return(self.parent_collection.parent_collection.allow_show(self) and self.global_manager.get('current_game_mode') in self.modes)
-                return(self.global_manager.get('current_game_mode') in self.modes)
+                    return(self.parent_collection.parent_collection.allow_show(self) and constants.current_game_mode in self.modes)
+                return(constants.current_game_mode in self.modes)
             elif self.parent_collection.allow_show(self):
-                return(self.global_manager.get('current_game_mode') in self.modes)
+                return(constants.current_game_mode in self.modes)
             return(False)
         else:
             return(self.can_show_override.can_show(skip_parent_collection=True))
@@ -149,7 +157,7 @@ class interface_element():
         self.x = new_x
         self.Rect.x = self.x
         self.y = new_y
-        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
+        self.Rect.y = constants.display_height - (self.y + self.height)
         if self.has_parent_collection:
             self.x_offset = self.x - self.parent_collection.x
             self.y_offset = self.y - self.parent_collection.y
@@ -176,13 +184,13 @@ class interface_element():
         '''
         return
     
-    def insert_collection_above(self, override_input_dict={}):
+    def insert_collection_above(self, override_input_dict=None):
         '''
         Description:
             Replaces this element's place in its parent collection with a new interface collection, allowing elements to dynamically form collections after initialization 
                 without interfering with above hierarchies
         'Input':
-            string init_type='interface collection': actor_creation_tools init type of collection to create
+            dictionary override_input_dict=None: Optional dictionary to override attributes of created collection's input_dict
         'Output':
             None
         '''
@@ -195,18 +203,19 @@ class interface_element():
             'init_type': 'interface collection',
             'member_config': {}
         }
-        for attribute in override_input_dict:
-            input_dict[attribute] = override_input_dict[attribute]
+        if override_input_dict:
+            for attribute in override_input_dict:
+                input_dict[attribute] = override_input_dict[attribute]
 
         if self.parent_collection != 'none':
             input_dict['member_config']['index'] = self.parent_collection.members.index(self)
             if hasattr(self.parent_collection, 'order_overlap_list') and self in self.parent_collection.order_overlap_list:
                 input_dict['member_config']['order_overlap'] = True
-                input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
+                #input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
 
             if hasattr(self.parent_collection, 'order_exempt_list') and self in self.parent_collection.order_exempt_list:
                 input_dict['member_config']['order_exempt'] = True
-                input_dict['member_config']['order_exempt_index'] = self.parent_collection.order_exempt_list.index(self)
+                #input_dict['member_config']['order_exempt_index'] = self.parent_collection.order_exempt_list.index(self)
 
             if hasattr(self, 'x_offset'):
                 input_dict['member_config']['x_offset'] = self.x_offset
@@ -222,9 +231,9 @@ class interface_element():
         
             self.parent_collection.remove_member(self)
 
-        new_parent_collection = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+        new_parent_collection = constants.actor_creation_manager.create_interface_element(input_dict)
         
-        new_parent_collection.add_member(self)
+        new_parent_collection.add_member(self, {})
 
         return(new_parent_collection)
 
@@ -239,7 +248,7 @@ class interface_collection(interface_element):
     Like an image bundle, members of an interface collection should have independent types and characteristics but be controlled as a unit and created in a list with a dictionary or simple 
         string. Unlike an image bundle, a collection does not necessarily have to be saved, and 
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -250,76 +259,75 @@ class interface_collection(interface_element):
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-            global_manager_template global_manager: Object that accesses shared variables
+                'initial_members' = None: members initially created with this collection
         Output:
             None
         '''
         self.members = []
-        global_manager.get('interface_collection_list').append(self)
         self.minimized = False
-        if 'is_info_display' in input_dict and input_dict['is_info_display']:
-            self.is_info_display = True
+        self.is_info_display = input_dict.get('is_info_display', False)
+        if self.is_info_display:
             self.actor_type = input_dict['actor_type']
-        else:
-            self.is_info_display = False
 
-        if not 'resize_with_contents' in input_dict:
-            input_dict['resize_with_contents'] = False
+        input_dict['resize_with_contents'] = input_dict.get('resize_with_contents', False)
         self.resize_with_contents = input_dict['resize_with_contents']
         if self.resize_with_contents:
             self.member_rects = []
 
         self.calibrate_exempt_list = []
 
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.original_coordinates = (self.x, self.y)
         if self.has_parent_collection:
             self.original_offsets = (self.x_offset, self.y_offset)
-        if self.is_info_display:
-            global_manager.set(self.actor_type + '_info_display', self)
         self.description = input_dict.get('description', 'window')
         self.move_with_mouse_config = {'moving': False}
         customize_button_x_offset = 0
         customize_button_size = 20
-        if ('allow_minimize' in input_dict and input_dict['allow_minimize']) or ('allow_move' in input_dict and input_dict['allow_move']):
+        if input_dict.get('allow_minimize', False) or input_dict.get('allow_move', False):
             self.insert_collection_above()
-            if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
-                member_input_dict = {
-                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                    'width': scaling.scale_width(customize_button_size, global_manager),
-                    'height': scaling.scale_height(customize_button_size, global_manager),
+            customize_button_width = scaling.scale_width(customize_button_size)
+            customize_button_height = scaling.scale_width(customize_button_size)
+
+            if input_dict.get('allow_minimize', False):
+                constants.actor_creation_manager.create_interface_element({
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5),
+                    'width': customize_button_width,
+                    'height': customize_button_height,
                     'parent_collection': self.parent_collection,
                     'attached_collection': self,
                     'init_type': 'minimize interface collection button',
                     'image_id': 'buttons/minimize_button.png',
                     'member_config': {'order_exempt': True}
-                }
-                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                })
                 customize_button_x_offset += customize_button_size + 5
-            if 'allow_move' in input_dict and input_dict['allow_move']:
-                member_input_dict = {
-                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                    'width': scaling.scale_width(customize_button_size, global_manager),
-                    'height': scaling.scale_height(customize_button_size, global_manager),
+
+            if input_dict.get('allow_move', False):
+                constants.actor_creation_manager.create_interface_element({
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5),
+                    'width': customize_button_width,
+                    'height': customize_button_height,
                     'parent_collection': self.parent_collection,
                     'init_type': 'move interface collection button',
                     'image_id': 'buttons/reposition_button.png',
                     'member_config': {'order_exempt': True}
-                }
-                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                })
                 customize_button_x_offset += customize_button_size + 5
                 
-                member_input_dict = {
-                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                    'width': scaling.scale_width(customize_button_size, global_manager),
-                    'height': scaling.scale_height(customize_button_size, global_manager),
+                constants.actor_creation_manager.create_interface_element({
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5),
+                    'width': customize_button_width,
+                    'height': customize_button_height,
                     'parent_collection': self.parent_collection,
                     'init_type': 'reset interface collection button',
                     'image_id': 'buttons/reset_button.png',
                     'member_config': {'order_exempt': True}
-                }
-                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                })
                 customize_button_x_offset += customize_button_size + 5
+
+        for initial_member_dict in input_dict.get('initial_members', []):
+            initial_member_dict['parent_collection'] = self
+            constants.actor_creation_manager.create_interface_element(initial_member_dict)
 
     def create_image(self, image_id):
         '''
@@ -327,7 +335,7 @@ class interface_collection(interface_element):
             Creates an image associated with this interface element - overrides parent version to create a collection image instead of the default button images at the same
                 initialization step
         '''
-        self.image = images.collection_image(self, self.width, self.height, image_id, self.global_manager)
+        self.image = images.collection_image(self, self.width, self.height, image_id)
 
     def calibrate(self, new_actor, override_exempt=False):
         '''
@@ -346,9 +354,11 @@ class interface_collection(interface_element):
                 else:
                     member.calibrate(new_actor)
         if self.is_info_display:
-            self.global_manager.set('displayed_' + self.actor_type, new_actor)
+            if new_actor == 'none':
+                new_actor = None
+            setattr(status, 'displayed_' + self.actor_type, new_actor)
 
-    def add_member(self, new_member, member_config={}):
+    def add_member(self, new_member, member_config=None):
         '''
         Description:
             Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates
@@ -359,16 +369,16 @@ class interface_collection(interface_element):
         Output:
             None
         '''
-        if not 'x_offset' in member_config:
-            member_config['x_offset'] = 0
-        if not 'y_offset' in member_config:
-            member_config['y_offset'] = 0
-        if not 'calibrate_exempt' in member_config:
-            member_config['calibrate_exempt'] = False
+        if not member_config:
+            member_config = {}
+
+        member_config['x_offset'] = member_config.get('x_offset', 0)
+        member_config['y_offset'] = member_config.get('y_offset', 0)
+        member_config['calibrate_exempt'] = member_config.get('calibrate_exempt', False)
 
         if not new_member.has_parent_collection:
             new_member.has_parent_collection = True
-            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), new_member))
+            status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, new_member)
         new_member.parent_collection = self
         if not 'index' in member_config:
             self.members.append(new_member)
@@ -379,10 +389,10 @@ class interface_collection(interface_element):
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
         if member_config['calibrate_exempt'] and hasattr(self, 'calibrate_exempt_list'):
-            if not 'order_overlap_index' in member_config:
-                self.calibrate_exempt_list.append(new_member)
-            else:
-                self.calibrate_exempt_list.insert(member_config['order_overlap_index'], new_member)
+            #if not 'order_overlap_index' in member_config:
+            self.calibrate_exempt_list.append(new_member)
+            #else:
+            #    self.calibrate_exempt_list.insert(member_config['order_overlap_index'], new_member)
 
     def remove_member(self, removed_member):
         '''
@@ -397,7 +407,39 @@ class interface_collection(interface_element):
             removed_member.x_offset = None
         if hasattr(removed_member, 'y_offset'):
             removed_member.y_offset = None
+        removed_member.parent_collection = 'none'
+        removed_member.has_parent_collection = False
+        status.independent_interface_elements.append(removed_member)
         self.members.remove(removed_member)
+
+    def remove_recursive(self, complete=False):
+        '''
+        Description:
+            Recursively removes a collection and its members
+        Input:
+            boolean complete=False: Whether to use remove_complete or remove for each item
+        Output:
+            None
+        '''
+        for current_member in self.members.copy():
+            self.remove_member(current_member)
+            current_member.remove_recursive(complete=complete)
+
+        if complete:
+            super().remove_complete()
+        else:
+            super().remove()
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove_recursive()
 
     def set_origin(self, new_x, new_y):
         '''
@@ -450,7 +492,7 @@ class interface_collection(interface_element):
             boolean: Returns True if this button can appear under current conditions, otherwise returns False
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if self.is_info_display and self.global_manager.get('displayed_' + self.actor_type) == 'none':
+        if self.is_info_display and getattr(status, 'displayed_' + self.actor_type) == None:
             return(False)
         else:
             return(result and not self.minimized)
@@ -471,7 +513,7 @@ class autofill_collection(interface_collection):
     Collection that will calibrate particular 'target' members with specific actors instead of the one the entire collection is calibrating to - such as calibrating the
         group, officer, and worker cells to the corresponding actors in the autofill operation when an officer is selected
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -483,7 +525,6 @@ class autofill_collection(interface_collection):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'autofill target': dict value - Dictionary with lists of the elements to calibrate to each autofill target type, like {'officer': [...], 'group': [...]}
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -493,7 +534,7 @@ class autofill_collection(interface_collection):
             self.autofill_actors[autofill_target_type] = 'none'
         self.autofill_actors['procedure'] = 'none'
         self.search_start_index = 0
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def calibrate(self, new_actor, override_exempt=False):
         '''
@@ -505,7 +546,7 @@ class autofill_collection(interface_collection):
             None
         '''
         #search start index may be changed by cycle autofill buttons between calibrates
-        self.autofill_actors = dummy_utility.generate_autofill_actors(self.global_manager, search_start_index=self.search_start_index)
+        self.autofill_actors = dummy_utility.generate_autofill_actors(search_start_index=self.search_start_index)
         for autofill_target_type in self.autofill_targets:
             for autofill_target in self.autofill_targets[autofill_target_type]:
                 #eg. generate autofill actors gives back a dummy officer, which all autofill targets that accept officers then calibrate to, repeat for worker/group targets
@@ -518,7 +559,7 @@ class tabbed_collection(interface_collection):
     High-level collection that controls a collection of tab buttons that each select an associated member collection "tab" to be shown, with only the tab buttons and the
         currently selected tab showing at a time
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -529,22 +570,20 @@ class tabbed_collection(interface_collection):
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.tabbed_members = []
         self.current_tabbed_member = None
-        super().__init__(input_dict, global_manager)
-        tabs_collection_input_dict = {
-            'coordinates': scaling.scale_coordinates(0, 5, global_manager),
-            'width': scaling.scale_width(10, global_manager),
-            'height': scaling.scale_height(30, global_manager),
+        super().__init__(input_dict)
+        self.tabs_collection = constants.actor_creation_manager.create_interface_element({
+            'coordinates': scaling.scale_coordinates(0, 5),
+            'width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
             'init_type': 'ordered collection',
             'parent_collection': self,
             'direction': 'horizontal'
-        }
-        self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element(tabs_collection_input_dict, global_manager)
+        })
 
     def allow_show(self, member):
         '''
@@ -572,23 +611,20 @@ class tabbed_collection(interface_collection):
         Output:
             None
         '''
-        if not 'tabbed' in member_config:
-            member_config['tabbed'] = False
-        elif member_config['tabbed']:
-            if not 'button_image_id' in member_config:
-                member_config['button_image_id'] = 'buttons/default_button.png'
+        member_config['tabbed'] = member_config.get('tabbed', False)
+        if member_config['tabbed'] and not 'button_image_id' in member_config:
+            member_config['button_image_id'] = 'buttons/default_button.png'
         super().add_member(new_member, member_config)
 
         if member_config['tabbed']:
-            tab_button_input_dict = {
-                'width': scaling.scale_width(36, self.global_manager), #20
-                'height': scaling.scale_height(36, self.global_manager),
+            constants.actor_creation_manager.create_interface_element({
+                'width': scaling.scale_width(36),
+                'height': scaling.scale_height(36),
                 'init_type': 'tab button',
                 'parent_collection': self.tabs_collection,
                 'image_id': member_config['button_image_id'],
                 'linked_element': new_member
-            }
-            self.global_manager.get('actor_creation_manager').create_interface_element(tab_button_input_dict, self.global_manager)
+            })
             self.tabbed_members.append(new_member)
             if len(self.tabbed_members) == 1:
                 self.current_tabbed_member = new_member
@@ -599,7 +635,7 @@ class ordered_collection(interface_collection):
     '''
     Collection that moves its members to display each visible element in order
     '''
-    def __init__(self, input_dict, global_manager): #change inventory display to a collection so that it orders correctly
+    def __init__(self, input_dict): #change inventory display to a collection so that it orders correctly
         '''
         Description:
             Initializes this object
@@ -610,21 +646,27 @@ class ordered_collection(interface_collection):
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'separation' = scaling.scale_height(5, global_manager): int value - Distance to set between ordered members
+                'separation' = scaling.scale_height(5): int value - Distance to set between ordered members
                 'direction' = 'vertical': string value - Direction to order members in
-            global_manager_template global_manager: Object that accesses shared variables
+                'reversed' = False: boolean value - Whether to reverse the order of members in the specified direction (top to bottom or bottom to top)
+                'second_dimension_increment' = 0: int value - Increment between each row/column of this collection - 2 elements with a difference of 1 second dimension
+                    coordinate will be the increment away along the second dimension
+                'anchor_coordinate' = None: int value - Optional relative coordinate around which each row/column of collection will be centered 
         Output:
             None
         '''
-        if not 'separation' in input_dict:
-            input_dict['separation'] = scaling.scale_height(5, global_manager)
-        if not 'direction' in input_dict:
-            input_dict['direction'] = 'vertical'
-        self.separation = input_dict['separation']
-        self.direction = input_dict['direction']
+        self.separation = input_dict.get('separation', scaling.scale_height(5))
+        self.direction = input_dict.get('direction', 'vertical')
+        self.second_dimension_increment = input_dict.get('second_dimension_increment', 0)
+        self.second_dimension_coordinates = {}
+        self.reverse_multiplier = 1
+        if input_dict.get('reversed', False):
+            self.reverse_multiplier *= -1
         self.order_overlap_list = []
         self.order_exempt_list = []
-        super().__init__(input_dict, global_manager)
+        if 'anchor_coordinate' in input_dict:
+            self.anchor_coordinate = input_dict['anchor_coordinate']
+        super().__init__(input_dict)
 
     def add_member(self, new_member, member_config={}):
         '''
@@ -637,33 +679,44 @@ class ordered_collection(interface_collection):
         Output:
             None
         '''
-        if not 'order_overlap' in member_config:
-            member_config['order_overlap'] = False
-
-        if not 'order_exempt' in member_config:
-            member_config['order_exempt'] = False
-
-        if not 'order_x_offset' in member_config:
-            member_config['order_x_offset'] = 0
+        member_config['order_overlap'] = member_config.get('order_overlap', False)
+        member_config['order_exempt'] = member_config.get('order_exempt', False)
+        member_config['order_x_offset'] = member_config.get('order_x_offset', 0)
+        member_config['order_y_offset'] = member_config.get('order_y_offset', 0)
+        if member_config.get('centered', False):
+            member_config['order_x_offset'] -= new_member.width / 2
+        member_config['second_dimension_coordinate'] = member_config.get('second_dimension_coordinate', 0)
         new_member.order_x_offset = member_config['order_x_offset']
-
-        if not 'order_y_offset' in member_config:
-            member_config['order_y_offset'] = 0
         new_member.order_y_offset = member_config['order_y_offset']
-
         super().add_member(new_member, member_config)
 
         if member_config['order_overlap'] and hasattr(self, 'order_overlap_list'): #maybe have a list of lists to iterate through these operations
-            if not 'order_overlap_index' in member_config:
-                self.order_overlap_list.append(new_member)
-            else:
-                self.order_overlap_list.insert(member_config['order_overlap_index'], new_member)
+            self.order_overlap_list.append(new_member)
 
         if member_config['order_exempt'] and hasattr(self, 'order_exempt_list'):
-            if not 'order_exempt_index' in member_config:
-                self.order_exempt_list.append(new_member)
+            self.order_exempt_list.append(new_member)
+
+        if 'second_dimension_alignment' in member_config: #if left alignment, go left through each column until one is free, and vice versa
+            if member_config['second_dimension_alignment'] in ['left', 'leftmost']:
+                increment = -1
             else:
-                self.order_exempt_list.insert(member_config['order_exempt_index'], new_member)
+                increment = 1
+            coordinate = 0
+            valid = False
+            while not valid:
+                if not str(coordinate) in self.second_dimension_coordinates:
+                    valid = True
+                if not valid:
+                    coordinate += increment
+            if member_config['second_dimension_alignment'] in ['leftmost', 'rightmost']: 
+                #leftmost and rightmost go to farthest column in that direction, rather than making a new column
+                coordinate -= increment
+            member_config['second_dimension_coordinate'] = coordinate
+        key = str(member_config['second_dimension_coordinate'])
+        if key in self.second_dimension_coordinates:
+            self.second_dimension_coordinates[key].append(new_member)
+        else:
+            self.second_dimension_coordinates[key] = [new_member]
 
     def remove_member(self, removed_member):
         '''
@@ -682,7 +735,26 @@ class ordered_collection(interface_collection):
             self.order_overlap_list.remove(removed_member)
         if removed_member in self.order_exempt_list:
             self.order_exempt_list.remove(removed_member)
+        for key in self.second_dimension_coordinates:
+            if removed_member in self.second_dimension_coordinates[key]:
+                self.second_dimension_coordinates[key].remove(removed_member)
         super().remove_member(removed_member)
+
+    def get_size(self, second_dimension_coordinate=0):
+        '''
+        Description:
+            Calculates and returns the width or height of a particular row/column of this collection
+        Input:
+            int second_dimension_coordinate=0: Second dimension coordinate of row/column to check
+        Output:
+            int: Returns width or height of specified row/column
+        '''
+        size = 0
+        for member in self.second_dimension_coordinates.get(str(second_dimension_coordinate), []):
+            if not (member in self.order_exempt_list or member in self.order_overlap_list):
+                size += member.height
+                size += self.separation
+        return(size)
 
     def update_collection(self):
         '''
@@ -695,31 +767,45 @@ class ordered_collection(interface_collection):
             None
         '''
         super().update_collection()
-        current_y = self.y
-        current_x = self.x
-        for member in self.members:
-            if member.showing and not member in self.order_exempt_list:
-                if self.direction == 'vertical':
-                    current_y -= member.height
+        for key in self.second_dimension_coordinates:
+            second_dimension_coordinate = int(key)
+            if self.direction == 'vertical':
+                current_y = self.y
+                current_x = self.x + (second_dimension_coordinate * self.second_dimension_increment)
+                if hasattr(self, 'anchor_coordinate'):
+                    current_y += self.anchor_coordinate - (self.get_size(second_dimension_coordinate) / 2)
+            elif self.direction == 'horizontal':
+                current_y = self.y + (second_dimension_coordinate * self.second_dimension_increment)
+                current_x = self.x
+                if hasattr(self, 'anchor_coordinate'):
+                    current_x += self.anchor_coordinate - (self.get_size(second_dimension_coordinate) / 2)
+            for member in self.second_dimension_coordinates[key]:
+                if member.showing and not member in self.order_exempt_list:
+                    if self.direction == 'vertical':
+                        preincrement = False
+                        if self.reverse_multiplier > 0:
+                            preincrement = True
+                            current_y -= member.height * self.reverse_multiplier
+                        new_x = current_x + member.order_x_offset
+                        new_y = current_y + member.order_y_offset
+                        if not preincrement:
+                            current_y -= member.height * self.reverse_multiplier
 
-                    new_x = self.x + member.order_x_offset
-                    new_y = current_y + member.order_y_offset
-                    if (member.x, member.y) != (new_x, new_y):
-                        effective_y = current_y + member.order_y_offset
-                        if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
-                            effective_y += member.height
-                        member.set_origin(self.x + member.order_x_offset, effective_y)
+                        if (member.x, member.y) != (new_x, new_y):
+                            if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
+                                new_y += member.height * self.reverse_multiplier
+                            member.set_origin(new_x, new_y)
 
-                    if not member in self.order_overlap_list:
-                        current_y -= self.separation
-                    else:
-                        current_y += member.height
+                        if not member in self.order_overlap_list:
+                            current_y -= self.separation * self.reverse_multiplier
+                        else:
+                            current_y += member.height * self.reverse_multiplier
 
-                elif self.direction == 'horizontal':
-                    new_x = current_x + member.order_x_offset
-                    new_y = self.y + member.order_y_offset
-                    if (member.x, member.y) != (new_x, new_y):
-                        member.set_origin(current_x + member.order_x_offset, self.y + member.order_y_offset)
+                    elif self.direction == 'horizontal':
+                        new_x = current_x + member.order_x_offset
+                        new_y = current_y + member.order_y_offset
+                        if (member.x, member.y) != (new_x, new_y):
+                            member.set_origin(new_x, new_y)
 
-                    if not member in self.order_overlap_list:
-                        current_x += self.separation + member.width
+                        if not member in self.order_overlap_list:
+                            current_x += self.separation + member.width * self.reverse_multiplier

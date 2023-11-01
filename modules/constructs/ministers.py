@@ -2,14 +2,16 @@
 
 import random
 import os
-from ..util import utility, actor_utility, minister_utility, notification_utility, scaling
-from . import images
+from ..util import tutorial_utility, utility, actor_utility, minister_utility, main_loop_utility, scaling
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class minister():
     '''
     Person that can be appointed to control a certain part of the company and will affect actions based on how skilled and corrupt they are
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -29,14 +31,12 @@ class minister():
                 'just_removed': boolean value - Whether this minister was just removed from office and will be fired at the end of the turn
                 'corruption_evidence': int value - Number of pieces of evidence that can be used against this minister in a trial, includes fabricated evidence
                 'fabricated_evidence': int value - Number of temporary fabricated pieces of evidence that can be used against this minister in a trial this turn
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.initializing = True
         self.actor_type = 'minister' #used for actor display labels and images
-        self.global_manager = global_manager
-        self.global_manager.get('minister_list').append(self)
+        status.minister_list.append(self)
         self.tooltip_text = []
         self.portrait_section_types = ['base_skin', 'mouth', 'nose', 'eyes', 'hair', 'outfit', 'facial_hair', 'hat', 'portrait']
         self.portrait_sections = {}
@@ -44,7 +44,7 @@ class minister():
             self.name = input_dict['name']
             self.current_position = input_dict['current_position']
             self.background = input_dict['background']
-            self.status_number = global_manager.get('background_status_dict')[self.background]
+            self.status_number = constants.background_status_dict[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = input_dict['personal_savings']
@@ -68,11 +68,11 @@ class minister():
             if not self.current_position == 'none':
                 self.appoint(self.current_position)
             else:
-                self.global_manager.get('available_minister_list').append(self)
+                status.available_minister_list.append(self)
         else:
-            self.background = random.choice(global_manager.get('weighted_backgrounds'))
-            self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
-            self.status_number = global_manager.get('background_status_dict')[self.background]
+            self.background = random.choice(constants.weighted_backgrounds)
+            self.name = constants.flavor_text_manager.generate_minister_name(self.background)
+            self.status_number = constants.background_status_dict[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
@@ -81,16 +81,17 @@ class minister():
             self.voice_setup()
             self.interests_setup()
             self.corruption_setup()
-            self.global_manager.get('available_minister_list').append(self)
+            status.available_minister_list.append(self)
             self.portrait_sections_setup()
             self.stolen_money = 0
             self.corruption_evidence = 0
             self.fabricated_evidence = 0
             self.just_removed = False
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
         self.stolen_already = False
         self.update_tooltip()
         self.initializing = False
+        self.most_recent_corruption = False
 
     def portrait_sections_setup(self):
         '''
@@ -129,7 +130,7 @@ class minister():
                             outfit_type = 'armored'
                     elif self.background == 'royal heir':
                         outfit_type = 'armored'
-                    elif (self.background != 'lowborn' and not self.global_manager.get('current_country').has_aristocracy):
+                    elif (self.background != 'lowborn' and not status.current_country.has_aristocracy):
                         if random.randrange(0, 5) == 0:
                             outfit_type = 'armored'
                 if outfit_type != 'default':
@@ -150,7 +151,7 @@ class minister():
                 self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': skin_color}
             elif image_type in ['outfit', 'hat']:
                 if outfit_type in ['military', 'armored']:
-                    self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': self.global_manager.get('current_country').colors}
+                    self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': status.current_country.colors}
                 else:
                     self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': suit_colors}
             else:
@@ -168,7 +169,7 @@ class minister():
         '''
         self.tooltip_text = []
         if not self.current_position == 'none':
-            keyword = self.global_manager.get('minister_type_dict')[self.current_position] #type, like military
+            keyword = constants.minister_type_dict[self.current_position] #type, like military
             self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
         else:
             self.tooltip_text.append('This is ' + self.name + ', an available minister candidate.')
@@ -185,25 +186,20 @@ class minister():
             displayed_skill = self.current_position
 
         if displayed_skill != 'unknown':
-            displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military]
+            displayed_skill_name = constants.minister_type_dict[displayed_skill] #like General to military]
             if self.apparent_skill_descriptions[displayed_skill] != 'unknown':
                 if self.current_position == 'none':
                     message = 'Highest ability: ' + self.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
                 else:
                     message = displayed_skill_name.capitalize() + ' ability: ' + self.apparent_skill_descriptions[displayed_skill]
                 self.tooltip_text.append(message)
-        #elif self.current_position == 'none':
-        #    message = 'Highest ability: unknown'
-        #else:
-        #    message = self.global_manager.get('minister_type_dict')[self.current_position] + 'ability: unknown'
-        #self.tooltip_text.append(message)
 
         rank = 0
         for skill_value in range(6, 0, -1): #iterates backwards from 6 to 1
             for skill_type in self.apparent_skills:
                 if self.apparent_skills[skill_type] == skill_value:
                     rank += 1
-                    skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                    skill_name = constants.minister_type_dict[skill_type] #like General to military
                     self.tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.apparent_skill_descriptions[skill_type])
 
         self.tooltip_text.append('Evidence: ' + str(self.corruption_evidence))
@@ -211,7 +207,33 @@ class minister():
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
             self.tooltip_text.append('If not reappointed by the end of the turn, they will be permanently fired, incurring a large public opinion penalty.')
 
-    def display_message(self, text, audio=''):
+    def generate_icon_input_dicts(self, alignment='left'):
+        '''
+        Description:
+            Generates the input dicts for this minister's face and position background to be attached to a notification
+        Input:
+            None
+        Output:
+            dictionary list: Returns list of input dicts for this minister's face and position background
+        '''
+        minister_position_icon_dict = {
+            'coordinates': (0, 0),
+            'width': scaling.scale_width(100),
+            'height': scaling.scale_height(100),
+            'modes': ['strategic', 'ministers', 'europe', 'trial'],
+            'attached_minister': self,
+            'minister_image_type': 'position',
+            'init_type': 'dice roll minister image',
+            'minister_message_image': True,
+            'member_config': {'order_overlap': True, 'second_dimension_alignment': alignment, 'centered': True}
+        }
+
+        minister_portrait_icon_dict = minister_position_icon_dict.copy()
+        minister_portrait_icon_dict['member_config'] = {'second_dimension_alignment': 'leftmost', 'centered': True}
+        minister_portrait_icon_dict['minister_image_type'] = 'portrait'
+        return([minister_position_icon_dict, minister_portrait_icon_dict])
+
+    def display_message(self, text, audio='none'):
         '''
         Description:
             Displays a notification message from this minister with an attached portrait
@@ -220,60 +242,98 @@ class minister():
         Output:
             None
         '''
-        minister_icon_coordinates = (scaling.scale_width(self.global_manager.get('notification_manager').notification_x - 140, self.global_manager), scaling.scale_height(440, self.global_manager))
-        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
-            self, 'position', self.global_manager, True)
-        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
-            self, 'portrait', self.global_manager, True)
-        self.global_manager.get('notification_manager').minister_message_queue.append(self)
-        notification_utility.display_notification(text, 'minister', self.global_manager, 0, audio=audio)
+        constants.notification_manager.display_notification({
+            'message': text + 'Click to remove this notification. /n /n',
+            'notification_type': 'action',
+            'audio': audio,
+            'attached_minister': self,
+            'attached_interface_elements': self.generate_icon_input_dicts(alignment='left'),
+            'transfer_interface_elements': not main_loop_utility.action_possible() #Transfer if during action, don't transfer if misc. messages
+        })
 
-    def steal_money(self, value, theft_type = 'none'):
+    def can_pay(self, value):
         '''
         Description:
-            Steals money from a company action, giving this minister money but causing a chance to be caught by the prosecutor. If caught by the prosecutor, the prosecutor may create evidence and report to the player, or, if corrupt,
-                take a bribe to do nothing
+            Checks if this minister has enough money to pay the inputted amount
+        Input:
+            double value: Amount of money being paid
+        Output:
+            boolean: Returns whether this minister is able to pay the inputted amount
+        '''
+        return(self.personal_savings + self.stolen_money >= value)
+
+    def pay(self, target, value):
+        '''
+        Description:
+            Pays the inputted amount of money to the inputted minister, taking money from savings if needed. Assumes that can_pay was True for the value
+        Input:
+            minister target: Minister being paid
+            double value: Amount of money being paid
+        Output:
+            None
+        '''
+        self.stolen_money -= value
+        if self.stolen_money < 0:
+            self.personal_savings += self.stolen_money
+            self.stolen_money = 0
+        target.stolen_money += value
+
+    def attempt_prosecutor_detection(self, value=0, theft_type='none'):
+        '''
+        Description:
+            Resolves the outcome of the prosecutor attempting to detect a corrupt action, regardless of if money was immediately stolen
+        Input:
+            double value = 0: Amount of money stolen
+            string theft_type = 'none': Type of theft, used in prosecutor report description
+        Output:
+            None
+        '''
+        prosecutor = status.current_ministers['Prosecutor']
+        if prosecutor != 'none':
+            if constants.effect_manager.effect_active('show_minister_stealing'):
+                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + constants.transaction_descriptions[theft_type] + '.')
+            difficulty = self.no_corruption_roll(6, 'minister_stealing')
+            result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
+            if prosecutor != self and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
+                required_bribe_amount = max(value / 2, 5)
+                if prosecutor.check_corruption() and self.can_pay(required_bribe_amount): #if prosecutor takes bribe, split money
+                    self.pay(prosecutor, required_bribe_amount)
+                    if constants.effect_manager.effect_active('show_minister_stealing'):
+                        print('The theft was caught by the prosecutor, who accepted a bribe to not create evidence.')
+                        print(prosecutor.current_position + ' ' + prosecutor.name + ' has now stolen a total of ' + str(prosecutor.stolen_money) + ' money.')
+                else: #if prosecutor refuses bribe, still keep money but create evidence
+                    self.corruption_evidence += 1
+                    evidence_message = ''
+                    evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
+                    evidence_message += constants.transaction_descriptions[theft_type] + ' and has filed a piece of evidence against him. /n /n'
+                    evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
+                    evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
+                    prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'))
+                    if constants.effect_manager.effect_active('show_minister_stealing'):
+                        print('The theft was caught by the prosecutor, who chose to create evidence.')
+            else:
+                if constants.effect_manager.effect_active('show_minister_stealing') and prosecutor != self:
+                    print('The theft was not caught by the prosecutor.')
+
+    def steal_money(self, value, theft_type = 'none', allow_prosecutor_detection=True):
+        '''
+        Description:
+            Steals money from a company action, giving this minister money but causing a chance of prosecutor detection
         Input:
             double value: Amount of money stolen
             string theft_type = 'none': Type of theft, used in prosecutor report description
         Output:
             None
         '''
-        prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
-        if prosecutor != 'none':
-            if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
-                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('transaction_descriptions')[theft_type] + '.')
-            difficulty = self.no_corruption_roll(6, 'minister_stealing')
-            result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
-            if (not prosecutor == self) and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
-                if prosecutor.check_corruption(): #if prosecutor takes bribe, split money
-                    prosecutor.stolen_money += (value / 2)
-                    self.stolen_money += (value / 2)
-                    if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
-                        print('The theft was caught by the prosecutor, who accepted a bribe to not create evidence.')
-                        print(prosecutor.current_position + ' ' + prosecutor.name + ' has now stolen a total of ' + str(prosecutor.stolen_money) + ' money.')
-                else: #if prosecutor refuses bribe, still keep money but create evidence
-                    self.stolen_money += value
-                    self.corruption_evidence += 1
-                    evidence_message = ''
+        self.stolen_money += value
+        if allow_prosecutor_detection:
+            self.attempt_prosecutor_detection(value=value, theft_type=theft_type)
 
-                    evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
-                    evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
-                    evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
-                    evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
-                    self.global_manager.set('evidence_just_found', True) #causes sound to be made next time prosecutor image appears
-                    prosecutor.display_message(evidence_message)
-                    if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
-                        print('The theft was caught by the prosecutor, who chose to create evidence.') 
-            else: #if not caught, keep money
-                self.stolen_money += value
-                if self.global_manager.get('effect_manager').effect_active('show_minister_stealing') and not prosecutor == self:
-                    print('The theft was not caught by the prosecutor.')
-        if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+        if constants.effect_manager.effect_active('show_minister_stealing'):
             print(self.current_position + ' ' + self.name + ' has now stolen a total of ' + str(self.stolen_money) + ' money.')
 
         if value > 0:
-            self.global_manager.get('evil_tracker').change(2)
+            constants.evil_tracker.change(2)
                 
     def to_save_dict(self):
         '''
@@ -411,7 +471,7 @@ class minister():
             int list: Returns a list of the rolls' modified results
         '''
         results = []
-        if self.check_corruption():
+        if self.check_corruption() and value > 0:
             self.steal_money(value, roll_type)
             self.stolen_already = True
             corrupt_index = random.randrange(0, num_dice)
@@ -476,37 +536,37 @@ class minister():
             None
         '''
         old_position = self.current_position
-        if not self.current_position == 'none': #if removing, set old position to none
-            self.global_manager.get('current_ministers')[self.current_position] = 'none'
+        if self.current_position != 'none': #if removing, set old position to none
+            status.current_ministers[self.current_position] = None
         self.current_position = new_position
-        self.global_manager.get('current_ministers')[new_position] = self
-        for current_pmob in self.global_manager.get('pmob_list'):
+        status.current_ministers[new_position] = self
+        for current_pmob in status.pmob_list:
             current_pmob.update_controlling_minister()
-        if not new_position == 'none': #if appointing
-            self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
-            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 3:
-                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display up because available minister was removed
+        if new_position != 'none': #if appointing
+            status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
+            if constants.available_minister_left_index >= len(status.available_minister_list) - 3:
+                constants.available_minister_left_index = len(status.available_minister_list) - 3 #move available minister display up because available minister was removed
         else:
-            self.global_manager.get('available_minister_list').append(self)
-            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display to newly fired minister
-        for current_minister_type_image in self.global_manager.get('minister_image_list'):
+            status.available_minister_list.append(self)
+            constants.available_minister_left_index = len(status.available_minister_list) - 3 #move available minister display to newly fired minister
+        for current_minister_type_image in status.minister_image_list:
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
             elif current_minister_type_image.minister_type == old_position:
                 current_minister_type_image.calibrate('none')
-        if self.global_manager.get('displayed_minister') == self:
-            minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
+        if status.displayed_minister == self:
+            minister_utility.calibrate_minister_info_display(self) #update minister label
 
-        minister_utility.update_available_minister_display(self.global_manager)
+        minister_utility.update_available_minister_display()
         
-        if not self.global_manager.get('minister_appointment_tutorial_completed'):
+        if not status.minister_appointment_tutorial_completed:
             completed = True
-            for current_position in self.global_manager.get('minister_types'):
-                if self.global_manager.get('current_ministers')[current_position] == 'none':
+            for current_position in constants.minister_types:
+                if status.current_ministers[current_position] == None:
                     completed = False
             if completed:
-                self.global_manager.set('minister_appointment_tutorial_completed', True)
-                notification_utility.show_tutorial_notifications(self.global_manager)
+                status.minister_appointment_tutorial_completed = True
+                tutorial_utility.show_tutorial_notifications()
 
     def skill_setup(self):
         '''
@@ -521,14 +581,14 @@ class minister():
         self.specific_skills = {}
         self.apparent_skills = {}
         self.apparent_skill_descriptions = {}
-        background_skill = random.choice(self.global_manager.get('background_skills_dict')[self.background])
+        background_skill = random.choice(constants.background_skills_dict[self.background])
         if background_skill == 'random':
-            background_skill = random.choice(self.global_manager.get('skill_types'))
-        for current_minister_type in self.global_manager.get('minister_types'):
+            background_skill = random.choice(constants.skill_types)
+        for current_minister_type in constants.minister_types:
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
-            if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill and (self.specific_skills[current_minister_type] + self.general_skill) < 6:
+            if constants.minister_type_dict[current_minister_type] == background_skill and (self.specific_skills[current_minister_type] + self.general_skill) < 6:
                 self.specific_skills[current_minister_type] += 1
-            if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+            if constants.effect_manager.effect_active('transparent_ministers'):
                 self.set_apparent_skill(current_minister_type, self.specific_skills[current_minister_type] + self.general_skill)
             else:
                 self.set_apparent_skill(current_minister_type, 0)
@@ -543,11 +603,11 @@ class minister():
         '''
         if (not skill_type in self.apparent_skills) or self.apparent_skills[skill_type] != new_value:
             self.apparent_skills[skill_type] = new_value
-            self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
-            if not (self.global_manager.get('creating_new_game') or self.initializing):
+            self.apparent_skill_descriptions[skill_type] = random.choice(constants.minister_skill_to_description_dict[new_value])
+            if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
-            if self.global_manager.get('displayed_minister') == self:
-                minister_utility.calibrate_minister_info_display(self.global_manager, self)
+            if status.displayed_minister == self:
+                minister_utility.calibrate_minister_info_display(self)
 
     def voice_setup(self, from_save=False):
         '''
@@ -582,11 +642,10 @@ class minister():
         Output:
             None
         '''
-        skill_types = self.global_manager.get('skill_types')
-        type_minister_dict = self.global_manager.get('type_minister_dict')
+        type_minister_dict = constants.type_minister_dict
         highest_skills = []
         highest_skill_number = 0
-        for current_skill in skill_types:
+        for current_skill in constants.skill_types:
             if len(highest_skills) == 0 or self.specific_skills[type_minister_dict[current_skill]] > highest_skill_number:
                 highest_skills = [current_skill]
                 highest_skill_number = self.specific_skills[type_minister_dict[current_skill]]
@@ -595,7 +654,7 @@ class minister():
         first_interest = random.choice(highest_skills)
         second_interest = first_interest
         while second_interest == first_interest:
-            second_interest = random.choice(skill_types)
+            second_interest = random.choice(constants.skill_types)
 
         if random.randrange(1, 7) >= 4:
             self.interests = [first_interest, second_interest]
@@ -614,7 +673,7 @@ class minister():
         self.corruption = random.randrange(1, 7) #1-6
         self.corruption_threshold = 10 - self.corruption #minimum roll on D6 required for corruption to occur
         
-        if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+        if constants.effect_manager.effect_active('transparent_ministers'):
             self.set_apparent_corruption(self.corruption)
         else:
             self.set_apparent_corruption(0)
@@ -628,11 +687,11 @@ class minister():
         '''
         if (not hasattr(self, 'apparent_corruption')) or self.apparent_corruption != new_value:
             self.apparent_corruption = new_value
-            self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
-            if not (self.global_manager.get('creating_new_game') or self.initializing):
+            self.apparent_corruption_description = random.choice(constants.minister_corruption_to_description_dict[new_value])
+            if not (flags.creating_new_game or self.initializing):
                 self.update_tooltip()
-            if self.global_manager.get('displayed_minister') == self:
-                minister_utility.calibrate_minister_info_display(self.global_manager, self)
+            if status.displayed_minister == self:
+                minister_utility.calibrate_minister_info_display(self)
 
     def get_average_apparent_skill(self):
         '''
@@ -645,7 +704,7 @@ class minister():
         '''
         num_data_points = 0
         total_apparent_skill = 0
-        for skill_type in self.global_manager.get('minister_types'):
+        for skill_type in constants.minister_types:
             if self.apparent_skills[skill_type] != 'unknown':
                 num_data_points += 1
                 total_apparent_skill += self.apparent_skills[skill_type]
@@ -665,7 +724,7 @@ class minister():
         '''
         max_skills = ['unknown']
         max_skill_value = 0
-        for skill_type in self.global_manager.get('minister_types'):
+        for skill_type in constants.minister_types:
             if self.apparent_skills[skill_type] != 'unknown':
                 if self.apparent_skills[skill_type] > max_skill_value:
                     max_skills = [skill_type]
@@ -673,59 +732,6 @@ class minister():
                 elif self.apparent_skills[skill_type] == max_skill_value:
                     max_skills.append(skill_type)
         return(max_skills[0])
-
-    def attempt_active_investigation(self, prosecutor, cost):
-        #1/2 chance of success - if successful:
-            #1/6 chance of report for each secondary, 1/2 for loyalty and main ability
-        previous_values = {}
-        new_values = {}
-        roll_result = prosecutor.roll(6, 4, 0, self.global_manager.get('action_prices')['active_investigation'], 'active_investigation')
-        if roll_result >= 4:
-            for category in self.global_manager.get('minister_types') + ['loyalty']:
-                if category == 'loyalty' or category == self.current_position: #simplify this
-                    if random.randrange(1, 7) >= 4:
-                        if category == 'loyalty':
-                            previous_values[category] = self.apparent_corruption_description
-                        else:
-                            previous_values[category] = self.apparent_skill_descriptions[category]
-                        self.attempt_rumor(category, prosecutor)
-                        if category == 'loyalty':
-                            if self.apparent_corruption_description != previous_values[category]:
-                                new_values[category] = self.apparent_corruption_description
-                        else:
-                            if self.apparent_skill_descriptions[category] != previous_values[category]:
-                                new_values[category] = self.apparent_skill_descriptions[category]
-                else:
-                    if random.randrange(1, 7) == 1:
-                        if category == 'loyalty':
-                            previous_values[category] = self.apparent_corruption_description
-                        else:
-                            previous_values[category] = self.apparent_skill_descriptions[category]
-                        self.attempt_rumor(category, prosecutor)
-                        if category == 'loyalty':
-                            if self.apparent_corruption_description != previous_values[category]:
-                                new_values[category] = self.apparent_corruption_description
-                        else:
-                            if self.apparent_skill_descriptions[category] != previous_values[category]:
-                                new_values[category] = self.apparent_skill_descriptions[category]
-        message = ''
-        if new_values:
-            message = 'The investigation launched against ' + self.name + ' for ' + str(cost) + ' money resulted in the following discoveries: /n /n'
-            for category in new_values:
-                if category == 'loyalty':
-                    category_name = category
-                else:
-                    category_name = self.global_manager.get('minister_type_dict')[category]
-                message += '    ' + category_name.capitalize() + ': ' + new_values[category]
-                if previous_values[category] == 'unknown': #if unknown
-                    message += ' /n'
-                else:
-                    message += ' (formerly ' + previous_values[category] + ') /n'
-
-        else:
-            message = 'The investigation launched against ' + self.name + ' for ' + str(cost) + ' money failed to make any significant discoveries. /n'
-        message += ' /n'
-        self.display_message(message)
 
     def attempt_rumor(self, rumor_type, prosecutor):
         '''
@@ -775,7 +781,7 @@ class minister():
             self.set_apparent_skill(rumor_type, apparent_value)
 
         if prosecutor == 'none' :
-            if not self.global_manager.get('creating_new_game'):
+            if not flags.creating_new_game:
                 message = 'A rumor has been found that ' + self.name + ', '
                 if self.current_position == 'none':
                     message += ' a potential minister candidate, '
@@ -785,7 +791,7 @@ class minister():
                 if rumor_type == 'loyalty':
                     message += self.apparent_corruption_description + ' loyalty'
                 else:
-                    skill_name = self.global_manager.get('minister_type_dict')[rumor_type]
+                    skill_name = constants.minister_type_dict[rumor_type]
                     message += utility.generate_article(self.apparent_skill_descriptions[rumor_type]) + ' ' + self.apparent_skill_descriptions[rumor_type] + ' ' + skill_name + ' ability'
                 message += '. /n /n'
                 #if not changed_value:
@@ -801,20 +807,21 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
-        if self.global_manager.get('effect_manager').effect_active('band_of_thieves'):
-            return(True)
-        elif self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
-            return(False)
-            
-        if random.randrange(1, 7) >= self.corruption_threshold:
-            if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
-                return(True)
+        if constants.effect_manager.effect_active('band_of_thieves') or ((constants.effect_manager.effect_active('lawbearer') and self != status.current_ministers['Prosecutor'])):
+            return_value = True
+        elif constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == status.current_ministers['Prosecutor']):
+            return_value = False
+        elif random.randrange(1, 7) >= self.corruption_threshold:
+            if random.randrange(1, 7) >= constants.fear: #higher fear reduces chance of exceeding threshold and stealing
+                return_value = True
             else:
-                if self.global_manager.get('effect_manager').effect_active('show_fear'):
+                if constants.effect_manager.effect_active('show_fear'):
                     print(self.name + ' was too afraid to steal money')
-                return(False)
+                return_value = False
         else:
-            return(False)
+            return_value = False
+        self.most_recent_corruption = return_value
+        return(return_value)
 
     def gain_experience(self):
         '''
@@ -879,30 +886,30 @@ class minister():
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
         modifier = 0
-        if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+        if constants.effect_manager.effect_active('ministry_of_magic') or (constants.effect_manager.effect_active('lawbearer') and self == status.current_ministers['Prosecutor']):
             return(5)
-        elif self.global_manager.get('effect_manager').effect_active('nine_mortal_men'):
+        elif constants.effect_manager.effect_active('nine_mortal_men'):
             return(-10)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             modifier += self.get_skill_modifier()
-            if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+            if constants.effect_manager.effect_active('show_modifiers'):
                 if modifier >= 0:
                     print('Minister gave modifier of +' + str(modifier) + ' to ' + roll_type + ' roll.')
                 else:
                     print('Minister gave modifier of ' + str(modifier) + ' to ' + roll_type + ' roll.')
-        if self.global_manager.get('effect_manager').effect_active(roll_type + '_plus_modifier'):
+        if constants.effect_manager.effect_active(roll_type + '_plus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier += 1
-                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                if constants.effect_manager.effect_active('show_modifiers'):
                     print('Country gave modifier of +1 to ' + roll_type + ' roll.')
-            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+            elif constants.effect_manager.effect_active('show_modifiers'):
                 print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
-        elif self.global_manager.get('effect_manager').effect_active(roll_type + '_minus_modifier'):
+        elif constants.effect_manager.effect_active(roll_type + '_minus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier -= 1
-                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                if constants.effect_manager.effect_active('show_modifiers'):
                     print('Country gave modifier of -1 to ' + roll_type + ' roll.')
-            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+            elif constants.effect_manager.effect_active('show_modifiers'):
                 print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
         return(modifier)
 
@@ -928,14 +935,14 @@ class minister():
             None
         '''
         if not self.current_position == 'none':
-            self.global_manager.get('current_ministers')[self.current_position] = 'none'
-            for current_minister_image in self.global_manager.get('minister_image_list'):
+            status.current_ministers[self.current_position] = None
+            for current_minister_image in status.minister_image_list:
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'
-        self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
-        self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
-        minister_utility.update_available_minister_display(self.global_manager)
+        status.minister_list = utility.remove_from_list(status.minister_list, self)
+        status.available_minister_list = utility.remove_from_list(status.available_minister_list, self)
+        minister_utility.update_available_minister_display()
 
     def respond(self, event):
         '''
@@ -947,7 +954,7 @@ class minister():
             None
         '''
         text = ''
-        audio = ''
+        audio = 'none'
         public_opinion_change = 0
 
         if self.status_number >= 3:
@@ -996,7 +1003,7 @@ class minister():
         elif event == 'fired':
             multiplier = random.randrange(8, 13) / 10.0 #0.8-1.2
             public_opinion_change = -10 * self.status_number * multiplier #4-6 for lowborn, 32-48 for very high
-            self.global_manager.get('evil_tracker').change(2)
+            constants.evil_tracker.change(2)
             text += 'From: ' + self.name + ' /n /n'
             intro_options = ['How far our empire has fallen... ',
                              'You have made a very foolish decision in firing me. ',
@@ -1015,7 +1022,7 @@ class minister():
                             'Learn how to respect your betters - we\'re not savages. ']
                 text += random.choice(warnings)
             else:
-                warnings = ['Think of what will happen to the ' + random.choice(self.global_manager.get('commodity_types')) + ' prices after the media hears about this! ',
+                warnings = ['Think of what will happen to the ' + random.choice(constants.commodity_types) + ' prices after the media hears about this! ',
                             'You think you can kick me down from your palace in the clouds? ',
                             'I\'ll make sure to tell all about those judges you bribed. ',
                             'So many dead... what will be left of this land by the time you\'re done? ',
@@ -1050,7 +1057,7 @@ class minister():
             if self.current_position == 'none':
                 text = self.name + ' no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n'
             else:
-                if random.randrange(0, 100) < self.global_manager.get('evil'):
+                if random.randrange(0, 100) < constants.evil:
                     tone = 'guilty'
                 else:
                     tone = 'content'
@@ -1091,7 +1098,7 @@ class minister():
                 text += random.choice(intro_options) + random.choice(middle_options) + random.choice(conclusion_options)
                 text += ' /n /n /n' + self.current_position + ' ' + self.name + ' has chosen to step down and retire. /n /n'
                 text += 'Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n'
-        self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
+        constants.public_opinion_tracker.change(public_opinion_change)
         if not text == '':
             self.display_message(text, audio)
 
@@ -1121,4 +1128,4 @@ class minister():
             None
         '''
         if len(self.voice_lines[type]) > 0:
-            self.global_manager.get('sound_manager').play_sound(self.get_voice_line(type))
+            constants.sound_manager.play_sound(self.get_voice_line(type))

@@ -2,23 +2,24 @@
 
 import pygame
 from ..util import utility, drawing_utility, text_utility, scaling
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class image():
     '''
     Abstract base image class
     '''
-    def __init__(self, width, height, global_manager):
+    def __init__(self, width, height):
         '''
         Description:
             Initializes this object
         Input:
             int width: Pixel width of this image
             int height: Pixel height of this image
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.contains_bundle = False
         self.width = width
         self.height = height
@@ -36,7 +37,7 @@ class image():
         if self.contains_bundle:
             self.image.complete_draw()
         elif self.image_id != 'misc/empty.png':
-            drawing_utility.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+            drawing_utility.display_image(self.image, self.x, self.y - self.height)
 
     def touching_mouse(self):
         '''
@@ -96,7 +97,6 @@ class image():
             None
         '''
         if self.can_show():
-            #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
             self.complete_draw()
 
     def update_image_bundle(self):
@@ -131,7 +131,7 @@ class image_bundle(image):
     Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
     An image can be set to an image bundle rather than a string image path
     '''
-    def __init__(self, parent_image, image_id_list, global_manager):
+    def __init__(self, parent_image, image_id_list):
         '''
         Description:
             Initializes this object
@@ -144,14 +144,13 @@ class image_bundle(image):
                     'x_offset': float value - x-axis offset of image, with 1 being shifted a full width to the right
                     'y_offset': float value - y-axis offset of image, with 1 being shifted a full height upward
                     'level': int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
-            global_manager_template global_manager: Object that accesses shared variables
             boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
         Output:
             None
         '''
         self.image_type = 'bundle'
         self.combined_surface = 'none'
-        super().__init__(parent_image.width, parent_image.height, global_manager)
+        super().__init__(parent_image.width, parent_image.height)
         self.parent_image = parent_image
         self.members = []
         if isinstance(image_id_list, list):
@@ -173,7 +172,7 @@ class image_bundle(image):
         Output:
             image_bundle: Returns a copy of this image bundle
         '''
-        return(image_bundle(self.parent_image, self, self.global_manager))
+        return(image_bundle(self.parent_image, self))
 
     def scale(self):
         '''
@@ -218,8 +217,8 @@ class image_bundle(image):
         '''
         #this is running whenever image is set, even if being set to same image as another bundle
         combined_surface = pygame.Surface((self.width, self.height)) #has strange interaction with smoke effects
-        combined_surface.fill(self.global_manager.get('color_dict')['transparent'])
-        combined_surface.set_colorkey(self.global_manager.get('color_dict')['transparent'], pygame.RLEACCEL)
+        combined_surface.fill(constants.color_dict['transparent'])
+        combined_surface.set_colorkey(constants.color_dict['transparent'], pygame.RLEACCEL)
         blit_sequence = []
         for member in self.members:
             if member.image_id != 'misc/empty.png':
@@ -240,7 +239,7 @@ class image_bundle(image):
         Output:
             None
         '''
-        drawing_utility.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+        drawing_utility.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height)
 
     def remove_member(self, member_type):
         '''
@@ -336,24 +335,12 @@ class bundle_image():
         else:
             self.image_id_dict = image_id
             self.image_id = image_id['image_id']
-            if 'size' in image_id:
-                self.size = image_id['size']
-            else:
-                self.size = 1
-            if 'x_offset' in image_id:
-                self.x_offset = image_id['x_offset']
-            else:
-                self.x_offset = 0
-            if 'y_offset' in image_id:
-                self.y_offset = image_id['y_offset']
-            else:
-                self.y_offset = 0
+            self.size = image_id.get('size', 1)
+            self.x_offset = image_id.get('x_offset', 0)
+            self.y_offset = image_id.get('y_offset', 0)
+            self.level = image_id.get('level', 0)
             if 'override_width' in image_id:
                 self.override_width = image_id['override_width']
-            if 'level' in image_id:
-                self.level = image_id['level']
-            else:
-                self.level = 0
             if 'green_screen' in image_id:
                 self.has_green_screen = True
                 self.green_screen_colors = []
@@ -431,8 +418,8 @@ class bundle_image():
         if self.is_offset and self.has_green_screen:
             for current_green_screen_color in self.green_screen_colors:
                 key += str(current_green_screen_color)
-        if key in self.bundle.global_manager.get('rendered_images'): #if image already loaded, use it
-            self.image = self.bundle.global_manager.get('rendered_images')[key]
+        if key in status.rendered_images: #if image already loaded, use it
+            self.image = status.rendered_images[key]
         else: #if image not loaded, load it and add it to the loaded images
             try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                 self.image = pygame.image.load(full_image_id)
@@ -443,10 +430,10 @@ class bundle_image():
             if self.is_offset and self.has_green_screen:
                 width, height = self.image.get_size()
                 index = 0
-                for current_green_screen_color in self.bundle.global_manager.get('green_screen_colors'):
+                for current_green_screen_color in constants.green_screen_colors:
                     if index < len(self.green_screen_colors):
                         if type(self.green_screen_colors[index]) == str: #like 'red'
-                            replace_with = self.bundle.global_manager.get('color_dict')[self.green_screen_colors[index]]
+                            replace_with = self.bundle.constants.color_dict[self.green_screen_colors[index]]
                         else: #like (255, 0, 0)
                             replace_with = self.green_screen_colors[index]
                         for x in range(width):
@@ -455,37 +442,56 @@ class bundle_image():
                                 if current_color[0] == current_green_screen_color[0] and current_color[1] == current_green_screen_color[1] and current_color[2] == current_green_screen_color[2]:
                                     self.image.set_at((x, y), (replace_with[0], replace_with[1], replace_with[2], current_color[3])) #preserves alpha value
                     index += 1
-            self.bundle.global_manager.get('rendered_images')[key] = self.image
+            status.rendered_images[key] = self.image
 
 class free_image(image):
     '''
     Image unrelated to any actors or grids that appears at certain pixel coordinates
     '''
-    def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            string image_id: File path to the image used by this object
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this button can appear
-            global_manager_template global_manager: Object that accesses shared variables
-            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'member_config' = {}: Dictionary of extra configuration values for how to add elements to collections
+                'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
         Output:
             None
         '''
         self.image_type = 'free'
         self.showing = False
-        self.has_parent_collection = False
-        global_manager.get('independent_interface_elements').append(self)        
-        super().__init__(width, height, global_manager)
-        self.modes = modes
-        self.set_image(image_id)
-        self.set_origin(coordinates[0], coordinates[1])
-        self.to_front = to_front
-        self.global_manager.get('free_image_list').append(self)
+        self.has_parent_collection = False    
+        super().__init__(input_dict['width'], input_dict['height'])
+        self.parent_collection = input_dict.get('parent_collection', 'none')
+        self.has_parent_collection = self.parent_collection != 'none'
+        if not self.has_parent_collection:
+            status.independent_interface_elements.append(self)
+
+        if self.has_parent_collection:
+            input_dict['member_config'] = input_dict.get('member_config', {})
+            if not 'x_offset' in input_dict['member_config']:
+                input_dict['member_config']['x_offset'] = input_dict['coordinates'][0]
+            if not 'y_offset' in input_dict['member_config']:
+                input_dict['member_config']['y_offset'] = input_dict['coordinates'][1]
+            self.parent_collection.add_member(self, input_dict['member_config'])
+        else:
+            self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
+
+        if 'modes' in input_dict:
+            self.set_modes(input_dict['modes'])
+        elif 'parent_collection' != 'none':
+            self.set_modes(self.parent_collection.modes)
+        self.set_image(input_dict['image_id'])
+
+        self.to_front = input_dict.get('to_front', False)
+        status.free_image_list.append(self)
 
     def calibrate(self, new_actor):
         return
@@ -501,10 +507,10 @@ class free_image(image):
             None
         '''
         self.x = new_x
-        self.y = self.global_manager.get('display_height') - new_y
+        self.y = constants.display_height - new_y
         if hasattr(self, 'Rect') and self.Rect != 'none':
             self.Rect.x = self.x
-            self.Rect.y = self.global_manager.get('display_height') - (new_y + self.height)
+            self.Rect.y = constants.display_height - (new_y + self.height)
         if self.has_parent_collection:
             self.x_offset = new_x - self.parent_collection.x
             self.y_offset = new_y - self.parent_collection.y
@@ -541,7 +547,7 @@ class free_image(image):
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if (self.has_parent_collection and self.parent_collection.showing) or not self.has_parent_collection:
-            if self.global_manager.get('current_game_mode') in self.modes:
+            if constants.current_game_mode in self.modes:
                 return(True)
         return(False)
 
@@ -555,8 +561,22 @@ class free_image(image):
             None
         '''
         super().remove()
-        self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
-        self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
+        status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
+        status.free_image_list = utility.remove_from_list(status.free_image_list, self)
+
+    def remove_recursive(self, complete=False):
+        '''
+        Description:
+            Recursively removes a collection and its members
+        Input:
+            boolean complete=False: Whether to use remove_complete or remove for each item
+        Output:
+            None
+        '''
+        if complete:
+            self.remove_complete()
+        else:
+            self.remove()
 
     def set_image(self, new_image):
         '''
@@ -576,19 +596,19 @@ class free_image(image):
                 if isinstance(new_image, str): #if set to string image path
                     self.contains_bundle = False
                     full_image_id = 'graphics/' + self.image_id
-                    if full_image_id in self.global_manager.get('rendered_images'):
-                        self.image = self.global_manager.get('rendered_images')[full_image_id]
+                    if full_image_id in status.rendered_images:
+                        self.image = status.rendered_images[full_image_id]
                     else:
                         try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                             self.image = pygame.image.load(full_image_id)
                         except:
                             print(full_image_id)
                             self.image = pygame.image.load(full_image_id)
-                        self.global_manager.get('rendered_images')[full_image_id] = self.image
+                        status.rendered_images[full_image_id] = self.image
                     self.image = pygame.transform.scale(self.image, (self.width, self.height))
                 else: #if set to image path list
                     self.contains_bundle = True
-                    self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+                    self.image = image_bundle(self, self.image_id) #self.image_id
         
     def can_show_tooltip(self):
         '''
@@ -602,16 +622,40 @@ class free_image(image):
         return(False)
 
 class background_image(free_image):
-    def __init__(self, modes, global_manager, to_front = False):
-        super().__init__('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), modes, global_manager, to_front=to_front)
+    '''
+    Background image covering entire screen - designed to blit efficiently
+    '''
+    def __init__(self, input_dict):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'modes': string list value - Game modes during which this button can appear
+        Output:
+            None
+        '''
+        input_dict['image_id'] = 'misc/background.png'
+        input_dict['coordinates'] = (0, 0)
+        input_dict['width'] = constants.display_width
+        input_dict['height'] = constants.display_height
+        super().__init__(input_dict)
         self.previous_safe_click_area_showing = False
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown, while also re-setting its image based on current circumstances
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can currently appear, otherwise returns False
+        '''
         if super().can_show():
-            if self.global_manager.get('safe_click_area').showing != self.previous_safe_click_area_showing:
-                self.previous_safe_click_area_showing = self.global_manager.get('safe_click_area').showing
+            if status.safe_click_area.showing != self.previous_safe_click_area_showing:
+                self.previous_safe_click_area_showing = status.safe_click_area.showing
                 if self.previous_safe_click_area_showing:
-                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': self.global_manager.get('safe_click_area').width}])
+                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': status.safe_click_area.width}])
                 else:
                     self.set_image('misc/background.png')
             return(True)
@@ -619,25 +663,25 @@ class background_image(free_image):
 
 class tooltip_free_image(free_image):
     '''
-    Free image that has a tooltip when moused over
+    Abstract class, free image that has a tooltip when moused over
     '''
-    def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            string image_id: File path to the image used by this object
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this button can appear
-            global_manager_template global_manager: Object that accesses shared variables
-            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
         Output:
             None
         '''
-        super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
-        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height)
+        super().__init__(input_dict)
+        self.Rect = pygame.Rect(self.x, constants.display_height - (self.y + self.height), self.width, self.height)
         self.Rect.y = self.y - self.height
         self.tooltip_text = []
         self.update_tooltip()
@@ -653,12 +697,12 @@ class tooltip_free_image(free_image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 0
-        font_name = self.global_manager.get('font_name')
-        font_size = self.global_manager.get('font_size')
+        font_name = constants.font_name
+        font_size = constants.font_size
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -705,43 +749,43 @@ class tooltip_free_image(free_image):
             self.update_tooltip()
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
-                mouse_y = self.global_manager.get('display_height') + 10 - height
+                mouse_y = constants.display_height + 10 - height
             if beyond_screen:
-                mouse_x = self.global_manager.get('display_width') - width
+                mouse_x = constants.display_width - width
             mouse_y += y_displacement
             self.tooltip_box.x = mouse_x
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
             self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            pygame.draw.rect(constants.game_display, constants.color_dict['black'], self.tooltip_outline)
+            pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
-                    (text_line_index * self.global_manager.get('font_size'))))
+                constants.game_display.blit(text_utility.text(text_line, constants.myfont), (self.tooltip_box.x + scaling.scale_width(10), self.tooltip_box.y +
+                    (text_line_index * constants.font_size)))
 
 class indicator_image(tooltip_free_image):
     '''
     Image that appears under certain conditions based on its type
     '''
-    def __init__(self, image_id, coordinates, width, height, modes, indicator_type, global_manager, to_front = False):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            string image_id: File path to the image used by this object
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this button can appear
-            string indicator_type: Type of variable that this indicator is attached to, like 'prosecution_bribed_judge'
-            global_manager_template global_manager: Object that accesses shared variables
-            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'to_front' = False: boolean value - If True, allows this image to appear in front of most other objects instead of being behind them
+                'indicator_type': string value - Type of variable that this indicator is attached to, like 'prosecution_bribed_judge'
         Output:
             None
         '''
-        self.indicator_type = indicator_type
-        super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
+        self.indicator_type = input_dict['indicator_type']
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -754,10 +798,10 @@ class indicator_image(tooltip_free_image):
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.indicator_type == 'prosecution_bribed_judge':
-                if self.global_manager.get('prosecution_bribed_judge'):
+                if flags.prosecution_bribed_judge:
                     return(True)
             elif self.indicator_type == 'not prosecution_bribed_judge':
-                if not self.global_manager.get('prosecution_bribed_judge'):
+                if not flags.prosecution_bribed_judge:
                     return(True)
             else:
                 return(True)
@@ -789,34 +833,34 @@ class dice_roll_minister_image(tooltip_free_image):
     '''
     Part of a pair of images that shows the controlling minister's position and portrait next to notifications during dice rolls
     '''
-    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager, minister_message_image = False):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this button can appear
-            minister attached_minister: Minister attached to this image
-            string minister_image_type: Type of minister information shown by this image, like 'portrait' or 'position'
-            global_manager_template global_manager: Object that accesses shared variables
-            boolean minister_message_image = False: Whether this image is attached to a minister message or an action notification dice roll
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'attached_minister': minister value - Minister attached to this image
+                'minister_image_type': string value - Type of minister information shown by this image, like 'portrait' or 'position'
+                'minister_message_image' = False: boolean value - Whether this image is attached to a minister message or an action notification dice roll
         Output:
             None
         '''
-        self.attached_minister = attached_minister #minister object
-        self.minister_image_type = minister_image_type #position or portrait
-        if minister_image_type == 'portrait':
-            image_id = attached_minister.image_id
-        elif minister_image_type == 'position':
-            if not self.attached_minister.current_position == 'none':
-                image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+        self.attached_minister = input_dict['attached_minister']
+        self.minister_image_type = input_dict['minister_image_type'] #position or portrait
+        if self.minister_image_type == 'portrait':
+            input_dict['image_id'] = self.attached_minister.image_id
+        elif self.minister_image_type == 'position':
+            if self.attached_minister.current_position != 'none':
+                input_dict['image_id'] = 'ministers/icons/' + constants.minister_type_dict[self.attached_minister.current_position] + '.png'
             else:
-                image_id = 'misc/mob_background.png'
-        self.minister_message_image = minister_message_image #whether this is an image attached to a minister message notification or an action notification - action notification by default, acts differently
-        super().__init__(image_id, coordinates, width, height, modes, global_manager)
-        global_manager.get('dice_roll_minister_images').append(self)
+                input_dict['image_id'] = 'misc/mob_background.png'
+        self.minister_message_image = input_dict.get('minister_message_image', False)
+        super().__init__(input_dict)
         self.to_front = True
 
     def update_tooltip(self):
@@ -834,61 +878,36 @@ class dice_roll_minister_image(tooltip_free_image):
         else:
             self.set_tooltip([])
 
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this image can be shown. Normal dice roll minister images return the same as superclass, while minister message images are only shown when their minister's message is currently displayed
-        Input:
-            None
-        Output:
-            boolean: Returns True if this image can currently appear, otherwise returns False
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if self.minister_message_image:
-                if self.global_manager.get('displayed_notification').notification_type == 'minister' and self.global_manager.get('displayed_notification').attached_minister == self.attached_minister:
-                    return(True)
-            else:
-                return(True)
-        return(False)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('dice_roll_minister_images', utility.remove_from_list(self.global_manager.get('dice_roll_minister_images'), self))
-
 class minister_type_image(tooltip_free_image):
     '''
     Image that displays the icon corresponding to a certain minister office. Can be set to always show the icon for the same office or to show the icon of a certain unit's minister
     '''
-    def __init__(self, coordinates, width, height, modes, minister_type, attached_label, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            string list modes: Game modes during which this button can appear
-            string minister_type: Minister office whose icon is always represented by this image, or 'none' if the icon can change
-            actor_display_label/string attached_label: Actor display label that this image appears next to, or 'none' if not attached to a label
-            global_manager_template global_manager: Object that accesses shared variables
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this image
+                'width': int value - Pixel width of this image
+                'height': int value - Pixel height of this image
+                'modes': string list value - Game modes during which this button can appear
+                'minister_type': string value - Minister office whose icon is always represented by this image, or 'none' if the icon can change
+                'attached_label': actor_display_label/string value - Actor display label that this image appears next to, or 'none' if not attached to a label
+                'minister_image_type': string value = 'position': Type of minister image to show - either only position or full portrait
         Output:
             None
         '''
         self.current_minister = 'none'
-        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
-        self.attached_label = attached_label
-        self.minister_type = minister_type #position, like General
-        if not self.minister_type == 'none':
-            self.calibrate(global_manager.get('current_ministers')[self.minister_type]) #calibrate to current minister or none if no current minister
-        self.global_manager.get('minister_image_list').append(self)
+        input_dict['image_id'] = 'misc/empty.png'
+        self.minister_image_type = input_dict.get('minister_image_type', 'position')
+        super().__init__(input_dict)
+        self.attached_label = input_dict['attached_label']
+        self.minister_type = input_dict['minister_type'] #position, like General
+        if self.minister_type != 'none':
+            self.calibrate(status.current_ministers[self.minister_type]) #calibrate to current minister or none if no current minister
+        status.minister_image_list.append(self)
         self.to_front = True
 
     def calibrate(self, new_minister):
@@ -900,23 +919,23 @@ class minister_type_image(tooltip_free_image):
         Output:
             None
         '''
+        if new_minister == None:
+            new_minister = 'none'
         if new_minister != 'none':
             if new_minister.actor_type != 'minister':
                 if hasattr(new_minister, 'controlling_minister'):
                     new_minister = new_minister.controlling_minister
                 else:
                     new_minister = 'none'
-        else:
-            new_minister = 'none'
 
         self.current_minister = new_minister
-        if not new_minister == 'none':
+        if new_minister != 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position
         current_minister_type = self.minister_type
         if self.attached_label != 'none' and self.attached_label.actor != 'none' and self.attached_label.actor.is_pmob:
             current_minister_type = self.attached_label.actor.controlling_minister_type
-        if not current_minister_type == 'none':
-            keyword = self.global_manager.get('minister_type_dict')[current_minister_type] #type, like military
+        if current_minister_type != 'none':
+            keyword = constants.minister_type_dict[current_minister_type] #type, like military
             self.tooltip_text = []
             if keyword == 'prosecution':
                 self.tooltip_text.append('Rather than controlling units, a prosecutor controls the process of investigating and removing ministers suspected to be corrupt.')
@@ -940,7 +959,10 @@ class minister_type_image(tooltip_free_image):
                     self.tooltip_text.append('The ' + current_minister_type + ' also ensures that goods are not lost in transport or storage.')
             if new_minister == 'none':
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
-            self.set_image('ministers/icons/' + keyword + '.png')
+            image_id_list = ['ministers/icons/' + keyword + '.png']
+            if self.minister_image_type == 'portrait' and self.current_minister != 'none':
+                image_id_list += self.current_minister.image_id
+            self.set_image(image_id_list)
         self.update_image_bundle()
 
     def update_tooltip(self):
@@ -970,22 +992,25 @@ class minister_type_image(tooltip_free_image):
 
 class warning_image(free_image):
     '''
-    Image that appears over the image it is attached to under certain conditions to draw attention from the player
+    Image that appears over the image it is attached to under certain conditions to draw the player's attention
     '''
-    def __init__(self, attached_image, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            image attached_image: Image that this warning appears over under certain conditions
-            global_manager_template global_manager: Object that accesses shared variables
-            string attachment_type = 'image': Type of object this image is attached to, like 'image' or 'button'
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'attached_image': image value - Image that this warning appears over under certain conditions
         Output:
             None
         '''
-        self.attached_image = attached_image
-        super().__init__('misc/warning_icon.png', (attached_image.x, attached_image.y), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
-            global_manager)
+        self.attached_image = input_dict['attached_image']
+        input_dict['image_id'] = 'misc/warning_icon.png'
+        input_dict['coordinates'] = (self.attached_image.x, self.attached_image.y)
+        input_dict['width'] = self.attached_image.width
+        input_dict['height'] = self.attached_image.height
+        input_dict['modes'] = self.attached_image.modes
+        super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1002,23 +1027,28 @@ class loading_image_template(free_image):
     '''
     Image that occupies the entire screen, covering all other objects while the game is loading 
     '''
-    def __init__(self, image_id, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
         Input:
-            string image_id: File path to the image used by this object
-            global_manager_template global_manager: Object that accesses shared variables
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'image_id': string/string list value - List of image bundle component descriptions or string file path to the image used by this object
         Output:
             None
         '''
-        super().__init__(image_id, (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), [], global_manager)
-        self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
+        input_dict['coordinates'] = (0, 0)
+        input_dict['width'] = constants.display_width
+        input_dict['height'] = constants.display_height
+        input_dict['modes'] = []
+        super().__init__(input_dict)
+        status.independent_interface_elements = utility.remove_from_list(status.independent_interface_elements, self)
 
     def can_show(self, skip_parent_collection=False):
         '''
         Description:
-            Returns whether this image can be shown. Unlike other images, a loading screen image will always be visible when draw() is called
+            Returns whether this image can be shown. Unlike other images, a loading screen image is always "showing" but only draws when draw() is  directly
+                called
         Input:
             None
         Output:
@@ -1030,7 +1060,7 @@ class actor_image(image):
     '''
     Image that is attached to an actor and a grid, representing the actor on a certain grid. An actor will have a different actor_image for each grid on which it appears
     '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
+    def __init__(self, actor, width, height, grid, image_description):
         '''
         Description:
             Initializes this object
@@ -1040,13 +1070,11 @@ class actor_image(image):
             int height: Pixel height of this image
             grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
             string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.image_type = 'actor'
-        super().__init__(width, height, global_manager)
-        self.global_manager = global_manager
+        super().__init__(width, height)
         self.actor = actor
         self.modes = actor.modes
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
@@ -1054,7 +1082,7 @@ class actor_image(image):
         self.image_description == image_description
         self.grid = grid
         self.outline_width = self.grid.grid_line_width + 1
-        self.outline = pygame.Rect(self.actor.x, self.global_manager.get('display_height') - (self.actor.y + self.height), self.width, self.height)
+        self.outline = pygame.Rect(self.actor.x, constants.display_height - (self.actor.y + self.height), self.width, self.height)
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
         if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
             grid_x, grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
@@ -1076,7 +1104,7 @@ class actor_image(image):
         '''
         cell_width = self.grid.get_cell_width()
         cell_height = self.grid.get_cell_height()
-        return((self.x + round(cell_width / 2), self.global_manager.get('display_height') -(self.y + round(cell_height / 2))))
+        return((self.x + round(cell_width / 2), constants.display_height -(self.y + round(cell_height / 2))))
         
     def set_image(self, new_image_description):
         '''
@@ -1103,19 +1131,19 @@ class actor_image(image):
             if isinstance(self.image_id, str): #if set to string image path
                 self.contains_bundle = False
                 full_image_id = 'graphics/' + self.image_id
-                if full_image_id in self.global_manager.get('rendered_images'):
-                    self.image = self.global_manager.get('rendered_images')[full_image_id]
+                if full_image_id in status.rendered_images:
+                    self.image = status.rendered_images[full_image_id]
                 else:
                     try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                         self.image = pygame.image.load(full_image_id)
                     except:
                         print(full_image_id)
                         self.image = pygame.image.load(full_image_id)
-                    self.global_manager.get('rendered_images')[full_image_id] = self.image
+                    status.rendered_images[full_image_id] = self.image
                 self.image = pygame.transform.scale(self.image, (self.width, self.height))
             else: #if set to image path list
                 self.contains_bundle = True
-                self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+                self.image = image_bundle(self, self.image_id) #self.image_id
         
     def draw(self):
         '''
@@ -1165,12 +1193,12 @@ class actor_image(image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
-        font_size = self.global_manager.get('font_size')
-        font_name = self.global_manager.get('font_name')
+        font_size = constants.font_size
+        font_name = constants.font_name
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
-        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
+        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)
         self.actor.tooltip_box = self.tooltip_box
         self.tooltip_outline_width = 1
@@ -1185,7 +1213,7 @@ class actor_image(image):
         Output:
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             return(True)
         else:
             return(False)
@@ -1194,7 +1222,7 @@ class mob_image(actor_image):
     '''
     actor image attached to a mob rather than an actor, gaining the ability to manage the cells corresponding to this image's mob's coordinates
     '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
+    def __init__(self, actor, width, height, grid, image_description):
         '''
         Description:
             Initializes this object
@@ -1204,11 +1232,10 @@ class mob_image(actor_image):
             int height: Pixel height of this image
             grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
             string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
+        super().__init__(actor, width, height, grid, image_description)
         self.current_cell = 'none'
         self.image_type = 'mob'
         self.add_to_cell()
@@ -1241,7 +1268,7 @@ class mob_image(actor_image):
             if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
                 old_cell = self.current_cell
                 self.current_cell = self.grid.find_cell(mini_x, mini_y)
-                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building):
+                if old_cell != self.current_cell and not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building):
                     self.current_cell.contained_mobs.insert(0, self.actor)
             else:
                 self.remove_from_cell()
@@ -1268,7 +1295,7 @@ class button_image(actor_image):
     '''
     actor image attached to a button rather than an actor, causing it to be located at a pixel coordinate location where its button should be rather than within a grid cell
     '''
-    def __init__(self, button, width, height, image_id, global_manager):
+    def __init__(self, button, width, height, image_id):
         '''
         Description:
             Initializes this object
@@ -1277,23 +1304,21 @@ class button_image(actor_image):
             int width: Pixel width of this image
             int height: Pixel height of this image
             string image_id: File path to the image used by this object
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.image_type = 'button'
         self.button = button
         self.width = width
         self.height = height
         self.x = self.button.x
-        self.y = self.global_manager.get('display_height') - (self.button.y + self.height) - self.height
+        self.y = constants.display_height - (self.button.y + self.height) - self.height
         self.modes = button.modes
         self.image_id = image_id
         self.set_image(image_id)
         self.Rect = self.button.Rect
         self.outline_width = 2
-        self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline = pygame.Rect(self.x - self.outline_width, constants.display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
 
     def update_state(self, new_x, new_y, new_width, new_height):
         '''
@@ -1311,7 +1336,7 @@ class button_image(actor_image):
         self.width = new_width
         self.height = new_height
         self.outline.x = new_x - self.outline_width
-        self.outline.y = self.global_manager.get('display_height') - (new_y + new_height + self.outline_width)
+        self.outline.y = constants.display_height - (new_y + new_height + self.outline_width)
         self.outline.width = new_width + (2 * self.outline_width)
         self.outline.height = new_height + (self.outline_width * 2)
         self.set_image(self.image_id)
@@ -1329,19 +1354,19 @@ class button_image(actor_image):
         if isinstance(self.image_id, str): #if set to string image path
             self.contains_bundle = False
             full_image_id = 'graphics/' + self.image_id
-            if full_image_id in self.global_manager.get('rendered_images'):
-                self.image = self.global_manager.get('rendered_images')[full_image_id]
+            if full_image_id in status.rendered_images:
+                self.image = status.rendered_images[full_image_id]
             else:
                 try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
                     self.image = pygame.image.load(full_image_id)
                 except:
                     print(full_image_id)
                     self.image = pygame.image.load(full_image_id)
-                self.global_manager.get('rendered_images')[full_image_id] = self.image
+                status.rendered_images[full_image_id] = self.image
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
         else: #if set to image path list
             self.contains_bundle = True
-            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+            self.image = image_bundle(self, self.image_id) #self.image_id
         
     def draw(self):
         '''
@@ -1354,7 +1379,7 @@ class button_image(actor_image):
         '''
         if self.button.showing:
             self.x = self.button.x
-            self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
+            self.y = constants.display_height - (self.button.y + self.height) + self.height
             self.complete_draw()
         
     def draw_tooltip(self):
@@ -1383,15 +1408,15 @@ class collection_image(button_image):
     def draw(self):
         if self.button.showing:
             self.x = self.button.x
-            self.y = self.global_manager.get('display_height') + self.height - self.button.y# + self.height
-            #self.y = self.global_manager.get('display_height') + self.button.y - (self.height * 3)
+            self.y = constants.display_height + self.height - self.button.y# + self.height
+            #self.y = constants.display_height + self.button.y - (self.height * 3)
             self.complete_draw()
 
 class tile_image(actor_image):
     '''
     actor_image attached to a tile rather than an actor, causing it to use file paths directly rather than an dictionary of image keys and file path values
     '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
+    def __init__(self, actor, width, height, grid, image_description):
         '''
         Description:
             Initializes this object
@@ -1401,11 +1426,10 @@ class tile_image(actor_image):
             int height: Pixel height of this image
             grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
             string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
+        super().__init__(actor, width, height, grid, image_description)
         self.go_to_cell((self.actor.x, self.actor.y))
 
     def go_to_cell(self, coordinates):

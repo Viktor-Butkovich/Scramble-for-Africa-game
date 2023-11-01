@@ -3,12 +3,14 @@
 import pygame
 from .buttons import button
 from ..util import scaling, text_utility, utility, market_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class label(button):
     '''
     A button that shares most of a button's behaviors but displays a message and does nothing when clicked
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -23,20 +25,18 @@ class label(button):
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'message': string value - Default text for this label
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
-        self.font_size = scaling.scale_width(25, global_manager)
-        self.font_name = self.global_manager.get('font_name')
+        self.font_size = scaling.scale_width(25)
+        self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
         self.message = input_dict['message']
         self.minimum_width = input_dict['minimum_width']
         input_dict['width'] = self.minimum_width
         input_dict['button_type'] = 'label'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.set_label(self.message)
 
     def set_label(self, new_message):
@@ -49,8 +49,8 @@ class label(button):
             None
         '''
         self.message = new_message
-        if text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width:
-            self.width = text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
+        if text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10) > self.minimum_width:
+            self.width = text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10)
         else:
             self.width = self.minimum_width
         self.image.width = self.width
@@ -91,14 +91,14 @@ class label(button):
         '''
         if self.showing:
             super().draw(allow_show_outline=False)
-            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+            constants.game_display.blit(text_utility.text(self.message, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 
 class value_label(label):
     '''
     Label that tracks the value of a certain variable and is attached to a value_tracker object. Whenever the value of the value_tracker changes, this label is automatically changed
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -113,15 +113,14 @@ class value_label(label):
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'value_name': string value - Type of value tracked by this label, like 'turn' for turn number label
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.value_name = input_dict['value_name']
         input_dict['message'] = 'none'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
         self.display_name = text_utility.remove_underscores(self.value_name) #public_opinion to public opinion
-        self.tracker = self.global_manager.get(self.value_name + '_tracker')
+        self.tracker = getattr(constants, self.value_name + '_tracker')
         self.tracker.value_label = self
         self.update_label(self.tracker.get())
 
@@ -151,18 +150,18 @@ class value_label(label):
             tooltip_text.append('Public opinion tends to approach the netural value of 50 over time')
         if self.value_name == 'turn':
             tooltip_text.append('Current lore mission: ')
-            if self.global_manager.get('current_lore_mission') == 'none':
+            if status.current_lore_mission == None:
                 text = '    None'
             else:
-                text = '    Find the ' + self.global_manager.get('current_lore_mission').name + ' (' + self.global_manager.get('current_lore_mission').lore_type + ')'
+                text = '    Find the ' + status.current_lore_mission.name + ' (' + status.current_lore_mission.lore_type + ')'
             tooltip_text.append(text)
         self.set_tooltip(tooltip_text)
 
-class money_label(value_label):
+class money_label_template(value_label):
     '''
     Special type of value label that tracks money
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -179,12 +178,11 @@ class money_label(value_label):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['value_name'] = 'money'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def update_label(self, new_value):
         '''
@@ -195,7 +193,7 @@ class money_label(value_label):
         Output:
             None
         '''
-        end_turn_money_change = market_utility.calculate_end_turn_money_change(self.global_manager)
+        end_turn_money_change = market_utility.calculate_end_turn_money_change()
         if end_turn_money_change >= 0:
             sign = '+'
         else:
@@ -211,7 +209,7 @@ class money_label(value_label):
         Output:
             None
         '''
-        self.update_label(self.global_manager.get(self.tracker.value_key))
+        self.update_label(getattr(constants, self.tracker.value_key))
     
     def update_tooltip(self):
         '''
@@ -224,62 +222,52 @@ class money_label(value_label):
         '''
         tooltip_text = [self.message]
 
-        num_african_workers = self.global_manager.get('num_african_workers')
-        african_worker_upkeep = self.global_manager.get('african_worker_upkeep')
-        total_african_worker_upkeep = round(num_african_workers * african_worker_upkeep, 2)
+        total_african_worker_upkeep = round(constants.num_african_workers * constants.african_worker_upkeep, 2)
+        total_european_worker_upkeep = round(constants.num_european_workers * constants.european_worker_upkeep, 2)
+        total_slave_worker_upkeep = round(constants.num_slave_workers * constants.slave_worker_upkeep, 2)
 
-        num_european_workers = self.global_manager.get('num_european_workers')
-        european_worker_upkeep = self.global_manager.get('european_worker_upkeep')
-        total_european_worker_upkeep = round(num_european_workers * european_worker_upkeep, 2)
-
-        num_slave_workers = self.global_manager.get('num_slave_workers')
-        slave_worker_upkeep = self.global_manager.get('slave_worker_upkeep')
-        total_slave_worker_upkeep = round(num_slave_workers * slave_worker_upkeep, 2)
-        
-        num_church_volunteers = self.global_manager.get('num_church_volunteers')
-
-        num_workers = num_african_workers + num_european_workers + num_slave_workers + num_church_volunteers
+        num_workers = constants.num_african_workers + constants.num_european_workers + constants.num_slave_workers + constants.num_church_volunteers
         total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
 
         tooltip_text.append('')
         tooltip_text.append('At the end of the turn, you will pay a total of ' + str(total_upkeep) + ' money to your ' + str(num_workers) + ' workers.')
-        if num_african_workers > 0:
-            tooltip_text.append('    Your ' + str(num_african_workers) + ' free African worker' + utility.generate_plural(num_african_workers) + ' will be paid ' + str(african_worker_upkeep) + ' money, totaling to ' + str(total_african_worker_upkeep) + ' money.')
+        if constants.num_african_workers > 0:
+            tooltip_text.append('    Your ' + str(constants.num_african_workers) + ' free African worker' + utility.generate_plural(constants.num_african_workers) + ' will be paid ' + str(constants.african_worker_upkeep) + ' money, totaling to ' + str(total_african_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append('    Any free African workers would each be paid ' + str(african_worker_upkeep) + ' money.')
-        if num_european_workers > 0:
-            tooltip_text.append('    Your ' + str(num_european_workers) + ' European worker' + utility.generate_plural(num_european_workers) + ' will be paid ' + str(european_worker_upkeep) + ' money, totaling to ' + str(total_european_worker_upkeep) + ' money.')
+            tooltip_text.append('    Any free African workers would each be paid ' + str(constants.african_worker_upkeep) + ' money.')
+        if constants.num_european_workers > 0:
+            tooltip_text.append('    Your ' + str(constants.num_european_workers) + ' European worker' + utility.generate_plural(constants.num_european_workers) + ' will be paid ' + str(constants.european_worker_upkeep) + ' money, totaling to ' + str(total_european_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append('    Any European workers would each be paid ' + str(european_worker_upkeep) + ' money.')
-        if num_slave_workers > 0:
-            tooltip_text.append('    Your ' + str(num_slave_workers) + ' slave worker' + utility.generate_plural(num_slave_workers) + ' will cost ' + str(slave_worker_upkeep) + ' in upkeep, totaling to ' + str(total_slave_worker_upkeep) + ' money.')
+            tooltip_text.append('    Any European workers would each be paid ' + str(constants.european_worker_upkeep) + ' money.')
+        if constants.num_slave_workers > 0:
+            tooltip_text.append('    Your ' + str(constants.num_slave_workers) + ' slave worker' + utility.generate_plural(constants.num_slave_workers) + ' will cost ' + str(constants.slave_worker_upkeep) + ' in upkeep, totaling to ' + str(total_slave_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append('    Any slave workers would each cost ' + str(slave_worker_upkeep) + ' money in upkeep.')
-        if num_church_volunteers > 0:
-            tooltip_text.append('    Your ' + str(num_church_volunteers) + ' church volunteer' + utility.generate_plural(num_church_volunteers) + ' will not need to be paid.')
+            tooltip_text.append('    Any slave workers would each cost ' + str(constants.slave_worker_upkeep) + ' money in upkeep.')
+        if constants.num_church_volunteers > 0:
+            tooltip_text.append('    Your ' + str(constants.num_church_volunteers) + ' church volunteer' + utility.generate_plural(constants.num_church_volunteers) + ' will not need to be paid.')
         else:
             tooltip_text.append('    Any church volunteers would not need to be paid.')
 
         tooltip_text.append('')
-        num_available_workers = market_utility.count_available_workers(self.global_manager)
+        num_available_workers = market_utility.count_available_workers()
         tooltip_text.append('Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of ' + str(num_available_workers) + ' African worker' + utility.generate_plural(num_available_workers) + '.')
         
-        if len(self.global_manager.get('loan_list')) > 0:
+        if len(status.loan_list) > 0:
             tooltip_text.append('')
             tooltip_text.append('Loans: ')
-            for current_loan in self.global_manager.get('loan_list'):
+            for current_loan in status.loan_list:
                 tooltip_text.append('    ' + current_loan.get_description())
 
         tooltip_text.append('')
-        tooltip_text.append('While public opinion and government subsidies are not entirely predictable, your company is estimated to receive ' + str(market_utility.calculate_subsidies(self.global_manager, True)) + ' money in subsidies this turn')
+        tooltip_text.append('While public opinion and government subsidies are not entirely predictable, your company is estimated to receive ' + str(market_utility.calculate_subsidies(True)) + ' money in subsidies this turn')
 
-        total_sale_revenue = market_utility.calculate_total_sale_revenue(self.global_manager)
+        total_sale_revenue = market_utility.calculate_total_sale_revenue()
         if total_sale_revenue > 0:
             tooltip_text.append('')
-            tooltip_text.append('Your ' + self.global_manager.get('type_minister_dict')['trade'] + ' has been ordered to sell commodities at the end of the turn for an estimated total of ' + str(total_sale_revenue) + ' money')
+            tooltip_text.append('Your ' + constants.type_minister_dict['trade'] + ' has been ordered to sell commodities at the end of the turn for an estimated total of ' + str(total_sale_revenue) + ' money')
 
         tooltip_text.append('')
-        estimated_money_change = market_utility.calculate_end_turn_money_change(self.global_manager)
+        estimated_money_change = market_utility.calculate_end_turn_money_change()
         if estimated_money_change > 0:
             tooltip_text.append('Between these revenues and expenses, your company is expected to gain about ' + str(estimated_money_change) + ' money at the end of the turn.')
         elif estimated_money_change < 0:
@@ -289,11 +277,11 @@ class money_label(value_label):
         
         self.set_tooltip(tooltip_text)
 
-class commodity_prices_label(label):
+class commodity_prices_label_template(label):
     '''
     Label that shows the price of each commodity. Unlike most labels, its message is a list of strings rather than a string, allowing it to have a line for each commodity
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -307,16 +295,15 @@ class commodity_prices_label(label):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.ideal_width = input_dict['minimum_width']
         self.minimum_height = input_dict['height']
         input_dict['message'] = 'none'
-        super().__init__(input_dict, global_manager)
-        self.font_size = self.global_manager.get('font_size') * 2
-        self.font_name = self.global_manager.get('font_name')
+        super().__init__(input_dict)
+        self.font_size = constants.font_size * 2
+        self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
 
@@ -331,15 +318,15 @@ class commodity_prices_label(label):
         '''
         message = ['Prices: ']
         widest_commodity_width = 0
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             current_message_width = text_utility.message_width(current_commodity, self.font_size, self.font_name)
             if current_message_width > widest_commodity_width:
                 widest_commodity_width = current_message_width
-        for current_commodity in self.global_manager.get('commodity_types'):
+        for current_commodity in constants.commodity_types:
             current_line = ''
             while text_utility.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
                 current_line += ' '
-            current_line += current_commodity + ': ' +  str(self.global_manager.get('commodity_prices')[current_commodity])
+            current_line += current_commodity + ': ' +  str(constants.commodity_prices[current_commodity])
             message.append(current_line)
         self.set_label(message)
             
@@ -354,8 +341,8 @@ class commodity_prices_label(label):
         '''
         self.message = new_message
         for text_line in self.message:
-            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10, self.global_manager) and text_utility.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.width:
-                self.width = scaling.scale_width(text_utility.message_width(text_line, self.font_size, self.font_name), self.global_manager) + scaling.scale_width(20, self.global_manager)# + 20
+            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10) and text_utility.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10) > self.width:
+                self.width = scaling.scale_width(text_utility.message_width(text_line, self.font_size, self.font_name)) + scaling.scale_width(20)
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling
@@ -370,11 +357,11 @@ class commodity_prices_label(label):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                     (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):
@@ -390,7 +377,7 @@ class multi_line_label(label):
     '''
     Label that has multiple lines and moves to the next line when a line of text exceeds its width
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -406,7 +393,6 @@ class multi_line_label(label):
                 'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -415,7 +401,7 @@ class multi_line_label(label):
         self.original_y = input_dict['coordinates'][1]
         input_dict['minimum_width'] = input_dict['ideal_width']
         input_dict['height'] = self.minimum_height
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def draw(self):
         '''
@@ -426,11 +412,11 @@ class multi_line_label(label):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                     (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):
@@ -475,7 +461,7 @@ class multi_line_label(label):
         next_line += next_word
         new_message.append(next_line)
         self.message = new_message
-        new_height = len(new_message) * self.global_manager.get('font_size')
+        new_height = len(new_message) * constants.font_size
         if new_height > self.minimum_height:
             self.height = new_height
 

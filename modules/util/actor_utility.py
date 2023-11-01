@@ -5,37 +5,37 @@ import os
 import pygame
 import math
 from . import utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
-def reset_action_prices(global_manager):
+def reset_action_prices():
     '''
     Description:
         Resets the costs of any actions that were increased during the previous turn
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    for current_action_type in global_manager.get('action_types'):
-        global_manager.get('action_prices')[current_action_type] = global_manager.get('base_action_prices')[current_action_type]
+    for current_action_type in constants.action_types:
+        constants.action_prices[current_action_type] = constants.base_action_prices[current_action_type]
 
-def double_action_price(global_manager, action_type):
+def double_action_price(action_type):
     '''
     Description:
         Doubles the price of a certain action type each time it is done, usually for ones that do not require workers
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         string action_type: Type of action to double the price of
     Output:
         None
     '''
-    global_manager.get('action_prices')[action_type] *= 2
+    constants.action_prices[action_type] *= 2
 
-def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
+def get_building_cost(constructor, building_type, building_name = 'n/a'):
     '''
     Description:
         Returns the cost of the inputted unit attempting to construct the inputted building
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         pmob/string constructor: Unit attempting to construct the building, or 'none' if no location/unit type is needed
         string building_type: Type of building to build, like 'infrastructure'
         string building_name = 'n/a': Name of building being built, used to differentiate roads from railroads
@@ -43,48 +43,48 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
         int: Returns the cost of the inputted unit attempting to construct the inputted building
     '''
     if building_type == 'infrastructure':
-        building_type = building_name #road, railroad, road_bridge, or railroad_bridge
-
+        building_type = building_name.replace(' ', '_') #road, railroad, road_bridge, or railroad_bridge
     if building_type == 'warehouses':
-        if constructor == 'none':
+        if constructor in ['none', None]:
             base_price = 5
         else:
             base_price = constructor.images[0].current_cell.get_warehouses_cost()
     else:
-        base_price = global_manager.get('building_prices')[building_type]
+        base_price = constants.building_prices[building_type]
 
     if building_type in ['train', 'steamboat']:
         cost_multiplier = 1
-    elif constructor == 'none' or not global_manager.get('strategic_map_grid') in constructor.grids:
+    elif constructor in ['none', None] or not status.strategic_map_grid in constructor.grids:
         cost_multiplier = 1
     else:
         terrain = constructor.images[0].current_cell.terrain
-        cost_multiplier = global_manager.get('terrain_build_cost_multiplier_dict')[terrain]
+        cost_multiplier = constants.terrain_build_cost_multiplier_dict[terrain]
 
     return(base_price * cost_multiplier)
 
-def update_recruitment_descriptions(global_manager, target = 'all'):
+def update_descriptions(target = 'all'):
     '''
     Description:
         Updates the descriptions of recruitable units for use in various parts of the program. Updates all units during setup and can target a certain unit to update prices, etc. when the information is needed later in the game.
             Creates list versions for tooltips and string versions for notifications
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         string target = 'all': Targets a certain unit type, or 'all' by default, to update while minimizing unnecessary calculations
     Output:
         None
     '''
     if target == 'all':
-        targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
+        targets_to_update = constants.recruitment_types + ['slums workers', 'village workers', 'slaves']
+        targets_to_update += constants.building_types + ['road', 'railroad', 'road_bridge', 'railroad_bridge']
+        targets_to_update += constants.upgrade_types
     else:
         targets_to_update = [target]
 
     for current_target in targets_to_update:
-        recruitment_list_descriptions = global_manager.get('recruitment_list_descriptions')
-        recruitment_string_descriptions = global_manager.get('recruitment_string_descriptions')
+        list_descriptions = constants.list_descriptions
+        string_descriptions = constants.string_descriptions
         text_list = []
-        if current_target in global_manager.get('officer_types'):
-            first_line = utility.capitalize(current_target) + 's are controlled by the ' + global_manager.get('officer_minister_dict')[current_target]
+        if current_target in constants.officer_types:
+            first_line = utility.capitalize(current_target) + 's are controlled by the ' + constants.officer_minister_dict[current_target]
             if current_target == 'explorer':
                 first_line += '.'
                 text_list.append(first_line)
@@ -126,30 +126,30 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
                 
         elif current_target == 'European workers':
-            text_list.append('European workers have an upkeep of ' + str(global_manager.get('european_worker_upkeep')) + ' money each turn.')
+            text_list.append('European workers have an upkeep of ' + str(constants.european_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of European workers hired or sent as replacements may increase the upkeep of all European workers.')
             text_list.append('European workers tend to be more susceptible to attrition but are more accustomed to using modern weaponry.')
             
         elif current_target == 'slave workers':
-            text_list.append('Slave workers have a constant upkeep of ' + str(global_manager.get('slave_worker_upkeep')) + ' money each turn.')
+            text_list.append('Slave workers have a constant upkeep of ' + str(constants.slave_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            if global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+            if constants.effect_manager.effect_active('no_slave_trade_penalty'):
                 text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
             else:
                 text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
             
         elif current_target == 'slums workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
             
         elif current_target == 'village workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
@@ -166,42 +166,94 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
         elif current_target == 'train':
             text_list.append('While useless by itself, a train crewed by workers can quickly transport units and cargo through railroads between train stations.')
             text_list.append('Crewing a train requires a basic level of technological training, which is generally unavailable to slave workers.')
-        recruitment_list_descriptions[current_target] = text_list
+
+        elif current_target == 'resource':
+            if current_target in status.actions:
+                building_name = status.actions[current_target].building_name
+                if building_name == 'none':
+                    building_name = 'resource production facility'
+            else:
+                building_name = 'resource production facility'
+            text_list.append('A ' + building_name + ' expands the tile\'s warehouse capacity, and each work crew attached to it attempts to produce resources each turn.')
+            text_list.append('Upgrades to the facility can increase the maximum number of attached work crews and the number of production attempts each work crew can make. ')
+
+        elif current_target == 'road':
+            text_list.append('A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad.')
+
+        elif current_target == 'railroad':
+            text_list.append('A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad.')
+            text_list.append('It is also required for trains to move and for a train station to be built.')
+
+        elif current_target == 'road_bridge':
+            text_list.append('A bridge built on a river tile between 2 land tiles allows movement across the river.')
+            text_list.append('A road bridge acts as a road between the tiles it connects and can later be upgraded to a railroad bridge.')
+
+        elif current_target == 'railroad_bridge':
+            text_list.append('A bridge built on a river tile between 2 land tiles allows movement across the river.')
+            text_list.append('A railroad bridge acts as a railroad between the tiles it connects.')
+
+        elif current_target == 'port':
+            text_list.append('A port allows steamboats and steamships to enter the tile, expands the tile\'s warehouse capacity, and attracts local labor brokers.')
+            text_list.append('A port adjacent to the ocean allows entry by steamships, while a port adjacent to a river allows entry by and assembly of steamboats.')
+
+        elif current_target == 'train_station':
+            text_list.append('A train station is required for a train to exchange cargo and passengers, expands the tile\'s warehouse capacity, and allows assembly of trains.')
+
+        elif current_target == 'trading_post':
+            text_list.append('A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading.')
+
+        elif current_target == 'mission':
+            text_list.append('A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting.')
+
+        elif current_target == 'fort':
+            text_list.append('A fort increases the combat effectiveness of your units standing in this tile.')
+
+        elif current_target == 'scale':
+            text_list.append('A resource production facility can have a number of attached work crews equal to its scale')
+
+        elif current_target == 'efficiency':
+            text_list.append('A resource production facility\'s attached work crews each make a number of production attempts per turn equal to its efficiency.')
+
+        elif current_target == 'warehouse_level':
+            text_list.append('Each of a tile\'s warehouse levels corresponds to 9 inventory capacity.')
+
+        list_descriptions[current_target] = text_list
 
         text = ''
-        for current_line in recruitment_list_descriptions[current_target]:
+        for current_line in list_descriptions[current_target]:
             text += current_line + ' /n /n' #replaces each tooltip list line with newline characters for notification descriptions
-        recruitment_string_descriptions[current_target] = text
+        string_descriptions[current_target] = text
             
-def spawn_beast(global_manager):
+def spawn_beast():
     '''
     Description:
         Attempts to spawn a beast at a random part of the map, choosing a tile and then choosing a type of animal that can spawn in that tile. The spawn attepmt fails and does nothing if the chosen tile is next to any player buildings
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    input_dict = {}
-    requirements_dict = {}
-    requirements_dict['ocean_allowed'] = False
-    requirements_dict['allowed_terrains'] = global_manager.get('terrain_list') + ['water']
-    requirements_dict['nearby_buildings_allowed'] = True
-    spawn_cell = global_manager.get('strategic_map_grid').choose_cell(requirements_dict)
+    spawn_cell = status.strategic_map_grid.choose_cell({
+        'ocean_allowed': False,
+        'allowed_terrains': constants.terrain_list + ['water'],
+        'nearby_buildings_allowed': True
+    })
     if spawn_cell.adjacent_to_buildings():
         return() #cancel spawn if beast would spawn near buildings, become less common as colony develops
     terrain_type = spawn_cell.terrain
-    
-    input_dict['coordinates'] = (spawn_cell.x, spawn_cell.y)
-    input_dict['grids'] = [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid]
-    input_dict['modes'] = ['strategic']
-    input_dict['animal_type'] = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
-    input_dict['adjective'] = random.choice(global_manager.get('animal_adjectives'))
-    input_dict['image'] = 'mobs/beasts/' + input_dict['animal_type'] + '.png'
-    input_dict['init_type'] = 'beast'
-    global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
+    animal_type = random.choice(constants.terrain_animal_dict[terrain_type])
 
-def find_closest_available_worker(destination, global_manager):
+    constants.actor_creation_manager.create(False, {
+        'coordinates': (spawn_cell.x, spawn_cell.y),
+        'grids': [status.strategic_map_grid, status.strategic_map_grid.mini_grid],
+        'modes': ['strategic'],
+        'animal_type': animal_type,
+        'adjective': random.choice(constants.animal_adjectives),
+        'image': 'mobs/beasts/' + animal_type + '.png',
+        'init_type': 'beast'
+    })  
+
+def find_closest_available_worker(destination):
     '''
     Description:
         Finds one of the closest African workers and returns its slums or village. Weighted based on the amount available such that a village with more available workers at the same distance is more likely to be chosen
@@ -211,10 +263,10 @@ def find_closest_available_worker(destination, global_manager):
         slums/village: Returns the slums or village at which the chosen closest worker is located
     '''
     possible_sources = []
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         if current_village.available_workers > 0:
             possible_sources.append(current_village)
-    possible_sources += global_manager.get('slums_list')
+    possible_sources += status.slums_list
     
     min_distance = -1 #makes a list of closest sources
     min_distance_sources = []
@@ -237,18 +289,6 @@ def find_closest_available_worker(destination, global_manager):
             max_workers_sources.append(possible_source)
     return(random.choice(max_workers_sources)) #randomly choose from ['none'] or the list of tied closest sources w/ most workers
 
-def stop_exploration(global_manager):
-    '''
-    Description:
-        Stops any ongoing explorations and removes exploration destination marks, used at end of exploration
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        None
-    '''
-    global_manager.get('displayed_mob').clear_attached_cell_icons()
-    global_manager.set('ongoing_action', False)
-    global_manager.set('ongoing_action_type', 'none')
 def create_image_dict(stem):
     '''
     Description:
@@ -266,155 +306,141 @@ def create_image_dict(stem):
     image_dict['left'] = stem + 'left.png'
     return(image_dict)
 
-def update_roads(global_manager):
+def update_roads():
     '''
     Description:
         Updates the road/railroad connections between tiles when a new one is built
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    for current_building in global_manager.get('building_list'):
+    for current_building in status.building_list:
         if current_building.building_type == 'infrastructure':
             current_building.cell.tile.update_image_bundle()
-    
-def get_selected_list(global_manager):
-    '''
-    Description:
-        Returns a list of all currently selected units. Currently, the game will only have 1 selected unit at a time and this should be updated
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-    Output:
-        mob list: All mobs that are currently selected
-    '''
-    selected_list = []
-    for current_mob in global_manager.get('mob_list'):
-        if current_mob.selected:
-            selected_list.append(current_mob)
-    return(selected_list)
 
-def deselect_all(global_manager):
+def deselect_all():
     '''
     Description:
         Deselects all units. Currently, the game will only have 1 selected unit at a time and this should be updated.
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         None
     '''
-    for current_mob in global_manager.get('mob_list'):
+    for current_mob in status.mob_list:
         if current_mob.selected:
             current_mob.selected = False
     
-def get_random_ocean_coordinates(global_manager):
+def get_random_ocean_coordinates():
     '''
     Description:
         Returns a random set of coordinates from the ocean section of the strategic map
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         int tuple: Two values representing x and y coordinates
     '''
-    mob_list = global_manager.get('mob_list')
-    mob_coordinate_list = []
-    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
+    start_x = random.randrange(0, status.strategic_map_grid.coordinate_width)
     start_y = 0
     return(start_x, start_y)
 
-def calibrate_actor_info_display(global_manager, info_display, new_actor, override_exempt=False):
+def calibrate_actor_info_display(info_display, new_actor, override_exempt=False):
     '''
     Description:
         Updates all relevant objects to display a certain mob or tile
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         interface_collection info_display: Collection of interface elements to calibrate to the inputted actor
-        string new_actor: The new mob or tile that is displayed
+        actor new_actor: The new mob or tile that is displayed
         boolean override_exempt=False: Whether to calibrate interface elements that are normally exempt, such as the reorganization interface
     Output:
         None
     '''
-    if info_display == global_manager.get('tile_info_display'):
-        for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+    if new_actor == 'none':
+        print(0/0)
+    if info_display == status.tile_info_display:
+        for current_same_tile_icon in status.same_tile_icon_list:
             current_same_tile_icon.reset()
-        global_manager.set('displayed_tile', new_actor)
-        if new_actor != 'none':
+        status.displayed_tile = new_actor
+        if new_actor:
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
 
-    elif info_display == global_manager.get('mob_info_display'):
-        global_manager.set('displayed_mob', new_actor)
-        if new_actor != 'none' and new_actor.images[0].current_cell.tile == global_manager.get('displayed_tile'):
-            for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+    elif info_display == status.mob_info_display:
+        status.displayed_mob = new_actor
+        if new_actor and new_actor.images[0].current_cell.tile == status.displayed_tile:
+            for current_same_tile_icon in status.same_tile_icon_list:
                 current_same_tile_icon.reset()
 
-    elif info_display == global_manager.get('country_info_display'):
-        global_manager.set('displayed_country', new_actor)
-    info_display.calibrate(new_actor, override_exempt)
+    elif info_display == status.country_info_display:
+        status.displayed_country = new_actor
 
-def get_migration_destinations(global_manager):
+    target = 'none'
+    if new_actor:
+        target = new_actor
+    info_display.calibrate(target, override_exempt)
+
+def get_migration_destinations():
     '''
     Description:
         Gathers and returns a list of all cells to which migration could occur. Migration can occur to tiles with places of employment, like ports, train stations, and resource production facilities
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         cell list: Returns list of all cells to which migration could occur
     '''
     return_list = []
-    for current_building in global_manager.get('building_list'):
+    for current_building in status.building_list:
         if current_building.building_type in ['port', 'train_station', 'resource']:
             if not current_building.cell in return_list:
                 if not current_building.damaged:
                     return_list.append(current_building.cell)
     return(return_list)
 
-def get_migration_sources(global_manager):
+def get_migration_sources():
     '''
     Description:
         Gathers and returns a list of all villages from which migration could occur. Migration can occur from villages with at least 1 available worker
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         village list: Returns list of all villages from which migration could occur
     '''
     return_list = []
-    for current_village in global_manager.get('village_list'):
+    for current_village in status.village_list:
         if current_village.available_workers > 0:
             return_list.append(current_village)
     return(return_list)
 
-def get_num_available_workers(location_types, global_manager):
+def get_num_available_workers(location_types):
     '''
     Description:
         Calculates and returns the number of workers currently available in the inputted location type, like how many workers are in slums
     Input:
         string location_types: Types of locations to count workers from, can be 'village', 'slums', or 'all'
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Returns number of workers currently available in the inputted location type
     '''
     num_available_workers = 0
     if not location_types == 'village': #slums or all
-        for current_slums in global_manager.get('slums_list'):
+        for current_slums in status.slums_list:
             #if current_building.building_type == 'slums':
             num_available_workers += current_slums.available_workers
     if not location_types == 'slums': #village or all
-        for current_village in global_manager.get('village_list'):
+        for current_village in status.village_list:
             num_available_workers += current_village.available_workers
     return(num_available_workers)
 
-def generate_resource_icon(tile, global_manager):
+def generate_resource_icon(tile):
     '''
     Description:
         Generates and returns the correct string image file path based on the resource/village and buildings built in the inputted tile
     Input:
         tile tile: Tile to generate a resource icon for
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         string: Returns string image file path for tile's resource icon
     '''
     small = False
-    for building_type in global_manager.get('building_types'):
+    for building_type in constants.building_types:
         if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
             small = True
     if tile.cell.resource == 'natives':
@@ -483,41 +509,40 @@ def extract_folder_colors(folder_path):
         colors.append((red, green, blue))
     return(colors)
 
-def get_slave_traders_strength_modifier(global_manager):
+def get_slave_traders_strength_modifier():
     '''
     Description:
         Calculates and returns the inverse difficulty modifier for actions related to the slave traders, with a positive modifier making rolls easier
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
+        None
     Output:
         string/int: Returns slave traders inverse difficulty modifier, or 'none' if the strength is 0
     '''
-    strength = global_manager.get('slave_traders_strength')
+    strength = constants.slave_traders_strength
     if strength == 0:
         strength_modifier = 'none'
-    elif strength >= global_manager.get('slave_traders_natural_max_strength') * 2: #>= 20
+    elif strength >= constants.slave_traders_natural_max_strength * 2: #>= 20
         strength_modifier = -1
-    elif strength >= global_manager.get('slave_traders_natural_max_strength'): #>= 10
+    elif strength >= constants.slave_traders_natural_max_strength: #>= 10
         strength_modifier = 0
     else: # < 10
         strength_modifier = 1
     return(strength_modifier)
 
-def set_slave_traders_strength(new_strength, global_manager):
+def set_slave_traders_strength(new_strength):
     '''
     Description:
         Sets the strength of the slave traders
     Input:
         int new_strength: New slave traders strength value
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
     if new_strength < 0:
         new_strength = 0
-    global_manager.set('slave_traders_strength', new_strength)
-    if global_manager.has('slave_traders_grid'):
-        slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0][0].tile
+    constants.slave_traders_strength = new_strength
+    if status.slave_traders_grid != None:
+        slave_traders_tile = status.slave_traders_grid.cell_list[0][0].tile
         slave_traders_tile.update_image_bundle()
 
 def generate_unit_component_image_id(base_image, component, to_front=False):
@@ -562,14 +587,13 @@ def generate_unit_component_image_id(base_image, component, to_front=False):
         return_dict['level'] *= -1
     return(return_dict)
 
-def generate_group_image_id_list(worker, officer, global_manager):
+def generate_group_image_id_list(worker, officer):
     '''
     Description:
         Generates and returns an image id list that a group formed from the inputted worker and officer would have
     Input:
         worker worker: Worker to use for group image
         officer officer: Officer to use for group image
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         list: Returns image id list of dictionaries for each part of the group image
     '''
@@ -582,9 +606,9 @@ def generate_group_image_id_list(worker, officer, global_manager):
         else:
             soldier = worker.image_dict['default']
         left_worker_dict['image_id'] = soldier
-        left_worker_dict['green_screen'] = global_manager.get('current_country').colors
+        left_worker_dict['green_screen'] = status.current_country.colors
         right_worker_dict['image_id'] = soldier
-        right_worker_dict['green_screen'] = global_manager.get('current_country').colors
+        right_worker_dict['green_screen'] = status.current_country.colors
     elif officer.officer_type in ['merchant', 'driver']:
         if 'porter' in worker.image_dict:
             porter = worker.image_dict['porter']
@@ -597,14 +621,13 @@ def generate_group_image_id_list(worker, officer, global_manager):
 
     return([left_worker_dict, right_worker_dict, officer_dict])
 
-def generate_group_name(worker, officer, global_manager, add_veteran=False):
+def generate_group_name(worker, officer, add_veteran=False):
     '''
     Description:
         Generates and returns the name that a group formed from the inputted worker and officer would have
     Input:
         worker worker: Worker to use for group name
         officer officer: Officer to use for group name
-        global_manager_template global_manager: Object that accesses shared variables
         boolean add_veteran=False: Whether veteran should be added to the start of the name if the officer is a veteran - while a mock group needs veteran to be added, a
             group actually being created will add veteran to its name automatically when it promotes
     Output:
@@ -612,7 +635,7 @@ def generate_group_name(worker, officer, global_manager, add_veteran=False):
     '''
     if not officer.officer_type == 'major':
         name = ''
-        for character in global_manager.get('officer_group_type_dict')[officer.officer_type]:
+        for character in constants.officer_group_type_dict[officer.officer_type]:
             if not character == '_':
                 name += character
             else:
@@ -626,14 +649,13 @@ def generate_group_name(worker, officer, global_manager, add_veteran=False):
         name = 'veteran ' + name
     return(name)
 
-def generate_group_movement_points(worker, officer, global_manager, generate_max=False):
+def generate_group_movement_points(worker, officer, generate_max=False):
     '''
     Description:
         Generates and returns either the current or maximum movement points that a group created from the inputted worker and officer would have
     Input:
         worker worker: Worker to use for group
         officer officer: Officer to use for group
-        global_manager_template global_manager: Object that accesses shared variables
         boolean generate_max=False: Whether to return the group's current or maximum number of movement points
     Output:
         list: Returns image id list of dictionaries for each part of the group image
@@ -644,7 +666,7 @@ def generate_group_movement_points(worker, officer, global_manager, generate_max
             max_movement_points = 6
         return(max_movement_points)
     else:
-        max_movement_points = generate_group_movement_points(worker, officer, global_manager, generate_max=True)
+        max_movement_points = generate_group_movement_points(worker, officer, generate_max=True)
         worker_movement_ratio_remaining = worker.movement_points / worker.max_movement_points
         officer_movement_ratio_remaining = officer.movement_points / officer.max_movement_points
         if worker_movement_ratio_remaining > officer_movement_ratio_remaining:

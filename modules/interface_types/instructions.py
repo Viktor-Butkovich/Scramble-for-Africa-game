@@ -3,6 +3,8 @@
 from .labels import label
 from .buttons import button
 from ..util import scaling, text_utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class instructions_button(button):
     '''
@@ -17,19 +19,18 @@ class instructions_button(button):
         Output:
             None
         '''
-        if self.global_manager.get('current_instructions_page') == 'none':
-            display_instructions_page(0, self.global_manager)
+        if status.current_instructions_page == None:
+            display_instructions_page(0)
         else:
-            if not self.global_manager.get('current_instructions_page') == 'none':
-                self.global_manager.get('current_instructions_page').remove_complete()
-                self.global_manager.set('current_instructions_page', 'none')
-            self.global_manager.set('current_instructions_page_index', 0)
+            status.current_instructions_page.remove_complete()
+            status.current_instructions_page = None
+            constants.current_instructions_page_index = 0
 
 class instructions_page(label):
     '''
     Label shown when the instructions button is pressed that goes to the next instructions page when clicked, or stops showing instructions if it is the last one. Unlike other labels, can have multiple lines
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -37,19 +38,17 @@ class instructions_page(label):
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'message': string value - Default text for this label
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
-        self.minimum_height = scaling.scale_height(self.global_manager.get('default_display_height') - 120, self.global_manager)
-        self.ideal_width = scaling.scale_width(self.global_manager.get('default_display_width') - 120, self.global_manager)
-        input_dict['coordinates'] = scaling.scale_coordinates(60, 60, self.global_manager)
+        self.minimum_height = scaling.scale_height(constants.default_display_height - 120)
+        self.ideal_width = scaling.scale_width(constants.default_display_width - 120)
+        input_dict['coordinates'] = scaling.scale_coordinates(60, 60)
         input_dict['minimum_width'] = self.ideal_width
         input_dict['height'] = self.minimum_height
         input_dict['modes'] = ['strategic', 'europe']
         input_dict['image_id'] = 'misc/default_instructions.png'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):
         '''
@@ -60,13 +59,13 @@ class instructions_page(label):
         Output:
             None
         '''
-        if not self.global_manager.get('current_instructions_page_index') == len(self.global_manager.get('instructions_list')) - 1:
-            self.global_manager.set('current_instructions_page_index', self.global_manager.get('current_instructions_page_index') + 1)
-            self.global_manager.set('current_instructions_page_text', self.global_manager.get('instructions_list')[self.global_manager.get('current_instructions_page_index')])
-            self.global_manager.set('current_instructions_page', instructions_page(self.global_manager.get('current_instructions_page_text')), self.global_manager) #create a new page and remove this one
+        if constants.current_instructions_page_index != len(status.instructions_list) - 1:
+            constants.current_instructions_page_index += 1
+            constants.current_instructions_page_text = status.instructions_list[constants.current_instructions_page_index]
+            status.current_instructions_page = instructions_page(constants.current_instructions_page_text)
             self.remove_complete()
         else:
-            self.global_manager.set('current_instructions_page', 'none')
+            status.current_instructions_page = None
             self.remove_complete()
 
     def set_label(self, new_message):
@@ -97,7 +96,7 @@ class instructions_page(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+                constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + 10, constants.display_height - (self.y + self.height - (text_line_index * self.font_size))))
 
     def format_message(self):
         '''
@@ -124,7 +123,7 @@ class instructions_page(label):
         new_message.append(next_line)
         new_message.append('Click to go to the next instructions page.')
         new_message.append('Press the display instructions button on the right side of the screen again to close the instructions.')
-        new_message.append('Page ' + str(self.global_manager.get('current_instructions_page_index') + 1))
+        new_message.append('Page ' + str(constants.current_instructions_page_index + 1))
         
         self.message = new_message
         
@@ -140,16 +139,15 @@ class instructions_page(label):
         self.set_tooltip(['Click to go to the next instructions page.', 'Press the display instructions button on the right side of the screen again to close the instructions.'])
 
 
-def display_instructions_page(page_number, global_manager):
+def display_instructions_page(page_number):
     '''
     Description:
         Displays a new instructions page with text corresponding to the inputted page number
     Input:
         int page_number: Page number of instructions to display,
-        global_manager_template global_manager: Object that accesses shared variables
     Output:
         None
     '''
-    global_manager.set('current_instructions_page_index', page_number)
-    global_manager.set('current_instructions_page_text', global_manager.get('instructions_list')[page_number])
-    global_manager.set('current_instructions_page', instructions_page(global_manager.get('current_instructions_page_text'), global_manager))
+    constants.current_instructions_page_index = page_number
+    constants.current_instructions_page_text = status.instructions_list[page_number]
+    status.current_instructions_page = instructions_page(constants.current_instructions_page_text)

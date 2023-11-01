@@ -72,20 +72,6 @@ def copy_list(received_list): #allows setting to new list by copying data instea
     for item in received_list:
         return_list.append(item)
     return(return_list)
-        
-def toggle(variable):
-    '''
-    Description:
-        Returns the opposite of the inputted boolean
-    Input:
-        boolean variable: boolean whose opposite value will be returned
-    Output:
-        boolean: Returns True if the inputted boolean is False, otherwise returns False
-    '''
-    if variable == True:
-        return(False)
-    elif variable == False:
-        return(True)
 
 def generate_article(word):
     '''
@@ -140,18 +126,6 @@ def generate_capitalized_article(word):
         return('An ')
     else:
         return('A ')
-    
-def add_to_message(message, new):
-    '''
-    Description:
-        Returns a concatenated version of the inputted strings, with the second string appearing after the first one in the concatenated version
-    Input:
-        string message: string to be concatenated with the other string
-        string new: string to be concatenated with the other string
-    Output:
-        string: Returns a concatenated version of the inputted strings
-    '''
-    return (message + new)
 
 def conjugate(infinitive, amount, tense = 'present'):
     '''

@@ -1,12 +1,14 @@
 #Contains functionality for panels
 
 from .buttons import button
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class panel(button):
     '''
     A button that does nothing when clicked and has an optional tooltip
     '''
-    def __init__(self, input_dict, global_manager):
+    def __init__(self, input_dict):
         '''
         Description:
             Initializes this object
@@ -21,12 +23,11 @@ class panel(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'panel'
-        super().__init__(input_dict, global_manager)
+        super().__init__(input_dict)
 
     def on_click(self):
         '''
@@ -99,6 +100,6 @@ class safe_click_panel(panel):
         '''
         if super().can_show():
             for parameter in ['displayed_mob', 'displayed_tile', 'displayed_minister', 'displayed_country']:
-                if self.global_manager.get(parameter) != 'none':
+                if getattr(status, parameter):
                     return(True)
         return(False)

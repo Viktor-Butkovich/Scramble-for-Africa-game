@@ -2,12 +2,14 @@
 
 import random
 from ..util import village_name_generator, actor_utility, utility
+import modules.constants.constants as constants
+import modules.constants.status as status
 
 class village():
     '''
     Object that represents a native village in a cell on the strategic map grid
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -19,17 +21,14 @@ class village():
                 'aggressiveness': int value - Required if from save, starting aggressiveness
                 'available_workers': int value - Required if from save, starting number of available workers
                 'cell': cell value - cell on strategic map grid in which this village exists
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.global_manager = global_manager
         self.attached_warriors = []
         if not from_save:
             self.set_initial_population()
             self.set_initial_aggressiveness()
             self.available_workers = 0
-            self.attempted_trades = 0
             self.name = village_name_generator.create_village_name()
             self.found_rumors = False
         else: #village recreated through saved dictionary given by tile.set_resource from the cell's save_dict
@@ -40,15 +39,15 @@ class village():
             self.found_rumors = input_dict['found_rumors']
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
-                self.global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
-        if self.global_manager.get('effect_manager').effect_active('infinite_village_workers'):
+                constants.actor_creation_manager.create(True, current_save_dict)
+        if constants.effect_manager.effect_active('infinite_village_workers'):
             self.available_workers = self.population
         self.cell = input_dict['cell']
         self.x = self.cell.x
         self.y = self.cell.y
         self.tiles = [] #added in set_resource for tiles
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
-            self.global_manager.get('village_list').append(self) #have more permanent fix later
+            status.village_list.append(self) #have more permanent fix later
 
     def remove_complete(self):
         '''
@@ -71,7 +70,7 @@ class village():
         Output:
             None
         '''
-        self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
+        status.village_list = utility.remove_from_list(status.village_list, self)
 
     def manage_warriors(self):
         '''
@@ -99,7 +98,7 @@ class village():
         Output:
             Returns whether this village can currently spawn a warrior
         '''
-        if self.global_manager.get('effect_manager').effect_active('block_native_warrior_spawning'):
+        if constants.effect_manager.effect_active('block_native_warrior_spawning'):
             return(False)
         if self.population > self.available_workers:
             return(True)
@@ -127,16 +126,16 @@ class village():
         Output:
             native_warriors: Returns the created native warriors unit
         '''
-        input_dict = {}
-        input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/native_warriors/default.png'
-        input_dict['canoes_image'] = 'mobs/native_warriors/canoe_default.png'
-        input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'native warriors'
-        input_dict['init_type'] = 'native_warriors'
-        input_dict['origin_village'] = self
-        new_warrior = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        new_warrior = constants.actor_creation_manager.create(False, {
+            'coordinates': (self.cell.x, self.cell.y),
+            'grids': [self.cell.grid, self.cell.grid.mini_grid],
+            'image': 'mobs/native_warriors/default.png',
+            'canoes_image': 'mobs/native_warriors/canoe_default.png',
+            'modes': ['strategic'],
+            'name': 'native warriors',
+            'init_type': 'native_warriors',
+            'origin_village': self
+        })
         self.change_population(-1)
         return(new_warrior)
 
@@ -149,17 +148,18 @@ class village():
         Output:
             None
         '''
-        input_dict = {'select_on_creation': True}
-        input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/African workers/default.png'
-        input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'African workers'
-        input_dict['init_type'] = 'workers'
-        input_dict['worker_type'] = 'African'
         self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
         self.change_population(-1)
-        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        constants.actor_creation_manager.create(False, {
+            'select_on_creation': True,
+            'coordinates': (self.cell.x, self.cell.y),
+            'grids': [self.cell.grid, self.cell.grid.mini_grid],
+            'image': 'mobs/African workers/default.png',
+            'modes': ['strategic'],
+            'name': 'African workers',
+            'init_type': 'workers',
+            'worker_type': 'African'
+        })
 
     def set_initial_population(self):
         '''
@@ -291,8 +291,8 @@ class village():
             None
         '''
         self.available_workers += change
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed available workers value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)    
+        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed available workers value
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)    
 
     def set_available_workers(self, new_value):
         '''
@@ -304,8 +304,8 @@ class village():
             None
         '''
         self.available_workers = new_value
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed available workers value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
+        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed available workers value
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
     
     def change_population(self, change):
         '''
@@ -326,8 +326,8 @@ class village():
         if self.population == 0 and len(self.attached_warriors) == 0:
             self.set_aggressiveness(1)
         self.tiles[0].update_image_bundle()
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
+        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''
@@ -344,5 +344,5 @@ class village():
         elif self.aggressiveness < 1:
             self.set_aggressiveness(1)
         self.tiles[0].update_image_bundle()
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed aggressiveness value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
+        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed aggressiveness value
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)

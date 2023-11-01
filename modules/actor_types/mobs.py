@@ -1,17 +1,19 @@
 #Contains functionality for mobs
 
 import pygame
-import time
 import random
 from ..constructs import images
 from ..util import utility, actor_utility
 from .actors import actor
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class mob(actor):
     '''
     Actor that can be selected and move within and between grids, but cannot necessarily controlled
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -27,7 +29,6 @@ class mob(actor):
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
@@ -50,12 +51,11 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_trade = False #if can trade or create trading posts
         self.can_convert = False #if can convert natives or build missions
-        self.just_promoted = False
         self.selected = False
         self.number = 1 #how many entities are in a unit, used for verb conjugation
         self.actor_type = 'mob'
         self.end_turn_destination = 'none'
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         if isinstance(input_dict['image'], str):
             self.image_dict = {'default': input_dict['image']}
         else:
@@ -64,8 +64,8 @@ class mob(actor):
         self.images = []
         self.status_icons = []
         for current_grid in self.grids:
-            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
-        global_manager.get('mob_list').append(self)
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default'))
+        status.mob_list.append(self)
         self.set_name(input_dict['name'])
         self.can_swim = False #if can enter water areas without ships in them
         self.can_swim_river = False
@@ -88,10 +88,10 @@ class mob(actor):
         else:
             self.reset_movement_points()
             self.update_tooltip()
-            if global_manager.get('creating_new_game'):
+            if flags.creating_new_game:
                 self.creation_turn = 0
             else:
-                self.creation_turn = self.global_manager.get('turn')
+                self.creation_turn = constants.turn
 
     def image_variants_setup(self, from_save, input_dict):
         '''
@@ -197,7 +197,7 @@ class mob(actor):
         self.disorganized = new_value
         self.update_image_bundle()
 
-    def get_combat_modifier(self):
+    def get_combat_modifier(self, opponent=None, include_tile=False):
         '''
         Description:
             Calculates and returns the modifier added to this unit's combat rolls
@@ -216,6 +216,13 @@ class mob(actor):
                 modifier -= 1
                 if self.is_officer:
                     modifier -= 1
+            if opponent and opponent.npmob_type == 'beast':
+                if self.is_group and self.group_type == 'safari':
+                    modifier += 3
+                else:
+                    modifier -= 1
+            if include_tile and self.images[0].current_cell.has_intact_building('fort'):
+                modifier += 1
         if self.disorganized:
             modifier -= 1
         return(modifier)
@@ -278,7 +285,7 @@ class mob(actor):
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if not (self.in_vehicle or self.in_group or self.in_building):
-            if self.images[0].current_cell != 'none' and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
+            if self.images[0].current_cell != 'none' and self.images[0].current_cell.contained_mobs[0] == self and constants.current_game_mode in self.modes:
                 if self.images[0].current_cell.visible:
                     return(True)
         return(False)
@@ -330,8 +337,8 @@ class mob(actor):
         else:
             adjacent_cell = local_cell.adjacent_cells[direction]
             
-        if not adjacent_cell == 'none':
-            cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
+        if adjacent_cell:
+            cost = cost * constants.terrain_movement_cost_dict[adjacent_cell.terrain]
             if self.is_pmob:
                 local_infrastructure = local_cell.get_intact_building('infrastructure')
                 adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
@@ -402,8 +409,8 @@ class mob(actor):
                 self.movement_points = round(self.movement_points)
             if self.is_pmob and self.movement_points <= 0:
                 self.remove_from_turn_queue()
-            if self.global_manager.get('displayed_mob') == self: #update mob info display to show new movement points
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            if status.displayed_mob == self: #update mob info display to show new movement points
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def set_movement_points(self, new_value):
         '''
@@ -421,8 +428,8 @@ class mob(actor):
             self.movement_points = round(self.movement_points)
         if self.is_pmob and self.movement_points <= 0:
             self.remove_from_turn_queue()
-        if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+        if status.displayed_mob == self:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def reset_movement_points(self):
         '''
@@ -442,8 +449,8 @@ class mob(actor):
                 self.movement_points = round(self.movement_points)
             if self.is_pmob and (not self.images[0].current_cell == 'none') and not (self.is_vehicle and self.crew == 'none'):
                 self.add_to_turn_queue()
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            if status.displayed_mob == self:
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def set_max_movement_points(self, new_value, initial_setup = True):
         '''
@@ -473,10 +480,10 @@ class mob(actor):
         Output:
             None
         '''
-        if new_grid == self.global_manager.get('europe_grid'):
+        if new_grid == status.europe_grid:
             self.modes.append('europe')
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), 'none')
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), new_grid.cell_list[0][0].tile)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, None)
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, new_grid.cell_list[0][0].tile)
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
@@ -491,7 +498,7 @@ class mob(actor):
             self.grids.append(new_grid.mini_grid)
         self.images = []
         for current_grid in self.grids:
-            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, old_image_id, self.global_manager))
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, old_image_id))
             self.images[-1].add_to_cell()
             
     def select(self):
@@ -503,17 +510,11 @@ class mob(actor):
         Output:
             None
         '''
-        actor_utility.deselect_all(self.global_manager)
+        actor_utility.deselect_all()
         self.selected = True
-        self.global_manager.set('end_turn_selected_mob', self) #tells game to select this unit at the end of the turn because it was selected most recently
-        self.global_manager.set('show_selection_outlines', True)
-        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
-        #for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members: #automatically selects default interface tab when selected
-        #    if hasattr(tab_button.linked_element, 'identifier'):
-        #        if tab_button.linked_element.identifier == self.default_interface_tab and tab_button.linked_element != self.global_manager.get('mob_tabbed_collection').current_tabbed_member:
-        #            tab_button.on_click()
-        #            continue
+        flags.show_selection_outlines = True
+        constants.last_selection_outline_switch = constants.current_time
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def move_to_front(self):
         '''
@@ -538,10 +539,10 @@ class mob(actor):
         Output:
             None
         '''
-        if self.global_manager.get('show_selection_outlines'):
+        if flags.show_selection_outlines:
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+                    pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
         
     def update_tooltip(self):
         '''
@@ -592,11 +593,11 @@ class mob(actor):
                 tooltip_list.append('This unit is currently disorganized, giving a combat penalty until its next turn')
 
         if not self.end_turn_destination == 'none':
-            if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
+            if self.end_turn_destination.cell.grid == status.strategic_map_grid:
                 tooltip_list.append('This unit has been issued an order to travel to (' + str(self.end_turn_destination.cell.x) + ', ' + str(self.end_turn_destination.cell.y) + ') in Africa at the end of the turn')
-            elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
+            elif self.end_turn_destination.cell.grid == status.europe_grid:
                 tooltip_list.append('This unit has been issued an order to travel to Europe at the end of the turn')
-            elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
+            elif self.end_turn_destination.cell.grid == status.slave_traders_grid:
                 tooltip_list.append('This unit has been issued an order to travel to the slave traders at the end of the turn')
                 
         if self.is_npmob and self.npmob_type == 'beast':
@@ -635,13 +636,12 @@ class mob(actor):
         '''
         if self.selected:
             self.selected = False
-        if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), 'none')
+        if status.displayed_mob == self:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         for current_image in self.images:
             current_image.remove_from_cell()
         super().remove()
-        self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+        status.mob_list = utility.remove_from_list(status.mob_list, self)
         for current_status_icon in self.status_icons:
             current_status_icon.remove_complete()
         self.status_icons = []
@@ -677,7 +677,7 @@ class mob(actor):
         elif death_type == 'violent':
             possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5']
         if len(possible_sounds) > 0:
-            self.global_manager.get('sound_manager').play_sound('voices/' + random.choice(possible_sounds), 0.5)
+            constants.sound_manager.play_sound('voices/' + random.choice(possible_sounds), 0.5)
 
     def can_move(self, x_change, y_change): #same logic as pmob without print statements
         '''
@@ -742,42 +742,47 @@ class mob(actor):
             current_image.remove_from_cell()
         self.x += x_change
         self.y += y_change
-        self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        status.minimap_grid.calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
 
         if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-            self.global_manager.get('sound_manager').play_sound('water')
+            constants.sound_manager.play_sound('water')
         else:
-            self.global_manager.get('sound_manager').play_sound('footsteps')
-            
-        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water' and ((not self.can_swim) or (self.y == 0 and not self.can_swim_ocean) or (self.y > 0 and not self.can_swim_river)): #board if moving to ship in water
-            self.selected = False
-            vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
-            if self.is_worker and not vehicle.has_crew:
-                self.crew_vehicle(vehicle)
-                self.set_movement_points(0)
-            else:
-                self.embark_vehicle(vehicle)
-                self.set_movement_points(0)
-            vehicle.select()
+            constants.sound_manager.play_sound('footsteps')
+
+        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle): #test this logic
+            previous_infrastructure = previous_cell.get_intact_building('infrastructure')
+            if self.images[0].current_cell.terrain == 'water' and not (previous_infrastructure != 'none' and previous_infrastructure.is_bridge):
+                if (not self.can_swim) or (self.y == 0 and not self.can_swim_ocean) or (self.y > 0 and not self.can_swim_river): #board if moving to ship in water
+                    self.selected = False
+                    vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
+                    if self.is_worker and not vehicle.has_crew:
+                        self.crew_vehicle(vehicle)
+                        self.set_movement_points(0)
+                    else:
+                        self.embark_vehicle(vehicle)
+                        self.set_movement_points(0)
+                    vehicle.select()
         if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
             self.manage_inventory_attrition()
             if previous_cell.terrain == 'water' and ((previous_cell.y > 0 and not self.can_swim_river) or (previous_cell.y == 0 and not self.can_swim_ocean)): #if landing without port, use all of movement points
-                if previous_cell.y == 0 and not (self.can_swim and self.can_swim_ocean): #if came from ship in ocean
-                    self.set_movement_points(0)
-                elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
-                    self.set_movement_points(0)
+                previous_infrastructure = previous_cell.get_intact_building('infrastructure')
+                if not (previous_infrastructure != 'none' and previous_infrastructure.is_bridge): #if from bridge, act as if moving from land
+                    if previous_cell.y == 0 and not (self.can_swim and self.can_swim_ocean): #if came from ship in ocean
+                        self.set_movement_points(0)
+                    elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
+                        self.set_movement_points(0)
             if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river and not previous_cell.has_walking_connection(self.images[0].current_cell): #if entering river w/o canoes, spend maximum movement and become disorganized
                 self.set_disorganized(True)
             if not (self.images[0].current_cell == 'none' or self.images[0].current_cell.terrain == 'water' or self.is_vehicle):
                 possible_sounds = ['voices/forward march 1', 'voices/forward march 2']
-                if self.global_manager.get('current_country').name == 'Germany':
+                if status.current_country.name == 'Germany':
                     possible_sounds.append('voices/german forward march 1')
-                self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+                constants.sound_manager.play_sound(random.choice(possible_sounds))
 
         if self.has_canoes:
             self.update_canoes()
@@ -860,7 +865,7 @@ class mob(actor):
         '''
         for current_image in self.images:
             if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
-                if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
+                if not (current_image.grid == status.minimap_grid and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
                     return(True)
         return(False)
 
@@ -874,8 +879,8 @@ class mob(actor):
             None
         '''
         super().set_name(new_name)
-        if self.global_manager.get('displayed_mob') == self: #self.selected:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+        if status.displayed_mob == self: #self.selected:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def hide_images(self):
         '''
@@ -886,6 +891,8 @@ class mob(actor):
         Output:
             None
         '''
+        if status.displayed_mob == self:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None)
         for current_image in self.images:
             current_image.remove_from_cell()
         

@@ -6,12 +6,15 @@ import itertools
 import json
 from . import cells, interface_elements
 from ..util import actor_utility, utility
+import modules.constants.constants as constants
+import modules.constants.status as status
+import modules.constants.flags as flags
 
 class grid(interface_elements.interface_element):
     '''
     Grid of cells of the same size with different positions based on the grid's size and the number of cells. Each cell contains various actors, terrain, and resources
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -29,12 +32,11 @@ class grid(interface_elements.interface_element):
                 'strategic_grid': boolean value - True if this grid is the primary strategic map of the game, False if it is a different grid, like the minimap or the Europe grid
                 'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(input_dict, global_manager)
-        self.global_manager.get('grid_list').append(self)
+        super().__init__(input_dict)
+        status.grid_list.append(self)
         self.grid_line_width = input_dict['grid_line_width']
         self.from_save = from_save
         self.is_mini_grid = False
@@ -61,11 +63,11 @@ class grid(interface_elements.interface_element):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'grid_type': string value - String matching the global manager key of this grid, used to initialize the correct type of grid on loading
+                'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
         save_dict = {}
-        if self.global_manager.get('strategic_map_grid') == self:
+        if status.strategic_map_grid == self:
             save_dict['grid_type'] = 'strategic_map_grid'
         else:
             save_dict['grid_type'] = 'default'
@@ -84,16 +86,16 @@ class grid(interface_elements.interface_element):
         '''
         area = self.coordinate_width * self.coordinate_height
         num_worms = area // 5
-        if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
-            self.global_manager.get('terrain_list').append('water')
+        if constants.effect_manager.effect_active('enable_oceans'):
+            constants.terrain_list.append('water')
         for i in range(num_worms):
-            self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
-        #if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+            self.make_random_terrain_worm(round(area/24), round(area/12), constants.terrain_list)
+        #if constants.effect_manager.effect_active('enable_oceans'):
         #    for i in range(num_worms // 6): #range(num_worms / 3):
         #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
-        if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+        if not constants.effect_manager.effect_active('enable_oceans'):
             for row in self.cell_list:
-                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict['ocean_water'])
                 row[0].set_terrain('water', terrain_variant)
             num_rivers = random.randrange(2, 4)
             valid = False
@@ -132,16 +134,16 @@ class grid(interface_elements.interface_element):
         Output:
             None
         '''
-        if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+        if not constants.effect_manager.effect_active('hide_grid_lines'):
             for x in range(0, self.coordinate_width+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
+                pygame.draw.line(constants.game_display, constants.color_dict[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
             for y in range(0, self.coordinate_height+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
-        if (not self.mini_grid == 'none') and self.global_manager.get('show_minimap_outlines'):
+                pygame.draw.line(constants.game_display, constants.color_dict[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
+        if self.mini_grid != 'none' and flags.show_minimap_outlines:
             mini_map_outline_color = self.mini_grid.external_line_color
             left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
             right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1
@@ -155,10 +157,10 @@ class grid(interface_elements.interface_element):
                 up_y = self.coordinate_height
             if down_y < 0:
                 down_y = 0
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)), self.grid_line_width + 1)
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1)
+            pygame.draw.line(constants.game_display, constants.color_dict[mini_map_outline_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)), self.grid_line_width + 1)
+            pygame.draw.line(constants.game_display, constants.color_dict[mini_map_outline_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
+            pygame.draw.line(constants.game_display, constants.color_dict[mini_map_outline_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
+            pygame.draw.line(constants.game_display, constants.color_dict[mini_map_outline_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1)
 
     def find_cell_center(self, coordinates):
         '''
@@ -170,7 +172,7 @@ class grid(interface_elements.interface_element):
             int tuple: Two values representing x and y pixel coordinates of the center of the requested cell
         '''
         x, y = coordinates
-        return((int((self.width/(self.coordinate_width)) * x) + self.x + int(self.get_cell_width()/2)), (self.global_manager.get('display_height') - (int((self.height/(self.coordinate_height)) * y) + self.y + int(self.get_cell_height()/2))))
+        return((int((self.width/(self.coordinate_width)) * x) + self.x + int(self.get_cell_width()/2)), (constants.display_height - (int((self.height/(self.coordinate_height)) * y) + self.y + int(self.get_cell_height()/2))))
 
     def convert_coordinates(self, coordinates):
         '''
@@ -182,7 +184,7 @@ class grid(interface_elements.interface_element):
             int tuple: Two values representing x and y pixel coordinates of the bottom left corner of the requested cell
         '''
         x, y = coordinates
-        return((int((self.width/(self.coordinate_width)) * x) + self.x), (self.global_manager.get('display_height') - (int((self.height/(self.coordinate_height)) * y) + self.y )))
+        return((int((self.width/(self.coordinate_width)) * x) + self.x), (constants.display_height - (int((self.height/(self.coordinate_height)) * y) + self.y )))
     
     def get_height(self):
         '''
@@ -236,12 +238,12 @@ class grid(interface_elements.interface_element):
             int x: x coordinate for the grid location of the requested cell
             int y: y coordinate for the grid location of the requested cell
         Output:
-            string/cell: Returns this grid's cell that occupies the inputted coordinates, or 'none' if there are no cells at the inputted coordinates
+            None/cell: Returns this grid's cell that occupies the inputted coordinates, or None if there are no cells at the inputted coordinates
         '''
         if x >= 0 and x < self.coordinate_width and y >= 0 and y < self.coordinate_height:
             return(self.cell_list[x][y])
         else:
-            return('none')
+            return(None)
 
     def choose_cell(self, requirements_dict):
         '''
@@ -321,7 +323,7 @@ class grid(interface_elements.interface_element):
         Output:
             cell: Returns created cell
         '''
-        return(cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], save_dict, self.global_manager))
+        return(cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, constants.color_dict['bright green'], save_dict))
 
     def create_resource_list_dict(self):
         '''
@@ -385,7 +387,7 @@ class grid(interface_elements.interface_element):
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = random.choice(possible_terrains)
-        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        terrain_variant = random.randrange(0, constants.terrain_variant_dict[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
         self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         counter = 0        
         while not counter == worm_length:           
@@ -400,7 +402,7 @@ class grid(interface_elements.interface_element):
                     current_y = current_y - 1
                 elif direction == 4:
                     current_x = current_x - 1
-                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
                 self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):
@@ -425,7 +427,7 @@ class grid(interface_elements.interface_element):
         else:
             water_type = 'river_water'
         #self.find_cell(current_x, current_y).set_terrain(terrain)
-        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        terrain_variant = random.randrange(0, constants.terrain_variant_dict[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
         self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         #self.find_cell(current_x, current_y).set_terrain(terrain)
         counter = 0        
@@ -447,7 +449,7 @@ class grid(interface_elements.interface_element):
                 else:
                     water_type = 'river_water'
                 #self.find_cell(current_x, current_y).set_terrain(terrain)
-                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
                 self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
 
     def touching_mouse(self):
@@ -473,7 +475,7 @@ class grid(interface_elements.interface_element):
         Output:
             boolean: Returns True if this grid can appear during the current game mode, otherwise returns False
         '''
-        return(self.global_manager.get('current_game_mode') in self.modes)
+        return(constants.current_game_mode in self.modes)
 
     def can_draw(self):
         '''
@@ -496,13 +498,13 @@ class grid(interface_elements.interface_element):
             None
         '''
         super().remove()
-        self.global_manager.set('grid_list', utility.remove_from_list(self.global_manager.get('grid_list'), self))
+        status.grid_list = utility.remove_from_list(status.grid_list, self)
         
 class mini_grid(grid):
     '''
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell of the attached grid. Which cell is being centered on can be changed
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -520,12 +522,11 @@ class mini_grid(grid):
                 'attached_grid': grid value - grid to which this grid is attached
                 'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['strategic_grid'] = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_mini_grid = True
         self.attached_grid = input_dict['attached_grid']
         self.attached_grid.mini_grid = self
@@ -542,10 +543,10 @@ class mini_grid(grid):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if constants.current_game_mode in self.modes:
             self.center_x = center_x
             self.center_y = center_y
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
             for current_cell in self.get_flat_cell_list():
                 attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
                 if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
@@ -558,7 +559,7 @@ class mini_grid(grid):
                     current_cell.set_resource('none', update_image_bundle=False)
                     current_cell.reset_buildings()
                     current_cell.tile.update_image_bundle()
-            for current_mob in self.global_manager.get('mob_list'):
+            for current_mob in status.mob_list:
                 if current_mob.images[0].current_cell != 'none':
                     for current_image in current_mob.images:
                         if current_image.grid == self:
@@ -636,34 +637,34 @@ class mini_grid(grid):
             up_y = self.coordinate_height
         else:
             up_y = upper_right_corner[1]
-        if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+        if not constants.effect_manager.effect_active('hide_grid_lines'):
                 
             for x in range(0, self.coordinate_width+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)),
+                pygame.draw.line(constants.game_display, constants.color_dict[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)),
                                 self.grid_line_width)
 
             for y in range(0, self.coordinate_height+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)),
+                pygame.draw.line(constants.game_display, constants.color_dict[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)),
                                 self.grid_line_width) 
         
         for y in range(0, self.coordinate_height+1):                    
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)),
+            pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)),
                             self.grid_line_width + 1)
 
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)),
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)),
                         self.grid_line_width + 1)
 
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)),
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)),
                         self.grid_line_width + 1)
 
-        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)),
+        pygame.draw.line(constants.game_display, constants.color_dict[self.external_line_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)),
                         self.grid_line_width + 1) 
 
 class abstract_grid(grid):
     '''
     1-cell grid that is not directly connected to the primary strategic grid but can be moved to by mobs from the strategic grid and vice versa
     '''
-    def __init__(self, from_save, input_dict, global_manager):
+    def __init__(self, from_save, input_dict):
         '''
         Description:
             Initializes this object
@@ -680,14 +681,13 @@ class abstract_grid(grid):
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
                 'tile_image_id': File path to the image used by this grid's tile
                 'name': Name of this grid
-            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['coordinate_width'] = 1
         input_dict['coordinate_height'] = 1
         input_dict['strategic_grid'] = False
-        super().__init__(from_save, input_dict, global_manager)
+        super().__init__(from_save, input_dict)
         self.is_abstract_grid = True
         self.name = input_dict['name']
         self.tile_image_id = input_dict['tile_image_id']
@@ -701,13 +701,13 @@ class abstract_grid(grid):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'grid_type': string value - String matching the global manager key of this grid, used to initialize the correct type of grid on loading
+                'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
         save_dict = super().to_save_dict()
-        if self.global_manager.get('europe_grid') == self:
+        if status.europe_grid == self:
             save_dict['grid_type'] = 'europe_grid'
-        elif self.global_manager.get('slave_traders_grid') == self:
+        elif status.slave_traders_grid == self:
             save_dict['grid_type'] = 'slave_traders_grid'
         else:
             save_dict['grid_type'] = 'default'
