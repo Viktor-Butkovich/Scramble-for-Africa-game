@@ -97,6 +97,7 @@ tile_inventory_collection: ordered_collection = None
 commodity_prices_label: commodity_prices_label_template = None
 reorganize_unit_left_button: button = None
 reorganize_unit_right_button: button = None
+cursor_image: pygame.image = None
 
 current_instructions_page: instructions_page = None
 current_country: country = None

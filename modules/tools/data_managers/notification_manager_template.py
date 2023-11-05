@@ -46,7 +46,7 @@ class notification_manager_template():
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = 25
+        font_size = constants.notification_font_size
         font_name = constants.font_name
         for index in range(len(message)):
             if not ((not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n'): #don't add if /n
@@ -69,45 +69,6 @@ class notification_manager_template():
         next_line += next_word
         new_message.append(next_line)
         return(new_message)
-    '''
-    def get_notification_height(self, notification_text):
-        
-        Description:
-            Returns the height in pixels of the inputted text if it were put in a notification
-        Input:
-            string notification_text: Text that will appear on the notification with lines separated by /n
-        Output:
-            int: height in pixels of the inputted text if it were put in a notification
-        
-        new_message = []
-        next_line = ''
-        next_word = ''
-        font_size = 25 #scaling.scale_height(25) #constants.font_size #25
-        font_name = constants.font_name
-        font = pygame.font.SysFont(font_name, font_size)
-        for index in range(len(notification_text)):
-            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n'): #don't add if /n
-                if not (index > 0 and notification_text[index - 1] + notification_text[index] == '/n'): #if on n after /, skip
-                    next_word += notification_text[index]
-            if notification_text[index] == ' ':
-                if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
-                    new_message.append(next_line)
-                    next_line = ''
-                next_line += next_word
-                next_word = ''
-            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n': #don't check for /n if at last index
-                new_message.append(next_line)
-                next_line = ''
-                next_line += next_word
-                next_word = ''
-        if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
-            new_message.append(next_line)
-            next_line = ''
-        next_line += next_word
-        new_message.append(next_line)
-        new_message.append('Click to remove this notification.')
-        return(len(new_message) * font_size)#self.message = new_message
-    '''
 
     def handle_next_notification(self, transferred_interface_elements = None):
         '''
@@ -175,7 +136,7 @@ class notification_manager_template():
         '''
         message = notification_dict['message'] #message should be the only required parameter
 
-        height = len(self.format_message(message)) * (constants.default_font_size + 10) #maybe font size is being scaled incorrectly here?
+        height = len(self.format_message(message)) * constants.default_notification_font_size
         self.update_notification_layout(height)
 
         if 'notification_type' in notification_dict:

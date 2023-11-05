@@ -83,6 +83,8 @@ old_mouse_y: int = pygame.mouse.get_pos()[1]
 font_name: str = 'times new roman'
 default_font_size: int = 15
 font_size: float = None
+default_notification_font_size: int = 25
+notification_font_size: float = None
 myfont: pygame.font.SysFont = None
 
 default_music_volume: float = 0.5

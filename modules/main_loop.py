@@ -57,9 +57,8 @@ def main_loop():
                         case pygame.K_BACKSPACE:
                             if flags.typing:
                                 constants.message = constants.message[:-1] #remove last character from message and set message to it
-                        case _:
-                            if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
-                                main_loop_utility.debug_print()
+                        case pygame.K_p if constants.effect_manager.effect_active('debug_print'):
+                            main_loop_utility.debug_print()
                     if flags.typing and event.key in constants.key_codes:
                         if flags.capital:
                             constants.message += constants.uppercase_key_values[constants.key_codes.index(event.key)]

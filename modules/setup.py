@@ -41,7 +41,8 @@ def misc():
     Output:
         None
     '''
-    constants.font_size = scaling.scale_height(15)
+    constants.font_size = scaling.scale_height(constants.default_font_size)
+    constants.notification_font_size = scaling.scale_height(constants.default_notification_font_size)
     constants.myfont = pygame.font.SysFont(constants.font_name, constants.font_size)
 
     #page 1

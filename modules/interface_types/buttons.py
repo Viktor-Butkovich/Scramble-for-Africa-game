@@ -2526,7 +2526,7 @@ class anonymous_button(button):
         self.message = button_info_dict['message']
 
         super().__init__(input_dict)
-        self.font_size = scaling.scale_width(25)
+        self.font_size = constants.notification_font_size
         self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True

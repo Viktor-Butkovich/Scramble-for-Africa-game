@@ -28,7 +28,7 @@ class label(button):
         Output:
             None
         '''
-        self.font_size = scaling.scale_width(25)
+        self.font_size = constants.notification_font_size
         self.font_name = constants.font_name
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
@@ -461,9 +461,7 @@ class multi_line_label(label):
         next_line += next_word
         new_message.append(next_line)
         self.message = new_message
-        new_height = len(new_message) * constants.font_size
-        if new_height > self.minimum_height:
-            self.height = new_height
+        self.height = max(self.minimum_height, (len(new_message) + 2) * self.font_size)
 
     def set_label(self, new_message):
         '''
