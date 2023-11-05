@@ -72,8 +72,6 @@ def set_game_mode(new_game_mode):
             if centered_cell.tile != 'none':
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, centered_cell.tile)
                 #calibrate tile info to minimap center
-        elif new_game_mode == 'europe':
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main_menu':
             constants.default_text_box_height = scaling.scale_height(90)
             constants.text_box_height = constants.default_text_box_height
@@ -83,14 +81,16 @@ def set_game_mode(new_game_mode):
         elif not new_game_mode in ['trial', 'new_game_setup']:
             constants.default_text_box_height = scaling.scale_height(90)
             constants.text_box_height = constants.default_text_box_height
-    for current_mob in status.mob_list:
-        current_mob.selected = False
         
     if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True) #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(status.tile_info_display, None, override_exempt=True)
         actor_utility.calibrate_actor_info_display(status.minister_info_display, None)
         actor_utility.calibrate_actor_info_display(status.country_info_display, None)
+        if new_game_mode == 'europe':
+            if status.europe_grid.cell_list[0][0].contained_mobs:
+                status.europe_grid.cell_list[0][0].contained_mobs[0].cycle_select()
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
 
     if new_game_mode == 'ministers':
         constants.available_minister_left_index = -2

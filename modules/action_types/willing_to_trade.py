@@ -3,7 +3,7 @@
 import pygame
 import math
 from . import action
-from ..util import action_utility, text_utility, utility
+from ..util import action_utility, text_utility, utility, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -155,9 +155,7 @@ class willing_to_trade(action.action):
         '''
         if super().on_click(unit):
             village = unit.images[0].current_cell.get_building('village')
-            if not status.current_lore_mission:
-                text_utility.print_to_screen('There are no ongoing lore missions for which to find rumors.')
-            elif village == 'none':
+            if village == 'none':
                 text_utility.print_to_screen('Trading is only possible in a village.')
             elif village.population <= 0:
                 text_utility.print_to_screen('Trading is only possible in a village with population above 0.')
@@ -203,10 +201,7 @@ class willing_to_trade(action.action):
         '''
         super().complete()
         if self.roll_result >= self.current_min_success:
-            for tab_button in status.mob_tabbed_collection.tabs_collection.members:
-                if tab_button.linked_element == status.mob_inventory_collection:
-                    tab_button.on_click()
-                    continue
+            actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
             status.actions['trade'].trades_remaining = self.trades_remaining
             status.actions['trade'].start(self.current_unit)
         elif self.roll_result <= self.current_max_crit_fail:

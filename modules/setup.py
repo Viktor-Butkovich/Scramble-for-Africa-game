@@ -1282,7 +1282,7 @@ def unit_organization_interface():
     lhs_x_offset = 35
     rhs_x_offset = image_height + 80
 
-    unit_organization_collection = constants.actor_creation_manager.create_interface_element({
+    status.mob_reorganization_collection = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(-30, -1 * image_height - 115),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
@@ -1300,13 +1300,12 @@ def unit_organization_interface():
         'minimum_width': scaling.scale_width(image_height - 10),
         'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
+        'init_type': 'actor tooltip label',
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True}
     })
-    unit_organization_collection.autofill_targets['officer'].append(lhs_top_tooltip)
+    status.mob_reorganization_collection.autofill_targets['officer'].append(lhs_top_tooltip)
 
     #mob image
     lhs_top_mob_free_image = constants.actor_creation_manager.create_interface_element({
@@ -1317,10 +1316,10 @@ def unit_organization_interface():
         'actor_image_type': 'default',
         'default_image_id': 'mobs/default/mock_officer.png',
         'init_type': 'actor display free image',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset)}
     })
-    unit_organization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
+    status.mob_reorganization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
 
     #mob background image's tooltip
     lhs_bottom_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -1328,13 +1327,12 @@ def unit_organization_interface():
         'minimum_width': scaling.scale_width(image_height - 10),
         'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
+        'init_type': 'actor tooltip label',
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True},
     })
-    unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_tooltip)
+    status.mob_reorganization_collection.autofill_targets['worker'].append(lhs_bottom_tooltip)
 
     #mob image
     default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'left', to_front=True), actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'right', to_front=True)]
@@ -1346,10 +1344,10 @@ def unit_organization_interface():
         'actor_image_type': 'default',
         'default_image_id': default_image_id,
         'init_type': 'actor display free image',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset), 'y_offset': scaling.scale_height(-1 * (image_height - 5))}
     })
-    unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
+    status.mob_reorganization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
 
     #right side
     #mob background image's tooltip
@@ -1358,13 +1356,12 @@ def unit_organization_interface():
         'minimum_width': scaling.scale_width(image_height - 10),
         'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
+        'init_type': 'actor tooltip label',
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
     })
-    unit_organization_collection.autofill_targets['group'].append(rhs_top_tooltip)
+    status.mob_reorganization_collection.autofill_targets['group'].append(rhs_top_tooltip)
 
     #mob image
     default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group left', to_front=True)]
@@ -1378,18 +1375,18 @@ def unit_organization_interface():
         'actor_image_type': 'default',
         'default_image_id': default_image_id,
         'init_type': 'actor display free image',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
     })
-    unit_organization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
+    status.mob_reorganization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
 
     #reorganize unit to right button
-    reorganize_unit_right_button = constants.actor_creation_manager.create_interface_element({
+    status.reorganize_unit_right_button = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15 + 30),
         'width': scaling.scale_width(60),
         'height': scaling.scale_height(25),
         'init_type': 'reorganize unit button',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'image_id': 'buttons/cycle_units_button.png',
         'allowed_procedures': ['merge', 'crew'],
         'keybind_id': pygame.K_m,
@@ -1397,12 +1394,12 @@ def unit_organization_interface():
     })
 
     #reorganize unit to left button
-    reorganize_unit_left_button = constants.actor_creation_manager.create_interface_element({
+    status.reorganize_unit_left_button = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15),
         'width': scaling.scale_width(60),
         'height': scaling.scale_height(25),
         'init_type': 'reorganize unit button',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'image_id': 'buttons/cycle_units_reverse_button.png',
         'allowed_procedures': ['split', 'uncrew'],
         'keybind_id': pygame.K_n,
@@ -1414,7 +1411,7 @@ def unit_organization_interface():
         'width': scaling.scale_width(30),
         'height': scaling.scale_height(30),
         'init_type': 'cycle autofill button',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'image_id': 'buttons/reset_button.png',
         'autofill_target_type': 'officer'
     }

@@ -673,3 +673,19 @@ def generate_group_movement_points(worker, officer, generate_max=False):
             return(math.floor(max_movement_points * officer_movement_ratio_remaining))
         else:
             return(math.floor(max_movement_points * worker_movement_ratio_remaining))
+
+def select_interface_tab(tabbed_collection, target_tab):
+    '''
+    Description:
+        Selects the inputted interface tab from the inputted tabbed collection, such as selecting the inventory tab from the mob tabbed collection
+    Input:
+        interface_collection tabbed_collection: Tabbed collection to select from
+        interface_collection target_tab: Tab to select
+    Output:
+        None
+    '''
+    if not target_tab.showing:
+        for tab_button in tabbed_collection.tabs_collection.members:
+            if tab_button.linked_element == target_tab:
+                tab_button.on_click()
+                continue

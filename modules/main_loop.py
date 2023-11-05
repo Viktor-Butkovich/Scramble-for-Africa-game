@@ -21,98 +21,82 @@ def main_loop():
             stopping = False
         constants.input_manager.update_input()
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                flags.crashed = True
             flags.capital = flags.r_shift or flags.l_shift
             flags.ctrl = flags.r_ctrl or flags.l_ctrl
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
-                    main_loop_utility.debug_print()
-                for current_button in status.button_list:
-                    if current_button.showing and not flags.typing:
-                        if current_button.has_keybind:
-                            if event.key == current_button.keybind_id:
-                                if current_button.has_released: #if stuck on loading, don't want multiple 'key down' events to repeat on_click - shouldn't on_click again until released
-                                    current_button.has_released = False
-                                    current_button.being_pressed = True
-                                    current_button.on_click()
-                                    current_button.showing_outline = True
-                                break
-                            else:#stop confirming an important button press if user starts doing something else
-                                current_button.confirming = False
-                                current_button.being_pressed = False
+            match event.type:
+                case pygame.QUIT:
+                    flags.crashed = True
+                case pygame.KEYDOWN:
+                    for current_button in status.button_list:
+                        if (current_button.showing or (current_button.has_button_press_override and current_button.button_press_override())) and \
+                            event.key == current_button.keybind_id and not flags.typing:
+                            if current_button.has_released: #if stuck on loading, don't want multiple 'key down' events to repeat on_click - shouldn't on_click again until released
+                                current_button.has_released = False
+                                current_button.being_pressed = True
+                                current_button.on_click()
+                                current_button.showing_outline = True
+                            break
                         else:
                             current_button.confirming = False
                             current_button.being_pressed = False
-                    else:
-                        current_button.confirming = False
-                        current_button.being_pressed = False
-                if event.key == pygame.K_RSHIFT:
-                    flags.r_shift = True
-                if event.key == pygame.K_LSHIFT:
-                    flags.l_shift = True
-                if event.key == pygame.K_RCTRL:
-                    flags.r_ctrl = True
-                if event.key == pygame.K_LCTRL:
-                    flags.l_ctrl = True
-                if event.key == pygame.K_ESCAPE:
-                    flags.typing = False
-                    constants.message = ''
-                if event.key == pygame.K_SPACE:
-                    if flags.typing:
-                        constants.message += ' '
-                if event.key == pygame.K_BACKSPACE:
-                    if flags.typing:
-                        constants.message = constants.message[:-1] #remove last character from message and set message to it
-
-                key_codes = [pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p]
-                key_codes += [pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u, pygame.K_v, pygame.K_w, pygame.K_x, pygame.K_y, pygame.K_z]
-                key_codes += [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_0]
-                lowercase_key_values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-                uppercase_key_values = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
-
-                for key_index in range(len(key_codes)):
-                    correct_key = False
-                    if event.key == key_codes[key_index]:
-                        correct_key = True
-                        if flags.typing:
-                            if flags.capital:
-                                constants.message += uppercase_key_values[key_index]
-                            else:
-                                constants.message += lowercase_key_values[key_index]
-                    if correct_key:
-                        break
-                        
-            elif event.type == pygame.KEYUP:
-                for current_button in status.button_list:
-                    if not flags.typing or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
-                        if current_button.has_keybind:
-                            if event.key == current_button.keybind_id:# and current_button.showing:
-                                current_button.on_release()
-                                current_button.has_released = True
-                                current_button.being_pressed = False
-                if event.key == pygame.K_RSHIFT:
-                    flags.r_shift = False
-                if event.key == pygame.K_LSHIFT:
-                    flags.l_shift = False
-                if event.key == pygame.K_LCTRL:
-                    flags.l_ctrl = False
-                if event.key == pygame.K_RCTRL:
-                    flags.r_ctrl = False
-                if event.key == pygame.K_RETURN:
-                    if flags.typing:
-                        if constants.input_manager.taking_input:
-                            constants.input_manager.taking_input = False
-                            text_utility.print_to_screen('Response: ' + constants.message)
+                    match event.key:
+                        case pygame.K_RSHIFT:
+                            flags.r_shift = True
+                        case pygame.K_LSHIFT:
+                            flags.l_shift = True
+                        case pygame.K_RCTRL:
+                            flags.r_ctrl = True
+                        case pygame.K_LCTRL:
+                            flags.l_ctrl = True
+                        case pygame.K_ESCAPE:
+                            flags.typing = False
+                            constants.message = ''
+                        case pygame.K_SPACE:
+                            if flags.typing:
+                                constants.message += ' '
+                        case pygame.K_BACKSPACE:
+                            if flags.typing:
+                                constants.message = constants.message[:-1] #remove last character from message and set message to it
+                        case _:
+                            if event.key == pygame.K_p and constants.effect_manager.effect_active('debug_print'):
+                                main_loop_utility.debug_print()
+                    if flags.typing and event.key in constants.key_codes:
+                        if flags.capital:
+                            constants.message += constants.uppercase_key_values[constants.key_codes.index(event.key)]
                         else:
-                            text_utility.print_to_screen(constants.message)
-                        flags.typing = False
-                        constants.message = ''
-                    else:
-                        flags.typing = True
+                            constants.message += constants.lowercase_key_values[constants.key_codes.index(event.key)]
 
-            elif event.type == pygame.mixer.music.get_endevent():
-                constants.sound_manager.song_done()
+                case pygame.KEYUP:
+                    for current_button in status.button_list:
+                        if not flags.typing or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
+                            if current_button.has_keybind:
+                                if event.key == current_button.keybind_id:
+                                    current_button.on_release()
+                                    current_button.has_released = True
+                                    current_button.being_pressed = False
+                    match event.key:
+                        case pygame.K_RSHIFT:
+                            flags.r_shift = False
+                        case pygame.K_LSHIFT:
+                            flags.l_shift = False
+                        case pygame.K_LCTRL:
+                            flags.l_ctrl = False
+                        case pygame.K_RCTRL:
+                            flags.r_ctrl = False
+                        case pygame.K_RETURN:
+                            if flags.typing:
+                                if constants.input_manager.taking_input:
+                                    constants.input_manager.taking_input = False
+                                    text_utility.print_to_screen('Response: ' + constants.message)
+                                else:
+                                    text_utility.print_to_screen(constants.message)
+                                flags.typing = False
+                                constants.message = ''
+                            else:
+                                flags.typing = True
+
+                case constants.music_endevent:
+                    constants.sound_manager.song_done()
 
         flags.old_lmb_down, flags.old_rmb_down, flags.old_mmb_down = flags.lmb_down, flags.rmb_down, flags.mmb_down
         flags.lmb_down, flags.mmb_down, flags.rmb_down = pygame.mouse.get_pressed()

@@ -3,7 +3,7 @@
 import pygame
 import random
 from ..constructs import images
-from ..util import utility, actor_utility
+from ..util import utility, actor_utility, main_loop_utility, text_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -515,6 +515,27 @@ class mob(actor):
         flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+
+    def cycle_select(self):
+        '''
+        Description:
+            Selects this mob while also moving it to the front of the tile and playing its selection sound - should be used when unit is clicked on
+        Input:
+            None
+        Output:
+            None
+        '''
+        if main_loop_utility.action_possible():
+            if status.displayed_mob != self:
+                self.select()
+                if self.is_pmob:
+                    self.selection_sound()
+                for current_image in self.images: #move mob to front of each stack it is in
+                    if current_image.current_cell != 'none':
+                        while not self == current_image.current_cell.contained_mobs[0]:
+                            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        else:
+            text_utility.print_to_screen('You are busy and cannot select a different unit')
 
     def move_to_front(self):
         '''

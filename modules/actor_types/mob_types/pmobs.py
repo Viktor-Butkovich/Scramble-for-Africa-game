@@ -617,10 +617,7 @@ class pmob(mob):
             self.inventory[commodity] += change
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
-                for tab_button in status.mob_tabbed_collection.tabs_collection.members:
-                    if tab_button.linked_element == status.mob_inventory_collection:
-                        tab_button.on_click()
-                        continue
+                actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
 
     def set_inventory(self, commodity, new_value):
         '''

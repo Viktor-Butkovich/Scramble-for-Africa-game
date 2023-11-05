@@ -833,7 +833,6 @@ class list_item_label(actor_display_label):
         '''
         self.list_index = input_dict['list_index']
         self.list_type = input_dict['list_type']
-        #input_dict['actor_label_type'] = self.list_type + ' list item'
         self.attached_list = []
         super().__init__(input_dict)
 
@@ -847,7 +846,6 @@ class list_item_label(actor_display_label):
             None
         '''
         self.attached_list = []
-        #print(self.actor_label_type)
         super().calibrate(new_actor)
 
     def can_show(self, skip_parent_collection=False):
@@ -862,6 +860,50 @@ class list_item_label(actor_display_label):
         if len(self.attached_list) > self.list_index:
             return(super().can_show(skip_parent_collection=skip_parent_collection))
         return(False)
+
+class actor_tooltip_label(actor_display_label):
+    '''
+    Label used for actor tooltips that can calibrate to actors and select them when clicked
+    '''
+    def __init__(self, input_dict):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
+        Output:
+            None
+        '''
+        input_dict['actor_label_type'] = 'tooltip'
+        super().__init__(input_dict)
+
+    def on_click(self):
+        '''
+        Description:
+            Selects the calibrated unit when clicked - used to allow selecting units from reorganization interface
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.actor.is_dummy:
+            if self.actor.is_group or self.actor.is_vehicle:
+                status.reorganize_unit_right_button.on_click()
+                self.actor.cycle_select()
+            else:
+                status.reorganize_unit_left_button.on_click()
+                self.actor.cycle_select()
+        else:
+            self.actor.cycle_select()
 
 class building_work_crews_label(actor_display_label):
     '''

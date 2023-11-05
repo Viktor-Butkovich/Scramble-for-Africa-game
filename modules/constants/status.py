@@ -92,8 +92,11 @@ defense_info_display: ordered_collection = None
 mob_tabbed_collection: tabbed_collection = None
 tile_tabbed_collection: tabbed_collection = None
 mob_inventory_collection: ordered_collection = None
+mob_reorganization_collection: ordered_collection = None
 tile_inventory_collection: ordered_collection = None
 commodity_prices_label: commodity_prices_label_template = None
+reorganize_unit_left_button: button = None
+reorganize_unit_right_button: button = None
 
 current_instructions_page: instructions_page = None
 current_country: country = None

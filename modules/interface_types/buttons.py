@@ -50,6 +50,7 @@ class button(interface_elements.interface_element):
             self.set_keybind(self.keybind_id)
         if 'color' in input_dict:
             self.color = constants.color_dict[input_dict['color']]
+        self.has_button_press_override = False
         self.enable_shader = input_dict.get('enable_shader', False)
         self.showing_outline = False
         self.showing_background = True
@@ -918,10 +919,7 @@ class button(interface_elements.interface_element):
                                         displayed_mob.set_sentry_mode(False)
                                     displayed_mob.change_inventory(commodity, amount_transferred)
                                     displayed_tile.change_inventory(commodity, -1 * amount_transferred)
-                                    for tab_button in status.mob_tabbed_collection.tabs_collection.members:
-                                        if tab_button.linked_element == status.mob_inventory_collection:
-                                            tab_button.on_click()
-                                            continue
+                                    actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
                             else:
                                 text_utility.print_to_screen('This unit cannot hold commodities.')
                         else:
@@ -1354,16 +1352,7 @@ class same_tile_icon(button):
             None
         '''
         if (not self.is_last) and self.attached_mob != 'none':
-            if main_loop_utility.action_possible(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-                self.attached_mob.select()
-                if self.attached_mob.is_pmob:
-                    self.attached_mob.selection_sound()
-                for current_image in self.attached_mob.images: #move mob to front of each stack it is in
-                    if not current_image.current_cell == 'none':
-                        while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
-                            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-            else:
-                text_utility.print_to_screen('You are busy and cannot select a different unit')
+            self.attached_mob.cycle_select()
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -2208,6 +2197,21 @@ class reorganize_unit_button(button):
         input_dict['button_type'] = 'reorganize unit'
         self.allowed_procedures = input_dict['allowed_procedures']
         super().__init__(input_dict)
+        self.has_button_press_override = True
+
+    def button_press_override(self):
+        '''
+        Description:
+            Allows this button to be pressed via keybind when it is not currently showing, under particular circumstances. Requires the
+                has_button_press_override flag to be enabled
+        Input:
+            None
+        Output
+        '''
+        if status.mob_tabbed_collection.showing:
+            actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_reorganization_collection)
+            return(True)
+        return(False)
 
     def enable_shader_condition(self):
         '''

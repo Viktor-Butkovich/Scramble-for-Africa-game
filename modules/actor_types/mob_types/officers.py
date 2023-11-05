@@ -147,9 +147,7 @@ class officer(pmob):
         self.x = group.x
         self.y = group.y
         self.show_images()
-        #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
-        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()

@@ -289,6 +289,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 #actor display labels
                 elif base == 'actor display':
                     new_element = actor_display_labels.actor_display_label(input_dict)
+                elif base == 'actor tooltip':
+                    new_element = actor_display_labels.actor_tooltip_label(input_dict)
                 elif base == 'list item':
                     new_element = actor_display_labels.list_item_label(input_dict)
                 elif base == 'building work crews':

@@ -18,6 +18,21 @@ pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
 pygame.display.set_caption('SFA')
 pygame.key.set_repeat(300, 200)
 pygame.mixer.music.set_endevent(pygame.USEREVENT+1)
+music_endevent: int = pygame.mixer.music.get_endevent()
+
+key_codes: List[int] = [
+    pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l,
+    pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p, pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u, pygame.K_v, pygame.K_w, pygame.K_x,
+    pygame.K_y, pygame.K_z, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_0
+]
+lowercase_key_values: List[str] = [
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3',
+    '4', '5', '6', '7', '8', '9', '0'
+]
+uppercase_key_values: List[str] = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#',
+    '$', '%', '^', '&', '*', '(', ')'
+]
 
 default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
 default_display_height: int = 972
