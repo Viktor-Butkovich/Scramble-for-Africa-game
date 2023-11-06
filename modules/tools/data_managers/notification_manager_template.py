@@ -34,15 +34,20 @@ class notification_manager_template():
         self.notification_width = 500
         self.notification_height = self.default_notification_height
         self.notification_y = self.default_notification_y
-        #if constants.current_game_mode in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-        #    self.notification_x = constants.minimap_grid_x - (self.notification_width + 40)
-        #else: #show notifications in center on europe mode
         self.notification_x = 610
         if notification_height > self.notification_height:
             self.notification_height = notification_height
         self.notification_y -= self.notification_height / 2
 
     def format_message(self, message):
+        '''
+        Description:
+            Converts a message string with newlines designated by /n's to a list of strings
+        Input:
+            string message: Initial message string
+        Output:
+            string list: Returns list of strings extracted from input string
+        '''
         new_message = []
         next_line = ''
         next_word = ''
@@ -222,5 +227,4 @@ class notification_manager_template():
                     constants.sound_manager.queue_sound(sound_file, channel)
                 else:
                     channel = constants.sound_manager.play_sound(sound_file)
-
         return(new_notification)
