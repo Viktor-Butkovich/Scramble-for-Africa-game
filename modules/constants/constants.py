@@ -11,6 +11,7 @@ from modules.tools.data_managers.notification_manager_template import notificati
 from modules.tools.data_managers.value_tracker_template import value_tracker_template, public_opinion_tracker_template, money_tracker_template
 from modules.tools.mouse_followers import mouse_follower_template
 from modules.interface_types.labels import money_label_template
+from modules.constructs.fonts import font
 
 pygame.init()
 pygame.mixer.init()
@@ -85,7 +86,8 @@ default_font_size: int = 15
 font_size: float = None
 default_notification_font_size: int = 25
 notification_font_size: float = None
-myfont: pygame.font.SysFont = None
+myfont: font = None
+fonts: Dict[str, font] = {}
 
 default_music_volume: float = 0.5
 

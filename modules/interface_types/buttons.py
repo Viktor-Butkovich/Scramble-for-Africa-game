@@ -629,13 +629,11 @@ class button(interface_elements.interface_element):
         self.tooltip_text = tooltip_text
         if self.has_keybind:
             self.tooltip_text.append('Press ' + self.keybind_name + ' to use.')
-        tooltip_width = 0#50
-        font_name = constants.font_name
-        font_size = constants.font_size
+        font = constants.fonts['default']
+        tooltip_width = font.size
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (len(self.tooltip_text) * font.size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -686,7 +684,7 @@ class button(interface_elements.interface_element):
             if self.has_keybind: #The key to which a button is bound will appear on the button's image
                 message = self.keybind_name
                 color = 'white'
-                textsurface = constants.myfont.render(message, False, constants.color_dict[color])
+                textsurface = constants.myfont.pygame_font.render(message, False, constants.color_dict[color])
                 constants.game_display.blit(textsurface, (self.x + scaling.scale_width(10), (constants.display_height -
                     (self.y + self.height - scaling.scale_height(5)))))
 
@@ -2526,9 +2524,7 @@ class anonymous_button(button):
         self.message = button_info_dict['message']
 
         super().__init__(input_dict)
-        self.font_size = constants.notification_font_size
-        self.font_name = constants.font_name
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.font = constants.fonts['default_notification']
         self.in_notification = True
 
     def on_click(self):

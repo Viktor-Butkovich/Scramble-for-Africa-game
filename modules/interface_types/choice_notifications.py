@@ -1,6 +1,5 @@
 #Contains functionality for choice notifications
 
-import pygame
 from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
 import modules.constants.constants as constants
@@ -149,9 +148,7 @@ class choice_button(buttons.button):
         else:
             self.message = input_dict['button_type'].capitalize()
         super().__init__(input_dict)
-        self.font_size = constants.notification_font_size
-        self.font_name = constants.font_name
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.font = constants.fonts['default_notification']
         self.in_notification = True
 
     def on_click(self):

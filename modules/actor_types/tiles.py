@@ -225,7 +225,11 @@ class tile(actor): #to do: make terrain tiles a subclass
             if self.cell.visible or force_visibility: #force visibility shows full tile even if tile is not yet visible
                 image_id_list.append({'image_id': self.image_dict['default'], 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -9})
                 if self.cell.resource != 'none':
-                    image_id_list.append(actor_utility.generate_resource_icon(self))
+                    resource_icon = actor_utility.generate_resource_icon(self)
+                    if type(resource_icon) == str:
+                        image_id_list.append(resource_icon)
+                    else:
+                        image_id_list += resource_icon
                 for current_building_type in constants.building_types:
                     current_building = self.cell.get_building(current_building_type)
                     if current_building != 'none':

@@ -1,6 +1,5 @@
 #Contains functionality for labels
 
-import pygame
 from .buttons import button
 from ..util import scaling, text_utility, utility, market_utility
 import modules.constants.constants as constants
@@ -28,9 +27,7 @@ class label(button):
         Output:
             None
         '''
-        self.font_size = constants.notification_font_size
-        self.font_name = constants.font_name
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.font = constants.fonts['default_notification']
         self.current_character = 'none'
         self.message = input_dict['message']
         self.minimum_width = input_dict['minimum_width']
@@ -49,10 +46,7 @@ class label(button):
             None
         '''
         self.message = new_message
-        if text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10) > self.minimum_width:
-            self.width = text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10)
-        else:
-            self.width = self.minimum_width
+        self.width = max(self.minimum_width, self.font.calculate_size(self.message) + scaling.scale_width(10))
         self.image.width = self.width
         self.Rect.width = self.width
         self.image.set_image(self.image.image_id)
@@ -302,9 +296,7 @@ class commodity_prices_label_template(label):
         self.minimum_height = input_dict['height']
         input_dict['message'] = 'none'
         super().__init__(input_dict)
-        self.font_size = constants.font_size * 2
-        self.font_name = constants.font_name
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.font = constants.fonts['large_notification']
         self.update_label()
 
     def update_label(self):
@@ -319,12 +311,10 @@ class commodity_prices_label_template(label):
         message = ['Prices: ']
         widest_commodity_width = 0
         for current_commodity in constants.commodity_types:
-            current_message_width = text_utility.message_width(current_commodity, self.font_size, self.font_name)
-            if current_message_width > widest_commodity_width:
-                widest_commodity_width = current_message_width
+            widest_commodity_width = max(widest_commodity_width, self.font.calculate_size(current_commodity))
         for current_commodity in constants.commodity_types:
             current_line = ''
-            while text_utility.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
+            while self.font.calculate_size(current_line + current_commodity) < widest_commodity_width:
                 current_line += ' '
             current_line += current_commodity + ': ' +  str(constants.commodity_prices[current_commodity])
             message.append(current_line)
@@ -341,8 +331,9 @@ class commodity_prices_label_template(label):
         '''
         self.message = new_message
         for text_line in self.message:
-            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10) and text_utility.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10) > self.width:
-                self.width = scaling.scale_width(text_utility.message_width(text_line, self.font_size, self.font_name)) + scaling.scale_width(20)
+            message_size = self.font.calculate_size(text_line)
+            if message_size > self.ideal_width - scaling.scale_width(10) and message_size + scaling.scale_width(10) > self.width:
+                self.width = message_size + scaling.scale_width(20)
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling
@@ -362,7 +353,7 @@ class commodity_prices_label_template(label):
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
                 constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + scaling.scale_width(10), constants.display_height -
-                    (self.y + self.height - (text_line_index * self.font_size))))
+                    (self.y + self.height - (text_line_index * self.font.size))))
 
     def update_tooltip(self):
         '''
@@ -417,7 +408,7 @@ class multi_line_label(label):
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
                 constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + scaling.scale_width(10), constants.display_height -
-                    (self.y + self.height - (text_line_index * self.font_size))))
+                    (self.y + self.height - (text_line_index * self.font.size))))
 
     def update_tooltip(self):
         '''
@@ -445,7 +436,7 @@ class multi_line_label(label):
                 if not (index > 0 and self.message[index - 1] + self.message[index] == '/n'): #if on n after /, skip
                     next_word += self.message[index]
             if self.message[index] == ' ':
-                if text_utility.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+                if self.font.calculate_size(next_line + next_word) > self.ideal_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word
@@ -455,13 +446,13 @@ class multi_line_label(label):
                 next_line = ''
                 next_line += next_word
                 next_word = ''
-        if text_utility.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+        if self.font.calculate_size(next_line + next_word) > self.ideal_width:
             new_message.append(next_line)
             next_line = ''
         next_line += next_word
         new_message.append(next_line)
         self.message = new_message
-        self.height = max(self.minimum_height, (len(new_message) + 2) * self.font_size)
+        self.height = max(self.minimum_height, (len(new_message) + 2) * self.font.size)
 
     def set_label(self, new_message):
         '''
@@ -475,6 +466,5 @@ class multi_line_label(label):
         self.message = new_message
         self.format_message()
         for text_line in self.message:
-            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
-                self.width = text_utility.message_width(text_line, self.font_size, self.font_name)
+            self.width = max(self.ideal_width, self.font.calculate_size(text_line))
         self.image.update_state(self.x, self.y, self.width, self.height)

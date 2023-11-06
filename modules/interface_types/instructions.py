@@ -80,8 +80,7 @@ class instructions_page(label):
         self.message = new_message
         self.format_message()
         for text_line in self.message:
-            if text_utility.message_width(text_line, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
-                self.width = text_utility.message_width(text_line, self.font_size, self.font_name) + 10
+            self.width = max(self.minimum_width, self.font.calculate_size(text_line) + scaling.scale_width(10))
 
     def draw(self):
         '''
@@ -96,7 +95,7 @@ class instructions_page(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + 10, constants.display_height - (self.y + self.height - (text_line_index * self.font_size))))
+                constants.game_display.blit(text_utility.text(text_line, self.font), (self.x + 10, constants.display_height - (self.y + self.height - (text_line_index * self.font.size))))
 
     def format_message(self):
         '''
@@ -114,7 +113,7 @@ class instructions_page(label):
         for index in range(len(self.message)):
             next_word += self.message[index]
             if self.message[index] == ' ':
-                if text_utility.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+                if self.font.calculate_size(next_line + next_word) > self.ideal_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word

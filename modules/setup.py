@@ -10,6 +10,7 @@ import modules.constants.flags as flags
 import modules.util.scaling as scaling
 import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
+import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
@@ -43,7 +44,43 @@ def misc():
     '''
     constants.font_size = scaling.scale_height(constants.default_font_size)
     constants.notification_font_size = scaling.scale_height(constants.default_notification_font_size)
-    constants.myfont = pygame.font.SysFont(constants.font_name, constants.font_size)
+
+    constants.myfont = fonts.font({
+        'descriptor': 'default',
+        'name': constants.font_name,
+        'size': constants.font_size,
+        'color': 'black'
+    })
+    fonts.font({
+        'descriptor': 'white',
+        'name': constants.font_name,
+        'size': constants.font_size,
+        'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'default_notification',
+        'name': constants.font_name,
+        'size': constants.notification_font_size,
+        'color': 'black'
+    })
+    fonts.font({
+        'descriptor': 'white_notification',
+        'name': constants.font_name,
+        'size': constants.notification_font_size,
+        'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'large_notification',
+        'name': constants.font_name,
+        'size': 30,
+        'color': 'black'
+    })
+    fonts.font({
+        'descriptor': 'large_white_notification',
+        'name': constants.font_name,
+        'size': 30,
+        'color': 'white'
+    })
 
     #page 1
     instructions_message = 'Placeholder instructions, use += to add'

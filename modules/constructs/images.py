@@ -342,6 +342,8 @@ class bundle_image():
             self.level = image_id.get('level', 0)
             if 'override_width' in image_id:
                 self.override_width = image_id['override_width']
+            if 'override_height' in image_id:
+                self.override_height = image_id['override_height']
             if 'green_screen' in image_id:
                 self.has_green_screen = True
                 self.green_screen_colors = []
@@ -350,9 +352,15 @@ class bundle_image():
                         self.green_screen_colors.append(image_id['green_screen'][index])
                 else:
                     self.green_screen_colors.append(image_id['green_screen'])
-
             else:
                 self.has_green_screen = False
+            if 'font' in image_id:
+                self.font = image_id['font']
+            elif not self.image_id.endswith('.png'):
+                self.font = constants.myfont
+            if 'free' in image_id:
+                self.free = image_id['free']
+            
         if type(self.image_id) == pygame.Surface: #if given pygame Surface, avoid having to render it again
             self.image = self.image_id
         else:
@@ -368,8 +376,8 @@ class bundle_image():
         Output:
             double: Returns final x offset of this member image when blitted to bundle's combined surface
         '''
-        if hasattr(self, 'override_width'):
-            return(0)
+        if hasattr(self, 'free') and self.free: #if hasattr(self, 'override_width'):
+            return((self.bundle.width * self.x_offset))
         else:
             return((self.bundle.width * self.x_offset) - (self.width / 2) + (self.bundle.width / 2))
 
@@ -382,7 +390,10 @@ class bundle_image():
         Output:
             double: Returns final y offset of this member image when blitted to bundle's combined surface
         '''
-        return((self.bundle.height * self.y_offset * -1) - (self.height / 2) + (self.bundle.height / 2))
+        if hasattr(self, 'free') and self.free: #hasattr(self, 'override_width'):
+            return((self.bundle.height * self.y_offset * -1))
+        else:
+            return((self.bundle.height * self.y_offset * -1) - (self.height / 2) + (self.bundle.height / 2))
 
     def scale(self):
         '''
@@ -398,7 +409,10 @@ class bundle_image():
                 self.width = self.override_width
             else:
                 self.width = self.bundle.width * self.size
-            self.height = self.bundle.height * self.size
+            if hasattr(self, 'override_height'):
+                self.height = self.override_height
+            else:
+                self.height = self.bundle.height * self.size
         else:
             self.width = self.bundle.width
             self.height = self.bundle.height
@@ -450,7 +464,7 @@ class bundle_image():
                         index += 1
             else:
                 self.text = True
-                self.image = text_utility.text(self.image_id, constants.myfont)
+                self.image = text_utility.text(self.image_id, self.font)
             status.rendered_images[key] = self.image
 
 class free_image(image):
@@ -476,7 +490,7 @@ class free_image(image):
         '''
         self.image_type = 'free'
         self.showing = False
-        self.has_parent_collection = False    
+        self.has_parent_collection = False
         super().__init__(input_dict['width'], input_dict['height'])
         self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
@@ -672,7 +686,7 @@ class background_image(free_image):
             if status.safe_click_area.showing != self.previous_safe_click_area_showing:
                 self.previous_safe_click_area_showing = status.safe_click_area.showing
                 if self.previous_safe_click_area_showing:
-                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': status.safe_click_area.width}])
+                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': status.safe_click_area.width, 'free': True}])
                 else:
                     self.set_image('misc/background.png')
             return(True)
@@ -714,12 +728,10 @@ class tooltip_free_image(free_image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 0
-        font_name = constants.font_name
-        font_size = constants.font_size
+        font = constants.fonts['default']
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (len(self.tooltip_text) * font.size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -1210,12 +1222,10 @@ class actor_image(image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
-        font_size = constants.font_size
-        font_name = constants.font_name
+        font = constants.fonts['default']
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (font.size * len(tooltip_text)) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)
         self.actor.tooltip_box = self.tooltip_box
         self.tooltip_outline_width = 1

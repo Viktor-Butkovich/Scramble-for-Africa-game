@@ -506,7 +506,7 @@ class actor():
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
             constants.game_display.blit(text_utility.text(text_line, constants.myfont), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
-                tooltip_image.tooltip_box.y + (text_line_index * constants.font_size)))
+                tooltip_image.tooltip_box.y + (text_line_index * constants.fonts['default'].size)))
 
     def get_image_id_list(self, override_values={}):
         '''

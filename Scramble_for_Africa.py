@@ -14,8 +14,6 @@ except Exception: #displays error message and records error message in crash log
     manage_crash(Exception)
 
 # tasks:
-# look into adding text on map, such as village names - should be a generalizable procedure that works similarly to tile images or cell icons, with some way to easily
-#   create a rendered text object with a string message and offset parameters
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
 # make generic contested action type
 # add horizontal ordered collection for double combat dice?
@@ -23,3 +21,5 @@ except Exception: #displays error message and records error message in crash log
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
+# maybe make map text size proportional to tile's size, rather than using override_width in create_resource_icon and cells.show_num_mobs
+#   would remove issue with zoomed in views of tiles incorrectly having the same text size

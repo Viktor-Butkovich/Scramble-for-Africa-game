@@ -1,4 +1,4 @@
-from ...util import scaling, text_utility
+from ...util import scaling
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -21,6 +21,7 @@ class notification_manager_template():
         self.default_notification_height = 300
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
+        self.font = constants.fonts['default_notification']
 
     def update_notification_layout(self, notification_height=0):
         '''
@@ -51,14 +52,12 @@ class notification_manager_template():
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = constants.notification_font_size
-        font_name = constants.font_name
         for index in range(len(message)):
             if not ((not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n'): #don't add if /n
                 if not (index > 0 and message[index - 1] + message[index] == '/n'): #if on n after /, skip
                     next_word += message[index]
             if message[index] == ' ':
-                if text_utility.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+                if self.font.calculate_size(next_line + next_word) > self.notification_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word
@@ -68,7 +67,7 @@ class notification_manager_template():
                 next_line = ''
                 next_line += next_word
                 next_word = ''
-        if text_utility.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+        if self.font.calculate_size(next_line + next_word) > self.notification_width:
             new_message.append(next_line)
             next_line = ''
         next_line += next_word
@@ -141,7 +140,7 @@ class notification_manager_template():
         '''
         message = notification_dict['message'] #message should be the only required parameter
 
-        height = len(self.format_message(message)) * constants.default_notification_font_size
+        height = len(self.format_message(message)) * constants.fonts['default_notification'].size
         self.update_notification_layout(height)
 
         if 'notification_type' in notification_dict:

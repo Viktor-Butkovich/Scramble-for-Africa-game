@@ -4,7 +4,7 @@ import random
 import os
 import pygame
 import math
-from . import utility
+from . import utility, text_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -460,9 +460,18 @@ def generate_resource_icon(tile):
         else: #7-10
             key += '3'
         if small:
-            image_id = 'scenery/resources/natives/small/' + key + '.png'
+            image_id = ['scenery/resources/natives/small/' + key + '.png']
         else:
-            image_id = 'scenery/resources/natives/' + key + '.png'
+            image_id = ['scenery/resources/natives/' + key + '.png']
+        image_id.append(text_utility.prepare_render(
+            attached_village.name,
+            font=constants.fonts['white_notification'],
+            override_input_dict={
+                'x_offset': 0.05,
+                'y_offset': -0.75,
+                'free': True
+            }
+        ))
     else:
         if small:
             image_id = 'scenery/resources/small/' + tile.cell.resource + '.png'
