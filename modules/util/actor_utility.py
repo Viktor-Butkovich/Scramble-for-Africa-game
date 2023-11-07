@@ -437,7 +437,7 @@ def generate_resource_icon(tile):
     Input:
         tile tile: Tile to generate a resource icon for
     Output:
-        string: Returns string image file path for tile's resource icon
+        string/list: Returns string or list image id for tile's resource icon
     '''
     small = False
     for building_type in constants.building_types:
@@ -463,13 +463,20 @@ def generate_resource_icon(tile):
             image_id = ['scenery/resources/natives/small/' + key + '.png']
         else:
             image_id = ['scenery/resources/natives/' + key + '.png']
+        x_size = min(0.93, 0.13 * len(attached_village.name)) #try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
+        y_size = (x_size / len(attached_village.name)) * 2.3 #decrease vertical font size proportionally if x_size was bounded by maximum
         image_id.append(text_utility.prepare_render(
             attached_village.name,
-            font=constants.fonts['white_notification'],
+            font=constants.fonts['max_detail_white'],
             override_input_dict={
                 'x_offset': 0.05,
-                'y_offset': -0.75,
-                'free': True
+                'y_offset': -0.7,
+                'free': True,
+                'override_height': None,
+                'override_width': None,
+                'x_size': x_size,
+                'y_size': y_size
+                
             }
         ))
     else:

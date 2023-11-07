@@ -81,6 +81,12 @@ def misc():
         'size': 30,
         'color': 'white'
     })
+    fonts.font({
+        'descriptor': 'max_detail_white',
+        'name': constants.font_name,
+        'size': 100,
+        'color': 'white'
+    })
 
     #page 1
     instructions_message = 'Placeholder instructions, use += to add'

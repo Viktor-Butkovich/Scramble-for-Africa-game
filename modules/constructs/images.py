@@ -315,6 +315,8 @@ class bundle_image():
                 offset image dictionary: String keys corresponding to extra information for offset images
                     'image'_id': string value - File path to image used for this offset image
                     'size' = 1: float value - Scale of offset image, with 1 being the same size as the bundle
+                    'x_size' = 1: float value - Scale of offset image on x axis, overrides size
+                    'y_size' = 1: float value - Scale of offset image on y axis, overrides size
                     'x_offset' = 0: float value - x-axis offset of image, with 1 being shifted a full width to the right
                     'y_offset' = 0: float value - y-axis offset of image, with 1 being shifted a full height upward
                     'level' = 0: int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
@@ -336,13 +338,14 @@ class bundle_image():
         else:
             self.image_id_dict = image_id
             self.image_id = image_id['image_id']
-            self.size = image_id.get('size', 1)
+            self.x_size = image_id.get('x_size', image_id.get('size', 1)) #uses inputted x_size if present, otherwise inputted size, otherwise 1
+            self.y_size = image_id.get('y_size', image_id.get('size', 1)) #uses inputted y_size if present, otherwise inputted size, otherwise 1
             self.x_offset = image_id.get('x_offset', 0)
             self.y_offset = image_id.get('y_offset', 0)
             self.level = image_id.get('level', 0)
-            if 'override_width' in image_id:
+            if image_id.get('override_width', None):
                 self.override_width = image_id['override_width']
-            if 'override_height' in image_id:
+            if image_id.get('override_height', None):
                 self.override_height = image_id['override_height']
             if 'green_screen' in image_id:
                 self.has_green_screen = True
@@ -408,11 +411,11 @@ class bundle_image():
             if hasattr(self, 'override_width'):
                 self.width = self.override_width
             else:
-                self.width = self.bundle.width * self.size
+                self.width = self.bundle.width * self.x_size
             if hasattr(self, 'override_height'):
                 self.height = self.override_height
             else:
-                self.height = self.bundle.height * self.size
+                self.height = self.bundle.height * self.y_size
         else:
             self.width = self.bundle.width
             self.height = self.bundle.height
