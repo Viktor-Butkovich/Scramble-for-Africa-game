@@ -41,7 +41,7 @@ class actor_display_free_image(free_image):
             None
         '''
         self.actor = new_actor
-        if not new_actor == 'none':
+        if new_actor != 'none':
             if self.actor_image_type in ['minister_default', 'country_default']:
                 self.set_image(new_actor.image_id)
             elif self.actor_image_type == 'possible_artifact_location':
@@ -62,7 +62,7 @@ class actor_display_free_image(free_image):
                 if new_actor.actor_type == 'mob':
                     image_id_list.append(action_utility.generate_background_image_input_dict())
                     if new_actor.is_dummy:
-                        image_id_list.append('misc/shader.png')
+                        image_id_list.append('misc/dark_shader.png')
                     if new_actor.is_pmob:
                         image_id_list.append('misc/pmob_outline.png')
                     else:
@@ -77,7 +77,7 @@ class actor_display_free_image(free_image):
                     image_id_list.append(self.default_image_id)
                 else:
                     image_id_list += self.default_image_id
-                image_id_list.append('misc/shader.png')
+                image_id_list.append('misc/dark_shader.png')
             image_id_list.append('misc/pmob_outline.png')
             self.set_image(image_id_list)
 

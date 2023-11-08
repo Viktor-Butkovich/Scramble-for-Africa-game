@@ -21,6 +21,4 @@ except Exception: #displays error message and records error message in crash log
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# maybe make map text size proportional to tile's size, rather than using override_width in generate_resource_icon and cells.show_num_mobs
-#   would remove issue with zoomed in views of tiles incorrectly having the same text size
 # possibly allow sections of images to appear over other images, like village names overlaying any contains mobs

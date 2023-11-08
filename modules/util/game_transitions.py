@@ -82,10 +82,10 @@ def set_game_mode(new_game_mode):
             constants.default_text_box_height = scaling.scale_height(90)
             constants.text_box_height = constants.default_text_box_height
         
-    if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
+    if previous_game_mode in ['strategic', 'europe', 'new_game_setup', 'ministers']:
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True) #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(status.tile_info_display, None, override_exempt=True)
-        actor_utility.calibrate_actor_info_display(status.minister_info_display, None)
+        minister_utility.calibrate_minister_info_display(None)
         actor_utility.calibrate_actor_info_display(status.country_info_display, None)
         if new_game_mode == 'europe':
             if status.europe_grid.cell_list[0][0].contained_mobs:

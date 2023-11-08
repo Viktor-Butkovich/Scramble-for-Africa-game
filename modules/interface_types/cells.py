@@ -739,13 +739,13 @@ class cell():
         length = len(self.contained_mobs)
         if length >= 2:
             message = str(length)
-            #color = 'white'
-            #font_size = round(self.width * 0.3)
-            #current_font = pygame.font.SysFont(constants.font_name, font_size)
-            font = constants.fonts['large_white_notification']
+            font = constants.fonts['max_detail_white']
+            font_width = self.width * 0.13 * 1.3
+            font_height = self.width * 0.3 * 1.3
             textsurface = font.pygame_font.render(message, False, font.color)
-            text_x = self.pixel_x + self.width - (font.size * 0.5)
-            text_y = self.pixel_y - font.size
+            textsurface = pygame.transform.scale(textsurface, (font_width * len(message), font_height))
+            text_x = self.pixel_x + self.width - (font_width * (len(message) + 0.3))
+            text_y = self.pixel_y - font_height
             constants.game_display.blit(textsurface, (text_x, text_y))
 
     def touching_mouse(self):
