@@ -460,25 +460,9 @@ def generate_resource_icon(tile):
         else: #7-10
             key += '3'
         if small:
-            image_id = ['scenery/resources/natives/small/' + key + '.png']
+            image_id = 'scenery/resources/natives/small/' + key + '.png'
         else:
-            image_id = ['scenery/resources/natives/' + key + '.png']
-        x_size = min(0.93, 0.13 * len(attached_village.name)) #try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
-        y_size = (x_size / len(attached_village.name)) * 2.3 #decrease vertical font size proportionally if x_size was bounded by maximum
-        image_id.append(text_utility.prepare_render(
-            attached_village.name,
-            font=constants.fonts['max_detail_white'],
-            override_input_dict={
-                'x_offset': 0.05,
-                'y_offset': -0.7,
-                'free': True,
-                'override_height': None,
-                'override_width': None,
-                'x_size': x_size,
-                'y_size': y_size
-                
-            }
-        ))
+            image_id = 'scenery/resources/natives/' + key + '.png'
     else:
         if small:
             image_id = 'scenery/resources/small/' + tile.cell.resource + '.png'

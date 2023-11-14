@@ -652,7 +652,7 @@ class cell():
             None
         '''
         self.visible = new_visibility
-        if update_image_bundle and not self.tile == 'none':
+        if update_image_bundle and self.tile != 'none':
             self.tile.update_image_bundle()
     
     def set_resource(self, new_resource, update_image_bundle=True):

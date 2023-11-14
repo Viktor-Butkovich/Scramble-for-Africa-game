@@ -1162,15 +1162,23 @@ class actor_image(image):
         if not isinstance(new_image_description, image_bundle):
             if isinstance(self.image_id, str): #if set to string image path
                 self.contains_bundle = False
-                full_image_id = 'graphics/' + self.image_id
+                if self.image_id.endswith('.png'):
+                    self.text = False
+                    full_image_id = 'graphics/' + self.image_id
+                else:
+                    self.text = True
+                    full_image_id = self.image_id
                 if full_image_id in status.rendered_images:
                     self.image = status.rendered_images[full_image_id]
                 else:
-                    try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                        self.image = pygame.image.load(full_image_id)
-                    except:
-                        print(full_image_id)
-                        self.image = pygame.image.load(full_image_id)
+                    if not self.text:
+                        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                            self.image = pygame.image.load(full_image_id)
+                        except:
+                            print(full_image_id)
+                            self.image = pygame.image.load(full_image_id)
+                    else:
+                        self.image = text_utility.text(self.image_id, constants.myfont)
                     status.rendered_images[full_image_id] = self.image
                 self.image = pygame.transform.scale(self.image, (self.width, self.height))
             else: #if set to image path list

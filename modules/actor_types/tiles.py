@@ -3,7 +3,7 @@
 import pygame
 import random
 from ..constructs import images, villages
-from ..util import utility, actor_utility, main_loop_utility
+from ..util import utility, actor_utility, main_loop_utility, text_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -33,6 +33,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.selection_outline_color = 'yellow'#'bright blue'
         self.actor_match_outline_color = 'white'
         input_dict['grids'] = [input_dict['grid']] #give actor a 1-item list of grids as input
+        self.name_icon = None
         super().__init__(from_save, input_dict)
         self.set_name(input_dict['name'])
         self.image_dict = {'default': input_dict['image']}
@@ -61,6 +62,57 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.terrain = 'none'
         self.update_tooltip()
         self.update_image_bundle()
+
+    def set_name(self, new_name):
+        '''
+        Description:
+            Sets this actor's name, also updating its name icon if applicable
+        Input:
+            string new_name: Name to set this actor's name to
+        Output:
+            None
+        '''
+        super().set_name(new_name)
+        if self.grid == status.strategic_map_grid and not new_name in ['default', 'placeholder']: #make sure user is not allowed to input default or *.png as a tile name
+            if not self.name_icon:
+                x_size = min(0.93, 0.13 * len(new_name)) #try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
+                y_size = (x_size / len(new_name)) * 2.3 #decrease vertical font size proportionally if x_size was bounded by maximum
+                image_id = [text_utility.prepare_render(
+                    new_name,
+                    font=constants.fonts['max_detail_white'],
+                    override_input_dict={
+                        'x_offset': 0.05,
+                        'y_offset': -0.7 + 0.4 - 0.1,
+                        'free': True,
+                        'level': 1,
+                        'override_height': None,
+                        'override_width': None,
+                        'x_size': x_size,
+                        'y_size': y_size
+                    }
+                )]
+
+                self.name_icon = constants.actor_creation_manager.create(False, {
+                    'coordinates': (self.x, self.y),
+                    'grids': [self.grid, self.grid.mini_grid],
+                    'image': image_id,
+                    'modes': ['strategic'],
+                    'init_type': 'name icon',
+                    'tile': self
+                })
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        if self.name_icon:
+            self.name_icon.remove()
 
     def draw_destination_outline(self, color = 'default'): #called directly by mobs
         '''
@@ -234,6 +286,8 @@ class tile(actor): #to do: make terrain tiles a subclass
                     current_building = self.cell.get_building(current_building_type)
                     if current_building != 'none':
                         image_id_list += current_building.get_image_id_list()
+                if self.name_icon:
+                    image_id_list += self.name_icon.images[0].get_image_id_list()
             elif self.show_terrain:
                 image_id_list.append(self.image_dict['hidden'])
             else:

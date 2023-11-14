@@ -105,6 +105,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         #cell icons
         elif init_type == 'cell icon':
             new_actor = cell_icons.cell_icon(from_save, input_dict)
+        elif init_type == 'name icon':
+            new_actor = cell_icons.name_icon(from_save, input_dict)
 
         #loans
         elif init_type == 'loan':
@@ -267,8 +269,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = panels.panel(input_dict)
         elif init_type == 'safe click panel':
             new_element = panels.safe_click_panel(input_dict)
-        elif init_type == 'cell_icon':
-            new_element = cell_icons.cell_icon(input_dict)
 
         elif init_type.endswith('label'):
             base = init_type.removesuffix('label')

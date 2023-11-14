@@ -26,6 +26,7 @@ class actor():
         self.from_save = from_save
         status.actor_list.append(self)
         self.modes = input_dict['modes']
+        self.x, self.y = input_dict['coordinates']
         if self.from_save:
             self.grid = getattr(status, input_dict['grid_type'])
             self.grids = [self.grid]
@@ -36,7 +37,6 @@ class actor():
             self.grids = input_dict['grids']
             self.grid = self.grids[0]
             self.set_name('placeholder')
-        self.x, self.y = input_dict['coordinates']
         self.set_coordinates(self.x, self.y)
         self.selected = False
         self.can_hold_commodities = False
