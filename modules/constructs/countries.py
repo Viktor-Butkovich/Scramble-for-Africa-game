@@ -158,6 +158,7 @@ class hybrid_country(country):
         constants.flavor_text_manager.allow_particles = self.allow_particles
         constants.flavor_text_manager.aristocratic_particles = self.aristocratic_particles
         constants.flavor_text_manager.allow_double_last_names = self.allow_double_last_names
+        constants.flavor_text_manager.set_flavor_text('settlement_names', 'text/locations/' + self.adjective + '_settlement_names.csv')
         constants.weighted_backgrounds = self.background_set
         for current_recruitment_button in status.recruitment_button_list:
             if current_recruitment_button.recruitment_type in constants.country_specific_units:
