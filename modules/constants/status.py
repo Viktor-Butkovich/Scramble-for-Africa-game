@@ -20,6 +20,7 @@ from modules.actor_types.mob_types.pmobs import pmob
 from modules.actor_types.mob_types.npmobs import npmob
 from modules.actor_types.mob_types.npmob_types.beasts import beast
 from modules.constructs.villages import village
+from modules.constructs.settlements import settlement
 from modules.constructs.lore_missions import lore_mission
 from modules.util.market_utility import loan
 from modules.action_types.action import action
@@ -67,6 +68,7 @@ pmob_list: List[pmob] = []
 npmob_list: List[npmob] = []
 beast_list: List[beast] = []
 village_list: List[village] = []
+settlement_list: List[settlement] = []
 building_list: List[building] = []
 slums_list: List[slums] = []
 resource_building_list: List[resource_building] = []

@@ -14,6 +14,7 @@ except Exception: #displays error message and records error message in crash log
     manage_crash(Exception)
 
 # tasks:
+# replace usages of 'none' with None
 # make generic contested action type
 # add minister speech bubbles
 # add horizontal ordered collection for double combat dice?

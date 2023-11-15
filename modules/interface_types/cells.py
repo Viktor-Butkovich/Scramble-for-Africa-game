@@ -39,6 +39,7 @@ class cell():
         self.tile = 'none'
         self.resource = 'none'
         self.village = 'none'
+        self.settlement = None
         self.terrain = 'none'
         self.terrain_variant = 0
         self.set_terrain('clear')

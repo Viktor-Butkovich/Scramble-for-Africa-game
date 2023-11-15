@@ -48,7 +48,8 @@ class village():
         self.tiles = [] #added in set_resource for tiles
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
             status.village_list.append(self) #have more permanent fix later
-            self.cell.tile.set_name(self.name)
+            if not self.cell.settlement:
+                self.cell.tile.set_name(self.name)
 
     def remove_complete(self):
         '''

@@ -22,6 +22,7 @@ class flavor_text_manager_template():
         self.set_flavor_text('minister_first_names', 'text/default.csv')
         self.set_flavor_text('minister_particles', 'text/default.csv')
         self.set_flavor_text('minister_last_names', 'text/default.csv')
+        self.set_flavor_text('settlement_names', 'text/default.csv')
         self.allow_particles = False
                 
     def set_flavor_text(self, topic, file):
@@ -76,7 +77,6 @@ class flavor_text_manager_template():
             else:
                 return_text += current_character
         return((return_text, index))
-
 
     def generate_flavor_text(self, subject):
         '''

@@ -248,6 +248,9 @@ class save_load_manager_template():
             
         for current_building in status.building_list:
             saved_actor_dicts.append(current_building.to_save_dict())
+        
+        for current_settlement in status.settlement_list:
+            saved_actor_dicts.append(current_settlement.to_save_dict())
             
         for current_loan in status.loan_list:
             saved_actor_dicts.append(current_loan.to_save_dict())

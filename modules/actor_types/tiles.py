@@ -76,12 +76,16 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.grid == status.strategic_map_grid and not new_name in ['default', 'placeholder']: #make sure user is not allowed to input default or *.png as a tile name
             if not self.name_icon:
                 x_size = min(0.93, 0.13 * len(new_name)) #try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
+                if x_size < 0.93:
+                    x_offset = 0.5 - (x_size / 2)
+                else:
+                    x_offset = 0.05
                 y_size = (x_size / len(new_name)) * 2.3 #decrease vertical font size proportionally if x_size was bounded by maximum
                 image_id = [text_utility.prepare_render(
                     new_name,
                     font=constants.fonts['max_detail_white'],
                     override_input_dict={
-                        'x_offset': 0.05,
+                        'x_offset': x_offset,
                         'y_offset': -0.7 + 0.4 - 0.1,
                         'free': True,
                         'level': 1,

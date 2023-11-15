@@ -10,7 +10,7 @@ from ...interface_types import dice, buttons, labels, panels, notifications, cho
 from ...actor_display_tools import buttons as actor_display_buttons
 from ...actor_display_tools import labels as actor_display_labels
 from ...actor_display_tools import images as actor_display_images
-from ...constructs import ministers, lore_missions, images
+from ...constructs import ministers, lore_missions, images, settlements
 from ...util import utility, actor_utility, market_utility
 from .. import mouse_followers
 import modules.constants.constants as constants
@@ -101,6 +101,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.resource_building(from_save, input_dict)
         elif init_type == 'slums':
             new_actor = buildings.slums(from_save, input_dict)
+        elif init_type == 'settlement':
+            new_actor = settlements.settlement(from_save, input_dict)
 
         #cell icons
         elif init_type == 'cell icon':

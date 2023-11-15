@@ -49,7 +49,13 @@ class building(actor):
                 constants.actor_creation_manager.create(True, current_work_crew).work_building(self)
             if self.can_damage():
                 self.set_damaged(input_dict['damaged'], True)
-        elif self.can_damage():
+        elif input_dict['building_type'] in ['resource', 'port', 'train_station']:
+            constants.actor_creation_manager.create(False, {
+                'init_type': 'settlement',
+                'coordinates': (self.cell.x, self.cell.y)
+            })
+
+        if (not from_save) and self.can_damage():
             self.set_damaged(False, True)
         self.cell.contained_buildings[self.building_type] = self
         self.cell.tile.update_image_bundle()
