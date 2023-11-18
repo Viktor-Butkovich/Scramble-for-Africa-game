@@ -47,7 +47,7 @@ def update_display():
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
-        notification_tooltip_button = 'none'
+        notification_tooltip_button = None
         for current_button in status.button_list:
             if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
                 if current_button.in_notification and current_button != status.current_instructions_page:
@@ -55,12 +55,12 @@ def update_display():
                 else:
                     possible_tooltip_drawers = [current_button]
         
-        if notification_tooltip_button == 'none':
+        if notification_tooltip_button:
+            possible_tooltip_drawers = [notification_tooltip_button]
+        else:
             for current_free_image in status.free_image_list:
                 if current_free_image.can_show_tooltip():
                     possible_tooltip_drawers = [current_free_image]
-        else:
-            possible_tooltip_drawers = [notification_tooltip_button]
                 
         if flags.show_text_box:
             draw_text_box()

@@ -17,8 +17,10 @@ def main_loop():
         None
     '''
     while not flags.crashed:
-        if status.displayed_notification == None:
-            stopping = False
+        if not flags.loading:
+            main_loop_utility.update_display()
+        else:
+            main_loop_utility.draw_loading_screen()
         constants.input_manager.update_input()
         for event in pygame.event.get():
             flags.capital = flags.r_shift or flags.l_shift
@@ -170,10 +172,10 @@ def main_loop():
                 if current_button.has_released:
                     current_button.showing_outline = False
 
-        if not flags.loading:
-            main_loop_utility.update_display()
-        else:
-            main_loop_utility.draw_loading_screen()
+        #if not flags.loading:
+        #    main_loop_utility.update_display()
+        #else:
+        #    main_loop_utility.draw_loading_screen()
         constants.current_time = time.time()
         if constants.current_time - constants.last_selection_outline_switch > 1:
             flags.show_selection_outlines = not flags.show_selection_outlines

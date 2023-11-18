@@ -27,3 +27,6 @@ except Exception: #displays error message and records error message in crash log
 #      would need to modify text box to capture the output for a particular purpose, with a standard listen/receive function
 #       when an object uses listen, it starts the typing process and captures the output when typing is cancelled or entered
 #       the text box should call the receive function of the current listener
+# remove tile name from tile info display, should only be on map and exploration image
+# change tile font to be larger then scale down - should fix issue with e's not showing
+# incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward

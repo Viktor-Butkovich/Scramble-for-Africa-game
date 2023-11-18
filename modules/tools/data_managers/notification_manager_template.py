@@ -220,10 +220,12 @@ class notification_manager_template():
                     if current_sound.get('dampen_music', False):
                         constants.sound_manager.dampen_music(current_sound.get('dampen_time_interval', 0.5))
                     in_sequence = current_sound.get('in_sequence', False)
+                    volume = current_sound.get('volume', 0.3)
                 else:
                     sound_file = current_sound
+                    volume = 0.3
                 if in_sequence and channel:
-                    constants.sound_manager.queue_sound(sound_file, channel)
+                    constants.sound_manager.queue_sound(sound_file, channel, volume=volume)
                 else:
-                    channel = constants.sound_manager.play_sound(sound_file)
+                    channel = constants.sound_manager.play_sound(sound_file, volume=volume)
         return(new_notification)

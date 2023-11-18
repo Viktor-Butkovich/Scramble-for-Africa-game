@@ -444,17 +444,6 @@ def value_trackers():
         'member_config': {'order_x_offset': scaling.scale_width(275), 'order_overlap': True}
     })
 
-    constants.public_opinion_tracker = value_tracker_template.public_opinion_tracker_template('public_opinion', 0, 0, 100)
-    constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(10),
-        'height': scaling.scale_height(30),
-        'modes': ['strategic', 'europe', 'ministers'],
-        'image_id': 'misc/default_label.png',
-        'value_name': 'public_opinion',
-        'init_type': 'value label',
-        'parent_collection': value_trackers_ordered_collection
-    })
-
     constants.money_tracker = value_tracker_template.money_tracker_template(100)
     constants.money_label =  constants.actor_creation_manager.create_interface_element({
         'minimum_width': scaling.scale_width(10),
@@ -464,6 +453,17 @@ def value_trackers():
         'init_type': 'money label',
         'parent_collection': value_trackers_ordered_collection,
         'member_config': {'index': 1} #should appear before public opinion in collection but relies on public opinion existing
+    })
+
+    constants.public_opinion_tracker = value_tracker_template.public_opinion_tracker_template('public_opinion', 0, 0, 100)
+    constants.actor_creation_manager.create_interface_element({
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'modes': ['strategic', 'europe', 'ministers'],
+        'image_id': 'misc/default_label.png',
+        'value_name': 'public_opinion',
+        'init_type': 'value label',
+        'parent_collection': value_trackers_ordered_collection
     })
 
     if constants.effect_manager.effect_active('track_fps'):

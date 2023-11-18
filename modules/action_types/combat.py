@@ -84,24 +84,22 @@ class combat(action.action):
         '''
         return_list = super().generate_attached_interface_elements(subject)
         if subject == 'dice':
-            return_list = [action_utility.generate_die_input_dict((0, 0), roll_list[0], self, 
-                                override_input_dict={'member_config': {'centered': True}})
-                            for roll_list in self.roll_lists]
+            return_list = []
             background_dict = action_utility.generate_background_image_input_dict()
             pmob_image_id_list = [background_dict] + self.current_unit.get_image_id_list() + ['misc/pmob_outline.png']
-            npmob_image_id_list = [background_dict] + self.opponent.get_image_id_list() + ['misc/pmob_outline.png']
+            npmob_image_id_list = [background_dict] + self.opponent.get_image_id_list() + ['misc/npmob_outline.png']
 
             image_size = 120
             return_list.append(action_utility.generate_free_image_input_dict(pmob_image_id_list, image_size,
                                 override_input_dict={
                                     'member_config': {'centered': True}
                                 }))
-            return_list.insert(0, action_utility.generate_free_image_input_dict(npmob_image_id_list, image_size,
-                                override_input_dict={
-                                    'member_config': {'centered': True}
-                                }))
 
-            return_list.insert(1, action_utility.generate_die_input_dict(
+            return_list += [action_utility.generate_die_input_dict((0, 0), roll_list[0], self, 
+                                override_input_dict={'member_config': {'centered': True}})
+                            for roll_list in self.roll_lists]
+
+            return_list.append(action_utility.generate_die_input_dict(
                 (0, 0),
                 self.opponent_roll_result,
                 self,
@@ -114,6 +112,10 @@ class combat(action.action):
                     'member_config': {'centered': True}
                 }
             ))
+            return_list.append(action_utility.generate_free_image_input_dict(npmob_image_id_list, image_size,
+                                override_input_dict={
+                                    'member_config': {'centered': True}
+                                }))
             if not self.defending:
                 return_list += self.current_unit.controlling_minister.generate_icon_input_dicts(alignment='left')
         return(return_list)

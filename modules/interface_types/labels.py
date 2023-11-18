@@ -219,7 +219,6 @@ class money_label_template(value_label):
         total_african_worker_upkeep = round(constants.num_african_workers * constants.african_worker_upkeep, 2)
         total_european_worker_upkeep = round(constants.num_european_workers * constants.european_worker_upkeep, 2)
         total_slave_worker_upkeep = round(constants.num_slave_workers * constants.slave_worker_upkeep, 2)
-
         num_workers = constants.num_african_workers + constants.num_european_workers + constants.num_slave_workers + constants.num_church_volunteers
         total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
 

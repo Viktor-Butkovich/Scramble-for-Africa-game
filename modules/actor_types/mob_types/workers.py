@@ -46,7 +46,7 @@ class worker(pmob):
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
             
         elif self.worker_type == 'African':
-            constants.num_african_workers -= 1
+            constants.num_african_workers += 1
             if not from_save:
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
                 

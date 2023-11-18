@@ -30,7 +30,7 @@ class settlement():
         self.cell.settlement = self
         self.x = self.cell.x
         self.y = self.cell.y
-        self.cell.tile.set_name(self.name)
+        #self.cell.tile.set_name(self.name)
         status.actor_list.append(self)
         status.settlement_list.append(self)
 

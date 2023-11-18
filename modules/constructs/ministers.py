@@ -782,7 +782,7 @@ class minister():
 
         if prosecutor == 'none' :
             if not flags.creating_new_game:
-                message = 'A rumor has been found that ' + self.name + ', '
+                message = 'A rumor has been found that ' + self.name + ','
                 if self.current_position == 'none':
                     message += ' a potential minister candidate, '
                 else:

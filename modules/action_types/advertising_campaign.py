@@ -83,7 +83,7 @@ class advertising_campaign(action.campaign):
         elif subject == 'initial':
             text += 'The merchant attempts to increase public demand for ' + self.target_commodity + '. /n /n'
             advertising_message, index = constants.flavor_text_manager.generate_substituted_indexed_flavor_text('advertising_campaign', '_', self.target_commodity)
-            self.success_audio = [{'sound_id': 'voices/advertising/messages/' + str(index), 'dampen_music': True, 'dampen_time_interval': 0.75},
+            self.success_audio = [{'sound_id': 'voices/advertising/messages/' + str(index), 'dampen_music': True, 'dampen_time_interval': 0.75, 'volume': 1.0},
                                   {'sound_id': 'voices/advertising/commodities/' + self.target_commodity, 'in_sequence': True}]
             text += advertising_message + ' /n /n'
         elif subject == 'success':

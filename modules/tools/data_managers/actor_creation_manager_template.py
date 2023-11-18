@@ -361,6 +361,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.off_tile_exploration_notification(input_dict)
                 else:
                     new_element = notifications.notification(input_dict)
+        new_element.showing = new_element.can_show()
         return(new_element)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name):
