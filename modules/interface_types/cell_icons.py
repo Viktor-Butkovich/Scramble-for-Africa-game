@@ -114,4 +114,4 @@ class name_icon(cell_icon):
         Output:
             boolean: Returns True if this grid can appear during the current game mode, otherwise returns False
         '''
-        return(super().can_show() and self.tile.cell.visible and not (status.displayed_mob and status.displayed_tile == self.tile))
+        return(super().can_show() and self.tile.cell.visible)

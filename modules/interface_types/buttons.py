@@ -2470,7 +2470,10 @@ class action_button(button):
         elif self.corresponding_action.actor_type == 'tile':
             return(status.displayed_tile)
         elif self.corresponding_action.actor_type == 'minister':
-            return(status.displayed_minister)
+            if constants.current_game_mode == 'trial':
+                return(status.displayed_prosecution)
+            else:
+                return(status.displayed_minister)
 
     def on_click(self):
         '''

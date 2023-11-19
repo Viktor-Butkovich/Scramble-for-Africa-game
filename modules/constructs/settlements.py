@@ -20,17 +20,19 @@ class settlement():
         Output:
             None
         '''
-        if not from_save:
-            self.name = 'placeholder settlement'
-            self.name = constants.flavor_text_manager.generate_flavor_text('settlement_names')
-        else:
-            self.name = input_dict['name']
         self.x, self.y = input_dict['coordinates']
         self.cell = status.strategic_map_grid.find_cell(self.x, self.y)
         self.cell.settlement = self
         self.x = self.cell.x
         self.y = self.cell.y
-        #self.cell.tile.set_name(self.name)
+        if not from_save:
+            if self.cell.village != 'none':
+                self.name = self.cell.village.name
+            else:
+                self.name = constants.flavor_text_manager.generate_flavor_text('settlement_names')
+        else:
+            self.name = input_dict['name']
+        self.cell.tile.set_name(self.name)
         status.actor_list.append(self)
         status.settlement_list.append(self)
 

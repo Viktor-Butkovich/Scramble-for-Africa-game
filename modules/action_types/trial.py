@@ -228,6 +228,14 @@ class trial(action.campaign):
             max_roll = 4
         else:
             max_roll = 6
+        text = self.generate_notification_text('initial')
+
+        constants.notification_manager.display_notification({
+            'message': text,
+            'notification_type': 'action',
+            'audio': self.generate_audio('initial')
+        })
+
         self.current_trial['trial_rolls'] = [prosecution.no_corruption_roll(max_roll) for i in range(0, self.current_trial['effective_evidence'])]
         self.roll_lists = self.generate_roll_lists(self.current_trial['trial_rolls'])
         self.roll_result = 0
@@ -236,13 +244,6 @@ class trial(action.campaign):
             if self.roll_result < 5 and self.current_trial['trial_rolls'][index] >= 5:
                 self.roll_result = self.current_trial['trial_rolls'][index]
                 roll_result_index = index
-        
-        text = self.generate_notification_text('initial')
-        constants.notification_manager.display_notification({
-            'message': text,
-            'notification_type': 'action',
-            'audio': self.generate_audio('initial')
-        })
         if self.current_trial['trial_rolls']:
             for i in range(0, roll_result_index + 1):
                 remaining_rolls_message = 'Evidence rolls remaining: ' + str(len(self.roll_lists)) + ' /n /n'
@@ -250,8 +251,7 @@ class trial(action.campaign):
                     'message': remaining_rolls_message + text + self.generate_notification_text('roll_message'),
                     'notification_type': 'action',
                     'attached_interface_elements': self.generate_attached_interface_elements('die'),
-                    'transfer_interface_elements': True,
-                    'audio': self.generate_audio('initial')
+                    'transfer_interface_elements': True
                 })
                 constants.notification_manager.display_notification({
                     'message': remaining_rolls_message + text + 'Rolling... ',

@@ -83,9 +83,15 @@ def misc():
     })
     fonts.font({
         'descriptor': 'max_detail_white',
-        'name': constants.font_name,
+        'name': 'helvetica',
         'size': 100,
         'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'max_detail_black',
+        'name': 'helvetica',
+        'size': 100,
+        'color': 'black'
     })
 
     #page 1

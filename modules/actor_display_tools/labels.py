@@ -896,7 +896,7 @@ class actor_tooltip_label(actor_display_label):
             None
         '''
         if self.actor.is_dummy:
-            if self.actor.is_group or self.actor.is_vehicle:
+            if self.actor.is_group or (self.actor.is_vehicle and self.actor.has_crew):
                 status.reorganize_unit_right_button.on_click()
                 self.actor.cycle_select()
             else:
