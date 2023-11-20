@@ -1514,6 +1514,8 @@ class fire_unit_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
+            if status.free_unit_slaves_button and status.free_unit_slaves_button.can_show(skip_parent_collection=skip_parent_collection):
+                return(False)
             if self.attached_mob != status.displayed_mob:
                 self.attached_mob = status.displayed_mob
             if self.attached_mob and self.attached_mob.is_pmob:
@@ -1595,12 +1597,12 @@ class free_unit_slaves_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.attached_mob == status.displayed_mob:
+            if self.attached_mob != status.displayed_mob:
                 self.attached_mob = status.displayed_mob
-            if self.attached_mob:
-                if self.attached_mob.is_pmob:
-                    if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
-                        return(True)
+            self.attached_mob = status.displayed_mob
+            if self.attached_mob and self.attached_mob.is_pmob:
+                if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
+                    return(True)
         return(False)
 
     def update_tooltip(self):

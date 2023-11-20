@@ -1050,10 +1050,9 @@ def mob_interface():
     }
     fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict)
     
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(actor_display_current_y + 40))
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free unit slaves button'
-    free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    status.free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
 
     #mob info labels setup

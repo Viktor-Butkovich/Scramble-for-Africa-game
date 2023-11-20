@@ -15,3 +15,4 @@ rm dist -force -Recurse
 rm modules -force -Recurse
 rm -force Scramble_for_Africa.py
 rm -force configuration/dev_config.json
+rm -force save_games/save1.pickle

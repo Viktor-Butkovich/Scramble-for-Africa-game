@@ -81,7 +81,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 x_offset = 0.5 - (x_size / 2)
             else:
                 x_offset = 0.05
-            y_size = (x_size / len(new_name)) * 2.1 #decrease vertical font size proportionally if x_size was bounded by maximum
+            y_size = (x_size / len(new_name)) * 2.3 #decrease vertical font size proportionally if x_size was bounded by maximum
             y_offset = -0.7 + 0.4 - 0.45 + 0.05 - 0.05
 
             has_building = False
@@ -93,7 +93,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 y_offset += 0.3
             image_id = [
                 {
-                'image_id': 'misc/default_label.png',
+                'image_id': 'misc/paper_label.png',
                 'x_offset': x_offset,
                 'y_offset': y_offset,
                 'free': True,

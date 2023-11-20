@@ -746,7 +746,7 @@ class cell():
             textsurface = font.pygame_font.render(message, False, font.color)
             textsurface = pygame.transform.scale(textsurface, (font_width * len(message), font_height))
             text_x = self.pixel_x + self.width - (font_width * (len(message) + 0.3))
-            text_y = self.pixel_y - font_height
+            text_y = self.pixel_y + (-0.8 * self.height) - (0.5 * font_height)
             constants.game_display.blit(textsurface, (text_x, text_y))
 
     def touching_mouse(self):

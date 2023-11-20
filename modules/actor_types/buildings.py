@@ -43,24 +43,24 @@ class building(actor):
         self.cell = self.grids[0].find_cell(self.x, self.y)
         status.building_list.append(self)
         self.set_name(input_dict['name'])
-        self.cell.tile.set_name(self.cell.tile.name)
         self.contained_work_crews = []        
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
                 constants.actor_creation_manager.create(True, current_work_crew).work_building(self)
             if self.can_damage():
                 self.set_damaged(input_dict['damaged'], True)
-        elif input_dict['building_type'] in ['resource', 'port', 'train_station']:
-            constants.actor_creation_manager.create(False, {
-                'init_type': 'settlement',
-                'coordinates': (self.cell.x, self.cell.y)
-            })
 
         if (not from_save) and self.can_damage():
             self.set_damaged(False, True)
         self.cell.contained_buildings[self.building_type] = self
         self.cell.tile.update_image_bundle()
-        self.is_port = False #used to determine if port is in a tile to move there
+
+        if (not from_save) and input_dict['building_type'] in ['resource', 'port', 'train_station', 'fort'] and not self.cell.settlement:
+            constants.actor_creation_manager.create(False, {
+                'init_type': 'settlement',
+                'coordinates': (self.cell.x, self.cell.y)
+            })
+        self.cell.tile.set_name(self.cell.tile.name)
 
         self.set_inventory_capacity(self.default_inventory_capacity)
         if constants.effect_manager.effect_active('damaged_buildings'):
@@ -552,8 +552,7 @@ class port(building):
         '''
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict)
-        self.is_port = True #used to determine if port is in a tile to move there
-        if (not from_save) and not self.cell.village == 'none':
+        if (not from_save) and self.cell.village != 'none':
             constants.sound_manager.play_random_music('europe')
 
 class warehouses(building):
