@@ -66,20 +66,20 @@ def set_game_mode(new_game_mode):
         start_loading()
         constants.current_game_mode = new_game_mode
         if new_game_mode == 'strategic':
-            constants.default_text_box_height = scaling.scale_height(90)
+            constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
             centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
             if centered_cell.tile != 'none':
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, centered_cell.tile)
                 #calibrate tile info to minimap center
         elif new_game_mode == 'main_menu':
-            constants.default_text_box_height = scaling.scale_height(90)
+            constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
             status.text_list = [] #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif not new_game_mode in ['trial', 'new_game_setup']:
-            constants.default_text_box_height = scaling.scale_height(90)
+            constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
         
     if previous_game_mode in ['strategic', 'europe', 'new_game_setup', 'ministers']:

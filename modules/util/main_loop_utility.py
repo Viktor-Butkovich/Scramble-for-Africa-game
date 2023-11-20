@@ -204,9 +204,8 @@ def draw_text_box():
     '''
     greatest_width = scaling.scale_width(300)
     font = constants.fonts['default']
-    max_screen_lines = (scaling.scale_height(constants.default_display_height // font.size)) - 1
-    max_text_box_lines = (scaling.scale_height(constants.text_box_height // font.size)) - 1
-    font = constants.fonts['default']
+    max_screen_lines = (constants.default_display_height // font.size) - 1
+    max_text_box_lines = (constants.text_box_height // font.size) - 1
     for text_index in range(len(status.text_list)):
         if text_index < max_text_box_lines:
             greatest_width = max(greatest_width, font.calculate_size(status.text_list[-text_index - 1]))

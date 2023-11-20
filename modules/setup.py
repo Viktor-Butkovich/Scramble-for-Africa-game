@@ -72,25 +72,25 @@ def misc():
     fonts.font({
         'descriptor': 'large_notification',
         'name': constants.font_name,
-        'size': 30,
+        'size': scaling.scale_height(30),
         'color': 'black'
     })
     fonts.font({
         'descriptor': 'large_white_notification',
         'name': constants.font_name,
-        'size': 30,
+        'size': scaling.scale_height(30),
         'color': 'white'
     })
     fonts.font({
         'descriptor': 'max_detail_white',
         'name': 'helvetica',
-        'size': 100,
+        'size': scaling.scale_height(100),
         'color': 'white'
     })
     fonts.font({
         'descriptor': 'max_detail_black',
         'name': 'helvetica',
-        'size': 100,
+        'size': scaling.scale_height(100),
         'color': 'black'
     })
 
@@ -1242,7 +1242,7 @@ def inventory_interface():
         None
     '''
     commodity_prices_x, commodity_prices_y = (870, 100)
-    commodity_prices_height = 30 + (30 * len(constants.commodity_types))
+    commodity_prices_height = 35 + (30 * len(constants.commodity_types))
     commodity_prices_width = 200
 
     status.commodity_prices_label = constants.actor_creation_manager.create_interface_element({

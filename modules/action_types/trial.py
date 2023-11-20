@@ -224,6 +224,7 @@ class trial(action.campaign):
         self.current_trial['judge_bias'] = max(self.current_trial['judge_bias'], 1)
         self.current_trial['judge_bias'] = min(self.current_trial['judge_bias'], 6)
         self.current_trial['trial_rolls'] = []
+        self.current_trial['prosecutor_corrupt'] = prosecutor_corrupt
         if prosecutor_corrupt:
             max_roll = 4
         else:

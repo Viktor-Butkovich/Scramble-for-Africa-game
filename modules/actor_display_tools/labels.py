@@ -40,7 +40,7 @@ class actor_display_label(label):
         super().__init__(input_dict)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
         s_increment = scaling.scale_width(6)
-        m_increment = scaling.scale_width(11)
+        m_increment = scaling.scale_width(9)
         l_increment = scaling.scale_width(30)
 
         s_size = self.height + s_increment
@@ -48,8 +48,8 @@ class actor_display_label(label):
         l_size = self.height + l_increment
         input_dict = {
             'coordinates': (self.x, self.y),
-            'width': s_size,
-            'height': s_size,
+            'width': m_size,
+            'height': m_size,
             'modes': self.modes,
             'attached_label': self
         }
@@ -85,7 +85,26 @@ class actor_display_label(label):
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             self.add_attached_button(input_dict)
 
-            input_dict['width'], input_dict['height'] = (s_size, s_size)
+            input_dict = {
+                'coordinates': (self.x, self.y),
+                'width': m_size,
+                'height': m_size,
+                'modes': self.modes,
+                'attached_label': self
+            }
+            input_dict['init_type'] = 'automatic route button'
+            input_dict['image_id'] = 'buttons/clear_automatic_route_button.png'
+            input_dict['button_type'] = 'clear automatic route'
+            self.add_attached_button(input_dict)
+
+            input_dict['image_id'] = 'buttons/draw_automatic_route_button.png'
+            input_dict['button_type'] = 'draw automatic route'
+            self.add_attached_button(input_dict)
+
+            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
+            input_dict['button_type'] = 'follow automatic route'
+            self.add_attached_button(input_dict)
+
             for action_type in status.actions:
                 if status.actions[action_type].actor_type in ['mob', 'tile'] and status.actions[action_type].placement_type == 'label':
                     button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
@@ -137,19 +156,6 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_f
             self.add_attached_button(input_dict)
             del input_dict['keybind_id']
-
-            input_dict['init_type'] = 'automatic route button'
-            input_dict['image_id'] = 'buttons/clear_automatic_route_button.png'
-            input_dict['button_type'] = 'clear automatic route'
-            self.add_attached_button(input_dict)
-
-            input_dict['image_id'] = 'buttons/draw_automatic_route_button.png'
-            input_dict['button_type'] = 'draw automatic route'
-            self.add_attached_button(input_dict)
-
-            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
-            input_dict['button_type'] = 'follow automatic route'
-            self.add_attached_button(input_dict)
             
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
@@ -286,6 +292,7 @@ class actor_display_label(label):
             input_dict['init_type'] = 'remove minister button'
             self.add_attached_button(input_dict)
             input_dict['init_type'] = 'appoint minister button'
+            input_dict['width'], input_dict['height'] = (s_size, s_size)
             for current_position in constants.minister_types:
                 input_dict['appoint_type'] = current_position
                 self.add_attached_button(input_dict)

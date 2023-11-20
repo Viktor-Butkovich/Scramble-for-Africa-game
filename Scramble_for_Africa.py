@@ -29,12 +29,8 @@ except Exception: #displays error message and records error message in crash log
 #       the text box should call the receive function of the current listener
 # incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
 # add settlement name label with indented building labels
-# continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries action while ship present)
-#   consistently doesn't re-embark if from critical failure from conversion
-# fix commodity prices label scaling - font scales differently from side icons
-# split group followed by tab to ship goes to empty unit? Monitor for this in the future
-# maybe implement cataracts - impassable for steamboats, but allow steamboats to move through adjacent ports - a series of ports adjacent to the river
+# continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionla series of ports adjacent to the river
 #   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
 # add f. lname labels under cabinet portraits in minister (and trial?) screen
-# fix text box scaling on other resolutions
+# add confirmation for free all slaves button

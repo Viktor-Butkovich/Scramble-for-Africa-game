@@ -37,6 +37,7 @@ class construction(action.action):
             self.requirement = 'can_construct'
         if self.building_type == 'resource':
             self.attached_resource = 'none'
+            self.building_name = 'resource production facility'
         self.name = 'construction'
         self.allow_critical_failures = False
 
@@ -229,7 +230,7 @@ class construction(action.action):
                         self.building_name = 'ivory camp'
                 else:
                     self.attached_resource = 'none'
-                    self.building_name = 'none'
+                    self.building_name = 'resource production facility'
                 self.button.image.set_image(constants.resource_building_button_dict[self.attached_resource])
 
         elif self.building_type == 'infrastructure':
