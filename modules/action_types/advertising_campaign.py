@@ -103,7 +103,7 @@ class advertising_campaign(action.campaign):
             text += self.generate_notification_text('success')
             text += 'This merchant is now a veteran. /n /n'
         elif subject == 'failure':
-            text += 'The merchant failed to increase the popularity of ' + self.target_unadvertised_commodity + '. /n /n'
+            text += 'The merchant failed to increase the popularity of ' + self.target_commodity + '. /n /n'
         elif subject == 'critical_failure':
             text += self.generate_notification_text('failure')
             text += 'Embarassed by this utter failure, the merchant quits your company. /n /n' 

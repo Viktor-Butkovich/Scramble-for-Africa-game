@@ -34,3 +34,10 @@ except Exception: #displays error message and records error message in crash log
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
 # add f. lname labels under cabinet portraits in minister (and trial?) screen
 # add confirmation for free all slaves button
+# ensure that active investigation success is working as intended
+# Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
+#   pending units - pending is a state like sentry mode
+# Lore mission issued message should explain how to find rumors from villages
+# reverse order of mission/convert and trading post/trade buttons to put building before action
+# Change active investigation to potentially find past evidence - would require some form of logging for past crimes
+# Active investigation action should require prosecutor (maybe all ministers) to be appointed

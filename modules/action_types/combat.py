@@ -542,7 +542,7 @@ class combat(action.action):
             result = 'failure'
         else:
             result = 'success'
-            if self.roll_result >= self.current_min_crit_success:
+            if (not self.current_unit.veteran) and self.roll_result >= self.current_min_crit_success:
                 result = 'critical_success'
 
         text += self.generate_notification_text(result)

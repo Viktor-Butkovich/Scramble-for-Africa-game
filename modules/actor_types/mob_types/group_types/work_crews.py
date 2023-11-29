@@ -105,7 +105,7 @@ class work_crew(group):
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
                             message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
-                            message += ') has become a veteran and will be more successful in future production attempts.'
+                            message += ') has become a veteran and will be more successful in future production attempts. /n'
                             constants.notification_manager.display_notification({
                                 'message': message,
                                 'zoom_destination': building.cell.tile,

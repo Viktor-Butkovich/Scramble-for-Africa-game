@@ -629,7 +629,7 @@ def manage_ministers():
         while len(status.minister_list) < constants.minister_limit:
             constants.actor_creation_manager.create_minister(False, {})
         constants.notification_manager.display_notification({
-            'message': 'Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n',
+            'message': 'Several new minister candidates are available for appointment and can be found in the candidate pool. /n /n',
         })
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
