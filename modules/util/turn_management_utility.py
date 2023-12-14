@@ -18,9 +18,6 @@ def end_turn():
     remove_excess_inventory()
     for current_pmob in status.pmob_list:
         current_pmob.end_turn_move()
-
-    actor_utility.deselect_all()
-        
     flags.player_turn = False
     status.player_turn_queue = []
     start_enemy_turn()
@@ -85,7 +82,6 @@ def start_player_turn(first_turn = False):
         market_utility.adjust_prices()#adjust_prices()
 
     if status.displayed_mob == None or status.displayed_mob.is_npmob:
-        actor_utility.deselect_all()
         game_transitions.cycle_player_turn(True)
 
     selected_mob = status.displayed_mob
@@ -511,7 +507,7 @@ def manage_villages():
             elif roll >= 5: #5-6
                 current_village.change_aggressiveness(1)
             if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
-                text = 'The previously pacified village at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
+                text = 'The previously pacified village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
                 constants.notification_manager.display_notification({
                     'message': text,
                     'zoom_destination': current_village.cell.tile,

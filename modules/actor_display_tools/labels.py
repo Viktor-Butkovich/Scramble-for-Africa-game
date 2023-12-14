@@ -279,7 +279,7 @@ class actor_display_label(label):
             if self.actor_label_type == 'minister_name':
                 input_dict['width'], input_dict['height'] = (s_size, s_size)
                 for action_type in status.actions:
-                    if status.actions[action_type].actor_type == 'minister' and status.actions[action_type].placement_type == 'label':
+                    if status.actions[action_type].actor_type in ['minister', 'prosecutor'] and status.actions[action_type].placement_type == 'label':
                         button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
                         if button_input_dict:
                             self.add_attached_button(button_input_dict)

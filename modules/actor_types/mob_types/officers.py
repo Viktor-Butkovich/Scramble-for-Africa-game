@@ -130,7 +130,6 @@ class officer(pmob):
             None
         '''
         self.in_group = True
-        self.selected = False
         self.hide_images()
         self.remove_from_turn_queue()
 

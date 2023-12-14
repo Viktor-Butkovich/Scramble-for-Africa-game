@@ -1022,7 +1022,6 @@ class button(interface_elements.interface_element):
                 displayed_mob.free_and_replace()
 
         elif self.button_type == 'free all':
-            actor_utility.deselect_all()
             pmob_list = utility.copy_list(status.pmob_list) #alllows iterating through each unit without any issues from removing from list during iteration
             old_public_opinion = constants.public_opinion
             num_freed = 0
@@ -1269,9 +1268,7 @@ class cycle_same_tile_button(button):
             cycled_tile = status.displayed_tile
             moved_mob = cycled_tile.cell.contained_mobs.pop(0)
             cycled_tile.cell.contained_mobs.append(moved_mob)
-            cycled_tile.cell.contained_mobs[0].select()
-            if cycled_tile.cell.contained_mobs[0].is_pmob:
-                cycled_tile.cell.contained_mobs[0].selection_sound()
+            cycled_tile.cell.contained_mobs[0].cycle_select()
             actor_utility.calibrate_actor_info_display(status.tile_info_display, cycled_tile) #updates mob info display list to show changed passenger order
         else:
             text_utility.print_to_screen('You are busy and cannot cycle units.')
@@ -1420,7 +1417,7 @@ class same_tile_icon(button):
         '''
         if self.showing:
             if self.index == 0 and status.displayed_tile:
-                if status.displayed_tile.cell.contained_mobs[0].selected:
+                if status.displayed_tile.cell.contained_mobs[0] == status.displayed_mob:
                     pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
                 else:
                     pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
@@ -2471,7 +2468,7 @@ class action_button(button):
             return(status.displayed_mob)
         elif self.corresponding_action.actor_type == 'tile':
             return(status.displayed_tile)
-        elif self.corresponding_action.actor_type == 'minister':
+        elif self.corresponding_action.actor_type in ['minister', 'prosecutor']:
             if constants.current_game_mode == 'trial':
                 return(status.displayed_prosecution)
             else:

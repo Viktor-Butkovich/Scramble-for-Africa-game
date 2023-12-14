@@ -20,7 +20,6 @@ except Exception: #displays error message and records error message in crash log
 # add horizontal ordered collection for double combat dice?
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
-# possibly allow sections of images to appear over other images, like village names overlaying any contains mobs
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
@@ -34,10 +33,13 @@ except Exception: #displays error message and records error message in crash log
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
 # add f. lname labels under cabinet portraits in minister (and trial?) screen
 # add confirmation for free all slaves button
-# ensure that active investigation success is working as intended
 # Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
 #   pending units - pending is a state like sentry mode
-# Lore mission issued message should explain how to find rumors from villages
 # reverse order of mission/convert and trading post/trade buttons to put building before action
 # Change active investigation to potentially find past evidence - would require some form of logging for past crimes
-# Active investigation action should require prosecutor (maybe all ministers) to be appointed
+# Change slums to be based around settlements rather than buildings, and use settlement name in migration description
+# Change active investigation to use a visible dice roll
+# Maybe have special corruption event involving Minister of Geography attempting to steal an artifact
+# Add ambient resource production facility, settlement, and village sounds
+# Clicking on a unit's minister icon should select that minister on the minister screen
+# Allow some inventory attrition to occur in Europe

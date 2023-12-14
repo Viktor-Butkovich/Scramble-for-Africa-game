@@ -361,7 +361,6 @@ class vehicle(pmob):
         for current_mob in (self.contained_mobs + [self.crew]): #make list of all mobs in vehicle
             current_mob.go_to_grid(new_grid, new_coordinates)
             current_mob.in_vehicle = True
-            current_mob.selected = False
             current_mob.hide_images()
         if new_grid == status.europe_grid or self.images[0].current_cell.has_intact_building('port'):
             self.eject_passengers()

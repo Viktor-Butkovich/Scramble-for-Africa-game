@@ -38,7 +38,6 @@ class actor():
             self.grid = self.grids[0]
             self.set_name('placeholder')
         self.set_coordinates(self.x, self.y)
-        self.selected = False
         self.can_hold_commodities = False
         self.can_hold_infinite_commodities = False
         self.inventory_capacity = 0

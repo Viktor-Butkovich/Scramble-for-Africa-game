@@ -183,7 +183,6 @@ class worker(pmob):
             None
         '''
         self.in_vehicle = True
-        self.selected = False
         self.hide_images()
         vehicle.set_crew(self)
         moved_mob = vehicle
@@ -233,7 +232,6 @@ class worker(pmob):
             None
         '''
         self.in_group = True
-        self.selected = False
         self.hide_images()
         self.remove_from_turn_queue()
 
@@ -407,7 +405,7 @@ class slave_worker(worker):
             'name': 'African workers',
             'init_type': 'workers',
             'worker_type': 'African',
-            'select_on_creation': self.selected
+            'select_on_creation': (self == status.displayed_mob)
         })
         new_worker.set_automatically_replace(self.automatically_replace)
         if self.in_vehicle:

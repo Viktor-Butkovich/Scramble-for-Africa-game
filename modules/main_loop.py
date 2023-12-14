@@ -198,7 +198,7 @@ def main_loop():
                 did_nothing = False
                 moving = False
                 if current_enemy.npmob_type == 'native_warriors' and current_enemy.despawning:
-                    if current_enemy.selected or not current_enemy.visible():
+                    if current_enemy == status.displayed_mob or not current_enemy.visible():
                         current_enemy.remove_complete()
                         removed = True
                         
@@ -219,23 +219,19 @@ def main_loop():
                             current_enemy.turn_done = True 
             
                 elif not current_enemy.visible(): #if not just spawned and hidden, do action without displaying
-                    if current_enemy.selected:
-                        actor_utility.deselect_all()
                     current_enemy.end_turn_move()
                     moving = True
                     
-                elif current_enemy.selected: #if enemy is selected and did not just spawn, move it while minimap follows
+                elif current_enemy == status.displayed_mob: #if enemy is selected and did not just spawn, move it while minimap follows
                     if not current_enemy.creation_turn == constants.turn: #don't do anything on first turn, but still move camera to spawn location if visible
                         current_enemy.end_turn_move() #do_turn()
                         moving = True
                         if current_enemy.visible():
-                            if not current_enemy.selected:
+                            if current_enemy != status.displayed_mob:
                                 current_enemy.select()
                                 status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                             else:
                                 status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
-                        else:
-                            actor_utility.deselect_all()
                     else:
                         current_enemy.turn_done = True
                     

@@ -67,7 +67,6 @@ class pmob(mob):
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
-            actor_utility.deselect_all()
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
@@ -752,7 +751,6 @@ class pmob(mob):
         '''
         self.in_vehicle = True
         self.vehicle = vehicle
-        self.selected = False
         for current_commodity in self.get_held_commodities(): #gives inventory to ship
             num_held = self.get_inventory(current_commodity)
             for current_commodity_unit in range(num_held):
@@ -790,7 +788,6 @@ class pmob(mob):
         self.y = vehicle.y
         for current_image in self.images:
             current_image.add_to_cell()
-        vehicle.selected = False
         if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.grid == status.strategic_map_grid and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
         if self.can_trade and self.can_hold_commodities: #if caravan

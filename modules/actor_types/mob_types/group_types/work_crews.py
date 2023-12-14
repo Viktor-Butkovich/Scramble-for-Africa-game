@@ -51,7 +51,6 @@ class work_crew(group):
         '''
         self.in_building = True
         self.building = building
-        self.selected = False
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
@@ -105,7 +104,7 @@ class work_crew(group):
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
                             message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
-                            message += ') has become a veteran and will be more successful in future production attempts. /n'
+                            message += ') has become a veteran and will be more successful in future production attempts. /n /n'
                             constants.notification_manager.display_notification({
                                 'message': message,
                                 'zoom_destination': building.cell.tile,

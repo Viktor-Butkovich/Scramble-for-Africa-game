@@ -319,19 +319,6 @@ def update_roads():
         if current_building.building_type == 'infrastructure':
             current_building.cell.tile.update_image_bundle()
 
-def deselect_all():
-    '''
-    Description:
-        Deselects all units. Currently, the game will only have 1 selected unit at a time and this should be updated.
-    Input:
-        None
-    Output:
-        None
-    '''
-    for current_mob in status.mob_list:
-        if current_mob.selected:
-            current_mob.selected = False
-    
 def get_random_ocean_coordinates():
     '''
     Description:

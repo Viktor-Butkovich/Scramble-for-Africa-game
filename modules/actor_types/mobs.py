@@ -51,7 +51,6 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_trade = False #if can trade or create trading posts
         self.can_convert = False #if can convert natives or build missions
-        self.selected = False
         self.number = 1 #how many entities are in a unit, used for verb conjugation
         self.actor_type = 'mob'
         self.end_turn_destination = 'none'
@@ -510,8 +509,6 @@ class mob(actor):
         Output:
             None
         '''
-        actor_utility.deselect_all()
-        self.selected = True
         flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
@@ -655,8 +652,6 @@ class mob(actor):
         Output:
             None
         '''
-        if self.selected:
-            self.selected = False
         if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         for current_image in self.images:
@@ -776,7 +771,6 @@ class mob(actor):
             previous_infrastructure = previous_cell.get_intact_building('infrastructure')
             if self.images[0].current_cell.terrain == 'water' and not (previous_infrastructure != 'none' and previous_infrastructure.is_bridge):
                 if (not self.can_swim) or (self.y == 0 and not self.can_swim_ocean) or (self.y > 0 and not self.can_swim_river): #board if moving to ship in water
-                    self.selected = False
                     vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
                     if self.is_worker and not vehicle.has_crew:
                         self.crew_vehicle(vehicle)
@@ -785,7 +779,7 @@ class mob(actor):
                         self.embark_vehicle(vehicle)
                         self.set_movement_points(0)
                     vehicle.select()
-        if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
+        if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self == status.displayed_mob: #if can build any type of building, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
@@ -900,7 +894,7 @@ class mob(actor):
             None
         '''
         super().set_name(new_name)
-        if status.displayed_mob == self: #self.selected:
+        if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def hide_images(self):
