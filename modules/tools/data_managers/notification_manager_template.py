@@ -207,7 +207,7 @@ class notification_manager_template():
             for current_die in status.dice_list:
                 current_die.start_rolling()
 
-        if 'audio' in notification_dict and notification_dict['audio'] != 'none':
+        if 'audio' in notification_dict and not notification_dict['audio'] in ['none', None]:
             if type(notification_dict['audio']) == list:
                 sound_list = notification_dict['audio']
             else:

@@ -43,3 +43,4 @@ except Exception: #displays error message and records error message in crash log
 # Add ambient resource production facility, settlement, and village sounds
 # Clicking on a unit's minister icon should select that minister on the minister screen
 # Allow some inventory attrition to occur in Europe
+# Add type hints on sight - gradual process

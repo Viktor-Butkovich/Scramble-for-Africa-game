@@ -1,13 +1,13 @@
 #Contains functionality for mobs
 
-import pygame
-import random
+import pygame, random
 from ..constructs import images
 from ..util import utility, actor_utility, main_loop_utility, text_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
+from typing import List
 
 class mob(actor):
     '''
@@ -676,7 +676,7 @@ class mob(actor):
             self.death_sound(death_type)
         self.remove_complete()
 
-    def death_sound(self, death_type = 'violent'):
+    def death_sound(self, death_type: str = 'violent'):
         '''
         Description:
             Makes a sound when this unit dies, depending on the type of death
@@ -685,13 +685,13 @@ class mob(actor):
         Output:
             None
         '''
-        possible_sounds = []
+        possible_sounds: List[str] = []
         if death_type == 'fired':
             possible_sounds = []
         elif death_type == 'quit':
             possible_sounds = ['quit 1', 'quit 2', 'quit 3']
         elif death_type == 'violent':
-            possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5']
+            possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5', 'dead 6', 'dead 7', 'dead 8', 'dead 9']
         if len(possible_sounds) > 0:
             constants.sound_manager.play_sound('voices/' + random.choice(possible_sounds), 0.5)
 

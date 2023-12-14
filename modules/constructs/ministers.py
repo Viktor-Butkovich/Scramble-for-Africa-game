@@ -609,7 +609,7 @@ class minister():
             if status.displayed_minister == self:
                 minister_utility.calibrate_minister_info_display(self)
 
-    def voice_setup(self, from_save=False):
+    def voice_setup(self, from_save: bool=False):
         '''
         Description:
             Gathers a set of voice lines for this minister, either using a saved voice set or a random new one
@@ -624,8 +624,9 @@ class minister():
             'acknowledgement': [],
             'fired': [],
             'evidence': [],
+            'hired': []
         }
-        self.last_voice_line = ''
+        self.last_voice_line: str = None
         folder_path = 'voices/voice sets/' + self.voice_set
         for file_name in os.listdir('sounds/' + folder_path):
             for key in self.voice_lines:
@@ -999,6 +1000,7 @@ class minister():
                 public_opinion_change = -1
                 text += 'While lowborn can easily be removed should they prove incompetent or disloyal, it reflects poorly on the company to appoint them as ministers. /n /n'
                 text += 'You have lost ' + str(-1 * public_opinion_change) + ' public opinion. /n /n'
+            audio = self.get_voice_line('hired')
             
         elif event == 'fired':
             multiplier = random.randrange(8, 13) / 10.0 #0.8-1.2
@@ -1111,11 +1113,12 @@ class minister():
         Output:
             string: Returns sound_manager file path of retrieved voice line
         '''
-        selected_line = ''
+        selected_line = None
         if len(self.voice_lines[type]) > 0:
             selected_line = random.choice(self.voice_lines[type])
             while len(self.voice_lines[type]) > 1 and selected_line == self.last_voice_line:
                 selected_line = random.choice(self.voice_lines[type])
+        self.last_voice_line = selected_line
         return(selected_line)
 
     def play_voice_line(self, type):
