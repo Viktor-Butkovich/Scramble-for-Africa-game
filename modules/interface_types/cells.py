@@ -616,10 +616,8 @@ class cell():
                         elif current_combat_modifier == best_combat_modifier:
                             if current_mob.veteran and not best_combatants[0].veteran: #use veteran as tiebreaker
                                 best_combatants = [current_mob]
-                                best_combatant_modifier = current_combat_modifier
                             else:
                                 best_combatants.append(current_mob)
-                        
         return(random.choice(best_combatants))
 
     def get_noncombatants(self, mob_type):

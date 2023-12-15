@@ -157,13 +157,6 @@ class save_load_manager_template():
             else:
                 market_utility.set_price(current_commodity, constants.consumer_goods_starting_price)
 
-        constants.money_tracker.reset_transaction_history()
-        constants.money_tracker.set(500)
-        constants.turn_tracker.set(0)
-        constants.public_opinion_tracker.set(50)
-        constants.money_tracker.change(0) #updates projected income display
-        constants.evil_tracker.set(0)
-        constants.fear_tracker.set(1)
 
         constants.slave_traders_natural_max_strength = 10 #regenerates to natural strength, can increase indefinitely when slaves are purchased
         actor_utility.set_slave_traders_strength(constants.slave_traders_natural_max_strength)
@@ -188,6 +181,14 @@ class save_load_manager_template():
             constants.sold_commodities[current_commodity] = 0
         flags.prosecution_bribed_judge = False
 
+        constants.money_tracker.reset_transaction_history()
+        constants.money_tracker.set(500)
+        constants.turn_tracker.set(0)
+        constants.public_opinion_tracker.set(50)
+        constants.money_tracker.change(0) #updates projected income display
+        constants.evil_tracker.set(0)
+        constants.fear_tracker.set(1)
+
         for i in range(1, random.randrange(5, 8)):
             turn_management_utility.manage_villages()
             turn_management_utility.manage_warriors()
@@ -207,7 +208,7 @@ class save_load_manager_template():
                 status.minister_list[current_minister_position_index].appoint(constants.minister_types[current_minister_position_index])
             game_transitions.set_game_mode('strategic')
         flags.creating_new_game = False
-        
+
     def save_game(self, file_path):
         '''
         Description:

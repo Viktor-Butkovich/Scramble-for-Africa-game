@@ -28,7 +28,8 @@ except Exception: #displays error message and records error message in crash log
 #       the text box should call the receive function of the current listener
 # incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
 # add settlement name label with indented building labels
-# continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionla series of ports adjacent to the river
+# continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
+#Allow ship moving through series of ports adjacent to the river
 #   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
 # add f. lname labels under cabinet portraits in minister (and trial?) screen
@@ -44,3 +45,4 @@ except Exception: #displays error message and records error message in crash log
 # Clicking on a unit's minister icon should select that minister on the minister screen
 # Allow some inventory attrition to occur in Europe
 # Add type hints on sight - gradual process
+# Find some solution to overlapping 3rd work crew and text box
