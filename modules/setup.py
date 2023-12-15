@@ -533,6 +533,27 @@ def buttons():
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
     europe_to_strategic_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
+    rhs_menu_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height),
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe', 'ministers'],
+        'init_type': 'ordered collection',
+        'member_config': {'order_exempt': True},
+        'separation': 5
+    })
+
+    lhs_menu_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 50),
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe', 'ministers'],
+        'init_type': 'ordered collection',
+        'member_config': {'order_exempt': True},
+        'separation': 5,
+        'direction': 'horizontal'
+    })
+
     input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 50)
     input_dict['width'] = scaling.scale_width(50)
     input_dict['height'] = scaling.scale_height(50)
@@ -540,6 +561,7 @@ def buttons():
     input_dict['keybind_id'] = 'none'
     input_dict['to_mode'] = 'main_menu'
     to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(to_main_menu_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['new_game_setup']
@@ -552,12 +574,14 @@ def buttons():
     input_dict['image_id'] = 'buttons/european_hq_button.png'
     input_dict['to_mode'] = 'ministers'
     to_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(to_ministers_button)
 
     input_dict['modes'] = ['ministers']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
     input_dict['to_mode'] = 'previous'
     from_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(from_ministers_button)
 
     input_dict['modes'] = ['trial']
     input_dict['to_mode'] = 'ministers'
@@ -636,12 +660,14 @@ def buttons():
         'init_type': 'save game button'
     }
     save_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(save_game_button)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 200))
     input_dict['modes'] = ['strategic']
     input_dict['image_id'] = 'buttons/grid_line_button.png'
     input_dict['init_type'] = 'toggle grid lines button'
     toggle_grid_lines_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(toggle_grid_lines_button)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 275))
     input_dict['modes'] = ['strategic', 'europe', 'ministers']
@@ -649,6 +675,7 @@ def buttons():
     input_dict['image_id'] = 'buttons/text_box_size_button.png'
     input_dict['init_type'] = 'expand text box button'
     expand_text_box_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(expand_text_box_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(110, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
@@ -656,6 +683,7 @@ def buttons():
     input_dict['image_id'] = 'buttons/cycle_units_button.png'
     input_dict['init_type'] = 'cycle units button'
     cycle_units_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(cycle_units_button)
 
     input_dict['coordinates'] = (scaling.scale_width(55), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic']
@@ -663,17 +691,20 @@ def buttons():
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free all button'
     free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(free_all_slaves_button)
 
     input_dict['coordinates'] = (scaling.scale_width(165), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['image_id'] = 'buttons/disable_sentry_mode_button.png'
     input_dict['init_type'] = 'wake up all button'
     wake_up_all_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(wake_up_all_button)
 
     input_dict['coordinates'] = (scaling.scale_width(220), input_dict['coordinates'][1])
     input_dict['image_id'] = 'buttons/execute_movement_routes_button.png'
     input_dict['init_type'] = 'execute movement routes button'
     execute_movement_routes_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(execute_movement_routes_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, 0)
     input_dict['modes'] = ['main_menu']
