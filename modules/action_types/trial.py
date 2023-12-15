@@ -281,6 +281,17 @@ class trial(action.campaign):
                 'on_remove': self.complete
             })
 
+    def leave_trial_screen(self):
+        '''
+        Description:
+            Callback function to return to ministers screen after trial is completed, regardless of result
+        Input:
+            None
+        Output:
+            None
+        '''
+        game_transitions.set_game_mode('ministers')
+
     def complete(self):
         '''
         Description:
@@ -292,7 +303,6 @@ class trial(action.campaign):
         '''
         prosecution = status.displayed_prosecution
         defense = status.displayed_defense
-        game_transitions.set_game_mode('ministers')
         if self.roll_result >= self.current_min_success:
             confiscated_money = defense.stolen_money / 2.0
             text = 'You have won the trial, removing ' + defense.name + ' as ' + defense.current_position + ' and putting him in prison. /n /n'
@@ -317,6 +327,7 @@ class trial(action.campaign):
             constants.notification_manager.display_notification({
                 'message': text,
                 'notification_type': 'action',
+                'on_remove': self.leave_trial_screen
             })
 
         else:
@@ -352,7 +363,8 @@ class trial(action.campaign):
             constants.notification_manager.display_notification({
                 'message': text,
                 'notification_type': 'action',
-                'audio': 'not guilty'
+                'audio': 'not guilty',
+                'on_remove': self.leave_trial_screen
             })
             minister_utility.calibrate_minister_info_display(defense)
         flags.prosecution_bribed_judge = False

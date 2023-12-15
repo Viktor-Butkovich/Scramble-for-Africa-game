@@ -205,7 +205,7 @@ class minister():
         self.tooltip_text.append('Evidence: ' + str(self.corruption_evidence))
         if self.just_removed and self.current_position == 'none':
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
-            self.tooltip_text.append('If not reappointed by the end of the turn, they will be permanently fired, incurring a large public opinion penalty.')
+            self.tooltip_text.append('If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty.')
 
     def generate_icon_input_dicts(self, alignment='left'):
         '''

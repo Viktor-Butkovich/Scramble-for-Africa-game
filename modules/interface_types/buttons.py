@@ -947,7 +947,7 @@ class button(interface_elements.interface_element):
                         game_transitions.set_game_mode('strategic')
                     for current_minister in status.minister_list:
                         if current_minister.just_removed and current_minister.current_position == 'none':
-                            text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
+                            text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, he will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
                             current_minister.display_message(text)
                     for current_cell in status.strategic_map_grid.get_flat_cell_list():
                         if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:

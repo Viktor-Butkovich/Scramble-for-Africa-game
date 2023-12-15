@@ -46,3 +46,4 @@ except Exception: #displays error message and records error message in crash log
 # Allow some inventory attrition to occur in Europe
 # Add type hints on sight - gradual process
 # Find some solution to overlapping 3rd work crew and text box
+# Make sure roads and bridges line up - horizontal and vertical road bridges should be moved
