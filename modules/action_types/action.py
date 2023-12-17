@@ -91,6 +91,7 @@ class action():
         Output:
             boolean: Returns whether the subclass on_click can continue with its logic
         '''
+        self.current_unit = unit
         if not main_loop_utility.action_possible():
             text_utility.print_to_screen('You are busy and cannot start a ' + self.name + '.')
             return(False)

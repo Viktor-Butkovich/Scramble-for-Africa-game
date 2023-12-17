@@ -43,7 +43,7 @@ class building(actor):
         self.cell = self.grids[0].find_cell(self.x, self.y)
         status.building_list.append(self)
         self.set_name(input_dict['name'])
-        self.contained_work_crews = []        
+        self.contained_work_crews = []
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
                 constants.actor_creation_manager.create(True, current_work_crew).work_building(self)

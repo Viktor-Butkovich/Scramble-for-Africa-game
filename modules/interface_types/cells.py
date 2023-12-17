@@ -249,13 +249,10 @@ class cell():
         if self.has_building(building_type):
             if building_type == 'village':
                 return(self.village)
-                
             elif building_type in ['road', 'railroad']:
-                return(self.contained_buildings['infrastructure'])
-                
+                return(self.contained_buildings['infrastructure']) 
             else:
                 return(self.contained_buildings[building_type])
-            
         else:
             return('none')
 

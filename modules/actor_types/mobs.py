@@ -486,13 +486,12 @@ class mob(actor):
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
-        
         old_image_id = self.images[0].image_id
         for current_image in self.images:
             current_image.remove_from_cell()
         self.grids = [new_grid]
         self.grid = new_grid
-        if not new_grid.mini_grid == 'none':
+        if new_grid.mini_grid != 'none':
             new_grid.mini_grid.calibrate(new_coordinates[0], new_coordinates[1])
             self.grids.append(new_grid.mini_grid)
         self.images = []

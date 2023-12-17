@@ -179,6 +179,7 @@ class save_load_manager_template():
         actor_utility.reset_action_prices()
         for current_commodity in constants.commodity_types:
             constants.sold_commodities[current_commodity] = 0
+        constants.attempted_commodities = []
         flags.prosecution_bribed_judge = False
 
         constants.money_tracker.reset_transaction_history()

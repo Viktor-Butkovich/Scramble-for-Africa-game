@@ -1287,7 +1287,7 @@ class mob_image(actor_image):
         Output:
             None
         '''
-        if not self.current_cell == 'none':
+        if not self.current_cell in ['none', None]:
             self.current_cell.contained_mobs = utility.remove_from_list(self.current_cell.contained_mobs, self.actor)
         self.current_cell = 'none'
 
