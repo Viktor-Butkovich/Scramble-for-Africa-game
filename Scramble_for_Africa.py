@@ -39,7 +39,6 @@ except Exception: #displays error message and records error message in crash log
 # reverse order of mission/convert and trading post/trade buttons to put building before action
 # Change active investigation to potentially find past evidence - would require some form of logging for past crimes
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description
-# Change active investigation to use a visible dice roll
 # Maybe have special corruption event involving Minister of Geography attempting to steal an artifact
 # Add ambient resource production facility, settlement, and village sounds
 # Clicking on a unit's minister icon should select that minister on the minister screen

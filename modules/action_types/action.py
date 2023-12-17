@@ -412,7 +412,7 @@ class action():
         '''
         if self.actor_type == 'mob' and self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
             self.current_unit.promote()
-            self.current_unit.select()
+            status.displayed_mob.select()
         action_utility.cancel_ongoing_actions()
 
 class campaign(action):
