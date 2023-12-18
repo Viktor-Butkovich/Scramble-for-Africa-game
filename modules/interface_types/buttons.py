@@ -1836,13 +1836,13 @@ class minister_portrait_image(button):
             new_minister.update_tooltip()
             self.tooltip_text = new_minister.tooltip_text
             self.image.set_image(new_minister.image_id)
-        elif constants.current_game_mode == 'ministers':
+        elif 'ministers' in self.modes: # Show empty minister if minister screen icon
             if self.minister_type == 'none': # If available minister portrait
                 self.tooltip_text = ['There is no available candidate in this slot.']
             else: # If appointed minister portrait
                 self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
             self.image.set_image(self.default_image_id)
-        else: # If on strategic mode with no minister, show empty
+        else: # If minister icon on strategic mode, no need to show empty minister
             self.image.set_image('misc/empty.png')
         self.current_minister = new_minister
 
