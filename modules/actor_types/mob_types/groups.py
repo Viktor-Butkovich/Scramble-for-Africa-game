@@ -148,7 +148,7 @@ class group(pmob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
-        if current_cell == 'none':
+        if current_cell in ['none', None]:
             return()
 
         transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
@@ -171,27 +171,23 @@ class group(pmob):
         Output:
             None
         '''
-        constants.evil_tracker.change(3)
+        constants.evil_tracker.change(2)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle
-            destination_type = 'vehicle'
             destination_message = ' from the ' + self.name + ' aboard the ' + zoom_destination.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
         elif self.in_building:
             zoom_destination = self.building.cell.get_intact_building('resource')
-            destination_type = 'building'
             destination_message = ' from the ' + self.name + ' working in the ' + zoom_destination.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
         else:
             zoom_destination = self
-            destination_type = 'self'
             destination_message = ' from the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
             
-        remaining_unit = 'none'
         if target == 'officer':
             text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
             if self.officer.automatically_replace:
                 text += self.officer.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
-                self.officer.replace(self) #self.officer.die()
+                self.officer.replace(self)
                 self.officer.death_sound()
             else:
                 if self.in_vehicle:

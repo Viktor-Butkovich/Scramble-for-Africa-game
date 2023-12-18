@@ -166,6 +166,13 @@ def actions():
     Output:
         none
     '''
+    for building_type in constants.building_types + ['train', 'steamboat']:
+        if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
+            construction.construction(building_type=building_type)
+            if not building_type in ['train', 'steamboat', 'infrastructure']:
+                repair.repair(building_type=building_type)
+    for upgrade_type in constants.upgrade_types:
+        upgrade.upgrade(building_type=upgrade_type)
     public_relations_campaign.public_relations_campaign()
     religious_campaign.religious_campaign()
     suppress_slave_trade.suppress_slave_trade()
@@ -182,13 +189,6 @@ def actions():
     active_investigation.active_investigation()
     track_beasts.track_beasts()
     trial.trial()
-    for building_type in constants.building_types + ['train', 'steamboat']:
-        if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
-            construction.construction(building_type=building_type)
-            if not building_type in ['train', 'steamboat', 'infrastructure']:
-                repair.repair(building_type=building_type)
-    for upgrade_type in constants.upgrade_types:
-        upgrade.upgrade(building_type=upgrade_type)
 
     for action_type in status.actions:
         if status.actions[action_type].placement_type == 'free':

@@ -80,7 +80,7 @@ class active_investigation(action.campaign):
             if status.displayed_minister.current_position != 'none':
                 text += status.displayed_minister.current_position + ' ' + status.displayed_minister.name + '. /n /n'
             else:
-                text += self.current_unit.name + '. /n /n'
+                text += status.displayed_minister.name + '. /n /n'
         return(text)
 
     def can_show(self):

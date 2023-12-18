@@ -774,7 +774,7 @@ class resource_building(building):
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
                 if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
-                    officer_attrition_list.append(current_work_crew) #current_work_crew.attrition_death('officer')
+                    officer_attrition_list.append(current_work_crew)
             if current_cell.local_attrition():
                 if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type

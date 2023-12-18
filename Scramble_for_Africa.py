@@ -14,12 +14,15 @@ except Exception: #displays error message and records error message in crash log
     manage_crash(Exception)
 
 # tasks:
+#   general:
+# make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
 # replace usages of 'none' with None
+# Add type hints on sight - gradual process
+#
+#   new features:
 # make generic contested action type
 # add minister speech bubbles
-# add horizontal ordered collection for double combat dice?
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
-# make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
 # add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
 #   no slums, otherwise like African
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
@@ -28,7 +31,6 @@ except Exception: #displays error message and records error message in crash log
 #       the text box should call the receive function of the current listener
 # incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
 # add settlement name label with indented building labels
-# continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
 #Allow ship moving through series of ports adjacent to the river
 #   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
@@ -36,13 +38,12 @@ except Exception: #displays error message and records error message in crash log
 # add confirmation for free all slaves button
 # Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
 #   pending units - pending is a state like sentry mode
-# reverse order of mission/convert and trading post/trade buttons to put building before action
-# Change active investigation to potentially find past evidence - would require some form of logging for past crimes
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description
 # Maybe have special corruption event involving Minister of Geography attempting to steal an artifact
 # Add ambient resource production facility, settlement, and village sounds
 # Clicking on a unit's minister icon should select that minister on the minister screen
 # Allow some inventory attrition to occur in Europe
-# Add type hints on sight - gradual process
+#
+#   bugfixes
+# continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
 # Find some solution to overlapping 3rd work crew and text box
-# Make sure roads and bridges line up - horizontal and vertical road bridges should be moved
