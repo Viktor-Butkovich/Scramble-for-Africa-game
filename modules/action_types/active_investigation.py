@@ -1,8 +1,9 @@
 #Contains all functionality for minister investigations
 
 import random
+from typing import Tuple, Dict
 from . import action
-from ..util import action_utility, text_utility
+from ..util import action_utility, text_utility, minister_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -148,28 +149,50 @@ class active_investigation(action.campaign):
         '''
         prosecutor = self.current_unit
         target = status.displayed_minister
-        previous_values = {}
-        new_values = {}
+        previous_values: Dict = {}
+        new_values: Dict = {}
+        corruption_event: Tuple[float, str] = None
         if self.roll_result >= self.current_min_success:
-            for category in constants.minister_types + ['loyalty']:
-                if category == 'loyalty' or category == target.current_position:
+            for category in constants.minister_types + ['loyalty', 'evidence']:
+                if category == target.current_position:
                     difficulty = 4
+                elif category in ['loyalty', 'evidence']:
+                    difficulty = 5
                 else:
                     difficulty = 6
                 if random.randrange(1, 7) >= difficulty: # More common to find rumors for current position or for loyalty than for random skill
-                    if category == 'loyalty':
-                        previous_values[category] = target.apparent_corruption_description
+                    if category == 'evidence':
+                        if len(target.undetected_corruption_events) > 0:
+                            random_index = random.randrange(0, len(target.undetected_corruption_events))
+                            corruption_event = target.undetected_corruption_events[random_index] #random.choice(target.undetected_corruption_events)
+                            if (target.check_corruption() or target.check_corruption()) and (prosecutor.check_corruption() or prosecutor.check_corruption()): #conspiracy check with advantage
+                                bribe_cost = 5
+                                if target.personal_savings + target.stolen_money >= bribe_cost:
+                                    target.personal_savings -= bribe_cost
+                                    if target.personal_savings < 0: #spend from personal savings, transfer stolen to personal savings if not enough
+                                        target.stolen_money += target.personal_savings
+                                        target.personal_savings = 0
+                                    prosecutor.steal_money(bribe_cost, 'bribery')
+                                    corruption_event = None
+                            else:
+                                target.corruption_evidence += 1
+                                target.undetected_corruption_events.pop(random_index)
+                                minister_utility.calibrate_minister_info_display(target)
                     else:
-                        previous_values[category] = target.apparent_skill_descriptions[category]
-                    target.attempt_rumor(category, prosecutor)
-                    if category == 'loyalty':
-                        if target.apparent_corruption_description != previous_values[category]:
-                            new_values[category] = target.apparent_corruption_description
-                    else:
-                        if target.apparent_skill_descriptions[category] != previous_values[category]:
-                            new_values[category] = target.apparent_skill_descriptions[category]
+                        if category == 'loyalty':
+                            previous_values[category] = target.apparent_corruption_description
+                        else:
+                            previous_values[category] = target.apparent_skill_descriptions[category]
+                        target.attempt_rumor(category, prosecutor)
+                        if category == 'loyalty':
+                            if target.apparent_corruption_description != previous_values[category]:
+                                new_values[category] = target.apparent_corruption_description
+                        else:
+                            if target.apparent_skill_descriptions[category] != previous_values[category]:
+                                new_values[category] = target.apparent_skill_descriptions[category]
         message = ''
-        if new_values:
+        audio = None
+        if new_values or corruption_event:
             message = 'The investigation resulted in the following discoveries: /n /n'
             for category in new_values:
                 if category == 'loyalty':
@@ -181,12 +204,16 @@ class active_investigation(action.campaign):
                     message += ' /n'
                 else:
                     message += ' (formerly ' + previous_values[category] + ') /n'
-
+            if corruption_event:
+                theft_amount, theft_type = corruption_event
+                message += '    Evidence of a previous theft of ' + str(theft_amount) + ' money relating to ' + constants.transaction_descriptions[theft_type] + '. /n'
+                audio = prosecutor.get_voice_line('evidence')
         else:
             message = 'The investigation failed to make any significant discoveries. /n'
         message += ' /n'
         constants.notification_manager.display_notification({
             'message': message,
-            'notification_type': 'action'
+            'notification_type': 'action',
+            'audio': audio
         })
         super().complete()

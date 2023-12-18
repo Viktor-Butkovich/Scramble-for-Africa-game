@@ -88,11 +88,11 @@ class notification(multi_line_label):
         Output:
             None
         '''
+        if self.on_remove:
+            self.on_remove()
         super().remove()
         if status.displayed_notification == self:
             status.displayed_notification = None
-        if self.on_remove:
-            self.on_remove()
 
 class zoom_notification(notification):
     '''
