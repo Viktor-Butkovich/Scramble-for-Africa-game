@@ -68,10 +68,6 @@ def set_game_mode(new_game_mode):
         if new_game_mode == 'strategic':
             constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
-            centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
-            if centered_cell.tile != 'none':
-                actor_utility.calibrate_actor_info_display(status.tile_info_display, centered_cell.tile)
-                #calibrate tile info to minimap center
         elif new_game_mode == 'main_menu':
             constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
@@ -91,7 +87,13 @@ def set_game_mode(new_game_mode):
             if status.europe_grid.cell_list[0][0].contained_mobs:
                 status.europe_grid.cell_list[0][0].contained_mobs[0].cycle_select()
             actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
-
+        elif new_game_mode == 'strategic':
+            centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
+            if centered_cell.tile != 'none':
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, centered_cell.tile)
+                if centered_cell.visible and centered_cell.contained_mobs:
+                    actor_utility.calibrate_actor_info_display(status.mob_info_display, centered_cell.contained_mobs[0])
+                #calibrate tile info to minimap center
     if new_game_mode == 'ministers':
         constants.available_minister_left_index = -2
         minister_utility.update_available_minister_display()

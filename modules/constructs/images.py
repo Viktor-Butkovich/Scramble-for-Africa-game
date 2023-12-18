@@ -992,8 +992,6 @@ class minister_type_image(tooltip_free_image):
             if new_minister == 'none':
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             image_id_list = ['ministers/icons/' + keyword + '.png']
-            if self.minister_image_type == 'portrait' and self.current_minister != 'none':
-                image_id_list += self.current_minister.image_id
             self.set_image(image_id_list)
         self.update_image_bundle()
 

@@ -270,6 +270,14 @@ class actor_display_label(label):
                 'parent_collection': self.insert_collection_above(),
                 'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
             })
+            attached_minister_portrait_image = constants.actor_creation_manager.create_interface_element({
+                'width': self.height + m_increment,
+                'height': self.height + m_increment,
+                'init_type': 'minister portrait image',
+                'minister_type': 'none',
+                'parent_collection': attached_minister_position_image.parent_collection,
+                'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
+            })
 
             self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5

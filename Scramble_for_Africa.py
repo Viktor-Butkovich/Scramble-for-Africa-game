@@ -41,7 +41,6 @@ except Exception: #displays error message and records error message in crash log
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description
 # Maybe have special corruption event involving Minister of Geography attempting to steal an artifact
 # Add ambient resource production facility, settlement, and village sounds
-# Clicking on a unit's minister icon should select that minister on the minister screen
 # Allow some inventory attrition to occur in Europe
 #
 #   bugfixes

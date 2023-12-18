@@ -1730,8 +1730,8 @@ class minister_portrait_image(button):
         input_dict['image_id'] = self.default_image_id
         input_dict['button_type'] = 'minister portrait'
         super().__init__(input_dict)
-        self.minister_type = input_dict['minister_type'] #position, like General
-        if self.minister_type == 'none': #if available minister portrait
+        self.minister_type = input_dict['minister_type'] # Position, like General
+        if self.minister_type == 'none': # If available minister portrait
             if 'ministers' in self.modes:
                 status.available_minister_portrait_list.append(self)
             warning_x_offset = scaling.scale_width(-100)
@@ -1746,7 +1746,7 @@ class minister_portrait_image(button):
             'parent_collection': self.insert_collection_above(),
             'member_config': {'x_offset': warning_x_offset, 'y_offset': 0}
         }    )
-        self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
+        self.parent_collection.can_show_override = self # Parent collection is considered showing when this label can show, allowing ordered collection to work correctly
 
         self.calibrate('none')
 
@@ -1762,7 +1762,7 @@ class minister_portrait_image(button):
         if not self.current_minister == 'none':
             if self.current_minister.just_removed and self.current_minister.current_position == 'none':
                 return(True)
-        elif self.minister_type != 'none': #if portrait in minister table and no minister assigned for office
+        elif self.minister_type != 'none': # If portrait in minister table and no minister assigned for office
             return(True)
         return(False)
 
@@ -1776,13 +1776,13 @@ class minister_portrait_image(button):
             None
         '''
         showing = False
-        if self.showing: #draw outline around portrait if minister selected
+        if self.showing and constants.current_game_mode == 'ministers': # Draw outline around portrait if minister selected
             showing = True
-            if not self.current_minister == 'none':
+            if self.current_minister != 'none':
                 pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.Rect) #draw white background
                 if status.displayed_minister == self.current_minister and flags.show_selection_outlines: 
                     pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
-        super().draw()
+        super().draw(allow_show_outline=(constants.current_game_mode == 'ministers')) # Show outline for selection icons on ministers mode but not the overlapping ones on strategic mode
         if showing and self.warning_image.showing:
             self.warning_image.draw()
 
@@ -1796,7 +1796,7 @@ class minister_portrait_image(button):
             None
         '''
         if main_loop_utility.action_possible():
-            if constants.current_game_mode == 'ministers' and not self.current_minister == 'none':
+            if constants.current_game_mode == 'ministers' and self.current_minister != 'none':
                 if self.current_minister != 'none':
                     self.current_minister.play_voice_line('acknowledgement')
                 if self in status.available_minister_portrait_list: #if available minister portrait
@@ -1805,6 +1805,12 @@ class minister_portrait_image(button):
                     minister_utility.update_available_minister_display()
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.current_minister)
+            elif constants.current_game_mode != 'ministers': # If clicked while not on ministers screen, go to ministers screen and select that minister
+                old_minister = self.current_minister
+                game_transitions.set_game_mode('ministers')
+                self.current_minister = old_minister
+                if self.current_minister != 'none':
+                    self.on_click()
         else:
             text_utility.print_to_screen('You are busy and cannot select other ministers.')
 
@@ -1817,16 +1823,27 @@ class minister_portrait_image(button):
         Output:
             None
         '''
-        if not new_minister == 'none':
+        if new_minister == None:
+            new_minister = 'none'
+        if new_minister != 'none': # If calibrated to non-minister, attempt to calibrate to that unit's controlling minister
+            if new_minister.actor_type != 'minister':
+                if hasattr(new_minister, 'controlling_minister'):
+                    new_minister = new_minister.controlling_minister
+                else:
+                    new_minister = 'none'
+
+        if new_minister != 'none':
             new_minister.update_tooltip()
-            self.tooltip_text = new_minister.tooltip_text #[self.minister_type + ' ' + new_minister.name]
+            self.tooltip_text = new_minister.tooltip_text
             self.image.set_image(new_minister.image_id)
-        else:
-            if self.minister_type == 'none': #if available minister portrait
+        elif constants.current_game_mode == 'ministers':
+            if self.minister_type == 'none': # If available minister portrait
                 self.tooltip_text = ['There is no available candidate in this slot.']
-            else: #if appointed minister portrait
+            else: # If appointed minister portrait
                 self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
             self.image.set_image(self.default_image_id)
+        else: # If on strategic mode with no minister, show empty
+            self.image.set_image('misc/empty.png')
         self.current_minister = new_minister
 
     def update_tooltip(self):
