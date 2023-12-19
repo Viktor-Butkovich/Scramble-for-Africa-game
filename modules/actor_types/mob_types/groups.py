@@ -323,7 +323,7 @@ class group(pmob):
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.drop_inventory()
         self.worker.leave_group(self)
 

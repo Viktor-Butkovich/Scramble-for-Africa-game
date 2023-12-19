@@ -62,6 +62,16 @@ class button(interface_elements.interface_element):
         self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
 
     def calibrate(self, new_actor, override_exempt=False):
+        '''
+        Description:
+            Attaches this button to the inputted actor and updates this button's image to that of the actor. May also display a shader over this button, if its particular
+                requirements are fulfilled
+        Input:
+            string/actor new_actor: The minister whose information is matched by this button. If this equals 'none', this button is detached from any ministers
+            bool override_exempt: Optional parameter that may be given to calibrate functions, does nothing for buttons
+        Output:
+            None
+        '''
         super().calibrate(new_actor, override_exempt)
         if self.enable_shader:
             shader_image_id = 'misc/shader.png'
@@ -881,7 +891,7 @@ class button(interface_elements.interface_element):
                                     displayed_mob.set_sentry_mode(False)
                                 displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                 displayed_tile.change_inventory(commodity, num_commodity)
-                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.infinite_inventory_capacity:
                                     text_utility.print_to_screen('This tile cannot hold this many commodities.')
                                     text_utility.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.')
                         else:
@@ -902,7 +912,7 @@ class button(interface_elements.interface_element):
                         num_commodity = displayed_tile.get_inventory(commodity)
                     if displayed_mob and displayed_tile:
                         if displayed_mob in displayed_tile.cell.contained_mobs:
-                            if displayed_mob.can_hold_commodities:
+                            if displayed_mob.has_inventory:
                                 can_pick_up = True
                                 if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
                                     can_pick_up = False
@@ -2421,6 +2431,64 @@ class cycle_autofill_button(button):
         self.parent_collection.calibrate(status.displayed_mob)
         #start autofill search for corresponding target type at index right after the current target actor
 
+class item_icon(button):
+    '''
+    Button that can calibrate to an item 
+    '''
+    def __init__(self, input_dict):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'inventory_index': int value - Index in inventory that this button will display
+        Output:
+            None
+        '''
+        self.inventory_index: int = input_dict['inventory_index']
+        self.current_item: str = None
+        self.default_image_id = input_dict['image_id']
+        input_dict['button_type'] = 'item_icon'
+        super().__init__(input_dict)
+
+    def calibrate(self, new_actor):
+        '''
+        Description:
+            Attaches this button to the inputted actor and updates this button's image to that of the actor. May also display a shader over this button, if its particular
+                requirements are fulfilled
+        Input:
+            string/actor new_actor: The minister whose information is matched by this button. If this equals 'none', this button is detached from any ministers
+            bool override_exempt: Optional parameter that may be given to calibrate functions, does nothing for buttons
+        Output:
+            None
+        '''
+        if new_actor != 'none':
+            if new_actor.inventory_capacity >= self.inventory_index + 1 or new_actor.infinite_inventory_capacity: #if inventory capacity 9 >= index 8 + 1, allow. If inventory capacity 9 >= index 9 + 1, disallow
+                self.current_item = new_actor.check_inventory(self.inventory_index)
+                if self.current_item:
+                    self.image.set_image(utility.combine(self.default_image_id, 'scenery/resources/large/' + self.current_item + '.png'))
+                else:
+                    self.image.set_image(self.default_image_id)
+            else:
+                self.image.set_image(self.default_image_id)
+        super().calibrate(new_actor)
+
+    def update_tooltip(self):
+        self.set_tooltip(['placeholder'])
+        return
+
+    def on_click(self):
+        return
 
 class action_button(button):
     '''

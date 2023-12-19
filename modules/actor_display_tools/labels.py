@@ -444,7 +444,7 @@ class actor_display_label(label):
                 if not self.actor == 'none':
                     if not self.actor.cell.visible:
                         tooltip_text.append('This tile has not been discovered')
-                    elif self.actor.can_hold_infinite_commodities:
+                    elif self.actor.infinite_inventory_capacity:
                         tooltip_text.append('This tile can hold infinite commodities.')
                     else:
                         tooltip_text.append('This tile currently contains ' + str(self.actor.get_inventory_used()) + ' commodities')
@@ -573,7 +573,7 @@ class actor_display_label(label):
             None
         '''
         self.actor = new_actor
-        if not new_actor == 'none':
+        if new_actor != 'none':
             if self.actor_label_type == 'name':
                 self.set_label(self.message_start + utility.capitalize(new_actor.name))
                 
@@ -703,7 +703,7 @@ class actor_display_label(label):
             elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
                 if self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
                     self.set_label(self.message_start + 'n/a')
-                elif self.actor.can_hold_infinite_commodities:
+                elif self.actor.infinite_inventory_capacity:
                     self.set_label(self.message_start + 'unlimited')
                 else:
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
@@ -778,7 +778,7 @@ class actor_display_label(label):
             boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result ==  False:
+        if not result:
             return(False)
         elif self.actor == 'none':
             return(False)
@@ -961,7 +961,7 @@ class building_work_crews_label(actor_display_label):
         '''
         self.actor = new_actor
         self.show_label = False
-        if not new_actor == 'none':
+        if new_actor != 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
@@ -1022,7 +1022,7 @@ class building_efficiency_label(actor_display_label):
         '''
         self.actor = new_actor
         self.show_label = False
-        if not new_actor == 'none':
+        if new_actor != 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label('Efficiency: ' + str(self.attached_building.efficiency))
@@ -1167,7 +1167,7 @@ class commodity_display_label(actor_display_label):
             None
         '''
         self.actor = new_actor
-        if not new_actor == 'none':
+        if new_actor != 'none':
             commodity_list = new_actor.get_held_commodities()
             if len(commodity_list) - 1 >= self.commodity_index: #if index in commodity list
                 self.showing_commodity = True

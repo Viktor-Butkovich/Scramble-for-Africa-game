@@ -265,6 +265,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = buttons.minister_portrait_image(input_dict)
         elif init_type == 'country selection image': #^likewise
             new_element = buttons.country_selection_image(input_dict)
+        elif init_type == 'item icon':
+            new_element = buttons.item_icon(input_dict)
         elif init_type == 'die':
             new_element = dice.die(input_dict)
         elif init_type == 'panel':

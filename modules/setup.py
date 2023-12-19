@@ -1316,12 +1316,29 @@ def inventory_interface():
         'parent_collection': status.mob_inventory_collection,
     }
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
-    
-    del input_dict['actor_label_type']
-    for current_index in range(len(constants.commodity_types)): #commodities held in selected mob
-        input_dict['commodity_index'] = current_index
-        input_dict['init_type'] = 'commodity display label'
-        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
+
+    mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'parent_collection': status.mob_inventory_collection,
+        'member_config': {'order_y_offset': scaling.scale_height(30)}
+    })
+    for current_index in range(9):
+        constants.actor_creation_manager.create_interface_element({
+            'width': scaling.scale_width(34),
+            'height': scaling.scale_height(34),
+            'image_id': 'buttons/default_button.png',
+            'init_type': 'item icon',
+            'parent_collection': mob_inventory_grid,
+            'inventory_index': current_index
+        })
+
+    #del input_dict['actor_label_type']
+    #for current_index in range(len(constants.commodity_types)): #commodities held in selected mob
+    #    input_dict['commodity_index'] = current_index
+    #    input_dict['init_type'] = 'commodity display label'
+    #    new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
     status.tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
@@ -1343,11 +1360,28 @@ def inventory_interface():
     }
     tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    del input_dict['actor_label_type']
-    for current_index in range(len(constants.commodity_types)): #commodities held in selected tile
-        input_dict['commodity_index'] = current_index
-        input_dict['init_type'] = 'commodity display label'
-        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
+    tile_inventory_grid = constants.actor_creation_manager.create_interface_element({
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'parent_collection': status.tile_inventory_collection,
+        'member_config': {'order_y_offset': scaling.scale_height(30)}
+    })
+    for current_index in range(9):
+        constants.actor_creation_manager.create_interface_element({
+            'width': scaling.scale_width(34),
+            'height': scaling.scale_height(34),
+            'image_id': 'buttons/default_button.png',
+            'init_type': 'item icon',
+            'parent_collection': tile_inventory_grid,
+            'inventory_index': current_index
+        })
+
+    #del input_dict['actor_label_type']
+    #for current_index in range(len(constants.commodity_types)): #commodities held in selected tile
+    #    input_dict['commodity_index'] = current_index
+    #    input_dict['init_type'] = 'commodity display label'
+    #    new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
 def unit_organization_interface():
     '''

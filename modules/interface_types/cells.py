@@ -85,7 +85,7 @@ class cell():
         save_dict['resource'] = self.resource
 
         saved_inventory = {}
-        if self.tile.can_hold_commodities: #only save inventory if not empty
+        if self.tile.has_inventory: #only save inventory if not empty
             for current_commodity in constants.commodity_types:
                if self.tile.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.tile.inventory[current_commodity]

@@ -612,7 +612,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] += change
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
@@ -628,7 +628,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] = new_value
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
@@ -790,7 +790,7 @@ class pmob(mob):
             current_image.add_to_cell()
         if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.grid == status.strategic_map_grid and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
-        if self.can_trade and self.can_hold_commodities: #if caravan
+        if self.can_trade and self.has_inventory: #if caravan
             consumer_goods_present = vehicle.get_inventory('consumer goods')
             if consumer_goods_present > 0:
                 consumer_goods_transferred = consumer_goods_present

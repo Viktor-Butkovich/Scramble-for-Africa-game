@@ -400,7 +400,7 @@ class train(vehicle):
         self.vehicle_type = 'train'
         self.can_swim = False
         self.can_walk = True
-        self.can_hold_commodities = True
+        self.has_inventory = True
         self.inventory_capacity = 27#9
         if not from_save:
             self.inventory_setup()
@@ -474,7 +474,7 @@ class ship(vehicle):
         self.can_swim_ocean = True
         self.can_walk = False
         self.travel_possible = True #if this mob would ever be able to travel
-        self.can_hold_commodities = True
+        self.has_inventory = True
         self.inventory_capacity = 27
         if not from_save:
             self.inventory_setup()

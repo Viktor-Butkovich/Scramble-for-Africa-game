@@ -46,14 +46,14 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.cell.tile = self
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
-            self.can_hold_commodities = True
+            self.has_inventory = True
             self.inventory_setup()
             if self.cell.grid.from_save: #load in saved inventory from cell
                 self.load_inventory(self.cell.save_dict['inventory'])
         elif self.name in ['Europe', 'Slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
-            self.can_hold_commodities = True
-            self.can_hold_infinite_commodities = True
+            self.has_inventory = True
+            self.infinite_inventory_capacity = True
             self.inventory_setup()
             self.terrain = 'none'
             if self.cell.grid.from_save: #load in saved inventory from cell
@@ -152,7 +152,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.can_hold_commodities and not self.can_hold_infinite_commodities:
+        if self.has_inventory and not self.infinite_inventory_capacity:
             inventory_used = self.get_inventory_used()
             amount_to_remove = inventory_used - self.inventory_capacity
             if amount_to_remove > 0:
@@ -174,7 +174,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] += change
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
@@ -192,7 +192,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] = new_value
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile.inventory[commodity] = new_value
