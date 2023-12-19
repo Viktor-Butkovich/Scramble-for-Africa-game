@@ -435,3 +435,11 @@ lore_types_effect_descriptions_dict: Dict[str, str] = {
     'theology': 'chance of a positive modifier for religious campaign rolls'
 }
 completed_lore_mission_types: List[str] = []
+
+titles: List[str] = [
+    'Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 
+    'Duc', 'Marquis', 'Count', 'Vicomte', 'Chevalier', 'Écuyer',
+    'Duque', 'Marquês', 'Infante', 'Visconde', 'Barão', 'Conde', 'Dom', 'Fidalgo',
+    'Herzog', 'Markgraf', 'Landgraf', 'Pfalzgraf', 'Reichsgraf', 'Burggraf', 'Reichsfürst', 'Graf', 'Freiherr', 'Herr',
+    'Principe', 'Duca', 'Marchese', 'Conte', 'Visconte', 'Barone', 'Nobile', 'Cavaliere', 'Patrizio'                  
+]

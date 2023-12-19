@@ -1730,6 +1730,7 @@ class minister_portrait_image(button):
         input_dict['image_id'] = self.default_image_id
         input_dict['button_type'] = 'minister portrait'
         super().__init__(input_dict)
+        self.insert_collection_above()
         self.minister_type = input_dict['minister_type'] # Position, like General
         if self.minister_type == 'none': # If available minister portrait
             if 'ministers' in self.modes:
@@ -1743,9 +1744,9 @@ class minister_portrait_image(button):
         self.warning_image = constants.actor_creation_manager.create_interface_element({
             'attached_image': self,
             'init_type': 'warning image',
-            'parent_collection': self.insert_collection_above(),
+            'parent_collection': self.parent_collection,
             'member_config': {'x_offset': warning_x_offset, 'y_offset': 0}
-        }    )
+        })
         self.parent_collection.can_show_override = self # Parent collection is considered showing when this label can show, allowing ordered collection to work correctly
 
         self.calibrate('none')
@@ -1835,7 +1836,10 @@ class minister_portrait_image(button):
         if new_minister != 'none':
             new_minister.update_tooltip()
             self.tooltip_text = new_minister.tooltip_text
-            self.image.set_image(new_minister.image_id)
+            if 'ministers' in self.modes:
+                self.image.set_image(new_minister.image_id + actor_utility.generate_label_image_id(new_minister.get_f_lname()))
+            else:
+                self.image.set_image(new_minister.image_id)
         elif 'ministers' in self.modes: # Show empty minister if minister screen icon
             if self.minister_type == 'none': # If available minister portrait
                 self.tooltip_text = ['There is no available candidate in this slot.']

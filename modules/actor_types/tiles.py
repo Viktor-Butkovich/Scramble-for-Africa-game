@@ -76,14 +76,8 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.grid == status.strategic_map_grid and not new_name in ['default', 'placeholder']: #make sure user is not allowed to input default or *.png as a tile name
             if self.name_icon:
                 self.name_icon.remove_complete()
-            x_size = min(0.93, 0.10 * len(new_name)) #try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
-            if x_size < 0.93:
-                x_offset = 0.5 - (x_size / 2)
-            else:
-                x_offset = 0.05
-            y_size = (x_size / len(new_name)) * 2.3 #decrease vertical font size proportionally if x_size was bounded by maximum
-            y_offset = -0.7 + 0.4 - 0.45 + 0.05 - 0.05
 
+            y_offset = -0.75
             has_building = False
             for building_type in constants.building_types:
                 if self.cell.has_building(building_type): #if any building present, shift name up to not cover them
@@ -91,36 +85,11 @@ class tile(actor): #to do: make terrain tiles a subclass
                     break
             if has_building:
                 y_offset += 0.3
-            image_id = [
-                {
-                'image_id': 'misc/paper_label.png',
-                'x_offset': x_offset,
-                'y_offset': y_offset,
-                'free': True,
-                'level': 1,
-                'x_size': x_size,
-                'y_size': y_size,
-                },
-                text_utility.prepare_render(
-                    new_name,
-                    font=constants.fonts['max_detail_black'],
-                    override_input_dict={
-                        'x_offset': x_offset,
-                        'y_offset': y_offset,
-                        'free': True,
-                        'level': 1,
-                        'override_height': None,
-                        'override_width': None,
-                        'x_size': x_size,
-                        'y_size': y_size
-                    }
-                )
-            ]
 
             self.name_icon = constants.actor_creation_manager.create(False, {
                 'coordinates': (self.x, self.y),
                 'grids': [self.grid, self.grid.mini_grid],
-                'image': image_id,
+                'image': actor_utility.generate_label_image_id(new_name, y_offset=y_offset),
                 'modes': ['strategic'],
                 'init_type': 'name icon',
                 'tile': self

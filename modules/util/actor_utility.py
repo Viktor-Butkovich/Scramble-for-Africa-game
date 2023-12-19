@@ -676,3 +676,44 @@ def select_interface_tab(tabbed_collection, target_tab):
             if tab_button.linked_element == target_tab:
                 tab_button.on_click()
                 continue
+
+def generate_label_image_id(text: str, y_offset=0):
+    '''
+    Description:
+        Generates and returns an image ID list for a label containing the inputted text at the inputted y offset
+            Used for "labels" that are part of images, not independent label objects
+    Input:
+        str text: Text for label to contain
+        float y_offset: -1.0 through 0.0, determines how far down image to offset the label, with 0 being at the top of the image
+    '''
+    x_size = min(0.96, 0.10 * len(text)) # Try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
+    if x_size < 0.93:
+        x_offset = 0.5 - (x_size / 2)
+    else:
+        x_offset = 0.02
+    y_size = (x_size / len(text)) * 2.3 # Decrease vertical font size proportionally if x_size was bounded by maximum
+    return([
+        {
+        'image_id': 'misc/paper_label.png',
+        'x_offset': x_offset - 0.01,
+        'y_offset': y_offset,
+        'free': True,
+        'level': 1,
+        'x_size': x_size + 0.02,
+        'y_size': y_size,
+        },
+        text_utility.prepare_render(
+            text,
+            font=constants.fonts['max_detail_black'],
+            override_input_dict={
+                'x_offset': x_offset,
+                'y_offset': y_offset,
+                'free': True,
+                'level': 1,
+                'override_height': None,
+                'override_width': None,
+                'x_size': x_size,
+                'y_size': y_size
+            }
+        )
+    ])

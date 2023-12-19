@@ -29,20 +29,30 @@ except Exception: #displays error message and records error message in crash log
 #      would need to modify text box to capture the output for a particular purpose, with a standard listen/receive function
 #       when an object uses listen, it starts the typing process and captures the output when typing is cancelled or entered
 #       the text box should call the receive function of the current listener
-# incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
 # add settlement name label with indented building labels
 #Allow ship moving through series of ports adjacent to the river
 #   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
-# add f. lname labels under cabinet portraits in minister (and trial?) screen
-# add confirmation for free all slaves button
+# Add cataracts
+# Add confirmation for free all slaves button
 # Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
 #   pending units - pending is a state like sentry mode
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description
 # Maybe have special corruption event involving Minister of Geography attempting to steal an artifact
 # Add ambient resource production facility, settlement, and village sounds
 # Allow some inventory attrition to occur in Europe
+# Add direct attack on native villages action
+# Allow water exploration for steamboat/train with expedition on board
+# Add cannibals
+# Add notification when village goes from 0 to 1 population
+# Add train/ship sounds
+# Change visual size of porter boxes
+# Replace resource production facility images
+# Add equipment/inventory rework - maybe with inventory boxes
+# Add random events
+# Add debug settings menu within game, rather than needing to edit .json out of game
 #
 #   bugfixes
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
 # Find some solution to overlapping 3rd work crew and text box
+# incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward

@@ -18,7 +18,8 @@ class minister():
         Input:
             boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'name': string value - Required if from save, this minister's name
+                'first_name': string value - Required if from save, this minister's first name
+                'last_name': string value - Required if from save, this minister's last name
                 'current_position': string value - Office that this minister is currently occupying, or 'none' if no office occupied
                 'background': string value - Career background of minister, determines social status and skills
                 'personal savings': double value - How much non-stolen money this minister has based on their social status
@@ -42,7 +43,9 @@ class minister():
         self.portrait_sections: Dict = {}
         status_number_dict: Dict[int, str] = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
         if from_save:
-            self.name: str = input_dict['name']
+            self.first_name: str = input_dict['first_name']
+            self.last_name: str = input_dict['last_name']
+            self.name: str = self.first_name + ' ' + self.last_name
             self.current_position: str = input_dict['current_position']
             self.background: str = input_dict['background']
             self.status_number: int = constants.background_status_dict[self.background]
@@ -72,7 +75,10 @@ class minister():
                 status.available_minister_list.append(self)
         else:
             self.background: str = random.choice(constants.weighted_backgrounds)
-            self.name: str = constants.flavor_text_manager.generate_minister_name(self.background)
+            self.first_name: str
+            self.last_name: str
+            self.first_name, self.last_name = constants.flavor_text_manager.generate_minister_name(self.background)
+            self.name = self.first_name + ' ' + self.last_name
             self.status_number: int = constants.background_status_dict[self.background]
             self.status: str = status_number_dict[self.status_number]
             self.personal_savings: float = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
@@ -92,6 +98,20 @@ class minister():
         self.stolen_already: bool = False
         self.update_tooltip()
         self.initializing: bool = False
+
+    def get_f_lname(self):
+        '''
+        Description:
+            Returns this minister's name in the form [first initial] [last name] - uses full aristocratic titles, if applicable
+        Input:
+            None
+        Output:
+            str: Returns this minister's name in the form [first initial] [last name]
+        '''
+        if self.first_name in constants.titles:
+            return(self.name)
+        else:
+            return(self.first_name[0] + '. ' + self.last_name)
 
     def portrait_sections_setup(self):
         '''
@@ -349,7 +369,8 @@ class minister():
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'name': string value - This minister's name
+                'first_name': string value - This minister's first name
+                'last_name': string value - This minister's last name
                 'current_position': string value - Office that this minister is currently occupying, or 'none' if no office occupied
                 'background': string value - Career background of minister, determines social status and skills
                 'personal savings': double value - How much non-stolen money this minister has based on their social status
@@ -370,7 +391,8 @@ class minister():
                 'voice_set': string value - Name of voice set assigned to this minister
         '''    
         save_dict = {}
-        save_dict['name'] = self.name
+        save_dict['first_name'] = self.first_name
+        save_dict['last_name'] = self.last_name
         save_dict['current_position'] = self.current_position
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
