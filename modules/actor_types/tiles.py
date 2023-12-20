@@ -52,12 +52,13 @@ class tile(actor): #to do: make terrain tiles a subclass
                 self.load_inventory(self.cell.save_dict['inventory'])
         elif self.name in ['Europe', 'Slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
-            self.has_inventory = True
-            self.infinite_inventory_capacity = True
-            self.inventory_setup()
             self.terrain = 'none'
-            if self.cell.grid.from_save: #load in saved inventory from cell
-                self.load_inventory(self.cell.save_dict['inventory'])
+            if self.name == 'Europe':
+                self.has_inventory = True
+                self.infinite_inventory_capacity = True
+                self.inventory_setup()
+                if self.cell.grid.from_save: #load in saved inventory from cell
+                    self.load_inventory(self.cell.save_dict['inventory'])
         else:
             self.terrain = 'none'
         self.update_tooltip()

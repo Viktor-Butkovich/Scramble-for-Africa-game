@@ -2451,15 +2451,71 @@ class item_icon(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'inventory_index': int value - Index in inventory that this button will display
+                'icon_index': int value - Index in inventory that this button will display
         Output:
             None
         '''
-        self.inventory_index: int = input_dict['inventory_index']
+        self.icon_index: int = input_dict['icon_index']
         self.current_item: str = None
+        self.in_inventory_capacity: bool = False
         self.default_image_id = input_dict['image_id']
         input_dict['button_type'] = 'item_icon'
         super().__init__(input_dict)
+
+    def get_display_order(self):
+        '''
+        Description:
+            To determine whether cell is used in a particular configuration, convert
+                0  1  2  3  4  5  6  7  8
+                9  10 11 12 13 14 15 16 17
+                18 19 20 21 22 23 24 25 26
+            To
+                0  1  2 9  10 11 18 19 20
+                3  4  5 12 13 14 21 22 23
+                6  7  8 15 16 17 24 25 26
+            0-2: no change
+            3-5: add 6
+            6-8: add 12
+            9-11: subtract 6
+            12-14: no change
+            15-17: add 6
+            18-20: subtract 12
+            21-23: subtract 6
+            24-26: no change
+        Input:
+            None
+        Output:
+            int: Returns the "line number" of this item icon - if this number is < the number of items to display, this icon is active
+        '''
+        return(self.icon_index + {0: 0, 1: 6, 2: 12, 3: -6, 4: 0, 5: 6, 6: -12, 7: -6, 8: 0}[self.icon_index // 3])
+
+    def get_displayed_index(self, actor, functional_capacity):
+        '''
+        Description:
+            Depending on inventory configuration, should display item at index:
+                0  1  2  3  4  5  6  7  8 (use index)
+                9  10 11 12 13 14 15 16 17
+                18 19 20 21 22 23 24 25 26
+
+                0  1  2  3  4  5  (use index - (3 * (index // 9)))
+                6  7  8  9  10 11
+                12 13 14 15 16 17
+
+                0  1  2 (use index - (6 * (index // 9)))
+                3  4  5
+                6  7  8
+        Input:
+            actor actor: Actor to display the inventory of
+            int functional_capacity: Number of active item icons - either the actor's inventory capacity or the inventory used, whichever is higher
+        Output:
+            int: Given that this icon is active, returns the actor's inventory index of the item to display
+        '''
+        if functional_capacity >= 27 or actor.infinite_inventory_capacity:
+            return(self.icon_index)
+        elif functional_capacity >= 18:
+            return(self.icon_index - (3 * (self.icon_index // 9)))
+        else:
+            return(self.icon_index - (6 * (self.icon_index // 9)))
 
     def calibrate(self, new_actor):
         '''
@@ -2473,18 +2529,35 @@ class item_icon(button):
             None
         '''
         if new_actor != 'none':
-            if new_actor.inventory_capacity >= self.inventory_index + 1 or new_actor.infinite_inventory_capacity: #if inventory capacity 9 >= index 8 + 1, allow. If inventory capacity 9 >= index 9 + 1, disallow
-                self.current_item = new_actor.check_inventory(self.inventory_index)
+            functional_capacity: int = max(new_actor.get_inventory_used(), new_actor.inventory_capacity)
+            self.in_inventory_capacity = (functional_capacity >= self.get_display_order() + 1 or new_actor.infinite_inventory_capacity)
+            if self.in_inventory_capacity: #if inventory capacity 9 >= index 8 + 1, allow. If inventory capacity 9 >= index 9 + 1, disallow
+                self.current_item = new_actor.check_inventory(self.get_displayed_index(new_actor, functional_capacity))
                 if self.current_item:
-                    self.image.set_image(utility.combine(self.default_image_id, 'scenery/resources/large/' + self.current_item + '.png'))
+                    if new_actor.inventory_capacity >= self.get_display_order() + 1 or new_actor.infinite_inventory_capacity: # If item in capacity
+                        self.image.set_image(utility.combine(self.default_image_id, 'scenery/resources/large/' + self.current_item + '.png'))
+                    else: # If item over capacity
+                        self.image.set_image(['scenery/resources/large/' + self.current_item + '.png', 'misc/warning_icon.png'])
                 else:
                     self.image.set_image(self.default_image_id)
-            else:
-                self.image.set_image(self.default_image_id)
         super().calibrate(new_actor)
 
+    def can_show(self, skip_parent_collection=False):
+        '''
+        Description:
+            Returns whether this button can be shown - an item icon is shown if the corresponding actor has sufficient inventory capacity to fill this slot
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button can appear, otherwise returns False
+        '''
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.in_inventory_capacity)
+
     def update_tooltip(self):
-        self.set_tooltip(['placeholder'])
+        if self.current_item:
+            self.set_tooltip([self.current_item.capitalize()])
+        else:
+            self.set_tooltip(['Empty'])
         return
 
     def on_click(self):

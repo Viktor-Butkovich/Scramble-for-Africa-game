@@ -1317,21 +1317,24 @@ def inventory_interface():
     }
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
+    inventory_cell_size = scaling.scale_height(34)
     mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.mob_inventory_collection,
-        'member_config': {'order_y_offset': scaling.scale_height(30)}
+        'member_config': {'order_y_offset': scaling.scale_height(30)},
+        'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
     })
-    for current_index in range(9):
+    for current_index in range(27):
         constants.actor_creation_manager.create_interface_element({
-            'width': scaling.scale_width(34),
-            'height': scaling.scale_height(34),
+            'width': inventory_cell_size,
+            'height': inventory_cell_size,
             'image_id': 'buttons/default_button.png',
             'init_type': 'item icon',
             'parent_collection': mob_inventory_grid,
-            'inventory_index': current_index
+            'icon_index': current_index,
+            'member_config': {'second_dimension_coordinate': current_index % 9}
         })
 
     #del input_dict['actor_label_type']
@@ -1365,16 +1368,18 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.tile_inventory_collection,
-        'member_config': {'order_y_offset': scaling.scale_height(30)}
+        'member_config': {'order_y_offset': scaling.scale_height(30)},
+        'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
     })
-    for current_index in range(9):
+    for current_index in range(27):
         constants.actor_creation_manager.create_interface_element({
-            'width': scaling.scale_width(34),
-            'height': scaling.scale_height(34),
+            'width': inventory_cell_size,
+            'height': inventory_cell_size,
             'image_id': 'buttons/default_button.png',
             'init_type': 'item icon',
             'parent_collection': tile_inventory_grid,
-            'inventory_index': current_index
+            'icon_index': current_index,
+            'member_config': {'second_dimension_coordinate': current_index % 9}
         })
 
     #del input_dict['actor_label_type']

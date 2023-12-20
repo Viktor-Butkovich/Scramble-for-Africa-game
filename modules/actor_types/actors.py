@@ -223,15 +223,12 @@ class actor():
         Output:
             string: Returns name of the item held at the inputted index of the inventory, or None if no inventory held at that index
         '''
-        if index >= self.inventory_capacity and not self.infinite_inventory_capacity: # If accessing index 9 for 9 inventory capacity, return None
-            return(None)
-        else:
-            current_index = 0
-            for item_type in self.inventory:
-                current_index += self.inventory[item_type]
-                # If holding 1 coffee, increment index by 1, now to current_index=1
-                if current_index > index: # Since index 1 > inputted index 0, return 'coffee'
-                    return(item_type)
+        current_index: int = 0
+        for item_type in self.inventory:
+            current_index += self.inventory[item_type]
+            # If holding 1 coffee, increment index by 1, now to current_index=1
+            if current_index > index: # Since index 1 > inputted index 0, return 'coffee'
+                return(item_type)
         return(None)
 
     def change_inventory(self, commodity, change):

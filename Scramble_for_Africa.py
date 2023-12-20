@@ -51,6 +51,8 @@ except Exception: #displays error message and records error message in crash log
 # Add equipment/inventory rework - maybe with inventory boxes
 # Add random events
 # Add debug settings menu within game, rather than needing to edit .json out of game
+# Add interface for new inventory system, implement as sub-info-display
+#   Must also add scrolling inventory pages of size 27
 #
 #   bugfixes
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
