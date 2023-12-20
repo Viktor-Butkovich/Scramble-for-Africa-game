@@ -2459,6 +2459,8 @@ class item_icon(button):
         self.current_item: str = None
         self.in_inventory_capacity: bool = False
         self.default_image_id = input_dict['image_id']
+        self.actor_type = input_dict['actor_type']
+        self.actor = 'none'
         input_dict['button_type'] = 'item_icon'
         super().__init__(input_dict)
 
@@ -2528,6 +2530,7 @@ class item_icon(button):
         Output:
             None
         '''
+        self.actor = new_actor
         if new_actor != 'none':
             functional_capacity: int = max(new_actor.get_inventory_used(), new_actor.inventory_capacity)
             self.in_inventory_capacity = (functional_capacity >= self.get_display_order() + 1 or new_actor.infinite_inventory_capacity)
@@ -2554,14 +2557,60 @@ class item_icon(button):
         return(super().can_show(skip_parent_collection=skip_parent_collection) and self.in_inventory_capacity)
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip depending on its contained item
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.current_item:
             self.set_tooltip([self.current_item.capitalize()])
         else:
             self.set_tooltip(['Empty'])
-        return
 
     def on_click(self):
-        return
+        '''
+        Description:
+            Calibrates mob_inventory_info_display or tile_inventory_info_display to this icon, depending on this icon's actor type
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.current_item:
+            actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), self)
+            if self.actor_type == 'mob_inventory':
+                actor_utility.calibrate_actor_info_display(getattr(status, 'tile_inventory_info_display'), None)
+            elif self.actor_type == 'tile_inventory':
+                actor_utility.calibrate_actor_info_display(getattr(status, 'mob_inventory_info_display'), None)
+        else:
+            actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), None)
+
+    def transfer(self, amount):
+        '''
+        Description:
+            Drops or picks up the inputted amount of this tile's current item type, depending on if this is a tile or mob item icon
+        Input:
+            str/int amount: Amount of item to transfer, either 'all' or a number
+        Output:
+            None
+        '''
+        if self.actor_type == 'tile_inventory':
+            if amount == 'all':
+                # Should match pick up all on_click code
+                return
+            else:
+                # Should match pick up one on_click code
+                return
+        elif self.actor_type == 'mob_inventory':
+            if amount == 'all':
+                # Should match drop all on_click code
+                return
+            else:
+                # Should match drop one on_click code
+                return
 
 class action_button(button):
     '''
@@ -2673,23 +2722,26 @@ class anonymous_button(button):
                     entirely defined by the dictionary's contents:
                         'on_click': tuple value - Tuple containing function object followed by the parameters to be passed to it when this button is clicked
                         'tooltip': string list value - Tuple containing tooltip list to display for this button
-                        'message': string value - Text to display over this button
+                        'message': string value - Optional text to display over this button, intended for notification choice buttons
+                'notification': notification value - Notification the button is attached to, if applicable
         Output:
             None
         '''
-        self.notification = input_dict['notification']
+        self.notification = input_dict.get('notification', None)
         button_info_dict = input_dict['button_type']
         input_dict['button_type'] = 'anonymous'
-
         self.on_click_info = button_info_dict['on_click']
         if type(self.on_click_info[0]) != list:
             self.on_click_info = ([self.on_click_info[0]], [self.on_click_info[1]])
         self.tooltip = button_info_dict['tooltip']
-        self.message = button_info_dict['message']
+        self.message = button_info_dict.get('message')
 
         super().__init__(input_dict)
         self.font = constants.fonts['default_notification']
-        self.in_notification = True
+        if self.notification:
+            self.in_notification = True
+        else:
+            self.in_notification = False
 
     def on_click(self):
         '''
@@ -2703,7 +2755,8 @@ class anonymous_button(button):
         super().on_click()
         for index in range(len(self.on_click_info[0])):
             self.on_click_info[0][index](*self.on_click_info[1][index]) #calls each item function with corresponding parameters
-        self.notification.on_click(choice_button_override=True)
+        if self.in_notification:
+            self.notification.on_click(choice_button_override=True)
 
     def draw(self):
         '''
@@ -2715,7 +2768,7 @@ class anonymous_button(button):
             None
         '''
         super().draw()
-        if self.showing:
+        if self.showing and self.in_notification:
             constants.game_display.blit(text_utility.text(self.message, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 

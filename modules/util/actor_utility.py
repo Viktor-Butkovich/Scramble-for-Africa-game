@@ -717,3 +717,14 @@ def generate_label_image_id(text: str, y_offset=0):
             }
         )
     ])
+
+def callback(target, function, *args):
+    '''
+    Description:
+        Orders the inputted target to call the inputted function with the inputted arguments
+    Input:
+        str target: Status object to call function of
+        str function: Name of function to call
+        *args: Any number of arguments to pass to function call
+    '''
+    getattr(getattr(status, target), function)(*args)

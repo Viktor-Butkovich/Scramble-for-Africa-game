@@ -9,7 +9,7 @@ from modules.interface_types.interface_elements import interface_collection, tab
 from modules.interface_types.grids import grid, mini_grid, abstract_grid
 from modules.interface_types.panels import safe_click_panel
 from modules.interface_types.notifications import notification
-from modules.interface_types.buttons import button, same_tile_icon
+from modules.interface_types.buttons import button, same_tile_icon, item_icon
 from modules.interface_types.instructions import instructions_page
 from modules.interface_types.dice import die
 from modules.interface_types.labels import commodity_prices_label_template
@@ -41,7 +41,9 @@ Italy: country = None
 actions: Dict[str, action] = {}
 
 displayed_mob: mob = None
+displayed_mob_item: item_icon = None
 displayed_tile: tile = None
+displayed_tile_item: item_icon = None
 displayed_minister: minister = None
 displayed_defense: minister = None
 displayed_prosecution: minister = None
@@ -86,7 +88,9 @@ loading_image: image = None
 safe_click_area: safe_click_panel = None
 info_displays_collection: interface_collection = None
 mob_info_display: ordered_collection = None
+mob_inventory_info_display: ordered_collection = None
 tile_info_display: ordered_collection = None
+tile_inventory_info_display: ordered_collection = None
 minister_info_display: ordered_collection = None
 country_info_display: ordered_collection = None
 prosecution_info_display: ordered_collection = None

@@ -1320,10 +1320,9 @@ def inventory_interface():
     inventory_cell_size = scaling.scale_height(34)
     mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
-        'height': scaling.scale_height(30),
+        'height': (inventory_cell_size + scaling.scale_height(5)) * 3,
         'init_type': 'ordered collection',
         'parent_collection': status.mob_inventory_collection,
-        'member_config': {'order_y_offset': scaling.scale_height(30)},
         'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
     })
     for current_index in range(27):
@@ -1334,7 +1333,8 @@ def inventory_interface():
             'init_type': 'item icon',
             'parent_collection': mob_inventory_grid,
             'icon_index': current_index,
-            'member_config': {'second_dimension_coordinate': current_index % 9}
+            'actor_type': 'mob_inventory',
+            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': mob_inventory_grid.height}
         })
 
     #del input_dict['actor_label_type']
@@ -1342,6 +1342,56 @@ def inventory_interface():
     #    input_dict['commodity_index'] = current_index
     #    input_dict['init_type'] = 'commodity display label'
     #    new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
+
+    status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element({
+        #'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'is_info_display': True,
+        'actor_type': 'mob_item',
+        'description': 'mob inventory panel',
+        'parent_collection': status.mob_inventory_collection,
+        'member_config': {'calibrate_exempt': True}
+    })
+
+    #mob inventory background image's tooltip
+    mob_inventory_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
+        'minimum_width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
+        'image_id': 'misc/empty.png',
+        'actor_label_type': 'tooltip',
+        'actor_type': 'tile',
+        'init_type': 'actor display label',
+        'parent_collection': status.mob_inventory_info_display,
+        'member_config': {'order_overlap': True}
+    })
+
+    mob_inventory_image = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(5, 5),
+        'width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
+        'modes': ['strategic', 'europe'],
+        'actor_image_type': 'inventory_default',
+        'init_type': 'actor display free image',
+        'parent_collection': status.mob_inventory_info_display,
+        'member_config': {'order_overlap': False}
+    })
+
+    mob_info_display_labels = ['inventory_name', 'inventory_quantity']
+    for current_actor_label_type in mob_info_display_labels:
+        x_displacement = 0
+        input_dict = {
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
+            'image_id': 'misc/default_label.png',
+            'actor_label_type': current_actor_label_type,
+            'actor_type': 'mob',
+            'parent_collection': status.mob_inventory_info_display,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
+        }
+        input_dict['init_type'] = 'actor display label'
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
     status.tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
@@ -1365,10 +1415,9 @@ def inventory_interface():
 
     tile_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
-        'height': scaling.scale_height(30),
+        'height': (inventory_cell_size + scaling.scale_height(5)) * 3,
         'init_type': 'ordered collection',
         'parent_collection': status.tile_inventory_collection,
-        'member_config': {'order_y_offset': scaling.scale_height(30)},
         'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
     })
     for current_index in range(27):
@@ -1379,8 +1428,59 @@ def inventory_interface():
             'init_type': 'item icon',
             'parent_collection': tile_inventory_grid,
             'icon_index': current_index,
-            'member_config': {'second_dimension_coordinate': current_index % 9}
+            'actor_type': 'tile_inventory',
+            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': tile_inventory_grid.height}
         })
+
+    status.tile_inventory_info_display = constants.actor_creation_manager.create_interface_element({
+        #'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'is_info_display': True,
+        'actor_type': 'tile_item',
+        'description': 'tile inventory panel',
+        'parent_collection': status.tile_inventory_collection,
+        'member_config': {'calibrate_exempt': True}
+    })
+
+    #tile inventory background image's tooltip
+    tile_inventory_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
+        'minimum_width': scaling.scale_width(125),
+        'height': scaling.scale_height(125),
+        'image_id': 'misc/empty.png',
+        'actor_label_type': 'tooltip',
+        'actor_type': 'tile',
+        'init_type': 'actor display label',
+        'parent_collection': status.tile_inventory_info_display,
+        'member_config': {'order_overlap': True}
+    })
+
+    tile_inventory_image = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(5, 5),
+        'width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
+        'modes': ['strategic', 'europe'],
+        'actor_image_type': 'inventory_default',
+        'init_type': 'actor display free image',
+        'parent_collection': status.tile_inventory_info_display,
+        'member_config': {'order_overlap': False}
+    })
+
+    tile_info_display_labels = ['inventory_name', 'inventory_quantity']
+    for current_actor_label_type in tile_info_display_labels:
+        x_displacement = 0
+        input_dict = {
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
+            'image_id': 'misc/default_label.png',
+            'actor_label_type': current_actor_label_type,
+            'actor_type': 'tile',
+            'parent_collection': status.tile_inventory_info_display,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
+        }
+        input_dict['init_type'] = 'actor display label'
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
     #del input_dict['actor_label_type']
     #for current_index in range(len(constants.commodity_types)): #commodities held in selected tile

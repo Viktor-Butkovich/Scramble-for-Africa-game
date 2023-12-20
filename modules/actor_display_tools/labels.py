@@ -3,7 +3,7 @@
 import pygame
 
 from ..interface_types.labels import label
-from ..util import utility, scaling
+from ..util import utility, scaling, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -349,6 +349,44 @@ class actor_display_label(label):
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
 
+        elif self.actor_label_type == 'inventory_name':
+            self.message_start = ''
+        
+        elif self.actor_label_type == 'inventory_quantity':
+            self.message_start = 'Quantity: '
+
+            if self.actor_type == 'mob':
+                input_dict['init_type'] = 'anonymous button'
+                input_dict['image_id'] = 'buttons/commodity_drop_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_mob_item', 'transfer', 1]),
+                        'tooltip': ['Orders the selected unit to drop this item']
+                }
+                self.add_attached_button(input_dict)
+
+                input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_mob_item', 'transfer', 'all']),
+                        'tooltip': ['Orders the selected unit to drop all of this item']
+                }
+                self.add_attached_button(input_dict)
+
+            elif self.actor_type == 'tile':
+                input_dict['init_type'] = 'anonymous button'
+                input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_tile_item', 'transfer', 1]),
+                        'tooltip': ['Orders the selected unit to pick up this item']
+                }
+                self.add_attached_button(input_dict)
+
+                input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_tile_item', 'transfer', 'all']),
+                        'tooltip': ['Orders the selected unit to pick up all of this item']
+                }
+                self.add_attached_button(input_dict)
+
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -576,7 +614,7 @@ class actor_display_label(label):
         if new_actor != 'none':
             if self.actor_label_type == 'name':
                 self.set_label(self.message_start + utility.capitalize(new_actor.name))
-                
+
             elif self.actor_label_type == 'coordinates':
                 self.set_label(self.message_start + '(' + str(new_actor.x) + ', ' + str(new_actor.y) + ')')
                 
@@ -762,6 +800,12 @@ class actor_display_label(label):
             
             elif self.actor_label_type == 'slave_traders_strength':
                 self.set_label('Strength: ' + str(constants.slave_traders_strength) + '/' + str(constants.slave_traders_natural_max_strength))
+
+            elif self.actor_label_type == 'inventory_name':
+                self.set_label(self.message_start + utility.capitalize(new_actor.current_item))
+
+            elif self.actor_label_type == 'inventory_quantity':
+                self.set_label(self.message_start + str(new_actor.actor.get_inventory(new_actor.current_item)))
 
         elif self.actor_label_type == 'tooltip':
             return #do not set text for tooltip label
