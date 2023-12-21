@@ -359,6 +359,7 @@ def manage_lmb_down(clicked_button):
                                 actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
                                 actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
                         else: #cannot move to same continent
+                            actor_utility.calibrate_actor_info_display(status.mob_info_display, None)
                             text_utility.print_to_screen('You can only send ships to other theatres.')
             flags.choosing_destination = False
             
@@ -425,25 +426,19 @@ def click_move_minimap():
     Output:
         None
     '''
-    breaking = False
     for current_grid in status.grid_list: #if grid clicked, move minimap to location clicked
         if current_grid.showing:
             for current_cell in current_grid.get_flat_cell_list():
                 if current_cell.touching_mouse():
                     if current_grid == status.minimap_grid: #if minimap clicked, calibrate to corresponding place on main map
-                        if not current_cell.terrain == 'none': #if off map, do not move minimap there
+                        if current_cell.terrain != 'none': #if off map, do not move minimap there
                             main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
                             status.minimap_grid.calibrate(main_x, main_y)
                     elif current_grid == status.strategic_map_grid:
                         status.minimap_grid.calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
                         actor_utility.calibrate_actor_info_display(status.tile_info_display, current_grid.cell_list[0][0].tile)
-                    breaking = True
-                    break
-                if breaking:
-                    break
-            if breaking:
-                 break
+                    return
 
 def debug_print():
     '''

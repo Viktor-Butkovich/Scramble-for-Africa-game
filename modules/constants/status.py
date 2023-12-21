@@ -41,9 +41,9 @@ Italy: country = None
 actions: Dict[str, action] = {}
 
 displayed_mob: mob = None
-displayed_mob_item: item_icon = None
+displayed_mob_inventory: item_icon = None
 displayed_tile: tile = None
-displayed_tile_item: item_icon = None
+displayed_tile_inventory: item_icon = None
 displayed_minister: minister = None
 displayed_defense: minister = None
 displayed_prosecution: minister = None

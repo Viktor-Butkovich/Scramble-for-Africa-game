@@ -359,32 +359,43 @@ class actor_display_label(label):
                 input_dict['init_type'] = 'anonymous button'
                 input_dict['image_id'] = 'buttons/commodity_drop_button.png'
                 input_dict['button_type'] = {
-                        'on_click': (actor_utility.callback, ['displayed_mob_item', 'transfer', 1]),
+                        'on_click': (actor_utility.callback, ['displayed_mob_inventory', 'transfer', 1]),
                         'tooltip': ['Orders the selected unit to drop this item']
                 }
                 self.add_attached_button(input_dict)
 
                 input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
                 input_dict['button_type'] = {
-                        'on_click': (actor_utility.callback, ['displayed_mob_item', 'transfer', 'all']),
+                        'on_click': (actor_utility.callback, ['displayed_mob_inventory', 'transfer', 'all']),
                         'tooltip': ['Orders the selected unit to drop all of this item']
                 }
                 self.add_attached_button(input_dict)
 
             elif self.actor_type == 'tile':
+                original_input_dict = input_dict.copy()
+
                 input_dict['init_type'] = 'anonymous button'
                 input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
                 input_dict['button_type'] = {
-                        'on_click': (actor_utility.callback, ['displayed_tile_item', 'transfer', 1]),
+                        'on_click': (actor_utility.callback, ['displayed_tile_inventory', 'transfer', 1]),
                         'tooltip': ['Orders the selected unit to pick up this item']
                 }
                 self.add_attached_button(input_dict)
 
                 input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
                 input_dict['button_type'] = {
-                        'on_click': (actor_utility.callback, ['displayed_tile_item', 'transfer', 'all']),
+                        'on_click': (actor_utility.callback, ['displayed_tile_inventory', 'transfer', 'all']),
                         'tooltip': ['Orders the selected unit to pick up all of this item']
                 }
+                self.add_attached_button(input_dict)
+
+                input_dict = original_input_dict
+                input_dict['init_type'] = 'sell commodity button'
+                input_dict['image_id'] = 'buttons/commodity_sell_button.png'
+                self.add_attached_button(input_dict)
+
+                input_dict['init_type'] = 'sell all commodity button'
+                input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
                 self.add_attached_button(input_dict)
 
         else:
@@ -957,10 +968,12 @@ class actor_tooltip_label(actor_display_label):
         if self.actor.is_dummy:
             if self.actor.is_group or (self.actor.is_vehicle and self.actor.has_crew):
                 status.reorganize_unit_right_button.on_click()
-                self.actor.cycle_select()
+                if not self.actor.is_dummy: # Only select if dummy unit successfully became real
+                    self.actor.cycle_select()
             else:
                 status.reorganize_unit_left_button.on_click()
-                self.actor.cycle_select()
+                if not self.actor.is_dummy: # Only select if dummy unit successfully became real
+                    self.actor.cycle_select()
         else:
             self.actor.cycle_select()
 
@@ -1104,137 +1117,3 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
             if self.actor.cell.has_building('village') and self.actor.cell.visible:
                 return(True)
         return(False)
-        
-
-class commodity_display_label(actor_display_label):
-    '''
-    Label that changes its text and attached image and button to match the commodity in a certain part of a currently selected actor's inventory    
-    '''
-    def __init__(self, input_dict):
-
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
-                'commodity_index': int value - Index of actor's inventory reflected
-        Output:
-            None
-        '''
-        self.current_commodity = 'none'
-        input_dict['actor_label_type'] = 'commodity'
-        super().__init__(input_dict)
-        self.showing_commodity = False
-        self.commodity_index = input_dict['commodity_index']
-
-        input_dict = {
-            'coordinates': (self.x, self.y + 200),
-            'width': self.height,
-            'height': self.height,
-            'modes': self.modes,
-            'attached_label': self,
-            'init_type': 'label button'
-        }
-
-        self.insert_collection_above()
-
-        self.commodity_image = constants.actor_creation_manager.create_interface_element({
-            'coordinates': (0, 0),
-            'width': self.height + 10,
-            'height': self.height + 10,
-            'modes': self.modes,
-            'attached_label': self,
-            'init_type': 'label image',
-            'parent_collection': self.parent_collection,
-            'member_config': {'x_offset': -1 * self.height - 10, 'y_offset': -5}
-        })
-
-        input_dict['coordinates'] = (0, 0)
-        if self.actor_type == 'mob':
-            input_dict['init_type'] = 'drop commodity button'
-            input_dict['image_id'] = 'buttons/commodity_drop_button.png'
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'drop all commodity button'
-            input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
-            self.add_attached_button(input_dict)
-            
-        elif self.actor_type == 'tile':
-            input_dict['init_type'] = 'pick up commodity button'
-            input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'pick up all commodity button'
-            input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'sell commodity button'
-            input_dict['image_id'] = 'buttons/commodity_sell_button.png'
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'sell all commodity button'
-            input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
-            self.add_attached_button(input_dict)
-
-    def set_label(self, new_message):
-        '''
-        Description:
-            Sets this label's text to the inputted string and changes locations of attached buttons since the length of the label may change. Also changes this label's attached image to match the commodity
-        Input:
-            string new_message: New text to set this label to
-        Output:
-            None
-        '''
-        super().set_label(new_message)
-        if self.actor != 'none':
-            commodity_list = self.actor.get_held_commodities()
-            if len(commodity_list) > self.commodity_index:
-                commodity = commodity_list[self.commodity_index]
-                self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
-
-    def calibrate(self, new_actor):
-        '''
-        Description:
-            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
-        Input:
-            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
-        Output:
-            None
-        '''
-        self.actor = new_actor
-        if new_actor != 'none':
-            commodity_list = new_actor.get_held_commodities()
-            if len(commodity_list) - 1 >= self.commodity_index: #if index in commodity list
-                self.showing_commodity = True
-                commodity = commodity_list[self.commodity_index]
-                self.current_commodity = commodity
-                self.set_label(commodity + ': ' + str(new_actor.get_inventory(commodity))) #format - commodity_name: how_many
-            else:
-                self.showing_commodity = False
-                self.set_label('n/a')
-        else:
-            self.showing_commodity = False
-            self.set_label('n/a')
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this label should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if this label's commodity_index is not in the attached actor's inventory. Otherwise, returns same value as superclass
-        '''
-        if not self.showing_commodity:
-            return(False)
-        else:
-            return(super().can_show(skip_parent_collection=skip_parent_collection))

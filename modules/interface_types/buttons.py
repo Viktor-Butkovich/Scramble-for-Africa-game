@@ -305,30 +305,6 @@ class button(interface_elements.interface_element):
             else:
                 self.set_tooltip(['Orders this ' + self.vehicle_type + ' to disembark all of its passengers',
                                   'Disembarking a unit outside of a port renders it disorganized until the next turn, decreasing its combat effectiveness'])
-
-        elif self.button_type == 'pick up commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers 1 unit of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' to the currently displayed unit in this tile'])
-            else:
-                self.set_tooltip(['none'])
-                
-        elif self.button_type == 'pick up all commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers all units of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' to the currently displayed unit in this tile'])
-            else:
-                self.set_tooltip(['none'])
-                
-        elif self.button_type == 'drop commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers 1 unit of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' into this unit\'s tile'])
-            else:
-                self.set_tooltip(['none'])
-                
-        elif self.button_type == 'drop all commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers all units of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' into this unit\'s tile'])
-            else:
-                self.set_tooltip(['none'])
                 
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
@@ -340,16 +316,15 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Ends the current turn'])
             
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-            if not self.attached_label.actor == 'none':
-                commodity_list = self.attached_label.actor.get_held_commodities()
-                commodity = commodity_list[self.attached_label.commodity_index]
-                sell_price = constants.commodity_prices[commodity]
+            if status.displayed_tile:
+                commodity: str = self.attached_label.actor.current_item
+                sell_price: int = constants.commodity_prices[commodity]
                 if self.button_type == 'sell commodity':
                     self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell 1 unit of ' + commodity + ' for about ' + str(sell_price) + ' money at the end of the turn',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
                                       'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
                 else:
-                    num_present = self.attached_label.actor.get_inventory(commodity)
+                    num_present = status.displayed_tile.get_inventory(commodity)
                     self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell your entire stockpile of ' + commodity + ' for about ' + str(sell_price) + ' money each at the end of the turn, ' +
                                           'for a total of about ' + str(sell_price * num_present) + ' money',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
@@ -687,7 +662,7 @@ class button(interface_elements.interface_element):
         '''
         if self.showing:
             if self.showing_outline and allow_show_outline:
-                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
+                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline, width=2)
             if self.showing_background and hasattr(self, 'color'):
                 pygame.draw.rect(constants.game_display, self.color, self.Rect)
             self.image.draw()
@@ -871,72 +846,6 @@ class button(interface_elements.interface_element):
             self.battalion.clear_attached_cell_icons()
             self.battalion.move(self.x_change, self.y_change, True)
 
-        elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
-            if main_loop_utility.action_possible():
-                if minister_utility.positions_filled():
-                    displayed_mob = status.displayed_mob
-                    displayed_tile = status.displayed_tile
-                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'drop all commodity':
-                        num_commodity = displayed_mob.get_inventory(commodity)
-                    if displayed_mob and displayed_tile:
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            can_drop_off = True
-                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
-                                can_drop_off = False
-                                text_utility.print_to_screen('A train can only drop off cargo at a train station.')
-                            if can_drop_off:
-                                if displayed_mob.sentry_mode:
-                                    displayed_mob.set_sentry_mode(False)
-                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                                displayed_tile.change_inventory(commodity, num_commodity)
-                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.infinite_inventory_capacity:
-                                    text_utility.print_to_screen('This tile cannot hold this many commodities.')
-                                    text_utility.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.')
-                        else:
-                            text_utility.print_to_screen('This unit is not in this tile.')
-                    else:
-                        text_utility.print_to_screen('There is no tile to transfer this commodity to.')
-            else:
-                text_utility.print_to_screen('You are busy and cannot transfer commodities.')
-                
-        elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
-            if main_loop_utility.action_possible():
-                if minister_utility.positions_filled():
-                    displayed_mob = status.displayed_mob
-                    displayed_tile = status.displayed_tile
-                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'pick up all commodity':
-                        num_commodity = displayed_tile.get_inventory(commodity)
-                    if displayed_mob and displayed_tile:
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            if displayed_mob.has_inventory:
-                                can_pick_up = True
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
-                                    can_pick_up = False
-                                    text_utility.print_to_screen('A train can only pick up cargo at a train station.')
-                                if can_pick_up:
-                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                        amount_transferred = num_commodity
-                                    else:
-                                        amount_transferred = displayed_mob.get_inventory_remaining()
-                                        text_utility.print_to_screen('This unit can currently only pick up ' + str(amount_transferred) + ' units of ' + commodity + '.')
-                                    if displayed_mob.sentry_mode:
-                                        displayed_mob.set_sentry_mode(False)
-                                    displayed_mob.change_inventory(commodity, amount_transferred)
-                                    displayed_tile.change_inventory(commodity, -1 * amount_transferred)
-                                    actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
-                            else:
-                                text_utility.print_to_screen('This unit cannot hold commodities.')
-                        else:
-                            text_utility.print_to_screen('This unit is not in this tile.')
-                    else:
-                        text_utility.print_to_screen('There is no unit to transfer this commodity to.')
-            else:
-                text_utility.print_to_screen('You are busy and cannot transfer commodities.')
-
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
                 if not len(self.attached_label.attached_building.contained_workers) == 0:
@@ -983,15 +892,20 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
             if minister_utility.positions_filled():
-                commodity_list = self.attached_label.actor.get_held_commodities()
-                commodity = commodity_list[self.attached_label.commodity_index]
-                num_present = self.attached_label.actor.get_inventory(commodity)
-                num_sold = 0
+                commodity: str = self.attached_label.actor.current_item
+                num_present: int = status.displayed_tile.get_inventory(commodity)
+                num_sold: int
                 if self.button_type == 'sell commodity':
                     num_sold = 1
                 else:
                     num_sold = num_present
-                market_utility.sell(self.attached_label.actor, commodity, num_sold)
+                market_utility.sell(status.displayed_tile, commodity, num_sold)
+
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
+                if status.displayed_tile_inventory.current_item:
+                    actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
+                else:
+                    actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, None)
 
         elif self.button_type == 'cycle units':
             if main_loop_utility.action_possible():
@@ -1167,7 +1081,7 @@ class button(interface_elements.interface_element):
                 if status.displayed_mob == None or (not status.displayed_mob.is_pmob):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
-                if status.europe_grid in self.attached_label.actor.grids and self.attached_label.current_commodity != 'consumer goods':
+                if status.displayed_tile and status.europe_grid in status.displayed_tile.grids and self.attached_label.actor.current_item != 'consumer goods':
                     return(True)
                 else:
                     return(False)
@@ -2491,34 +2405,6 @@ class item_icon(button):
         '''
         return(self.icon_index + {0: 0, 1: 6, 2: 12, 3: -6, 4: 0, 5: 6, 6: -12, 7: -6, 8: 0}[self.icon_index // 3])
 
-    def get_displayed_index(self, actor, functional_capacity):
-        '''
-        Description:
-            Depending on inventory configuration, should display item at index:
-                0  1  2  3  4  5  6  7  8 (use index)
-                9  10 11 12 13 14 15 16 17
-                18 19 20 21 22 23 24 25 26
-
-                0  1  2  3  4  5  (use index - (3 * (index // 9)))
-                6  7  8  9  10 11
-                12 13 14 15 16 17
-
-                0  1  2 (use index - (6 * (index // 9)))
-                3  4  5
-                6  7  8
-        Input:
-            actor actor: Actor to display the inventory of
-            int functional_capacity: Number of active item icons - either the actor's inventory capacity or the inventory used, whichever is higher
-        Output:
-            int: Given that this icon is active, returns the actor's inventory index of the item to display
-        '''
-        if functional_capacity >= 27 or actor.infinite_inventory_capacity:
-            return(self.icon_index)
-        elif functional_capacity >= 18:
-            return(self.icon_index - (3 * (self.icon_index // 9)))
-        else:
-            return(self.icon_index - (6 * (self.icon_index // 9)))
-
     def calibrate(self, new_actor):
         '''
         Description:
@@ -2533,17 +2419,32 @@ class item_icon(button):
         self.actor = new_actor
         if new_actor != 'none':
             functional_capacity: int = max(new_actor.get_inventory_used(), new_actor.inventory_capacity)
-            self.in_inventory_capacity = (functional_capacity >= self.get_display_order() + 1 or new_actor.infinite_inventory_capacity)
+            display_index: int = self.get_display_order()
+            self.in_inventory_capacity = (functional_capacity >= display_index + 1 or new_actor.infinite_inventory_capacity)
             if self.in_inventory_capacity: #if inventory capacity 9 >= index 8 + 1, allow. If inventory capacity 9 >= index 9 + 1, disallow
-                self.current_item = new_actor.check_inventory(self.get_displayed_index(new_actor, functional_capacity))
+                self.current_item = new_actor.check_inventory(display_index)
                 if self.current_item:
-                    if new_actor.inventory_capacity >= self.get_display_order() + 1 or new_actor.infinite_inventory_capacity: # If item in capacity
+                    if new_actor.inventory_capacity >= display_index + 1 or new_actor.infinite_inventory_capacity: # If item in capacity
                         self.image.set_image(utility.combine(self.default_image_id, 'scenery/resources/large/' + self.current_item + '.png'))
                     else: # If item over capacity
                         self.image.set_image(['scenery/resources/large/' + self.current_item + '.png', 'misc/warning_icon.png'])
                 else:
                     self.image.set_image(self.default_image_id)
         super().calibrate(new_actor)
+
+    def draw(self):
+        '''
+        Description:
+            Draws this button below its choice notification, along with an outline if it is selected
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.showing:
+            if self == getattr(status, 'displayed_' + self.actor_type):
+                pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline, width=2)
+        super().draw()
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -2579,6 +2480,8 @@ class item_icon(button):
         Output:
             None
         '''
+        if not self.can_show(skip_parent_collection=True):
+            self.current_item = None
         if self.current_item:
             actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), self)
             if self.actor_type == 'mob_inventory':
@@ -2597,20 +2500,57 @@ class item_icon(button):
         Output:
             None
         '''
-        if self.actor_type == 'tile_inventory':
-            if amount == 'all':
-                # Should match pick up all on_click code
-                return
-            else:
-                # Should match pick up one on_click code
-                return
-        elif self.actor_type == 'mob_inventory':
-            if amount == 'all':
-                # Should match drop all on_click code
-                return
-            else:
-                # Should match drop one on_click code
-                return
+        if main_loop_utility.action_possible():
+            if minister_utility.positions_filled():
+                displayed_mob = status.displayed_mob
+                displayed_tile = status.displayed_tile
+                if displayed_mob and displayed_tile and displayed_mob.images[0].current_cell.tile == displayed_tile:
+                    if amount == 'all':
+                        if self.actor_type == 'tile_inventory':
+                            amount = displayed_tile.get_inventory(self.current_item)
+                        elif self.actor_type == 'mob_inventory':
+                            amount = displayed_mob.get_inventory(self.current_item)
+                    elif self.actor_type == 'mob_inventory' and amount > displayed_mob.get_inventory(self.current_item):
+                        text_utility.print_to_screen('This unit does not have enough ' + self.current_item + ' to transfer.')
+                        return
+                    elif self.actor_type == 'tile_inventory' and amount > displayed_tile.get_inventory(self.current_item):
+                        text_utility.print_to_screen('This tile does not have enough ' + self.current_item + ' to transfer.')
+                        return
+                    
+                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_tile.cell.has_intact_building('train_station'):
+                        text_utility.print_to_screen('A train can only transfer cargo at a train station.')
+                        return
+                    
+                    if self.actor_type == 'tile_inventory':
+                        if displayed_mob.get_inventory_remaining(amount) < 0:
+                            amount = displayed_mob.get_inventory_remaining()
+                            if amount == 0:
+                                text_utility.print_to_screen('This unit can not pick up any ' + self.current_item + '.')
+                                return
+
+                    if displayed_mob.sentry_mode:
+                        displayed_mob.set_sentry_mode(False)
+
+                    if self.actor_type == 'tile_inventory': # Pick up item(s)
+                        displayed_mob.change_inventory(self.current_item, amount)
+                        displayed_tile.change_inventory(self.current_item, amount * -1)
+                        actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
+                        actor_utility.calibrate_actor_info_display(status.tile_info_display, displayed_tile)
+
+                    elif self.actor_type == 'mob_inventory': # Drop item(s)
+                        displayed_tile.change_inventory(self.current_item, amount)
+                        displayed_mob.change_inventory(self.current_item, amount * -1)
+                        actor_utility.select_interface_tab(status.tile_tabbed_collection, status.tile_inventory_collection)
+                        actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
+
+                    self.on_click()
+
+                elif self.actor_type == 'mob_inventory':
+                    text_utility.print_to_screen('There is no tile to transfer this commodity to.')
+                elif self.actor_type == 'tile_inventory':
+                    text_utility.print_to_screen('There is no unit to transfer this commodity to.')
+        else:
+            text_utility.print_to_screen('You are busy and cannot transfer commodities.')
 
 class action_button(button):
     '''

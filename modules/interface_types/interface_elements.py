@@ -350,7 +350,7 @@ class interface_collection(interface_element):
         '''
         super().calibrate(new_actor, override_exempt)
         for member in self.members:
-            if override_exempt or not member in self.calibrate_exempt_list:
+            if override_exempt or (not member in self.calibrate_exempt_list):
                 if hasattr(member, 'members'):
                     member.calibrate(new_actor, override_exempt)
                 else:

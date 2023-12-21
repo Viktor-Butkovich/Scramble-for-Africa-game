@@ -1047,8 +1047,8 @@ def mob_interface():
     #mob background image's tooltip
     mob_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
-        'minimum_width': scaling.scale_width(125),
-        'height': scaling.scale_height(125),
+        'minimum_width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1188,8 +1188,8 @@ def tile_interface():
     #tile background image's tooltip
     tile_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
-        'minimum_width': scaling.scale_width(125),
-        'height': scaling.scale_height(125),
+        'minimum_width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
@@ -1337,19 +1337,13 @@ def inventory_interface():
             'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': mob_inventory_grid.height}
         })
 
-    #del input_dict['actor_label_type']
-    #for current_index in range(len(constants.commodity_types)): #commodities held in selected mob
-    #    input_dict['commodity_index'] = current_index
-    #    input_dict['init_type'] = 'commodity display label'
-    #    new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
-
     status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element({
         #'coordinates': scaling.scale_coordinates(0, 0),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'is_info_display': True,
-        'actor_type': 'mob_item',
+        'actor_type': 'mob_inventory',
         'description': 'mob inventory panel',
         'parent_collection': status.mob_inventory_collection,
         'member_config': {'calibrate_exempt': True}
@@ -1357,8 +1351,8 @@ def inventory_interface():
 
     #mob inventory background image's tooltip
     mob_inventory_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(125),
-        'height': scaling.scale_height(125),
+        'minimum_width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
@@ -1369,8 +1363,8 @@ def inventory_interface():
 
     mob_inventory_image = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(5, 5),
-        'width': scaling.scale_width(115),
-        'height': scaling.scale_height(115),
+        'width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'inventory_default',
         'init_type': 'actor display free image',
@@ -1438,7 +1432,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'is_info_display': True,
-        'actor_type': 'tile_item',
+        'actor_type': 'tile_inventory',
         'description': 'tile inventory panel',
         'parent_collection': status.tile_inventory_collection,
         'member_config': {'calibrate_exempt': True}
@@ -1446,8 +1440,8 @@ def inventory_interface():
 
     #tile inventory background image's tooltip
     tile_inventory_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(125),
-        'height': scaling.scale_height(125),
+        'minimum_width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
@@ -1458,8 +1452,8 @@ def inventory_interface():
 
     tile_inventory_image = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(5, 5),
-        'width': scaling.scale_width(115),
-        'height': scaling.scale_height(115),
+        'width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
         'modes': ['strategic', 'europe'],
         'actor_image_type': 'inventory_default',
         'init_type': 'actor display free image',
@@ -1481,12 +1475,6 @@ def inventory_interface():
         }
         input_dict['init_type'] = 'actor display label'
         constants.actor_creation_manager.create_interface_element(input_dict)
-
-    #del input_dict['actor_label_type']
-    #for current_index in range(len(constants.commodity_types)): #commodities held in selected tile
-    #    input_dict['commodity_index'] = current_index
-    #    input_dict['init_type'] = 'commodity display label'
-    #    new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
 def unit_organization_interface():
     '''
