@@ -6,10 +6,12 @@ from modules.constructs.ministers import minister
 from modules.constructs.countries import country
 from modules.constructs.images import image, free_image
 from modules.interface_types.interface_elements import interface_collection, tabbed_collection, ordered_collection
+from modules.interface_types.inventory_interface import inventory_grid
 from modules.interface_types.grids import grid, mini_grid, abstract_grid
 from modules.interface_types.panels import safe_click_panel
 from modules.interface_types.notifications import notification
-from modules.interface_types.buttons import button, same_tile_icon, item_icon
+from modules.interface_types.buttons import button, same_tile_icon
+from modules.interface_types.inventory_interface import item_icon
 from modules.interface_types.instructions import instructions_page
 from modules.interface_types.dice import die
 from modules.interface_types.labels import commodity_prices_label_template
@@ -89,8 +91,10 @@ safe_click_area: safe_click_panel = None
 info_displays_collection: interface_collection = None
 mob_info_display: ordered_collection = None
 mob_inventory_info_display: ordered_collection = None
+mob_inventory_grid: inventory_grid = None
 tile_info_display: ordered_collection = None
 tile_inventory_info_display: ordered_collection = None
+tile_inventory_grid: inventory_grid = None
 minister_info_display: ordered_collection = None
 country_info_display: ordered_collection = None
 prosecution_info_display: ordered_collection = None

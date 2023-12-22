@@ -1318,10 +1318,10 @@ def inventory_interface():
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
     inventory_cell_size = scaling.scale_height(34)
-    mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
+    status.mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
         'height': (inventory_cell_size + scaling.scale_height(5)) * 3,
-        'init_type': 'ordered collection',
+        'init_type': 'inventory grid',
         'parent_collection': status.mob_inventory_collection,
         'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
     })
@@ -1331,10 +1331,10 @@ def inventory_interface():
             'height': inventory_cell_size,
             'image_id': 'buttons/default_button.png',
             'init_type': 'item icon',
-            'parent_collection': mob_inventory_grid,
+            'parent_collection': status.mob_inventory_grid,
             'icon_index': current_index,
             'actor_type': 'mob_inventory',
-            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': mob_inventory_grid.height}
+            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': status.mob_inventory_grid.height}
         })
 
     status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element({
@@ -1407,27 +1407,49 @@ def inventory_interface():
     }
     tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    tile_inventory_grid = constants.actor_creation_manager.create_interface_element({
+    status.tile_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
         'height': (inventory_cell_size + scaling.scale_height(5)) * 3,
-        'init_type': 'ordered collection',
+        'init_type': 'inventory grid',
         'parent_collection': status.tile_inventory_collection,
         'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
     })
+
+    tile_scroll_up_button = constants.actor_creation_manager.create_interface_element({
+        'width': inventory_cell_size,
+        'height': inventory_cell_size,
+        'parent_collection': status.tile_inventory_grid,
+        'image_id': 'buttons/cycle_ministers_up_button.png',
+        'value_name': 'inventory_page',
+        'increment': -1,
+        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_size), 'y_offset': status.tile_inventory_grid.height - ((inventory_cell_size + scaling.scale_height(5)) * 3) + scaling.scale_height(5)},
+        'init_type': 'scroll button'
+    })
+
+    tile_scroll_down_button = constants.actor_creation_manager.create_interface_element({
+        'width': inventory_cell_size,
+        'height': inventory_cell_size,
+        'parent_collection': status.tile_inventory_grid,
+        'image_id': 'buttons/cycle_ministers_down_button.png',
+        'value_name': 'inventory_page',
+        'increment': 1,
+        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_size), 'y_offset': status.tile_inventory_grid.height - (inventory_cell_size)},
+        'init_type': 'scroll button'
+    })
+
     for current_index in range(27):
         constants.actor_creation_manager.create_interface_element({
             'width': inventory_cell_size,
             'height': inventory_cell_size,
             'image_id': 'buttons/default_button.png',
             'init_type': 'item icon',
-            'parent_collection': tile_inventory_grid,
+            'parent_collection': status.tile_inventory_grid,
             'icon_index': current_index,
             'actor_type': 'tile_inventory',
-            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': tile_inventory_grid.height}
+            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': status.tile_inventory_grid.height}
         })
 
     status.tile_inventory_info_display = constants.actor_creation_manager.create_interface_element({
-        #'coordinates': scaling.scale_coordinates(0, 0),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',

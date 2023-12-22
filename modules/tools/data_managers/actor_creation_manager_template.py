@@ -6,7 +6,7 @@ from ...actor_types.mob_types import vehicles, officers, dummy, workers
 from ...actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
 from ...actor_types.mob_types.npmob_types import native_warriors, beasts
 from ...interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons, \
-    europe_transactions
+    europe_transactions, inventory_interface
 from ...actor_display_tools import buttons as actor_display_buttons
 from ...actor_display_tools import labels as actor_display_labels
 from ...actor_display_tools import images as actor_display_images
@@ -152,6 +152,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = interface_elements.autofill_collection(input_dict)
         elif init_type == 'ordered collection':
             new_element = interface_elements.ordered_collection(input_dict)
+        elif init_type == 'inventory grid':
+            new_element = inventory_interface.inventory_grid(input_dict)
         elif init_type == 'tabbed collection':
             new_element = interface_elements.tabbed_collection(input_dict)
         if init_type.endswith('button'):
@@ -187,6 +189,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.anonymous_button(input_dict)
                 elif base == 'action':
                     new_element = buttons.action_button(input_dict)
+                elif base == 'scroll':
+                    new_element = buttons.scroll_button(input_dict)
 
                 #instructions buttons
                 elif base == 'instructions':
@@ -266,7 +270,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         elif init_type == 'country selection image': #^likewise
             new_element = buttons.country_selection_image(input_dict)
         elif init_type == 'item icon':
-            new_element = buttons.item_icon(input_dict)
+            new_element = inventory_interface.item_icon(input_dict)
         elif init_type == 'die':
             new_element = dice.die(input_dict)
         elif init_type == 'panel':

@@ -902,7 +902,7 @@ class button(interface_elements.interface_element):
                 market_utility.sell(status.displayed_tile, commodity, num_sold)
 
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
-                if status.displayed_tile_inventory.current_item:
+                if status.displayed_tile_inventory and status.displayed_tile_inventory.current_item:
                     actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
                 else:
                     actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, None)
@@ -1946,6 +1946,79 @@ class cycle_available_ministers_button(button):
         else:
             text_utility.print_to_screen('You are busy and cannot select other ministers.')
 
+class scroll_button(button):
+    '''
+    Button that increments or decrements a particular value of its parent collection
+    '''
+    def __init__(self, input_dict) -> None:
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'value_name': str value - Variable name of value being scrolled
+                'increment': int value - Amount to change attached value each time button is pressed
+        Output:
+            None
+        '''
+        self.value_name: str = input_dict['value_name']
+        self.increment: int = input_dict['increment']
+        input_dict['button_type'] = 'scroll'
+        super().__init__(input_dict)
+        if self.increment > 0:
+            self.parent_collection.scroll_down_button = self
+        elif self.increment < 0:
+            self.parent_collection.scroll_up_button = self
+
+    def on_click(self) -> None:
+        '''
+        Description:
+            When this button is clicked, increment/decrement the corresponding value of the parent collection and update its display
+        Input:
+            None
+        Output:
+            None
+        '''
+        if main_loop_utility.action_possible():
+            setattr(self.parent_collection, self.value_name, getattr(self.parent_collection, self.value_name) + self.increment)
+            self.parent_collection.scroll_update()
+
+    def can_show(self, skip_parent_collection=False) -> bool:
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button's attached collection needs to show a scroll button and would otherwise be shown
+        '''
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.parent_collection.show_scroll_button(self))
+
+    def update_tooltip(self) -> None:
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, describing its scroll functionality
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.increment > 0:
+            descriptor = 'down'
+        elif self.increment < 0:
+            descriptor = 'up'
+        self.set_tooltip(['Click to scroll ' + descriptor + ' ' + str(abs(self.increment)) + ' ' + self.value_name.replace('_', ' ')])
+
 class commodity_button(button):
     '''
     Button appearing near commodity prices label that can be clicked as a target for advertising campaigns
@@ -2344,213 +2417,6 @@ class cycle_autofill_button(button):
         self.parent_collection.search_start_index = current_cell.contained_mobs.index(self.parent_collection.autofill_actors[self.autofill_target_type]) + 1
         self.parent_collection.calibrate(status.displayed_mob)
         #start autofill search for corresponding target type at index right after the current target actor
-
-class item_icon(button):
-    '''
-    Button that can calibrate to an item 
-    '''
-    def __init__(self, input_dict):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'icon_index': int value - Index in inventory that this button will display
-        Output:
-            None
-        '''
-        self.icon_index: int = input_dict['icon_index']
-        self.current_item: str = None
-        self.in_inventory_capacity: bool = False
-        self.default_image_id = input_dict['image_id']
-        self.actor_type = input_dict['actor_type']
-        self.actor = 'none'
-        input_dict['button_type'] = 'item_icon'
-        super().__init__(input_dict)
-
-    def get_display_order(self):
-        '''
-        Description:
-            To determine whether cell is used in a particular configuration, convert
-                0  1  2  3  4  5  6  7  8
-                9  10 11 12 13 14 15 16 17
-                18 19 20 21 22 23 24 25 26
-            To
-                0  1  2 9  10 11 18 19 20
-                3  4  5 12 13 14 21 22 23
-                6  7  8 15 16 17 24 25 26
-            0-2: no change
-            3-5: add 6
-            6-8: add 12
-            9-11: subtract 6
-            12-14: no change
-            15-17: add 6
-            18-20: subtract 12
-            21-23: subtract 6
-            24-26: no change
-        Input:
-            None
-        Output:
-            int: Returns the "line number" of this item icon - if this number is < the number of items to display, this icon is active
-        '''
-        return(self.icon_index + {0: 0, 1: 6, 2: 12, 3: -6, 4: 0, 5: 6, 6: -12, 7: -6, 8: 0}[self.icon_index // 3])
-
-    def calibrate(self, new_actor):
-        '''
-        Description:
-            Attaches this button to the inputted actor and updates this button's image to that of the actor. May also display a shader over this button, if its particular
-                requirements are fulfilled
-        Input:
-            string/actor new_actor: The minister whose information is matched by this button. If this equals 'none', this button is detached from any ministers
-            bool override_exempt: Optional parameter that may be given to calibrate functions, does nothing for buttons
-        Output:
-            None
-        '''
-        self.actor = new_actor
-        if new_actor != 'none':
-            functional_capacity: int = max(new_actor.get_inventory_used(), new_actor.inventory_capacity)
-            display_index: int = self.get_display_order()
-            self.in_inventory_capacity = (functional_capacity >= display_index + 1 or new_actor.infinite_inventory_capacity)
-            if self.in_inventory_capacity: #if inventory capacity 9 >= index 8 + 1, allow. If inventory capacity 9 >= index 9 + 1, disallow
-                self.current_item = new_actor.check_inventory(display_index)
-                if self.current_item:
-                    if new_actor.inventory_capacity >= display_index + 1 or new_actor.infinite_inventory_capacity: # If item in capacity
-                        self.image.set_image(utility.combine(self.default_image_id, 'scenery/resources/large/' + self.current_item + '.png'))
-                    else: # If item over capacity
-                        self.image.set_image(['scenery/resources/large/' + self.current_item + '.png', 'misc/warning_icon.png'])
-                else:
-                    self.image.set_image(self.default_image_id)
-        super().calibrate(new_actor)
-
-    def draw(self):
-        '''
-        Description:
-            Draws this button below its choice notification, along with an outline if it is selected
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.showing:
-            if self == getattr(status, 'displayed_' + self.actor_type):
-                pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline, width=2)
-        super().draw()
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button can be shown - an item icon is shown if the corresponding actor has sufficient inventory capacity to fill this slot
-        Input:
-            None
-        Output:
-            boolean: Returns True if this button can appear, otherwise returns False
-        '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.in_inventory_capacity)
-
-    def update_tooltip(self):
-        '''
-        Description:
-            Sets this button's tooltip depending on its contained item
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.current_item:
-            self.set_tooltip([self.current_item.capitalize()])
-        else:
-            self.set_tooltip(['Empty'])
-
-    def on_click(self):
-        '''
-        Description:
-            Calibrates mob_inventory_info_display or tile_inventory_info_display to this icon, depending on this icon's actor type
-        Input:
-            None
-        Output:
-            None
-        '''
-        if not self.can_show(skip_parent_collection=True):
-            self.current_item = None
-        if self.current_item:
-            actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), self)
-            if self.actor_type == 'mob_inventory':
-                actor_utility.calibrate_actor_info_display(getattr(status, 'tile_inventory_info_display'), None)
-            elif self.actor_type == 'tile_inventory':
-                actor_utility.calibrate_actor_info_display(getattr(status, 'mob_inventory_info_display'), None)
-        else:
-            actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), None)
-
-    def transfer(self, amount):
-        '''
-        Description:
-            Drops or picks up the inputted amount of this tile's current item type, depending on if this is a tile or mob item icon
-        Input:
-            str/int amount: Amount of item to transfer, either 'all' or a number
-        Output:
-            None
-        '''
-        if main_loop_utility.action_possible():
-            if minister_utility.positions_filled():
-                displayed_mob = status.displayed_mob
-                displayed_tile = status.displayed_tile
-                if displayed_mob and displayed_tile and displayed_mob.images[0].current_cell.tile == displayed_tile:
-                    if amount == 'all':
-                        if self.actor_type == 'tile_inventory':
-                            amount = displayed_tile.get_inventory(self.current_item)
-                        elif self.actor_type == 'mob_inventory':
-                            amount = displayed_mob.get_inventory(self.current_item)
-                    elif self.actor_type == 'mob_inventory' and amount > displayed_mob.get_inventory(self.current_item):
-                        text_utility.print_to_screen('This unit does not have enough ' + self.current_item + ' to transfer.')
-                        return
-                    elif self.actor_type == 'tile_inventory' and amount > displayed_tile.get_inventory(self.current_item):
-                        text_utility.print_to_screen('This tile does not have enough ' + self.current_item + ' to transfer.')
-                        return
-                    
-                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_tile.cell.has_intact_building('train_station'):
-                        text_utility.print_to_screen('A train can only transfer cargo at a train station.')
-                        return
-                    
-                    if self.actor_type == 'tile_inventory':
-                        if displayed_mob.get_inventory_remaining(amount) < 0:
-                            amount = displayed_mob.get_inventory_remaining()
-                            if amount == 0:
-                                text_utility.print_to_screen('This unit can not pick up any ' + self.current_item + '.')
-                                return
-
-                    if displayed_mob.sentry_mode:
-                        displayed_mob.set_sentry_mode(False)
-
-                    if self.actor_type == 'tile_inventory': # Pick up item(s)
-                        displayed_mob.change_inventory(self.current_item, amount)
-                        displayed_tile.change_inventory(self.current_item, amount * -1)
-                        actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
-                        actor_utility.calibrate_actor_info_display(status.tile_info_display, displayed_tile)
-
-                    elif self.actor_type == 'mob_inventory': # Drop item(s)
-                        displayed_tile.change_inventory(self.current_item, amount)
-                        displayed_mob.change_inventory(self.current_item, amount * -1)
-                        actor_utility.select_interface_tab(status.tile_tabbed_collection, status.tile_inventory_collection)
-                        actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
-
-                    self.on_click()
-
-                elif self.actor_type == 'mob_inventory':
-                    text_utility.print_to_screen('There is no tile to transfer this commodity to.')
-                elif self.actor_type == 'tile_inventory':
-                    text_utility.print_to_screen('There is no unit to transfer this commodity to.')
-        else:
-            text_utility.print_to_screen('You are busy and cannot transfer commodities.')
 
 class action_button(button):
     '''

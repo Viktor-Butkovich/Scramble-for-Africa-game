@@ -179,6 +179,7 @@ class buy_commodity_button(button):
                     if random.randrange(1, 7) == 1: #1/6 chance
                         market_utility.change_price('consumer goods', 1)
                         text_utility.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.')
+                    actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
             else:
                 text_utility.print_to_screen('You do not have enough money to purchase this commodity')
         else:

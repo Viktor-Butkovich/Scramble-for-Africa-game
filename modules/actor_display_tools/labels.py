@@ -750,12 +750,21 @@ class actor_display_label(label):
                         self.set_label(self.message_start + str(self.actor.cell.get_building('village').available_workers))
 
             elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
+                inventory_used = self.actor.get_inventory_used()
                 if self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
-                    self.set_label(self.message_start + 'n/a')
+                    text = self.message_start + 'n/a'
                 elif self.actor.infinite_inventory_capacity:
-                    self.set_label(self.message_start + 'unlimited')
+                    text = self.message_start + 'unlimited'
                 else:
-                    self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
+                    text = self.message_start + str(inventory_used) + '/' + str(self.actor.inventory_capacity)
+                inventory_grid = getattr(status, self.actor_type + '_inventory_grid')
+                if inventory_grid.inventory_page > 0:
+                    minimum = (inventory_grid.inventory_page * 27) + 1
+                    functional_capacity = max(inventory_used, self.actor.inventory_capacity)
+                    maximum = min(minimum + 26, functional_capacity)
+                    if maximum >= minimum:
+                        text += ' (' + str(minimum) + '-' + str(maximum) + ')'
+                self.set_label(text)
                     
             elif self.actor_label_type == 'minister':
                 if self.actor.is_pmob and self.actor.controlling_minister != 'none':
