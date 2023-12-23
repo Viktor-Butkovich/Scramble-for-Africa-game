@@ -655,6 +655,22 @@ class free_image(image):
         '''
         return(False)
 
+    def get_actor_type(self) -> str:
+        '''
+        Description:
+            Recursively finds the type of actor this interface is attached to
+        Input:
+            None
+        Output:
+            str: Returns type of actor this interface is attached to
+        '''
+        if hasattr(self, 'actor_type'):
+            return(self.actor_type)
+        elif self.has_parent_collection:
+            return(self.parent_collection.get_actor_type())
+        else:
+            return(None)
+
 class background_image(free_image):
     '''
     Background image covering entire screen - designed to blit efficiently

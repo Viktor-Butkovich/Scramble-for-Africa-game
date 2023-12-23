@@ -578,11 +578,14 @@ class minister():
         else:
             status.available_minister_list.append(self)
             constants.available_minister_left_index = len(status.available_minister_list) - 3 #move available minister display to newly fired minister
+
         for current_minister_type_image in status.minister_image_list:
-            if current_minister_type_image.minister_type == new_position:
-                current_minister_type_image.calibrate(self)
-            elif current_minister_type_image.minister_type == old_position:
-                current_minister_type_image.calibrate('none')
+            if current_minister_type_image.get_actor_type() == None:
+                if current_minister_type_image.minister_type == new_position:
+                    current_minister_type_image.calibrate(self)
+                elif current_minister_type_image.minister_type == old_position:
+                    current_minister_type_image.calibrate('none')
+
         if status.displayed_minister == self:
             minister_utility.calibrate_minister_info_display(self) #update minister label
 

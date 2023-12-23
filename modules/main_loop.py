@@ -172,10 +172,6 @@ def main_loop():
                 if current_button.has_released:
                     current_button.showing_outline = False
 
-        #if not flags.loading:
-        #    main_loop_utility.update_display()
-        #else:
-        #    main_loop_utility.draw_loading_screen()
         constants.current_time = time.time()
         if constants.current_time - constants.last_selection_outline_switch > 1:
             flags.show_selection_outlines = not flags.show_selection_outlines

@@ -317,7 +317,6 @@ class trial(action.campaign):
                 'notification_type': 'action',
                 'audio': 'guilty'
             })
-            
             defense.appoint('none')
             minister_utility.calibrate_minister_info_display(None)
             defense.respond('prison')

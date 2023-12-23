@@ -49,8 +49,12 @@ except Exception: #displays error message and records error message in crash log
 # Change visual size of porter boxes
 # Replace resource production facility images
 # Add equipment
+#   Battalions should be 1 weaker, and rifles should give a +1 to combat strength - soldiers without rifles should have uniforms but no rifles in the image
 # Add random events
 # Add debug settings menu within game, rather than needing to edit .json out of game
+# Add cosmetic flag to minister screen
+# Fix scaling issue with inventory interface - going over edge of safe click panel
+# Add transfer all button to inventory that ignores which commodities are involved, as well as a sell all button in Europe
 #
 #   bugfixes
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat

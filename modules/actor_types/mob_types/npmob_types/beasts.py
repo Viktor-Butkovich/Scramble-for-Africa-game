@@ -101,7 +101,7 @@ class beast(npmob):
         target_list = []
         current_cell = self.grids[0].find_cell(self.x, self.y)
         possible_cells = current_cell.adjacent_list + [current_cell]
-        if random.randrange(1, 7) >= 3: #1/3 chance of moving to pmob if present, 2/3 chance of moving randomly, possibly torward pmob but not necessarily
+        if random.randrange(1, 7) >= 3 and not constants.effect_manager.effect_active('nine_mortal_men'): #1/3 chance of moving to pmob if present, 2/3 chance of moving randomly, possibly torward pmob but not necessarily
             ignoring_pmobs = True
         else:
             ignoring_pmobs = False

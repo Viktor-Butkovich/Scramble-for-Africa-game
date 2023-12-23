@@ -1317,18 +1317,20 @@ def inventory_interface():
     }
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    inventory_cell_size = scaling.scale_height(34)
+    inventory_cell_height = scaling.scale_height(34)
+    inventory_cell_width = scaling.scale_width(34)
+
     status.mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
-        'height': (inventory_cell_size + scaling.scale_height(5)) * 3,
+        'height': (inventory_cell_height + scaling.scale_height(5)) * 3,
         'init_type': 'inventory grid',
         'parent_collection': status.mob_inventory_collection,
-        'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
+        'second_dimension_increment': inventory_cell_width + scaling.scale_height(5)
     })
     for current_index in range(27):
         constants.actor_creation_manager.create_interface_element({
-            'width': inventory_cell_size,
-            'height': inventory_cell_size,
+            'width': inventory_cell_width,
+            'height': inventory_cell_height,
             'image_id': 'buttons/default_button.png',
             'init_type': 'item icon',
             'parent_collection': status.mob_inventory_grid,
@@ -1409,38 +1411,38 @@ def inventory_interface():
 
     status.tile_inventory_grid = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
-        'height': (inventory_cell_size + scaling.scale_height(5)) * 3,
+        'height': (inventory_cell_height + scaling.scale_height(5)) * 3,
         'init_type': 'inventory grid',
         'parent_collection': status.tile_inventory_collection,
-        'second_dimension_increment': inventory_cell_size + scaling.scale_height(5)
+        'second_dimension_increment': inventory_cell_width + scaling.scale_height(5)
     })
 
     tile_scroll_up_button = constants.actor_creation_manager.create_interface_element({
-        'width': inventory_cell_size,
-        'height': inventory_cell_size,
+        'width': inventory_cell_width,
+        'height': inventory_cell_height,
         'parent_collection': status.tile_inventory_grid,
         'image_id': 'buttons/cycle_ministers_up_button.png',
         'value_name': 'inventory_page',
         'increment': -1,
-        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_size), 'y_offset': status.tile_inventory_grid.height - ((inventory_cell_size + scaling.scale_height(5)) * 3) + scaling.scale_height(5)},
+        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_width), 'y_offset': status.tile_inventory_grid.height - ((inventory_cell_height + scaling.scale_height(5)) * 3) + scaling.scale_height(5)},
         'init_type': 'scroll button'
     })
 
     tile_scroll_down_button = constants.actor_creation_manager.create_interface_element({
-        'width': inventory_cell_size,
-        'height': inventory_cell_size,
+        'width': inventory_cell_width,
+        'height': inventory_cell_height,
         'parent_collection': status.tile_inventory_grid,
         'image_id': 'buttons/cycle_ministers_down_button.png',
         'value_name': 'inventory_page',
         'increment': 1,
-        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_size), 'y_offset': status.tile_inventory_grid.height - (inventory_cell_size)},
+        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_width), 'y_offset': status.tile_inventory_grid.height - (inventory_cell_height)},
         'init_type': 'scroll button'
     })
 
     for current_index in range(27):
         constants.actor_creation_manager.create_interface_element({
-            'width': inventory_cell_size,
-            'height': inventory_cell_size,
+            'width': inventory_cell_width,
+            'height': inventory_cell_height,
             'image_id': 'buttons/default_button.png',
             'init_type': 'item icon',
             'parent_collection': status.tile_inventory_grid,
