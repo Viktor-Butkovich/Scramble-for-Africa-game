@@ -407,7 +407,8 @@ class slave_worker(worker):
             'worker_type': 'African',
             'select_on_creation': (self == status.displayed_mob)
         })
-        new_worker.set_automatically_replace(self.automatically_replace)
+        new_worker.set_automatically_replace(True)
+        # Slaves will be set to not automatically replace after ending slave trade - freed slaves should restart automatic replacement
         if self.in_vehicle:
             new_worker.embark_vehicle(self.vehicle, focus = False)
             self.disembark_vehicle(self.vehicle, focus = False)

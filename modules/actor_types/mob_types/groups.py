@@ -88,15 +88,18 @@ class group(pmob):
             input_dict['name'] = 'African workers'
             input_dict['init_type'] = 'workers'
             input_dict['worker_type'] = 'African'
-        elif new_worker_type == 'slaves':
+        elif new_worker_type == 'slave':
             constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
             input_dict['image'] = 'mobs/slave workers/default.png'
             input_dict['name'] = 'slave workers'
-            input_dict['init_type'] = 'slaves'
+            input_dict['init_type'] = 'slave'
             input_dict['purchased'] = False
         previous_selected = status.displayed_mob
         new_worker = constants.actor_creation_manager.create(False, input_dict)
-        new_worker.set_automatically_replace(self.worker.automatically_replace)
+        if self.worker.worker_type == 'slave':
+            new_worker.set_automatically_replace(True)
+        else:
+            new_worker.set_automatically_replace(self.worker.automatically_replace)
         self.worker.fire(wander = False)
         self.worker = new_worker
         self.worker.update_image_bundle()
