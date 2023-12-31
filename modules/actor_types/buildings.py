@@ -779,7 +779,6 @@ class resource_building(building):
                 if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
-                        current_work_crew.attrition_death('worker')
                         worker_attrition_list.append(current_work_crew)
         for current_work_crew in worker_attrition_list:
             current_work_crew.attrition_death('worker')
