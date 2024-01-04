@@ -731,5 +731,5 @@ def manage_lore():
         None
     '''
     if status.current_lore_mission == None:
-        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or constants.effect_manager.effect_active('instant_lore_mission'):
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2) or constants.effect_manager.effect_active('instant_lore_mission'):
             constants.actor_creation_manager.create_lore_mission(False, {})
