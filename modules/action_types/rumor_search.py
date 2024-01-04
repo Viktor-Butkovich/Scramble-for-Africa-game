@@ -195,7 +195,7 @@ class rumor_search(action.action):
                 flags.ongoing_action = True
                 status.ongoing_action_type = 'rumor_search'
                 constants.notification_manager.display_notification({
-                    'message': text,
+                    'message': text + 'Click to remove this notification. /n /n',
                     'notification_type': 'off_tile_exploration',
                     'extra_parameters': {
                         'cell': status.strategic_map_grid.find_cell(coordinates[0], coordinates[1]),

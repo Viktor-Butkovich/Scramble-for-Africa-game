@@ -57,9 +57,9 @@ def start_player_turn(first_turn = False):
             if current_building.building_type == 'resource':
                 current_building.reattach_work_crews()
         manage_attrition() #have attrition before or after enemy turn? Before upkeep?
+        manage_production()
         reset_mobs('pmobs')
         manage_villages()
-        manage_production()
         manage_public_opinion()
         manage_upkeep()
         manage_loans()
@@ -158,7 +158,7 @@ def remove_excess_inventory():
             current_tile = current_cell.tile
             if len(current_tile.get_held_commodities()) > 0:
                 current_tile.remove_excess_inventory()
-    
+
 def manage_production():
     '''
     Description:
@@ -181,9 +181,8 @@ def manage_production():
                     else:
                         expected_production[current_resource_building.resource_type] += 0.5 * current_resource_building.efficiency
             current_resource_building.produce()
-            if len(current_resource_building.contained_work_crews) == 0:
-                if not current_resource_building.resource_type in constants.attempted_commodities:
-                    constants.attempted_commodities.append(current_resource_building.resource_type)
+            if not current_resource_building.resource_type in constants.attempted_commodities:
+                constants.attempted_commodities.append(current_resource_building.resource_type)
     manage_production_report(expected_production)
 
 def manage_production_report(expected_production):

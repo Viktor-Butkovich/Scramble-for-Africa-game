@@ -56,9 +56,19 @@ except Exception: #displays error message and records error message in crash log
 # Fix scaling issue with inventory interface - going over edge of safe click panel
 # Add transfer all button to inventory that ignores which commodities are involved, as well as a sell all button in Europe
 # Change game to be fullscreen by default, along with debug setting to make it windowed
+# Put __init__ file in each subfolder to organize module imports
+# Add autosave and multiple save slots
+# Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
+# When steamship/steamboat moves to non-port land from water, disembark and move all passengers - any passengers w/o enough movement should stay on vehicle, and can't move
+#   into npmobs
 #
 #   bugfixes
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
 # Find some solution to overlapping 3rd work crew and text box
 # incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
 # Sell commodities button should go to minister screen if not all ministers appointed
+
+# Notes: Possibly allow choosing minister but not confirming yet
+#   Don't allow any actions while any notifications are visible, even purely informational ones
+#   Make sure movement buttons move the selected unit
+#   Add way to repeatedly do action every turn, especially for advertising/public opinion
