@@ -95,8 +95,8 @@ class country:
         Output:
             string: Returns a descriptor string for the effect of this country's effect
         '''
-        if self.country_effect.effect_type == 'advertising_campaign_plus_modifier':
-            return('Bonus when advertising')
+        if self.country_effect.effect_type == 'construction_plus_modifier':
+            return('Bonus for construction')
         elif self.country_effect.effect_type == 'conversion_plus_modifier':
             return('Bonus when converting natives')
         elif self.country_effect.effect_type == 'attack_plus_modifier':

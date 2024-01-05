@@ -295,7 +295,7 @@ class actor():
                         current_cell = self.images[0].current_cell
                     else:
                         return() #only surface-level mobs can have inventories and need to roll for attrition
-                    
+
                 if (random.randrange(1, 7) <= 2 and transportation_minister.check_corruption()): #1/18 chance of corruption check to take commodities - 1/36 chance for most corrupt to steal
                     self.trigger_inventory_attrition(transportation_minister, True)
                     return()

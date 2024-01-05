@@ -454,11 +454,14 @@ class combat(action.action):
         self.current_roll_modifier = self.generate_current_roll_modifier(opponent=False)
         self.opponent_roll_modifier = self.generate_current_roll_modifier(opponent=True)
         if not self.defending:
+            action_type = self.action_type
+            if action_type == 'combat':
+                action_type = 'attack'
             minister_rolls = self.current_unit.controlling_minister.attack_roll_to_list( #minister rolls need to be made with enemy roll in mind, as corrupt result needs to be inconclusive
                 self.current_roll_modifier,
                 self.opponent_roll_modifier,
                 price,
-                self.action_type,
+                action_type,
                 num_dice
             )
             results = minister_rolls

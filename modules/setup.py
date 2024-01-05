@@ -259,7 +259,7 @@ def def_countries():
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier')
+    british_country_effect = effects.effect('british_country_modifier', 'construction_plus_modifier')
 
     status.Britain = countries.country({
         'name': 'Britain',

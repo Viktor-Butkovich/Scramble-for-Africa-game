@@ -930,19 +930,23 @@ class minister():
                 else:
                     print('Minister gave modifier of ' + str(modifier) + ' to ' + roll_type + ' roll.')
         if constants.effect_manager.effect_active(roll_type + '_plus_modifier'):
-            if random.randrange(1, 3) == 1:
-                modifier += 1
-                if constants.effect_manager.effect_active('show_modifiers'):
-                    print('Country gave modifier of +1 to ' + roll_type + ' roll.')
-            elif constants.effect_manager.effect_active('show_modifiers'):
-                print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
+            if not (roll_type == 'construction' and status.displayed_mob.officer.officer_type != 'engineer'):
+                # Exclude non-construction gang units from construction modifiers
+                if random.randrange(1, 3) == 1:
+                    modifier += 1
+                    if constants.effect_manager.effect_active('show_modifiers'):
+                        print('Country gave modifier of +1 to ' + roll_type + ' roll.')
+                elif constants.effect_manager.effect_active('show_modifiers'):
+                    print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
         elif constants.effect_manager.effect_active(roll_type + '_minus_modifier'):
-            if random.randrange(1, 3) == 1:
-                modifier -= 1
-                if constants.effect_manager.effect_active('show_modifiers'):
-                    print('Country gave modifier of -1 to ' + roll_type + ' roll.')
-            elif constants.effect_manager.effect_active('show_modifiers'):
-                print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
+            if not (roll_type == 'construction' and status.displayed_mob.officer.officer_type != 'engineer'):
+                # Exclude non-construction gang units from construction modifiers
+                if random.randrange(1, 3) == 1:
+                    modifier -= 1
+                    if constants.effect_manager.effect_active('show_modifiers'):
+                        print('Country gave modifier of -1 to ' + roll_type + ' roll.')
+                elif constants.effect_manager.effect_active('show_modifiers'):
+                    print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
         return(modifier)
 
     def remove_complete(self):
