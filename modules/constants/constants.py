@@ -378,28 +378,11 @@ recruitment_costs: Dict[str, int] = {
     'steamship': 10,
     'officer': 5
 }
-num_african_workers: int = 0
-african_worker_upkeep: float = 0.0
-initial_african_worker_upkeep: float = 4.0
-min_african_worker_upkeep: float = 0.5
-
-num_european_workers: int = 0
-european_worker_upkeep: float = 0.0
-initial_european_worker_upkeep: float = 6.0
-min_european_worker_upkeep: float = 0.5
-
-num_slave_workers: int = 0
-initial_slave_worker_upkeep: float = 2.0
-slave_worker_upkeep: float = 0.0
-base_slave_recruitment_cost: float = 5.0
-recruitment_costs['slave workers'] = base_slave_recruitment_cost
-min_slave_worker_recruitment_cost: float = 2.0
 
 num_wandering_workers: int = 0
-num_church_volunteers: int = 0
 
-worker_upkeep_fluctuation_amount: float = 0.25
-slave_recruitment_cost_fluctuation_amount: float = 1.0
+worker_upkeep_increment: float = 0.25
+slave_recruitment_cost_increment: float = 1.0
 base_upgrade_price: float = 20.0 #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 consumer_goods_starting_price: int = 1
 

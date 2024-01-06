@@ -7,6 +7,7 @@ from ...interface_types import grids
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
+import modules.constructs.worker_types as worker_types
 
 class save_load_manager_template():
     '''
@@ -47,9 +48,6 @@ class save_load_manager_template():
         self.copied_constants.append('commodity_prices')
         self.copied_constants.append('recruitment_costs')
         self.copied_constants.append('num_wandering_workers')
-        self.copied_constants.append('african_worker_upkeep')
-        self.copied_constants.append('european_worker_upkeep')
-        self.copied_constants.append('slave_worker_upkeep')
         self.copied_constants.append('slave_traders_strength')
         self.copied_constants.append('slave_traders_natural_max_strength')
         self.copied_constants.append('completed_lore_mission_types')
@@ -167,15 +165,9 @@ class save_load_manager_template():
 
         constants.available_minister_left_index = -2
 
-        constants.num_african_workers = 0
-        constants.num_european_workers = 0
-        constants.num_slave_workers = 0
+        for worker_type_name in status.worker_types:
+            status.worker_types[worker_type_name].reset()
         constants.num_wandering_workers = 0
-        constants.num_church_volunteers = 0
-        constants.african_worker_upkeep = constants.initial_african_worker_upkeep
-        constants.european_worker_upkeep = constants.initial_european_worker_upkeep
-        constants.slave_worker_upkeep = constants.initial_slave_worker_upkeep
-        constants.recruitment_costs['slave workers'] = constants.base_slave_recruitment_cost
         actor_utility.reset_action_prices()
         for current_commodity in constants.commodity_types:
             constants.sold_commodities[current_commodity] = 0
@@ -238,7 +230,8 @@ class save_load_manager_template():
             if not current_grid.is_mini_grid: #minimap grid doesn't need to be saved
                 saved_grid_dicts.append(current_grid.to_save_dict())
 
-            
+        saved_worker_types = [status.worker_types[worker_type_name].to_save_dict() for worker_type_name in status.worker_types]
+
         saved_actor_dicts = []
         for current_pmob in status.pmob_list:
             if not (current_pmob.in_group or current_pmob.in_vehicle or current_pmob.in_building): #containers save their contents and load them in, contents don't need to be saved/loaded separately
@@ -273,6 +266,7 @@ class save_load_manager_template():
             pickle.dump(saved_statuses, handle)
             pickle.dump(saved_flags, handle)
             pickle.dump(saved_grid_dicts, handle)
+            pickle.dump(saved_worker_types, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
             pickle.dump(saved_lore_mission_dicts, handle)
@@ -301,6 +295,7 @@ class save_load_manager_template():
                 saved_statuses = pickle.load(handle)
                 saved_flags = pickle.load(handle)
                 saved_grid_dicts = pickle.load(handle)
+                saved_worker_types = pickle.load(handle)
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
                 saved_lore_mission_dicts = pickle.load(handle)
@@ -391,6 +386,9 @@ class save_load_manager_template():
             actor_utility.set_slave_traders_strength(0)
         else:
             actor_utility.set_slave_traders_strength(constants.slave_traders_strength)
+
+        for current_worker_type in saved_worker_types:
+            worker_types.worker_type(True, current_worker_type)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:

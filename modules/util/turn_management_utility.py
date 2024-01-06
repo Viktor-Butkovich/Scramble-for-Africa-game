@@ -308,28 +308,28 @@ def manage_worker_price_changes():
     '''
     european_worker_roll = random.randrange(1, 7)
     if european_worker_roll >= 5:
-        current_price = constants.european_worker_upkeep
-        changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
-        if changed_price >= constants.min_european_worker_upkeep:
-            constants.european_worker_upkeep = changed_price
+        current_price = status.worker_types['European'].upkeep
+        changed_price = round(current_price - constants.worker_upkeep_increment, 2)
+        if changed_price >= status.worker_types['European'].min_upkeep:
+            status.worker_types['European'].upkeep = changed_price
             text_utility.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
     elif european_worker_roll == 1:
-        current_price = constants.european_worker_upkeep
-        changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
-        constants.european_worker_upkeep = changed_price
+        current_price = status.worker_types['European'].upkeep
+        changed_price = round(current_price + constants.worker_upkeep_increment, 2)
+        status.worker_types['European'].upkeep = changed_price
         text_utility.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
     if constants.slave_traders_strength > 0:
         slave_worker_roll = random.randrange(1, 7)
         if slave_worker_roll == 6:
-            current_price = constants.recruitment_costs['slave workers']
-            changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
-            if changed_price >= constants.min_slave_worker_recruitment_cost:
-                constants.recruitment_costs['slave workers'] = changed_price
+            current_price = status.worker_types['slave'].recruitment_cost
+            changed_price = round(current_price - constants.slave_recruitment_cost_increment, 2)
+            if changed_price >= status.worker_types['slave'].min_recruitment_cost:
+                status.worker_types['slave'].set_recruitment_cost(changed_price)
                 text_utility.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         elif slave_worker_roll == 1:
-            current_price = constants.recruitment_costs['slave workers']
-            changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
-            constants.recruitment_costs['slave workers'] = changed_price
+            current_price = status.worker_types['slave'].recruitment_cost
+            changed_price = round(current_price + constants.slave_recruitment_cost_increment, 2)
+            status.worker_types['slave'].set_recruitment_cost(changed_price)
             text_utility.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         
 def manage_worker_migration(): 

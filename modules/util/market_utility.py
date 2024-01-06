@@ -106,15 +106,15 @@ def attempt_worker_upkeep_change(change_type, worker_type):
         None
     '''
     if random.randrange(1, 7) >= 4: #half chance of change
-        current_price = getattr(constants, worker_type.lower() + '_worker_upkeep')
+        current_price = status.worker_types[worker_type].upkeep
         if change_type == 'increase':
-            changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
-            setattr(constants, worker_type.lower() + '_worker_upkeep', changed_price)
+            changed_price = round(current_price + constants.worker_upkeep_increment, 2)
+            status.worker_types[worker_type].upkeep = changed_price
             text_utility.print_to_screen('Hiring ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker increased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         elif change_type == 'decrease':
-            changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
-            if changed_price >= getattr(constants, 'min_' + worker_type.lower() + '_worker_upkeep'):
-                setattr(constants, worker_type.lower() + '_worker_upkeep', changed_price)
+            changed_price = round(current_price - constants.worker_upkeep_increment, 2)
+            if changed_price >= status.worker_types[worker_type].min_upkeep:
+                status.worker_types[worker_type].upkeep = changed_price
                 text_utility.print_to_screen('Adding ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker to the labor pool decreased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         constants.money_label.check_for_updates()
 
@@ -129,15 +129,15 @@ def attempt_slave_recruitment_cost_change(change_type):
         None
     '''
     if random.randrange(1, 7) >= 4:
-        current_price = constants.recruitment_costs['slave workers']
+        current_price = status.worker_types['slave'].recruitment_cost
         if change_type == 'increase':
-            changed_price = round(current_price + constants.slave_recruitment_cost_fluctuation_amount, 2)
-            constants.recruitment_costs['slave workers'] = changed_price
+            changed_price = round(current_price + constants.slave_recruitment_cost_increment, 2)
+            status.worker_types['slave'].set_recruitment_cost(changed_price)
             text_utility.print_to_screen('Buying slave workers increased the recruitment cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         elif change_type == 'decrease':
-            changed_price = round(current_price - constants.slave_recruitment_cost_fluctuation_amount, 2)
-            if changed_price >= constants.min_slave_worker_recruitment_cost:
-                constants.recruitment_costs['slave workers'] = changed_price
+            changed_price = round(current_price - constants.slave_recruitment_cost_increment, 2)
+            if changed_price >= status.worker_types['slave'].min_recruitment_cost:
+                status.worker_types['slave'].set_recruitment_cost(changed_price)
                 text_utility.print_to_screen('Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
 
 def calculate_subsidies(projected = False):
@@ -174,11 +174,10 @@ def calculate_total_worker_upkeep():
     Output:
         double: Returns the total upkeep of the company's workers
     '''
-    total_african_worker_upkeep = round(constants.num_african_workers * constants.african_worker_upkeep, 2)
-    total_european_worker_upkeep = round(constants.num_european_workers * constants.european_worker_upkeep, 2)
-    total_slave_worker_upkeep = round(constants.num_slave_workers * constants.slave_worker_upkeep, 2)
-    total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
-    return(total_upkeep)
+    total_upkeep = 0.0
+    for current_worker_type in status.worker_types:
+        total_upkeep += status.worker_types[current_worker_type].get_total_upkeep()
+    return(round(total_upkeep, 2))
 
 def calculate_end_turn_money_change():
     '''

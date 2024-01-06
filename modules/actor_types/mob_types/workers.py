@@ -39,14 +39,12 @@ class worker(pmob):
         self.is_worker = True
         self.is_church_volunteers = False
         self.worker_type = input_dict['worker_type'] #European, African, religious, slave
-        
+        status.worker_types[self.worker_type].number += 1
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
-            constants.num_european_workers += 1
             if not from_save:
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
             
         elif self.worker_type == 'African':
-            constants.num_african_workers += 1
             if not from_save:
                 market_utility.attempt_worker_upkeep_change('increase', self.worker_type)
                 
@@ -264,10 +262,7 @@ class worker(pmob):
             None
         '''
         super().remove()
-        if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
-            constants.num_european_workers -= 1
-        elif self.worker_type == 'African':
-            constants.num_african_workers -= 1
+        status.worker_types[self.worker_type].number -= 1
         constants.money_label.check_for_updates()
 
     def image_variants_setup(self, from_save, input_dict):
@@ -350,7 +345,6 @@ class slave_worker(worker):
                 if not resulting_public_opinion == current_public_opinion:
                     text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
                 constants.evil_tracker.change(6)
-        constants.num_slave_workers += 1
         self.set_controlling_minister_type(constants.type_minister_dict['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for is_worker changing
@@ -413,19 +407,6 @@ class slave_worker(worker):
             new_worker.embark_vehicle(self.vehicle, focus = False)
             self.disembark_vehicle(self.vehicle, focus = False)
         self.fire(wander = False)
-        
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        constants.num_slave_workers -= 1
-        constants.money_label.check_for_updates()
 
 class church_volunteers(worker):
     '''
@@ -454,17 +435,3 @@ class church_volunteers(worker):
         input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict)
         self.set_controlling_minister_type(constants.type_minister_dict['religion'])
-        constants.num_church_volunteers += 1
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        constants.num_church_volunteers -= 1
-        constants.money_label.check_for_updates()

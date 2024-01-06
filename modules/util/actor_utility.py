@@ -126,13 +126,13 @@ def update_descriptions(target = 'all'):
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
                 
         elif current_target == 'European workers':
-            text_list.append('European workers have an upkeep of ' + str(constants.european_worker_upkeep) + ' money each turn.')
+            text_list.append('European workers have an upkeep of ' + str(status.worker_types['European'].upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of European workers hired or sent as replacements may increase the upkeep of all European workers.')
             text_list.append('European workers tend to be more susceptible to attrition but are more accustomed to using modern weaponry.')
             
         elif current_target == 'slave workers':
-            text_list.append('Slave workers have a constant upkeep of ' + str(constants.slave_worker_upkeep) + ' money each turn.')
+            text_list.append('Slave workers have a constant upkeep of ' + str(status.worker_types['slave'].upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
@@ -142,14 +142,14 @@ def update_descriptions(target = 'all'):
                 text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
             
         elif current_target == 'slums workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(status.worker_types['African'].upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
             
         elif current_target == 'village workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(status.worker_types['African'].upkeep) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')

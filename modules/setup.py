@@ -12,6 +12,7 @@ import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
 import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
+import modules.constructs.worker_types as worker_types
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
@@ -140,6 +141,34 @@ def misc():
     anchor = constants.actor_creation_manager.create_interface_element(
         {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}
     ) #rect at original location prevents collection from moving unintentionally when resizing
+
+def worker_types_config():
+    '''
+    Description:
+        Defines worker type templates
+    Input:
+        None
+    Output:
+        None
+    '''
+    worker_types.worker_type(False, {
+        'adjective': 'European',
+        'upkeep': 6.0
+    })
+    worker_types.worker_type(False, {
+        'adjective': 'African',
+        'upkeep': 4.0
+    })
+    worker_types.worker_type(False, {
+        'adjective': 'slave',
+        'recruitment_cost': 5.0,
+        'upkeep': 2.0
+    })
+    worker_types.worker_type(False, {
+        'adjective': 'religious',
+        'name': 'church volunteers',
+        'upkeep': 0.0
+    })
 
 def terrains():
     '''
