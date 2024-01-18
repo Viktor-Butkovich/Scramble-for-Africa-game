@@ -1083,6 +1083,7 @@ class switch_theatre_button(button):
                             current_mob.select()
                         current_mob.clear_automatic_route()
                         current_mob.end_turn_destination = 'none'
+                        current_mob.add_to_turn_queue()
                         flags.choosing_destination = True
                 else:
                     text_utility.print_to_screen('You are inland and cannot cross the ocean.') 

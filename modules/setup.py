@@ -159,6 +159,10 @@ def worker_types_config():
         'adjective': 'African',
         'upkeep': 4.0
     })
+    #worker_types.worker_type(False, {
+    #    'adjective': 'Asian',
+    #    'upkeep': 4.0
+    #})
     worker_types.worker_type(False, {
         'adjective': 'slave',
         'recruitment_cost': 5.0,

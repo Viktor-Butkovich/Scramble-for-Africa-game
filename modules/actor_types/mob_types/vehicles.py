@@ -54,11 +54,9 @@ class vehicle(pmob):
             self.selection_sound()
         else: #create crew and passengers through recruitment_manager and embark them
             if input_dict['crew'] == 'none':
-                #self.crew = 'none'
                 self.set_crew('none')
             else:
                 constants.actor_creation_manager.create(True, input_dict['crew']).crew_vehicle(self) #creates worker and merges it as crew
-                #print(self.image_dict)
             for current_passenger in input_dict['passenger_dicts']:
                 constants.actor_creation_manager.create(True, current_passenger).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
@@ -66,11 +64,10 @@ class vehicle(pmob):
         if not self.has_crew:
             self.remove_from_turn_queue()
         if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
 
-    def set_crew(self, new_crew): #continue adding set_crew
+    def set_crew(self, new_crew):
         '''
         Description:
             Sets this vehicle's crew to the inputted workers

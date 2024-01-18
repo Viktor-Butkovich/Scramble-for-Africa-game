@@ -109,8 +109,7 @@ class group(pmob):
             self.select()
         elif previous_selected:
             previous_selected.select()
-
-        if self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
+        elif self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
             actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):

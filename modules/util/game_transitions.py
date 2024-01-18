@@ -24,20 +24,16 @@ def cycle_player_turn(start_of_turn = False):
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0] == status.displayed_mob: #only print no other units message if there is only 1 unit in turn queue and it is already selected
             text_utility.print_to_screen('There are no other units left to move this turn.')
-        if constants.current_game_mode == 'europe' and not status.europe_grid in turn_queue[0].grids:
-            set_game_mode('strategic')
         if turn_queue[0] != status.displayed_mob:
             turn_queue[0].selection_sound()
         else: 
             turn_queue.append(turn_queue.pop(0)) #if unit is already selected, move it to the end and shift to the next one
-        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         cycled_mob = turn_queue[0]
+        if constants.current_game_mode == 'europe' and not status.europe_grid in cycled_mob.grids:
+            set_game_mode('strategic')
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         cycled_mob.select()
         cycled_mob.move_to_front()
-        if cycled_mob.grids[0].mini_grid != 'none':
-            cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
-        else:
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, cycled_mob.images[0].current_cell.tile)
         if not start_of_turn:
             turn_queue.append(turn_queue.pop(0))
 

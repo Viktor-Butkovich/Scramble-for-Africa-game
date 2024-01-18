@@ -225,7 +225,6 @@ def main_loop():
                         if current_enemy.visible():
                             if current_enemy != status.displayed_mob:
                                 current_enemy.select()
-                                status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                             else:
                                 status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                     else:
@@ -242,7 +241,6 @@ def main_loop():
                         current_enemy.turn_done = True
                     elif current_enemy.visible(): #if unit will do an action, move the camera to it and select it
                         current_enemy.select()
-                        status.minimap_grid.calibrate(current_enemy.x, current_enemy.y)
                                                                      
                 elif current_enemy.creation_turn == constants.turn and not spawning: #if enemy visible but just spawned, end turn
                     did_nothing = True

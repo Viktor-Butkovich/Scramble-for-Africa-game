@@ -68,7 +68,6 @@ class pmob(mob):
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
                 self.select()
         self.attached_cell_icon_list = []
@@ -373,10 +372,9 @@ class pmob(mob):
         Output:
             None
         '''
-        if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none':
-            turn_queue = status.player_turn_queue
-            if not self in turn_queue:
-                turn_queue.append(self)
+        if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none' and not self in status.player_turn_queue:
+            if not self in status.player_turn_queue:
+                status.player_turn_queue.append(self)
 
     def remove_from_turn_queue(self):
         '''
@@ -387,7 +385,6 @@ class pmob(mob):
         Output:
             None
         '''
-        turn_queue = status.player_turn_queue
         status.player_turn_queue = utility.remove_from_list(status.player_turn_queue, self)
 
     def replace(self):
@@ -502,7 +499,7 @@ class pmob(mob):
         '''
         if flags.show_selection_outlines:
             for current_image in self.images:
-                if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
+                if current_image.current_cell != 'none' and self == current_image.current_cell.contained_mobs[0] and current_image.current_cell.grid.showing: #only draw outline if on top of stack
                     pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
 
                     if len(self.base_automatic_route) > 0:
@@ -804,7 +801,4 @@ class pmob(mob):
         if focus:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
-            if status.minimap_grid in self.grids:
-                status.minimap_grid.calibrate(self.x, self.y)
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
             constants.sound_manager.play_sound('footsteps')

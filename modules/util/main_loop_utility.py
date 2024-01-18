@@ -265,7 +265,6 @@ def manage_rmb_down(clicked_button):
                             moved_mob.select()
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
-                            actor_utility.calibrate_actor_info_display(status.tile_info_display, moved_mob.images[0].current_cell.tile)
     elif flags.drawing_automatic_route:
         stopping = True
         flags.drawing_automatic_route = False
@@ -306,19 +305,11 @@ def manage_lmb_down(clicked_button):
                             if current_cell.visible:
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_mob = True
+                                    current_mob = current_cell.contained_mobs[0]
                                     actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-                                    current_cell.contained_mobs[0].select()
-                                    if current_cell.contained_mobs[0].is_pmob:
-                                        current_cell.contained_mobs[0].selection_sound()
-                                    if current_grid == status.minimap_grid:
-                                        main_x, main_y = status.minimap_grid.get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = status.strategic_map_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                        main_cell = status.strategic_map_grid.find_cell(main_x, main_y)
-                                        if main_cell:
-                                            main_tile = main_cell.tile
-                                            if not main_tile == 'none':
-                                                actor_utility.calibrate_actor_info_display(status.tile_info_display, main_tile)
-                                    else:
-                                        actor_utility.calibrate_actor_info_display(status.tile_info_display, current_cell.tile)
+                                    current_mob.select()
+                                    if current_mob.is_pmob:
+                                        current_mob.selection_sound()
             if selected_mob:
                 unit = status.displayed_mob
                 if unit and unit.grids[0] == status.minimap_grid.attached_grid:
@@ -350,7 +341,6 @@ def manage_lmb_down(clicked_button):
                                 if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < status.strategic_map_grid.coordinate_width: #or is harbor
                                     text_utility.print_to_screen('You can only send ships to coastal waters and coastal ports.')
                                     stopping = True
-                            chose_destination = True
                             if not stopping:
                                 status.displayed_mob.end_turn_destination = target_cell.tile
                                 flags.show_selection_outlines = True

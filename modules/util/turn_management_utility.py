@@ -84,11 +84,10 @@ def start_player_turn(first_turn = False):
     if status.displayed_mob == None or status.displayed_mob.is_npmob:
         game_transitions.cycle_player_turn(True)
 
-    selected_mob = status.displayed_mob
-    actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-    if selected_mob:
-        selected_mob.select()
-        actor_utility.calibrate_actor_info_display(status.tile_info_display, selected_mob.images[0].current_cell.tile)
+    if status.displayed_mob:
+        status.displayed_mob.select()
+    else:
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
        
 
 def reset_mobs(mob_type):

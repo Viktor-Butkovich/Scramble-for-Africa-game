@@ -511,6 +511,9 @@ class mob(actor):
         flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+        if self.grids[0].mini_grid != 'none':
+            self.grids[0].mini_grid.calibrate(self.x, self.y)
 
     def cycle_select(self):
         '''
@@ -558,7 +561,7 @@ class mob(actor):
         '''
         if flags.show_selection_outlines:
             for current_image in self.images:
-                if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
+                if current_image.current_cell != 'none' and self == current_image.current_cell.contained_mobs[0] and current_image.current_cell.grid.showing: #only draw outline if on top of stack
                     pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
         
     def update_tooltip(self):

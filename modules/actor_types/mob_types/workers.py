@@ -218,7 +218,6 @@ class worker(pmob):
         vehicle.select()
         self.add_to_turn_queue()
         self.update_image_bundle()
-        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def join_group(self):
         '''

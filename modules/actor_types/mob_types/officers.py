@@ -150,4 +150,3 @@ class officer(pmob):
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()
-        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding

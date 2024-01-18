@@ -2329,9 +2329,9 @@ class reorganize_unit_button(button):
                     else:
                         procedure_actors['group'].crew.uncrew_vehicle(procedure_actors['group'])
             elif 'merge' in self.allowed_procedures:
-                text_utility.print_to_screen('This button does merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile')
+                text_utility.print_to_screen('This button executes merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile')
             elif 'split' in self.allowed_procedures:
-                text_utility.print_to_screen('This button does split and uncrew procedures, which require a group or crewed vehicle to be selected')
+                text_utility.print_to_screen('This button executes split and uncrew procedures, which require a group or crewed vehicle to be selected')
 
     def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes, override_values={}):
         '''

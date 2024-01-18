@@ -71,7 +71,6 @@ class work_crew(group):
         self.show_images()
         self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
-        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile) #update tile ui with worked building
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         self.select()
 

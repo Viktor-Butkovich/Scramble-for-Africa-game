@@ -130,8 +130,6 @@ class zoom_notification(notification):
             if not target.images[0].current_cell == 'none': #if non-hidden mob, move to front of tile and select
                 target.select()
                 target.move_to_front()
-                if (not target.grids[0].mini_grid == 'none'): #if not in abstract grid, calibrate mini map to mob location
-                   target.grids[0].mini_grid.calibrate(target.x, target.y)
             else: #if hidden mob, move to location and select tile
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, target.grids[0].find_cell(target.x, target.y).tile)
