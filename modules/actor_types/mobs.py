@@ -508,6 +508,7 @@ class mob(actor):
         Output:
             None
         '''
+        self.move_to_front()
         flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(status.mob_info_display, self)

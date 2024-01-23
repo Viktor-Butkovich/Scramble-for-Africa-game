@@ -120,16 +120,17 @@ class zoom_notification(notification):
         '''
         super().__init__(input_dict)
         target = input_dict['target']
-        if status.strategic_map_grid in target.grids:
-            status.minimap_grid.calibrate(target.x, target.y)
+        if target.actor_type == 'building':
+            target = target.cell.tile
+
         if target.actor_type == 'tile':
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None)
             actor_utility.calibrate_actor_info_display(status.tile_info_display, target)
-            if not target.cell.grid.mini_grid == 'none':
+            if target.cell.grid.mini_grid != 'none':
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
         elif target.actor_type == 'mob':
-            if not target.images[0].current_cell == 'none': #if non-hidden mob, move to front of tile and select
+            if target.images[0].current_cell != 'none': #if non-hidden mob, move to front of tile and select
                 target.select()
-                target.move_to_front()
             else: #if hidden mob, move to location and select tile
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, target.grids[0].find_cell(target.x, target.y).tile)

@@ -365,6 +365,20 @@ class vehicle(pmob):
         elif new_grid == status.slave_traders_grid:
             self.eject_passengers()
 
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        if self.crew == 'none':
+            return(super().get_worker())
+        else:
+            return(self.crew)
+
 class train(vehicle):
     '''
     Vehicle that can only move along railroads, has large inventory capacity, and has 10 movement points
@@ -436,6 +450,17 @@ class train(vehicle):
             double: How many movement points would be spent by moving by the inputted amount
         '''
         return(self.movement_cost)
+
+    def get_vehicle_name(self) -> str:
+        '''
+        Description:
+            Returns the name of this type of vehicle
+        Input:
+            None
+        Output:
+            Returns the name of this type of vehicle
+        '''
+        return('train')
 
 class ship(vehicle):
     '''
@@ -516,6 +541,17 @@ class ship(vehicle):
                     return(True)
         return(False)
 
+    def get_vehicle_name(self) -> str:
+        '''
+        Description:
+            Returns the name of this type of vehicle
+        Input:
+            None
+        Output:
+            Returns the name of this type of vehicle
+        '''
+        return('steamship')
+
 class boat(ship):
     '''
     Vehicle that behaves similarly to a ship but moves in river water instead and has large inventory capacity and limited movement points
@@ -562,3 +598,14 @@ class boat(ship):
             double: How many movement points would be spent by moving by the inputted amount
         '''
         return(self.movement_cost)
+
+    def get_vehicle_name(self) -> str:
+        '''
+        Description:
+            Returns the name of this type of vehicle
+        Input:
+            None
+        Output:
+            Returns the name of this type of vehicle
+        '''
+        return('steamboat')

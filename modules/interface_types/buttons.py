@@ -1403,20 +1403,10 @@ class fire_unit_button(button):
         '''
         if main_loop_utility.action_possible(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
-                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
-                if self.attached_mob.is_worker:
-                    if self.attached_mob.worker_type in ['European', 'religious']:
-                        if self.attached_mob.worker_type == 'European':
-                            message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                        else:
-                            message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                    elif self.attached_mob.worker_type == 'African':
-                        message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
-                    elif self.attached_mob.worker_type == 'slave':
-                        message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-
+                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n'
+                worker = self.attached_mob.get_worker()
+                if worker:
+                    message += status.worker_types[worker.worker_type].fired_description
                 constants.notification_manager.display_notification({
                     'message': message,
                     'choices': ['fire', 'cancel']
@@ -1500,7 +1490,7 @@ class free_unit_slaves_button(button):
         '''
         if main_loop_utility.action_possible():
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
-                message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
+                message = 'Are you sure you want to fire the slaves in this unit? /n /n' + status.worker_types['slave'].fired_description
                 constants.notification_manager.display_notification({
                     'message': message,
                     'choices': ['free', 'cancel']
@@ -1518,12 +1508,8 @@ class free_unit_slaves_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if self.attached_mob != status.displayed_mob:
-                self.attached_mob = status.displayed_mob
             self.attached_mob = status.displayed_mob
-            if self.attached_mob and self.attached_mob.is_pmob:
-                if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
-                    return(True)
+            return(self.attached_mob and self.attached_mob.is_pmob and self.attached_mob.get_worker() and self.attached_mob.get_worker().worker_type == 'slave')
         return(False)
 
     def update_tooltip(self):
@@ -1538,9 +1524,7 @@ class free_unit_slaves_button(button):
         if not self.showing:
             self.set_tooltip([])
         else:
-            tooltip_text = ['Click to free this unit']
-            if self.attached_mob.is_group or self.attached_mob.is_worker:
-                tooltip_text.append('Once freed, this unit\'s slaves will be converted to free African workers with any associated upkeep')
+            tooltip_text = ['Click to free this unit\'s slaves', status.worker_types[self.attached_mob.get_worker().worker_type].fired_description.replace('/n', '')]
             self.set_tooltip(tooltip_text)
 
 class switch_game_mode_button(button):
@@ -2311,14 +2295,11 @@ class reorganize_unit_button(button):
                         constants.actor_creation_manager.create_group(procedure_actors['worker'], procedure_actors['officer'])
 
                 elif procedure_type == 'crew':
-                    if procedure_actors['worker'].worker_type == 'religious':
-                        text_utility.print_to_screen('Church volunteers cannot crew vehicles.')
-                    elif procedure_actors['worker'].worker_type == 'slave':
-                        text_utility.print_to_screen('Slave workers cannot crew vehicles.')
-                    elif procedure_actors['worker'].worker_type == 'African' and procedure_actors['officer'].vehicle_type == 'ship' and procedure_actors['officer'].can_swim_ocean:
-                        text_utility.print_to_screen('Only European workers can crew steamships.')
-                    else:
+                    if procedure_actors['officer'].get_vehicle_name() in status.worker_types[procedure_actors['worker'].worker_type].can_crew:
                         procedure_actors['worker'].crew_vehicle(procedure_actors['officer'])
+                    else:
+                        text_utility.print_to_screen(status.worker_types[procedure_actors['worker'].worker_type].name.capitalize() + ' cannot crew ' +
+                            procedure_actors['officer'].get_vehicle_name() + 's.')
 
                 elif procedure_type == 'split':
                     procedure_actors['group'].disband()

@@ -297,6 +297,17 @@ class worker(pmob):
         image_id_list.append(actor_utility.generate_unit_component_image_id(self.image_variants[self.second_image_variant], 'right'))
         return(image_id_list)
 
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        return(self)
+
 class slave_worker(worker):
     '''
     Worker that is captured or bought from slave traders, reduces public opinion, and has a low, unvarying upkeep and a varying recruitment cost
@@ -325,7 +336,7 @@ class slave_worker(worker):
         input_dict['worker_type'] = 'slave'
         super().__init__(from_save, input_dict)
         if not from_save:
-            if input_dict['purchased']: #as opposed to captured
+            if input_dict.get('purchased', True): #as opposed to captured
                 if not constants.effect_manager.effect_active('no_slave_trade_penalty'):
                     public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                     current_public_opinion = constants.public_opinion_tracker.get()

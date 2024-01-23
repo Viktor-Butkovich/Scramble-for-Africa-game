@@ -1,6 +1,6 @@
 # Contains functionality for worker type templates, such as European, African, Asian, slave workers
 
-from typing import Dict
+from typing import Dict, List
 import modules.constants.status as status
 import modules.constants.constants as constants
 
@@ -19,6 +19,9 @@ class worker_type():
                 'name': string value - Name of the corresponding unit, adjective + ' workers' by default
                 'upkeep': float value - Cost of this unit each turn, default of 0.0
                 'recruitment_cost': float value - Cost of recruiting this unit, default of 0.0
+                'fired_description': string value - Description text to confirm firing of this unit
+                'can_crew': list value - Types of vehicles this worker type can crew
+                'init_type': string value - Actor creation init type to use for this unit, default of 'workers'
         Output:
             None
         '''
@@ -41,6 +44,12 @@ class worker_type():
             self.initial_recruitment_cost: float = self.recruitment_cost
             self.min_recruitment_cost: float = min(2.0, self.recruitment_cost)
 
+            self.fired_description: str = input_dict.get('fired_description', '')
+
+            self.can_crew: List[str] = input_dict.get('can_crew', [])
+
+            self.init_type: str = input_dict.get('init_type', 'workers')
+
     def to_save_dict(self) -> Dict:
         '''
         Description:
@@ -52,11 +61,15 @@ class worker_type():
                 'adjective': string value - Adjective describing this unit and its corresponding worker types entry
                 'upkeep': float value - Cost of this unit each turn
                 'recruitment_cost': float value - Cost of recruiting this unit
+                'fired_description': string value - Description text to confirm firing of this unit
+                'init_type': string value - Actor creation init type to use for this unit
         '''
         return({
             'adjective': self.adjective,
             'upkeep': self.upkeep,
-            'recruitment_cost': self.recruitment_cost
+            'recruitment_cost': self.recruitment_cost,
+            'fired_description': self.fired_description,
+            'init_type': self.init_type
         })
 
     def set_recruitment_cost(self, new_number: float) -> None:
@@ -94,3 +107,11 @@ class worker_type():
             float: Returns the total upkeep of this worker type's units
         '''
         return(self.number * self.upkeep)
+
+    def generate_input_dict(self) -> Dict:
+        return({
+            'image': 'mobs/' + self.name + '/default.png',
+            'name': self.name,
+            'init_type': self.init_type,
+            'worker_type': self.adjective
+        })

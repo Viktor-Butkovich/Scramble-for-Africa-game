@@ -440,7 +440,7 @@ class pmob(mob):
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
                 constants.notification_manager.display_notification({
                     'message': text,
-                    'zoom_destination': self.images[0].current_cell.tile,
+                    'zoom_destination': self,
                 })
 
             self.temp_disable_movement()
@@ -533,7 +533,7 @@ class pmob(mob):
         Output:
             boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
         '''
-        if minister_utility.positions_filled(): #not self.controlling_minister == 'none':
+        if minister_utility.positions_filled():
             return(True)
         else:
             game_transitions.force_minister_appointment()
@@ -802,3 +802,14 @@ class pmob(mob):
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
             constants.sound_manager.play_sound('footsteps')
+
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        return(None)

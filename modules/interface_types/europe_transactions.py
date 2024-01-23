@@ -48,7 +48,7 @@ class recruitment_button(button):
                 self.recruitment_name += ' '
         self.cost = constants.recruitment_costs[self.recruitment_type]
         status.recruitment_button_list.append(self)
-        if self.recruitment_name in ['European workers']:
+        if self.recruitment_name.endswith(' workers'):
             image_id_list = ['mobs/default/button.png']
             left_worker_dict = {
                 'image_id': self.mob_image_id,
@@ -110,7 +110,7 @@ class recruitment_button(button):
             None
         '''
         actor_utility.update_descriptions(self.recruitment_type)
-        if self.recruitment_type == 'European workers':
+        if self.recruitment_type.endswith(' workers'):
             self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
         else:
             self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])

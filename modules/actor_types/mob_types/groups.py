@@ -78,22 +78,8 @@ class group(pmob):
             'modes': self.modes
         }
 
-        if new_worker_type == 'European':
-            input_dict['image'] = 'mobs/European workers/default.png'
-            input_dict['name'] = 'European workers'
-            input_dict['init_type'] = 'workers'
-            input_dict['worker_type'] = 'European'
-        elif new_worker_type == 'African':
-            input_dict['image'] = 'mobs/African workers/default.png'
-            input_dict['name'] = 'African workers'
-            input_dict['init_type'] = 'workers'
-            input_dict['worker_type'] = 'African'
-        elif new_worker_type == 'slave':
-            constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
-            input_dict['image'] = 'mobs/slave workers/default.png'
-            input_dict['name'] = 'slave workers'
-            input_dict['init_type'] = 'slave'
-            input_dict['purchased'] = False
+        input_dict.update(status.worker_types[new_worker_type].generate_input_dict())
+        constants.money_tracker.change(-1 * status.worker_types[new_worker_type].recruitment_cost, 'unit_recruitment')
         previous_selected = status.displayed_mob
         new_worker = constants.actor_creation_manager.create(False, input_dict)
         if self.worker.worker_type == 'slave':
@@ -105,12 +91,10 @@ class group(pmob):
         self.worker.update_image_bundle()
         self.worker.join_group()
         self.update_image_bundle()
-        if previous_selected == self:
-            self.select()
-        elif previous_selected:
+        if previous_selected:
             previous_selected.select()
-        elif self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+        #elif self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
+        #    actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -368,3 +352,14 @@ class group(pmob):
         image_id_list.remove(self.image_dict['default']) #group default image is empty
         image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer)
         return(image_id_list)
+
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        return(self.worker)

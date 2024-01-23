@@ -33,7 +33,6 @@ def cycle_player_turn(start_of_turn = False):
             set_game_mode('strategic')
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         cycled_mob.select()
-        cycled_mob.move_to_front()
         if not start_of_turn:
             turn_queue.append(turn_queue.pop(0))
 

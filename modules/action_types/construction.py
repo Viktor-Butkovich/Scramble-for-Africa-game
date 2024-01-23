@@ -436,7 +436,6 @@ class construction(action.action):
                     
             actor_utility.calibrate_actor_info_display(status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:
-                new_building.move_to_front()
                 new_building.select()
             else:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self.current_unit) #update mob display to show new upgrade possibilities

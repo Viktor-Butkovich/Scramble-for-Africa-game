@@ -64,6 +64,8 @@ except Exception: #displays error message and records error message in crash log
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 # When steamship/steamboat moves to non-port land from water, disembark and move all passengers - any passengers w/o enough movement should stay on vehicle, and can't move
 #   into npmobs
+# Should only select 1st unit at start of turn after getting through initial notifications - currently causing tile/building zoom notifications to be overridden by the
+#    start of turn cycle
 #
 #   bugfixes
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat

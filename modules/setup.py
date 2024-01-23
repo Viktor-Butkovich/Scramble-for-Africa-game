@@ -153,25 +153,34 @@ def worker_types_config():
     '''
     worker_types.worker_type(False, {
         'adjective': 'European',
-        'upkeep': 6.0
+        'upkeep': 6.0,
+        'can_crew': ['steamship', 'steamboat', 'train'],
+        'fired_description': 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n' + \
+                                'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
     worker_types.worker_type(False, {
         'adjective': 'African',
-        'upkeep': 4.0
+        'upkeep': 4.0,
+        'can_crew': ['steamboat', 'train'],
+        'fired_description': 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again. /n /n'
     })
     #worker_types.worker_type(False, {
     #    'adjective': 'Asian',
     #    'upkeep': 4.0
     #})
     worker_types.worker_type(False, {
+        'init_type': 'slaves',
         'adjective': 'slave',
         'recruitment_cost': 5.0,
-        'upkeep': 2.0
+        'upkeep': 2.0,
+        'fired_description': 'Firing slaves frees them, increasing public opinion. Freed slaves join the labor pool and are automatically hired as workers. /n /n'
     })
     worker_types.worker_type(False, {
         'adjective': 'religious',
         'name': 'church volunteers',
-        'upkeep': 0.0
+        'upkeep': 0.0,
+        'fired_description': 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n' + \
+                                'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
 
 def terrains():
