@@ -401,16 +401,14 @@ class slave_worker(worker):
         Output:
             None
         '''
-        new_worker = constants.actor_creation_manager.create(False, {
+        input_dict = {
             'coordinates': (self.x, self.y),
             'grids': self.grids,
             'modes': self.modes,
-            'image': 'mobs/African workers/default.png',
-            'name': 'African workers',
-            'init_type': 'workers',
-            'worker_type': 'African',
             'select_on_creation': (self == status.displayed_mob)
-        })
+        }
+        input_dict.update(status.worker_types['African'].generate_input_dict())
+        new_worker = constants.actor_creation_manager.create(False, input_dict)
         new_worker.set_automatically_replace(True)
         # Slaves will be set to not automatically replace after ending slave trade - freed slaves should restart automatic replacement
         if self.in_vehicle:

@@ -366,83 +366,63 @@ def trigger_worker_migration(): #resolves migration if it occurs
     '''
     possible_source_village_list = actor_utility.get_migration_sources() #list of villages that could have migration
     destination_cell_list = actor_utility.get_migration_destinations()
-    if not len(destination_cell_list) == 0:
+
+    if destination_cell_list:
         weighted_destination_cell_list = create_weighted_migration_destinations(destination_cell_list)
+
         village_destination_dict = {}
-        village_destination_coordinates_dict = {}
         village_num_migrated_dict = {}
-        source_village_list = [] #list of villages that actually had migration occur
-        any_migrated = False
-        #resolve village worker migration
         for source_village in possible_source_village_list:
             num_migrated = 0
             for available_worker in range(source_village.available_workers):
                 if random.randrange(1, 7) >= 4:
                     num_migrated += 1
-                    
+
             if num_migrated > 0:
-                any_migrated = True
-                
-                source_village_list.append(source_village)
-                destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
+                destination = random.choice(weighted_destination_cell_list)
                 if not destination.has_building('slums'):
                     destination.create_slums()
                 source_village.change_available_workers(-1 * num_migrated)
                 source_village.change_population(-1 * num_migrated)
                 destination.get_building('slums').change_population(num_migrated)
-                if destination.has_intact_building('port'):
-                    destination_type = 'port'
-                elif destination.has_intact_building('resource'):
-                    destination_type = destination.get_building('resource').name
-                elif destination.has_intact_building('train_station'):
-                    destination_type = 'train station'
-                village_destination_dict[source_village] = destination_type
-                village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
+                village_destination_dict[source_village] = destination
                 village_num_migrated_dict[source_village] = num_migrated
 
-        
-        #resolve wandering worker migration
-        wandering_destinations = []
-        wandering_destination_dict = {}
-        wandering_destination_coordinates_dict = {}
         wandering_num_migrated_dict = {}
-        num_migrated = constants.num_wandering_workers
-        if num_migrated > 0:
-            any_migrated = True
-            for i in range(num_migrated):
-                destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
-                if not destination.has_building('slums'):
-                    destination.create_slums()
-                destination.get_building('slums').change_population(1) #num_migrated
-                constants.num_wandering_workers -= 1
-                if destination.has_intact_building('port'):
-                    destination_type = 'port'
-                elif destination.has_intact_building('resource'):
-                    destination_type = destination.get_building('resource').name
-                elif destination.has_intact_building('train_station'):
-                    destination_type = 'train station'
-                wandering_destination_dict[destination] = destination_type #destination 0: port
-                wandering_destination_coordinates_dict[destination] = (destination.x, destination.y) #destination 0: (2, 2)
-                if destination in wandering_destinations:
-                    wandering_num_migrated_dict[destination] += 1
-                else:
-                    wandering_num_migrated_dict[destination] = 1
-                    wandering_destinations.append(destination)
+        for i in range(constants.num_wandering_workers):
+            destination = random.choice(weighted_destination_cell_list)
+            if not destination.has_building('slums'):
+                destination.create_slums()
+            destination.get_building('slums').change_population(1)
+            constants.num_wandering_workers -= 1
+            wandering_num_migrated_dict[destination] = wandering_num_migrated_dict.get(destination, 0) + 1
                 
-        if any_migrated:        
-            migration_report_text = 'A wave of migration from villages to your colony has occurred as African workers search for employment. /n'
-            for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
-                current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
-                current_line += ' village to the slums surrounding your ' + village_destination_dict[source_village]
-                current_line += ' at (' + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
-                migration_report_text += current_line + ' /n'
-            for wandering_destination in wandering_destinations:
-                current_line = str(wandering_num_migrated_dict[wandering_destination]) + ' wandering worker' + utility.generate_plural(wandering_num_migrated_dict[wandering_destination]) + ' settled in the slums surrounding your '
-                current_line += wandering_destination_dict[wandering_destination] + ' at (' + str(wandering_destination_coordinates_dict[wandering_destination][0]) + ', ' + str(wandering_destination_coordinates_dict[wandering_destination][1]) + ').'
-                migration_report_text += current_line + ' /n'
-            constants.notification_manager.display_notification({
-                'message': migration_report_text,
-            })
+        if village_num_migrated_dict or wandering_num_migrated_dict:        
+            migration_report_text = 'A wave of migration from villages to your colony has occurred as African workers search for employment. /n /n'
+            for source_village in village_destination_dict: # 2 workers migrated from villageName village to the slums surrounding Port Young at (0, 0). /n /n
+                destination = village_destination_dict[source_village]
+                destination_settlement = destination.settlement
+
+                current_notification_text = str(village_num_migrated_dict[source_village]) + ' worker' + \
+                    utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from the village of ' + source_village.name + \
+                    ' to the slums surrounding ' + destination_settlement.name + ' at (' + str(destination.x) + ', ' + str(destination.y) + '). /n /n'
+
+                constants.notification_manager.display_notification({
+                    'message': migration_report_text + current_notification_text,
+                    'zoom_destination': destination.tile
+                })
+
+            for destination in wandering_num_migrated_dict: # 3 wandering workers settled in the slums surrounding Port Young at (0, 0). /n /n 
+                destination_settlement = destination.settlement
+
+                current_notification_text = str(wandering_num_migrated_dict[destination]) + ' wandering worker' + \
+                    utility.generate_plural(wandering_num_migrated_dict[destination]) + ' settled in the slums surrounding ' + \
+                    destination_settlement.name + ' at (' + str(destination.x) + ', ' + str(destination.y) + '). /n /n'
+
+                constants.notification_manager.display_notification({
+                    'message': migration_report_text + current_notification_text,
+                    'zoom_destination': destination.tile
+                })
     
 def create_weighted_migration_destinations(destination_cell_list):
     '''

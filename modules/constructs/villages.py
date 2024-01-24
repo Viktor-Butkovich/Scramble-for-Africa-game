@@ -150,18 +150,16 @@ class village():
         Output:
             None
         '''
-        self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
-        self.change_population(-1)
-        constants.actor_creation_manager.create(False, {
+        input_dict = {
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'image': 'mobs/African workers/default.png',
-            'modes': ['strategic'],
-            'name': 'African workers',
-            'init_type': 'workers',
-            'worker_type': 'African'
-        })
+            'modes': ['strategic']
+        }
+        input_dict.update(status.worker_types['African'].generate_input_dict())
+        constants.actor_creation_manager.create(False, input_dict)
+        self.change_available_workers(-1)
+        self.change_population(-1)
 
     def set_initial_population(self):
         '''

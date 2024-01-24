@@ -968,16 +968,14 @@ class slums(building):
         Output:
             None
         '''
-        constants.actor_creation_manager.create(False, {
+        input_dict = {
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'image': 'mobs/African workers/default.png',
-            'modes': ['strategic'],
-            'name': 'African workers',
-            'worker_type': 'African',
-            'init_type': 'workers'
-        })
+            'modes': ['strategic']
+        }
+        input_dict.update(status.worker_types['African'].generate_input_dict())
+        constants.actor_creation_manager.create(False, input_dict)
         self.change_population(-1)
 
     def to_save_dict(self):

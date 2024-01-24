@@ -958,7 +958,7 @@ class button(interface_elements.interface_element):
                     current_pmob.free_and_replace()
             public_opinion_increase = constants.public_opinion - old_public_opinion
             if num_freed > 0:
-                message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
+                message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and hired as workers'
                 message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
                 constants.notification_manager.display_notification({
                     'message': message,

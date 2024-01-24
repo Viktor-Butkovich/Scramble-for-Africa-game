@@ -93,8 +93,6 @@ class group(pmob):
         self.update_image_bundle()
         if previous_selected:
             previous_selected.select()
-        #elif self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
-        #    actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -279,9 +277,8 @@ class group(pmob):
             self.officer.veteran = True
         self.update_image_bundle()
         self.officer.update_image_bundle()
-        #self.officer.update_image_bundle()
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) # Updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -347,9 +344,8 @@ class group(pmob):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
         image_id_list = super().get_image_id_list(override_values)
-        image_id_list.remove(self.image_dict['default']) #group default image is empty
+        image_id_list.remove(self.image_dict['default']) # Group default image is empty
         image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer)
         return(image_id_list)
 

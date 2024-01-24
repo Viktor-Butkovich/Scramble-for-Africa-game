@@ -272,8 +272,8 @@ class recruitment_choice_button(choice_button):
                 input_dict['init_type'] = self.recruitment_type
                 input_dict['officer_type'] = self.recruitment_type
 
-            elif self.recruitment_type.endswith('workers'):
-                input_dict.update(status.worker_types[self.recruitment_type.replace(' workers', '')].generate_input_dict())
+            elif self.recruitment_type.endswith(' workers'):
+                input_dict.update(status.worker_types[self.recruitment_type.replace(' workers', '')].generate_input_dict()) # Like European workers
 
             elif self.recruitment_type == 'steamship':
                 image_dict = {'default': self.mob_image_id, 'uncrewed': 'mobs/steamship/uncrewed.png'}

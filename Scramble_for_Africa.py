@@ -76,4 +76,4 @@ except Exception: #displays error message and records error message in crash log
 # Notes: Possibly allow choosing minister but not confirming yet
 #   Don't allow any actions while any notifications are visible, even purely informational ones
 #   Make sure movement buttons move the selected unit
-#   Add way to repeatedly do action every turn, especially for advertising/public opinion
+#   Possibly add way to repeatedly do action every turn, especially for advertising/public opinion
