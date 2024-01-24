@@ -145,13 +145,11 @@ class minister():
                 if image_type == 'outfit':
                     if self.background in ['army officer', 'naval officer']:
                         outfit_type = 'military'
-                    elif self.background in ['aristocrat']:
-                        if random.randrange(0, 2) == 0:
-                            outfit_type = 'armored'
-                    elif self.background == 'royal heir':
-                        outfit_type = 'armored'
-                    elif (self.background != 'lowborn' and not status.current_country.has_aristocracy):
+                    elif self.background in ['aristocrat', 'royal heir']:
                         if random.randrange(0, 5) == 0:
+                            outfit_type = 'armored'
+                    elif (self.background != 'lowborn' and not status.current_country.has_aristocracy):
+                        if random.randrange(0, 20) == 0:
                             outfit_type = 'armored'
                 if outfit_type != 'default':
                     possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', outfit_type)
