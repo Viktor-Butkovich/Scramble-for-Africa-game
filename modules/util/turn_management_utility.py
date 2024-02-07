@@ -79,7 +79,7 @@ def start_player_turn(first_turn = False):
     constants.turn_tracker.change(1)
         
     if not first_turn:
-        market_utility.adjust_prices()#adjust_prices()
+        market_utility.adjust_prices()
 
     if status.displayed_mob == None or status.displayed_mob.is_npmob:
         game_transitions.cycle_player_turn(True)
@@ -305,27 +305,30 @@ def manage_worker_price_changes():
     Output:
         None
     '''
-    european_worker_roll = random.randrange(1, 7)
-    if european_worker_roll >= 5:
-        current_price = status.worker_types['European'].upkeep
-        changed_price = round(current_price - constants.worker_upkeep_increment, 2)
-        if changed_price >= status.worker_types['European'].min_upkeep:
-            status.worker_types['European'].upkeep = changed_price
-            text_utility.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
-    elif european_worker_roll == 1:
-        current_price = status.worker_types['European'].upkeep
-        changed_price = round(current_price + constants.worker_upkeep_increment, 2)
-        status.worker_types['European'].upkeep = changed_price
-        text_utility.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
+    for worker_type in status.worker_types:
+        if status.worker_types[worker_type].upkeep_variance:
+            worker_roll = random.randrange(1, 7)
+            if worker_roll >= 5:
+                current_price = status.worker_types[worker_type].upkeep
+                changed_price = round(current_price - constants.worker_upkeep_increment, 2)
+                if changed_price >= status.worker_types[worker_type].min_upkeep:
+                    status.worker_types[worker_type].upkeep = changed_price
+                    text_utility.print_to_screen('An influx of ' + worker_type + ' workers has decreased their upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.')
+            elif worker_roll == 1:
+                current_price = status.worker_types[worker_type].upkeep
+                changed_price = round(current_price + constants.worker_upkeep_increment, 2)
+                status.worker_types[worker_type].upkeep = changed_price
+                text_utility.print_to_screen('An shortage of ' + worker_type + ' workers has increased their upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.')
+
     if constants.slave_traders_strength > 0:
-        slave_worker_roll = random.randrange(1, 7)
-        if slave_worker_roll == 6:
+        worker_roll = random.randrange(1, 7)
+        if worker_roll == 6:
             current_price = status.worker_types['slave'].recruitment_cost
             changed_price = round(current_price - constants.slave_recruitment_cost_increment, 2)
             if changed_price >= status.worker_types['slave'].min_recruitment_cost:
                 status.worker_types['slave'].set_recruitment_cost(changed_price)
                 text_utility.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
-        elif slave_worker_roll == 1:
+        elif worker_roll == 1:
             current_price = status.worker_types['slave'].recruitment_cost
             changed_price = round(current_price + constants.slave_recruitment_cost_increment, 2)
             status.worker_types['slave'].set_recruitment_cost(changed_price)

@@ -155,6 +155,7 @@ def worker_types_config():
         'adjective': 'European',
         'upkeep': 6.0,
         'can_crew': ['steamship', 'steamboat', 'train'],
+        'upkeep_variance': True,
         'fired_description': 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n' + \
                                 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
@@ -164,10 +165,13 @@ def worker_types_config():
         'can_crew': ['steamboat', 'train'],
         'fired_description': 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again. /n /n'
     })
-    #worker_types.worker_type(False, {
-    #    'adjective': 'Asian',
-    #    'upkeep': 4.0
-    #})
+    worker_types.worker_type(False, {
+        'adjective': 'Asian',
+        'upkeep': 4.0,
+        'can_crew': ['steamboat', 'train'],
+        'upkeep_variance': True,
+        'fired_description': 'Placeholder fired description. /n /n'
+    })
     worker_types.worker_type(False, {
         'init_type': 'slaves',
         'adjective': 'slave',
@@ -772,9 +776,9 @@ def europe_screen():
         'modes': ['europe'],
         'init_type': 'recruitment button'
     }
-    for recruitment_index in range(len(constants.recruitment_types)):
+    for recruitment_index, recruitment_type in enumerate(constants.recruitment_types):
         input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
-        input_dict['recruitment_type'] = constants.recruitment_types[recruitment_index]
+        input_dict['recruitment_type'] = recruitment_type
         new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({

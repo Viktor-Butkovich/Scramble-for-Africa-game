@@ -124,37 +124,38 @@ def update_descriptions(target = 'all'):
                 first_line += '.'
                 text_list.append(first_line)
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
-                
-        elif current_target == 'European workers':
-            text_list.append('European workers have an upkeep of ' + str(status.worker_types['European'].upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('Each unit of European workers hired or sent as replacements may increase the upkeep of all European workers.')
-            text_list.append('European workers tend to be more susceptible to attrition but are more accustomed to using modern weaponry.')
-            
-        elif current_target == 'slave workers':
-            text_list.append('Slave workers have a constant upkeep of ' + str(status.worker_types['slave'].upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
-            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            if constants.effect_manager.effect_active('no_slave_trade_penalty'):
-                text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
+        
+        elif current_target.endswith(' workers'):
+            worker_name = current_target.replace('slums ', 'African ').replace('village ', 'African ')
+            worker_type = worker_name.split(' ')[0] # 'African' for 'African workers', 'European' for 'European workers', etc.
+
+            if worker_type != 'slave':
+                text_list.append(worker_name.capitalize() + ' have a varying upkeep, currently ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
             else:
-                text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+                text_list.append(worker_name.capitalize() + ' have a constant upkeep of ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
+
+            text_list.append('Officers and vehicles require an attached unit of workers to perform most actions.')
+
+            if worker_type != 'slave':
+                text_list.append('Each unit of ' + worker_name + ' hired may increase the upkeep of all ' + worker_name + '.')
+            else:
+                text_list.append('Each unit of ' + worker_name + ' purchased may increase the purchase cost of all ' + worker_name + '.')
             
-        elif current_target == 'slums workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(status.worker_types['African'].upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
-            text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
-            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
+            if worker_type == 'European':
+                text_list.append(worker_name.capitalize() + ' tend to be more susceptible to attrition but are more accustomed to modern weaponry.')
+            elif worker_type == 'Asian':
+                text_list.append('Asian worker placeholder')
+            else:
+                if worker_type != 'slave':
+                    text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
+                text_list.append('African workers tend to be more resistant to attrition but are less accustomed to using modern weaponry.')
             
-        elif current_target == 'village workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(status.worker_types['African'].upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
-            text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
-            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            
+            if worker_type == 'slave':
+                if constants.effect_manager.effect_active('no_slave_trade_penalty'):
+                    text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
+                else:
+                    text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+
         elif current_target == 'steamship':
             text_list.append('While useless by itself, a steamship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
             text_list.append('Crewing a steamship requires an advanced level of technological training, which is generally only available to European workers in this time period.')

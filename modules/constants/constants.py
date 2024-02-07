@@ -372,7 +372,7 @@ group_minister_dict: Dict[str, str] = {
     'battalion': type_minister_dict['military']
 }
 country_specific_units: List[str] = ['major']
-recruitment_types: List[str] = officer_types + ['European workers', 'steamship']
+recruitment_types: List[str] = officer_types + ['European workers', 'Asian workers', 'steamship']
 recruitment_costs: Dict[str, int] = {
     'European workers': 0,
     'steamship': 10,

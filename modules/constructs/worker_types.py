@@ -21,6 +21,7 @@ class worker_type():
                 'recruitment_cost': float value - Cost of recruiting this unit, default of 0.0
                 'fired_description': string value - Description text to confirm firing of this unit
                 'can_crew': list value - Types of vehicles this worker type can crew
+                'upkeep_variance': bool value - Whether this worker type's upkeep can randomly fluctuate each turn
                 'init_type': string value - Actor creation init type to use for this unit, default of 'workers'
         Output:
             None
@@ -48,6 +49,8 @@ class worker_type():
 
             self.can_crew: List[str] = input_dict.get('can_crew', [])
 
+            self.upkeep_variance: bool = input_dict.get('upkeep_variance', False)
+
             self.init_type: str = input_dict.get('init_type', 'workers')
 
     def to_save_dict(self) -> Dict:
@@ -68,7 +71,6 @@ class worker_type():
             'adjective': self.adjective,
             'upkeep': self.upkeep,
             'recruitment_cost': self.recruitment_cost,
-            'fired_description': self.fired_description,
             'init_type': self.init_type
         })
 

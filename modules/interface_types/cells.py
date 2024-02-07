@@ -451,7 +451,7 @@ class cell():
                     return(current_mob)
         return('none')
 
-    def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious'], required_number=1):
+    def has_worker(self, possible_types=None, required_number=1):
         '''
         Description:
             Returns whether this cell contains a worker of one of the inputted types
@@ -463,7 +463,7 @@ class cell():
         '''
         num_found = 0
         for current_mob in self.contained_mobs:
-            if current_mob.is_pmob and current_mob.is_worker and current_mob.worker_type in possible_types: 
+            if current_mob.is_pmob and current_mob.is_worker and ((not possible_types) or current_mob.worker_type in possible_types): 
                 num_found += 1
                 if num_found >= required_number:
                     return(True)
@@ -487,7 +487,7 @@ class cell():
                     return(True)
         return(False)
 
-    def get_worker(self, possible_types=['African', 'European', 'slave', 'religious'], start_index=0):
+    def get_worker(self, possible_types=None, start_index=0):
         '''
         Description:
             Finds and returns the first worker in this cell of the inputted types, or 'none' if none are present
@@ -504,7 +504,7 @@ class cell():
         else:
             iterated_list = self.contained_mobs[start_index:len(self.contained_mobs)] + self.contained_mobs[0:start_index]
         for current_mob in iterated_list:
-            if current_mob.is_pmob and current_mob.is_worker and current_mob.worker_type in possible_types:
+            if current_mob.is_pmob and current_mob.is_worker and ((not possible_types) or current_mob.worker_type in possible_types):
                 return(current_mob)
         return('none')
 
