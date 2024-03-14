@@ -73,68 +73,9 @@ class save_load_manager_template():
         '''
         flags.creating_new_game = True
         country.select()
-        strategic_grid_height = 300
-        strategic_grid_width = 320
-        mini_grid_height = 600
-        mini_grid_width = 640
 
-        status.strategic_map_grid = grids.grid(False, {
-            'coordinates': scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25)),
-            'width': scaling.scale_width(strategic_grid_width),
-            'height': scaling.scale_height(strategic_grid_height),
-            'coordinate_width': constants.strategic_map_width,
-            'coordinate_height': constants.strategic_map_height,
-            'internal_line_color': 'black',
-            'external_line_color': 'black',
-            'modes': ['strategic'],
-            'strategic_grid': True,
-            'grid_line_width': 2
-        })
-
-        status.minimap_grid = grids.mini_grid(False, {
-            'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
-                constants.default_display_height - (strategic_grid_height + mini_grid_height + 50)),
-            'width': scaling.scale_width(mini_grid_width),
-            'height': scaling.scale_height(mini_grid_height),
-            'coordinate_width': constants.minimap_grid_coordinate_size,
-            'coordinate_height': constants.minimap_grid_coordinate_size,
-            'internal_line_color': 'black',
-            'external_line_color': 'bright red',
-            'modes': ['strategic'],
-            'grid_line_width': 3,
-            'attached_grid': status.strategic_map_grid
-        })
-
-        europe_grid_x = constants.europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
-        europe_grid_y = constants.europe_grid_y #constants.default_display_height - (strategic_grid_height + 25)
-
-        status.europe_grid = grids.abstract_grid(False, {
-            'coordinates': scaling.scale_coordinates(europe_grid_x, europe_grid_y),
-            'width': scaling.scale_width(120),
-            'height': scaling.scale_height(120),
-            'internal_line_color': 'black',
-            'external_line_color': 'black',
-            'modes': ['strategic', 'europe'],
-            'tile_image_id': 'locations/europe/' + country.name + '.png',
-            'grid_line_width': 3,
-            'name': 'Europe'
-        })
-
-
-        slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
-        slave_traders_grid_y = constants.default_display_height - (strategic_grid_height - 120) #started at 25, -120 for europe grid y, -25 for space between
-
-        status.slave_traders_grid = grids.abstract_grid(False, {
-            'coordinates': scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y),
-            'width': scaling.scale_width(120),
-            'height': scaling.scale_height(120),
-            'internal_line_color': 'black',
-            'external_line_color': 'black',
-            'modes': ['strategic'],
-            'tile_image_id': 'locations/slave_traders/default.png', 
-            'grid_line_width': 3,
-            'name': 'Slave traders'
-        })
+        for grid_type in constants.grid_types_list:
+            grids.create(from_save=False, grid_type=grid_type)
         
         game_transitions.set_game_mode('strategic')
         game_transitions.create_strategic_map(from_save=False)
@@ -287,7 +228,7 @@ class save_load_manager_template():
         text_utility.print_to_screen('')
         text_utility.print_to_screen('Loading ' + file_path)
         game_transitions.start_loading()
-        #load file
+        # Load file
         try:
             file_path = 'save_games/' + file_path
             with open(file_path, 'rb') as handle:
@@ -304,7 +245,7 @@ class save_load_manager_template():
             text_utility.print_to_screen('The ' + file_path + ' file does not exist.')
             return()
 
-        #load variables
+        # Load variables
         for current_element in self.copied_constants:
             setattr(constants, current_element, saved_constants[current_element])
         for current_element in self.copied_statuses:
@@ -323,62 +264,10 @@ class save_load_manager_template():
         text_utility.print_to_screen('')
         text_utility.print_to_screen('Turn ' + str(constants.turn))
 
-        #load grids
-        strategic_grid_height = 300
-        strategic_grid_width = 320
-        mini_grid_height = 600
-        mini_grid_width = 640
-        europe_grid_x = constants.europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
-        europe_grid_y = constants.europe_grid_y #constants.default_display_height - (strategic_grid_height + 25)
-        slave_traders_grid_x = europe_grid_x #constants.default_display_width - (strategic_grid_width + 340)
-        slave_traders_grid_y = constants.default_display_height - (strategic_grid_height - 120)
+        # Load grids
         for current_grid_dict in saved_grid_dicts:
-            input_dict = current_grid_dict
-            if current_grid_dict['grid_type'] == 'strategic_map_grid':
-                input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - (strategic_grid_width + 100), constants.default_display_height - (strategic_grid_height + 25))
-                input_dict['width'] = scaling.scale_width(strategic_grid_width)
-                input_dict['height'] = scaling.scale_height(strategic_grid_height)
-                input_dict['coordinate_width'] = constants.strategic_map_width
-                input_dict['coordinate_height'] = constants.strategic_map_height
-                input_dict['internal_line_color'] = 'black'
-                input_dict['external_line_color'] = 'black'
-                input_dict['modes'] = ['strategic']
-                input_dict['strategic_grid'] = True
-                input_dict['grid_line_width'] = 2
-                status.strategic_map_grid = grids.grid(True, input_dict)
-                
-            elif current_grid_dict['grid_type'] in ['europe_grid', 'slave_traders_grid']:
-                input_dict['width'] = scaling.scale_width(120)
-                input_dict['height'] = scaling.scale_height(120)
-                input_dict['internal_line_color'] = 'black'
-                input_dict['external_line_color'] = 'black'
-                input_dict['grid_line_width'] = 3
-                if current_grid_dict['grid_type'] == 'europe_grid':
-                    input_dict['modes'] = ['strategic', 'europe']
-                    input_dict['coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y)
-                    input_dict['tile_image_id'] = 'locations/europe/' + status.current_country.name + '.png' 
-                    input_dict['name'] = 'Europe'
-                    status.europe_grid = grids.abstract_grid(True, input_dict)
-                else:
-                    input_dict['modes'] = ['strategic']
-                    input_dict['coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y)
-                    input_dict['tile_image_id'] = 'locations/slave_traders/default.png' 
-                    input_dict['name'] = 'Slave traders'
-                    status.slave_traders_grid = grids.abstract_grid(True, input_dict)
-
-        status.minimap_grid = grids.mini_grid(False, {
-            'coordinates': scaling.scale_coordinates(constants.default_display_width - (mini_grid_width + 100),
-                constants.default_display_height - (strategic_grid_height + mini_grid_height + 50)),
-            'width': scaling.scale_width(mini_grid_width),
-            'height': scaling.scale_height(mini_grid_height),
-            'coordinate_width': constants.minimap_grid_coordinate_size,
-            'coordinate_height': constants.minimap_grid_coordinate_size,
-            'internal_line_color': 'black',
-            'external_line_color': 'bright red',
-            'modes': ['strategic'],
-            'grid_line_width': 3,
-            'attached_grid': status.strategic_map_grid
-        })
+            grids.create(from_save=True, grid_type=current_grid_dict['grid_type'], input_dict=current_grid_dict)
+        grids.create(from_save=False, grid_type='minimap_grid')
         
         game_transitions.set_game_mode('strategic')
         game_transitions.create_strategic_map(from_save=True)
@@ -390,7 +279,7 @@ class save_load_manager_template():
         for current_worker_type in saved_worker_types:
             worker_types.worker_type(True, current_worker_type)
 
-        #load actors
+        # Load actors
         for current_actor_dict in saved_actor_dicts:
             constants.actor_creation_manager.create(True, current_actor_dict)
         for current_minister_dict in saved_minister_dicts:

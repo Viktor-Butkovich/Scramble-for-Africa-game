@@ -244,7 +244,7 @@ class slave_capture(action.action):
                 'grids': self.current_unit.grids,
                 'image': 'mobs/slave workers/default.png',
                 'name': 'slave workers',
-                'modes': ['strategic'],
+                'modes': self.current_unit.grid.modes,
                 'init_type': 'slaves',
                 'purchased': False,
                 'worker_type': 'slave'

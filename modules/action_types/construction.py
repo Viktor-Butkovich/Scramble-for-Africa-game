@@ -379,7 +379,7 @@ class construction(action.action):
                 'coordinates': (self.current_unit.x, self.current_unit.y),
                 'grids': self.current_unit.grids,
                 'name': self.building_name,
-                'modes': ['strategic'],
+                'modes': self.current_unit.grids[0].modes,
                 'init_type': self.building_type
             }
 

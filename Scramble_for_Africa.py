@@ -71,7 +71,6 @@ except Exception: #displays error message and records error message in crash log
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
 # Find some solution to overlapping 3rd work crew and text box
 # incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
-# Sell commodities button should go to minister screen if not all ministers appointed
 
 # Notes: Possibly allow choosing minister but not confirming yet
 #   Don't allow any actions while any notifications are visible, even purely informational ones

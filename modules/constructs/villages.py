@@ -133,7 +133,7 @@ class village():
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
             'image': 'mobs/native_warriors/default.png',
             'canoes_image': 'mobs/native_warriors/canoe_default.png',
-            'modes': ['strategic'],
+            'modes': self.cell.grid.modes,
             'name': 'native warriors',
             'init_type': 'native_warriors',
             'origin_village': self
@@ -154,7 +154,7 @@ class village():
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'modes': ['strategic']
+            'modes': self.cell.grid.modes
         }
         input_dict.update(status.worker_types['African'].generate_input_dict())
         constants.actor_creation_manager.create(False, input_dict)

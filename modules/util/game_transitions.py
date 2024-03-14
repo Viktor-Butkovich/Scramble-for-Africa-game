@@ -126,7 +126,7 @@ def create_strategic_map(from_save=False):
                 'grid': current_grid,
                 'image': 'misc/empty.png',
                 'name': 'default',
-                'modes': ['strategic'],
+                'modes': current_grid.modes,
                 'show_terrain': True,
             }
             if (not from_save) and current_grid == status.strategic_map_grid:

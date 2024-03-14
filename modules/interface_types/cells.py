@@ -46,17 +46,14 @@ class cell():
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        
-        if not save_dict == 'none': #if from save
+        if save_dict != 'none': #if from save
             self.save_dict = save_dict
             if constants.effect_manager.effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
             self.terrain_variant = save_dict['terrain_variant']
         else: #if creating new map
-            if constants.effect_manager.effect_active('remove_fog_of_war'):
-                self.set_visibility(True)
-            else:
-                self.set_visibility(False)
+            self.set_visibility(constants.effect_manager.effect_active('remove_fog_of_war'))
             
     def to_save_dict(self):
         '''
@@ -385,7 +382,7 @@ class cell():
             'coordinates': (self.x, self.y),
             'grids': [self.grid, self.grid.mini_grid],
             'name': 'slums',
-            'modes': ['strategic'],
+            'modes': self.grid.modes,
             'init_type': 'slums'
         })
         if self.tile == status.displayed_tile:

@@ -492,9 +492,9 @@ class actor_display_label(label):
             elif self.actor_label_type == 'tile inventory capacity':
                 if not self.actor == 'none':
                     if not self.actor.cell.visible:
-                        tooltip_text.append('This tile has not been discovered')
+                        tooltip_text.append('This tile has not been explored')
                     elif self.actor.infinite_inventory_capacity:
-                        tooltip_text.append('This tile can hold infinite commodities.')
+                        tooltip_text.append('This tile can hold infinite commodities')
                     else:
                         tooltip_text.append('This tile currently contains ' + str(self.actor.get_inventory_used()) + ' commodities')
                         tooltip_text.append('This tile can retain a maximum of ' + str(self.actor.inventory_capacity) + ' commodities')

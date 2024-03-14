@@ -91,7 +91,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 'coordinates': (self.x, self.y),
                 'grids': [self.grid, self.grid.mini_grid],
                 'image': actor_utility.generate_label_image_id(new_name, y_offset=y_offset),
-                'modes': ['strategic'],
+                'modes': self.cell.grid.modes,
                 'init_type': 'name icon',
                 'tile': self
             })
@@ -435,7 +435,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.show_terrain == True:
+        if self.show_terrain:
             if self.touching_mouse() and constants.current_game_mode in self.modes: #and not targeting_ability
                 if self.cell.terrain == 'none':
                     return(False)

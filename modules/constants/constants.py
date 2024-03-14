@@ -95,12 +95,23 @@ current_instructions_page_index: int = 0
 current_instructions_page_text: str = ''
 message: str = ''
 
-grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid']
-minimap_grid_x: int = default_display_width - (640 + 100)
-europe_grid_x: int = default_display_width - (320 + 100 + 120 + 25)
-europe_grid_y: int = default_display_height - (300 + 25)
+grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid', 'minimap_grid']
+
+grids_collection_x: int = default_display_width - 740
+grids_collection_y: int = default_display_height - 325
+
+strategic_map_pixel_width: int = 320
+strategic_map_pixel_height: int = 300
 strategic_map_width: int = 15
 strategic_map_height: int = 16
+
+europe_grid_x_offset: int = 175
+europe_grid_y_offset: int = 0
+slave_traders_grid_x_offset: int = europe_grid_x_offset
+slave_traders_grid_y_offset: int = 145
+
+minimap_grid_pixel_width: int = strategic_map_pixel_width * 2
+minimap_grid_pixel_height: int = strategic_map_pixel_height * 2
 minimap_grid_coordinate_size: int = 5
 
 default_text_box_height: int = 0

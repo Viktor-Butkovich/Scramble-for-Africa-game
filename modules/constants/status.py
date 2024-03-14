@@ -91,6 +91,7 @@ same_tile_icon_list: List[same_tile_icon] = []
 loading_image: image = None
 safe_click_area: safe_click_panel = None
 info_displays_collection: interface_collection = None
+grids_collection: interface_collection = None
 mob_info_display: ordered_collection = None
 mob_inventory_info_display: ordered_collection = None
 mob_inventory_grid: inventory_grid = None

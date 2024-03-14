@@ -135,7 +135,7 @@ class pmob(mob):
             'coordinates': (x, y),
             'grids': self.grids,
             'image': image_id,
-            'modes': ['strategic'],
+            'modes': self.grids[0].modes,
             'init_type': 'cell icon'
         }))
 

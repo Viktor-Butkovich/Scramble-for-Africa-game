@@ -227,7 +227,7 @@ class recruitment_choice_button(choice_button):
             input_dict['grids'] = [status.slave_traders_grid]
             attached_cell = input_dict['grids'][0].cell_list[0][0]
             input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
-            input_dict['modes'] = ['strategic']
+            input_dict['modes'] = input_dict['grids'][0].modes
             input_dict['purchased'] = True
             constants.actor_creation_manager.create(False, input_dict)
 
@@ -242,7 +242,7 @@ class recruitment_choice_button(choice_button):
             input_dict.update(status.worker_types['African'].generate_input_dict())
             input_dict['coordinates'] = (recruiter.x, recruiter.y)
             input_dict['grids'] = recruiter.grids
-            input_dict['modes'] = ['strategic']
+            input_dict['modes'] = status.displayed_tile.cell.grid.modes
             constants.money_tracker.change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African') #adds 1 worker to the pool
@@ -259,7 +259,7 @@ class recruitment_choice_button(choice_button):
             input_dict['coordinates'] = (0, 0)
             input_dict['grids'] = [status.europe_grid]
             input_dict['image'] = self.mob_image_id
-            input_dict['modes'] = ['strategic', 'europe']
+            input_dict['modes'] = status.europe_grid.modes
             constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
             if self.recruitment_type in constants.officer_types:
                 name = ''

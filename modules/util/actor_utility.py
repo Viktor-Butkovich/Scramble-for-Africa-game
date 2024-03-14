@@ -247,7 +247,7 @@ def spawn_beast():
     constants.actor_creation_manager.create(False, {
         'coordinates': (spawn_cell.x, spawn_cell.y),
         'grids': [status.strategic_map_grid, status.strategic_map_grid.mini_grid],
-        'modes': ['strategic'],
+        'modes': status.strategic_map_grid.modes,
         'animal_type': animal_type,
         'adjective': random.choice(constants.animal_adjectives),
         'image': 'mobs/beasts/' + animal_type + '.png',

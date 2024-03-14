@@ -138,9 +138,18 @@ def misc():
         'description': 'general information panel',
         'resize_with_contents': True,
     })
-    anchor = constants.actor_creation_manager.create_interface_element(
-        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}
-    ) #rect at original location prevents collection from moving unintentionally when resizing
+
+    status.grids_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(constants.grids_collection_x, constants.grids_collection_y),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'modes': ['strategic', 'europe'],
+        'init_type': 'interface collection'
+    })
+
+    #anchor = constants.actor_creation_manager.create_interface_element(
+    #    {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}
+    #) #rect at original location prevents collection from moving unintentionally when resizing
 
 def worker_types_config():
     '''
@@ -556,7 +565,8 @@ def buttons():
     europe_button_width = 150
     europe_button_height = 100
     input_dict = {
-        'coordinates': scaling.scale_coordinates(constants.europe_grid_x - europe_button_width - 25, constants.europe_grid_y + 10),
+        
+        'coordinates': scaling.scale_coordinates(constants.grids_collection_x + constants.europe_grid_x_offset - europe_button_width - 25, constants.grids_collection_y + constants.europe_grid_y_offset + 10),
         'width': scaling.scale_width(europe_button_width),
         'height': scaling.scale_height(europe_button_height),
         'keybind_id': pygame.K_e,
@@ -570,7 +580,7 @@ def buttons():
 
     europe_button_width = 60
     europe_button_height = 60
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.europe_grid_y))
+    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.grids_collection_y + constants.europe_grid_y_offset))
     input_dict['width'] = scaling.scale_width(europe_button_width)
     input_dict['height'] = scaling.scale_height(europe_button_height)
     input_dict['modes'] = ['europe']
@@ -1146,7 +1156,7 @@ def mob_interface():
             'coordinates': scaling.scale_coordinates(0, 0),
             'minimum_width': scaling.scale_width(10),
             'height': scaling.scale_height(30),
-            'image_id': 'misc/default_label.png', #'misc/underline.png',
+            'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
             'parent_collection': status.mob_info_display,
