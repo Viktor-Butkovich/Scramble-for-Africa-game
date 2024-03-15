@@ -83,7 +83,7 @@ class advertising_campaign(action.campaign):
         elif subject == 'initial':
             text += 'The merchant attempts to increase public demand for ' + self.target_commodity + '. /n /n'
             advertising_message, index = constants.flavor_text_manager.generate_substituted_indexed_flavor_text('advertising_campaign', '_', self.target_commodity)
-            self.success_audio = [{'sound_id': 'voices/advertising/messages/' + str(index), 'dampen_music': True, 'dampen_time_interval': 0.75},
+            self.success_audio = [{'sound_id': 'voices/advertising/messages/' + str(index), 'dampen_music': True, 'dampen_time_interval': 0.75, 'volume': 1.0},
                                   {'sound_id': 'voices/advertising/commodities/' + self.target_commodity, 'in_sequence': True}]
             text += advertising_message + ' /n /n'
         elif subject == 'success':
@@ -103,7 +103,7 @@ class advertising_campaign(action.campaign):
             text += self.generate_notification_text('success')
             text += 'This merchant is now a veteran. /n /n'
         elif subject == 'failure':
-            text += 'The merchant failed to increase the popularity of ' + self.target_unadvertised_commodity + '. /n /n'
+            text += 'The merchant failed to increase the popularity of ' + self.target_commodity + '. /n /n'
         elif subject == 'critical_failure':
             text += self.generate_notification_text('failure')
             text += 'Embarassed by this utter failure, the merchant quits your company. /n /n' 

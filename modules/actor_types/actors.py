@@ -26,6 +26,7 @@ class actor():
         self.from_save = from_save
         status.actor_list.append(self)
         self.modes = input_dict['modes']
+        self.x, self.y = input_dict['coordinates']
         if self.from_save:
             self.grid = getattr(status, input_dict['grid_type'])
             self.grids = [self.grid]
@@ -36,11 +37,9 @@ class actor():
             self.grids = input_dict['grids']
             self.grid = self.grids[0]
             self.set_name('placeholder')
-        self.x, self.y = input_dict['coordinates']
         self.set_coordinates(self.x, self.y)
-        self.selected = False
-        self.can_hold_commodities = False
-        self.can_hold_infinite_commodities = False
+        self.has_inventory = False
+        self.infinite_inventory_capacity = False
         self.inventory_capacity = 0
         self.tooltip_text = []
         self.inventory = {}
@@ -98,7 +97,7 @@ class actor():
                 save_dict['grid_type'] = grid_type
         save_dict['name'] = self.name
         saved_inventory = {}
-        if self.can_hold_commodities: #only save inventory if not empty
+        if self.has_inventory: #only save inventory if not empty
             for current_commodity in constants.commodity_types:
                if self.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.inventory[current_commodity]
@@ -156,8 +155,6 @@ class actor():
                 self.inventory[current_commodity] = 10
             else:
                 self.inventory[current_commodity] = 0
-        #if self.actor_type == 'mob' and self.is_pmob and self.inventory_capacity >= 9:
-        #    self.default_interface_tab = 'inventory'
 
     def drop_inventory(self):
         '''
@@ -209,10 +206,30 @@ class actor():
         Output:
             int: Number of commodities of the inputted type held by this actor
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             return(self.inventory[commodity])
         else:
             return(0)
+
+    def check_inventory(self, index):
+        '''
+        Description:
+            Returns the type of item at the inputted index of this actor's inventory
+            Results in access time of O(# inventory types held), rather than O(1) that would be allowed by maintaining an inventory array. For ease of development, it
+                has been determined that slightly slower inventory access is desirable over just having an inventory array (making it harder to count number of items in 
+                a category) or the possible bugs that could be introduced by trying to maintain both
+        Input:
+            int index: Index of inventory to check
+        Output:
+            string: Returns name of the item held at the inputted index of the inventory, or None if no inventory held at that index
+        '''
+        current_index: int = 0
+        for item_type in self.inventory:
+            current_index += self.inventory[item_type]
+            # If holding 1 coffee, increment index by 1, now to current_index=1
+            if current_index > index: # Since index 1 > inputted index 0, return 'coffee'
+                return(item_type)
+        return(None)
 
     def change_inventory(self, commodity, change):
         '''
@@ -224,7 +241,7 @@ class actor():
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] += change
 
     def set_inventory(self, commodity, new_value):
@@ -237,7 +254,7 @@ class actor():
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] = new_value
 
     def get_held_commodities(self, ignore_consumer_goods = False):
@@ -249,7 +266,7 @@ class actor():
         Output:
             string list: Types of commodities held by this actor
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             held_commodities = []
             for current_commodity in constants.commodity_types:
                 if self.get_inventory(current_commodity) > 0:
@@ -278,7 +295,7 @@ class actor():
                         current_cell = self.images[0].current_cell
                     else:
                         return() #only surface-level mobs can have inventories and need to roll for attrition
-                    
+
                 if (random.randrange(1, 7) <= 2 and transportation_minister.check_corruption()): #1/18 chance of corruption check to take commodities - 1/36 chance for most corrupt to steal
                     self.trigger_inventory_attrition(transportation_minister, True)
                     return()
@@ -506,7 +523,7 @@ class actor():
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
             constants.game_display.blit(text_utility.text(text_line, constants.myfont), (tooltip_image.tooltip_box.x + scaling.scale_width(10),
-                tooltip_image.tooltip_box.y + (text_line_index * constants.font_size)))
+                tooltip_image.tooltip_box.y + (text_line_index * constants.fonts['default'].size)))
 
     def get_image_id_list(self, override_values={}):
         '''

@@ -4,7 +4,7 @@ import random
 import os
 import pygame
 import math
-from . import utility
+from . import utility, text_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -124,37 +124,38 @@ def update_descriptions(target = 'all'):
                 first_line += '.'
                 text_list.append(first_line)
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
-                
-        elif current_target == 'European workers':
-            text_list.append('European workers have an upkeep of ' + str(constants.european_worker_upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('Each unit of European workers hired or sent as replacements may increase the upkeep of all European workers.')
-            text_list.append('European workers tend to be more susceptible to attrition but are more accustomed to using modern weaponry.')
-            
-        elif current_target == 'slave workers':
-            text_list.append('Slave workers have a constant upkeep of ' + str(constants.slave_worker_upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
-            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            if constants.effect_manager.effect_active('no_slave_trade_penalty'):
-                text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
+        
+        elif current_target.endswith(' workers'):
+            worker_name = current_target.replace('slums ', 'African ').replace('village ', 'African ')
+            worker_type = worker_name.split(' ')[0] # 'African' for 'African workers', 'European' for 'European workers', etc.
+
+            if worker_type != 'slave':
+                text_list.append(worker_name.capitalize() + ' have a varying upkeep, currently ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
             else:
-                text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+                text_list.append(worker_name.capitalize() + ' have a constant upkeep of ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
+
+            text_list.append('Officers and vehicles require an attached unit of workers to perform most actions.')
+
+            if worker_type != 'slave':
+                text_list.append('Each unit of ' + worker_name + ' hired may increase the upkeep of all ' + worker_name + '.')
+            else:
+                text_list.append('Each unit of ' + worker_name + ' purchased may increase the purchase cost of all ' + worker_name + '.')
             
-        elif current_target == 'slums workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
-            text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
-            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
+            if worker_type == 'European':
+                text_list.append(worker_name.capitalize() + ' tend to be more susceptible to attrition than African workers, but are more accustomed to modern vehicles and weaponry.')
+            elif worker_type == 'Asian':
+                text_list.append(worker_name.capitalize() + ' tend to be cheaper than European workers and less accustomed to modern vehicles and weaponry, while being easier to obtain and more susceptible to attrition than African workers.')
+            else:
+                if worker_type != 'slave':
+                    text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
+                text_list.append('African workers tend to be more resistant to attrition but are less accustomed to using modern vehicles and weaponry.')
             
-        elif current_target == 'village workers':
-            text_list.append('African workers have a varying upkeep that is currently ' + str(constants.african_worker_upkeep) + ' money each turn.')
-            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
-            text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
-            text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
-            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            
+            if worker_type == 'slave':
+                if constants.effect_manager.effect_active('no_slave_trade_penalty'):
+                    text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
+                else:
+                    text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+
         elif current_target == 'steamship':
             text_list.append('While useless by itself, a steamship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
             text_list.append('Crewing a steamship requires an advanced level of technological training, which is generally only available to European workers in this time period.')
@@ -246,7 +247,7 @@ def spawn_beast():
     constants.actor_creation_manager.create(False, {
         'coordinates': (spawn_cell.x, spawn_cell.y),
         'grids': [status.strategic_map_grid, status.strategic_map_grid.mini_grid],
-        'modes': ['strategic'],
+        'modes': status.strategic_map_grid.modes,
         'animal_type': animal_type,
         'adjective': random.choice(constants.animal_adjectives),
         'image': 'mobs/beasts/' + animal_type + '.png',
@@ -319,19 +320,6 @@ def update_roads():
         if current_building.building_type == 'infrastructure':
             current_building.cell.tile.update_image_bundle()
 
-def deselect_all():
-    '''
-    Description:
-        Deselects all units. Currently, the game will only have 1 selected unit at a time and this should be updated.
-    Input:
-        None
-    Output:
-        None
-    '''
-    for current_mob in status.mob_list:
-        if current_mob.selected:
-            current_mob.selected = False
-    
 def get_random_ocean_coordinates():
     '''
     Description:
@@ -361,11 +349,15 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
     if info_display == status.tile_info_display:
         for current_same_tile_icon in status.same_tile_icon_list:
             current_same_tile_icon.reset()
+        if new_actor != status.displayed_tile:
+            calibrate_actor_info_display(status.tile_inventory_info_display, None)
         status.displayed_tile = new_actor
         if new_actor:
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
 
     elif info_display == status.mob_info_display:
+        if new_actor != status.displayed_mob:
+            calibrate_actor_info_display(status.mob_inventory_info_display, None)
         status.displayed_mob = new_actor
         if new_actor and new_actor.images[0].current_cell.tile == status.displayed_tile:
             for current_same_tile_icon in status.same_tile_icon_list:
@@ -437,7 +429,7 @@ def generate_resource_icon(tile):
     Input:
         tile tile: Tile to generate a resource icon for
     Output:
-        string: Returns string image file path for tile's resource icon
+        string/list: Returns string or list image id for tile's resource icon
     '''
     small = False
     for building_type in constants.building_types:
@@ -673,3 +665,71 @@ def generate_group_movement_points(worker, officer, generate_max=False):
             return(math.floor(max_movement_points * officer_movement_ratio_remaining))
         else:
             return(math.floor(max_movement_points * worker_movement_ratio_remaining))
+
+def select_interface_tab(tabbed_collection, target_tab):
+    '''
+    Description:
+        Selects the inputted interface tab from the inputted tabbed collection, such as selecting the inventory tab from the mob tabbed collection
+    Input:
+        interface_collection tabbed_collection: Tabbed collection to select from
+        interface_collection target_tab: Tab to select
+    Output:
+        None
+    '''
+    if not target_tab.showing:
+        for tab_button in tabbed_collection.tabs_collection.members:
+            if tab_button.linked_element == target_tab:
+                tab_button.on_click()
+                continue
+
+def generate_label_image_id(text: str, y_offset=0):
+    '''
+    Description:
+        Generates and returns an image ID list for a label containing the inputted text at the inputted y offset
+            Used for "labels" that are part of images, not independent label objects
+    Input:
+        str text: Text for label to contain
+        float y_offset: -1.0 through 0.0, determines how far down image to offset the label, with 0 being at the top of the image
+    '''
+    x_size = min(0.96, 0.10 * len(text)) # Try to use a particular font size, decreasing if surpassing the maximum of 93% of the image width
+    if x_size < 0.93:
+        x_offset = 0.5 - (x_size / 2)
+    else:
+        x_offset = 0.02
+    y_size = (x_size / len(text)) * 2.3 # Decrease vertical font size proportionally if x_size was bounded by maximum
+    return([
+        {
+        'image_id': 'misc/paper_label.png',
+        'x_offset': x_offset - 0.01,
+        'y_offset': y_offset,
+        'free': True,
+        'level': 1,
+        'x_size': x_size + 0.02,
+        'y_size': y_size,
+        },
+        text_utility.prepare_render(
+            text,
+            font=constants.fonts['max_detail_black'],
+            override_input_dict={
+                'x_offset': x_offset,
+                'y_offset': y_offset,
+                'free': True,
+                'level': 1,
+                'override_height': None,
+                'override_width': None,
+                'x_size': x_size,
+                'y_size': y_size
+            }
+        )
+    ])
+
+def callback(target, function, *args):
+    '''
+    Description:
+        Orders the inputted target to call the inputted function with the inputted arguments
+    Input:
+        str target: Status object to call function of
+        str function: Name of function to call
+        *args: Any number of arguments to pass to function call
+    '''
+    getattr(getattr(status, target), function)(*args)

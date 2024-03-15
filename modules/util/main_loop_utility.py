@@ -47,7 +47,7 @@ def update_display():
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
-        notification_tooltip_button = 'none'
+        notification_tooltip_button = None
         for current_button in status.button_list:
             if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
                 if current_button.in_notification and current_button != status.current_instructions_page:
@@ -55,12 +55,12 @@ def update_display():
                 else:
                     possible_tooltip_drawers = [current_button]
         
-        if notification_tooltip_button == 'none':
+        if notification_tooltip_button:
+            possible_tooltip_drawers = [notification_tooltip_button]
+        else:
             for current_free_image in status.free_image_list:
                 if current_free_image.can_show_tooltip():
                     possible_tooltip_drawers = [current_free_image]
-        else:
-            possible_tooltip_drawers = [notification_tooltip_button]
                 
         if flags.show_text_box:
             draw_text_box()
@@ -135,16 +135,13 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
         None
     '''
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
-    font_size = scaling.scale_width(constants.font_size)
+    font = constants.fonts['default']
     y_displacement = scaling.scale_width(30) #estimated mouse size
-    x_displacement = 0
     if possible_tooltip_drawers_length == 0:
         return()
     elif possible_tooltip_drawers_length == 1:
         height = y_displacement
-        height += font_size
-        for current_text_line in possible_tooltip_drawers[0].tooltip_text:
-            height += font_size
+        height += font.size * (len(possible_tooltip_drawers[0].tooltip_text) + 1)
         possible_tooltip_drawers[0].update_tooltip()
         width = possible_tooltip_drawers[0].tooltip_box.width
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -162,25 +159,18 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
         for possible_tooltip_drawer in possible_tooltip_drawers:
             possible_tooltip_drawer.update_tooltip()
             if possible_tooltip_drawer == status.current_instructions_page:
-                height += font_size
-                for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    height += font_size
+                height += font.size * (len(possible_tooltip_drawer.tooltip_text) + 1)
                 width = possible_tooltip_drawer.tooltip_box.width
                 stopping = True
-            if (possible_tooltip_drawer in status.button_list and possible_tooltip_drawer.in_notification) and not stopping:
-                height += font_size
-                for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    height += font_size
+            elif (possible_tooltip_drawer in status.button_list and possible_tooltip_drawer.in_notification) and not stopping:
+                height += font.size * (len(possible_tooltip_drawer.tooltip_text) + 1)
                 width = possible_tooltip_drawer.tooltip_box.width
                 stopping = True
         if not stopping:
             for possible_tooltip_drawer in possible_tooltip_drawers:
-                height += font_size
+                height += font.size * (len(possible_tooltip_drawer.tooltip_text) + 1)
                 if possible_tooltip_drawer.tooltip_box.width > width:
-                    width = possible_tooltip_drawer.tooltip_box.width
-                for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    height += font_size
-
+                        width = possible_tooltip_drawer.tooltip_box.width
         mouse_x, mouse_y = pygame.mouse.get_pos()
         below_screen = False #if goes below bottom side
         beyond_screen = False #if goes beyond right side
@@ -188,28 +178,20 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
             below_screen = True
         if mouse_x + width > constants.display_width:
             beyond_screen = True
-        
         stopping = False
         for possible_tooltip_drawer in possible_tooltip_drawers:
             if possible_tooltip_drawer == status.current_instructions_page:
                 possible_tooltip_drawer.draw_tooltip(below_screen, beyond_screen, height, width, y_displacement)
-                y_displacement += scaling.unscale_width(font_size)
-                for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    y_displacement += scaling.unscale_width(font_size)
+                y_displacement += scaling.unscale_width(font.size * (len(possible_tooltip_drawer.tooltip_text) + 1))
                 stopping = True
-            if (possible_tooltip_drawer in status.button_list and possible_tooltip_drawer.in_notification) and not stopping:
+            elif (possible_tooltip_drawer in status.button_list and possible_tooltip_drawer.in_notification) and not stopping:
                 possible_tooltip_drawer.draw_tooltip(below_screen, beyond_screen, height, width, y_displacement)
-                y_displacement += scaling.unscale_width(font_size)
-                for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    y_displacement += scaling.unscale_width(font_size)
+                y_displacement += scaling.unscale_width(font.size * (len(possible_tooltip_drawer.tooltip_text) + 1))
                 stopping = True
-                
         if not stopping:
             for possible_tooltip_drawer in possible_tooltip_drawers:
                 possible_tooltip_drawer.draw_tooltip(below_screen, beyond_screen, height, width, y_displacement)
-                y_displacement += scaling.unscale_width(font_size)
-                for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    y_displacement += scaling.unscale_width(font_size)
+                y_displacement += scaling.unscale_width(font.size * (len(possible_tooltip_drawer.tooltip_text) + 1))
 
 def draw_text_box():
     '''
@@ -221,20 +203,16 @@ def draw_text_box():
         None
     '''
     greatest_width = scaling.scale_width(300)
-    max_screen_lines = (scaling.scale_height(constants.default_display_height // constants.font_size)) - 1
-    max_text_box_lines = (scaling.scale_height(constants.text_box_height // constants.font_size)) - 1
-    font_name = constants.font_name
-    font_size = constants.font_size
+    font = constants.fonts['default']
+    max_screen_lines = (constants.default_display_height // font.size) - 1
+    max_text_box_lines = (constants.text_box_height // font.size) - 1
     for text_index in range(len(status.text_list)):
         if text_index < max_text_box_lines:
-            if text_utility.message_width(status.text_list[-text_index - 1], font_size, font_name) > greatest_width:
-                greatest_width = text_utility.message_width(status.text_list[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
+            greatest_width = max(greatest_width, font.calculate_size(status.text_list[-text_index - 1]))
     if constants.input_manager.taking_input:
-        if text_utility.message_width('Response: ' + constants.message, font_size, font_name) > greatest_width: #manages width of user input
-            greatest_width = text_utility.message_width('Response: ' + constants.message, font_size, font_name)
+        greatest_width = max(font.calculate_size('Response: ' + constants.message), greatest_width) #manages width of user input
     else:
-        if text_utility.message_width(constants.message, font_size, font_name) > greatest_width: #manages width of user input
-            greatest_width = text_utility.message_width(constants.message, font_size, font_name)
+        greatest_width = max(font.calculate_size(constants.message), greatest_width) #manages width of user input
     text_box_width = greatest_width + scaling.scale_width(10)
     x, y = (0, constants.display_height - constants.text_box_height)
     pygame.draw.rect(constants.game_display, constants.color_dict['white'], (x, y, text_box_width, constants.text_box_height)) #draws white rect to prevent overlapping
@@ -243,20 +221,20 @@ def draw_text_box():
     else:
         color = 'black'
     pygame.draw.rect(constants.game_display, constants.color_dict[color], (x, y, text_box_width, constants.text_box_height), scaling.scale_height(3)) #black text box outline
-    pygame.draw.line(constants.game_display, constants.color_dict[color], (0, constants.display_height - (font_size + scaling.scale_height(5))), #input line
-        (text_box_width, constants.display_height - (font_size + scaling.scale_height(5))))
+    pygame.draw.line(constants.game_display, constants.color_dict[color], (0, constants.display_height - (font.size + scaling.scale_height(5))), #input line
+        (text_box_width, constants.display_height - (font.size + scaling.scale_height(5))))
 
     status.text_list = text_utility.manage_text_list(status.text_list, max_screen_lines) #number of lines
-    
+
     for text_index in range(len(status.text_list)):
         if text_index < max_text_box_lines:
-            textsurface = constants.myfont.render(status.text_list[(-1 * text_index) - 1], False, (0, 0, 0))
-            constants.game_display.blit(textsurface,(scaling.scale_width(10), (-1 * font_size * text_index) + constants.display_height - ((2 * font_size) + scaling.scale_height(5))))
+            textsurface = constants.myfont.pygame_font.render(status.text_list[(-1 * text_index) - 1], False, (0, 0, 0))
+            constants.game_display.blit(textsurface,(scaling.scale_width(10), (-1 * font.size * text_index) + constants.display_height - ((2 * font.size) + scaling.scale_height(5))))
     if constants.input_manager.taking_input:
-        textsurface = constants.myfont.render('Response: ' + constants.message, False, (0, 0, 0))
+        textsurface = constants.myfont.pygame_font.render('Response: ' + constants.message, False, (0, 0, 0))
     else:
-        textsurface = constants.myfont.render(constants.message, False, (0, 0, 0))
-    constants.game_display.blit(textsurface,(scaling.scale_width(10), constants.display_height - (font_size + scaling.scale_height(5))))
+        textsurface = constants.myfont.pygame_font.render(constants.message, False, (0, 0, 0))
+    constants.game_display.blit(textsurface,(scaling.scale_width(10), constants.display_height - (font.size + scaling.scale_height(5))))
 
 def manage_rmb_down(clicked_button):
     '''
@@ -287,7 +265,6 @@ def manage_rmb_down(clicked_button):
                             moved_mob.select()
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
-                            actor_utility.calibrate_actor_info_display(status.tile_info_display, moved_mob.images[0].current_cell.tile)
     elif flags.drawing_automatic_route:
         stopping = True
         flags.drawing_automatic_route = False
@@ -328,19 +305,11 @@ def manage_lmb_down(clicked_button):
                             if current_cell.visible:
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_mob = True
+                                    current_mob = current_cell.contained_mobs[0]
                                     actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-                                    current_cell.contained_mobs[0].select()
-                                    if current_cell.contained_mobs[0].is_pmob:
-                                        current_cell.contained_mobs[0].selection_sound()
-                                    if current_grid == status.minimap_grid:
-                                        main_x, main_y = status.minimap_grid.get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = status.strategic_map_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                        main_cell = status.strategic_map_grid.find_cell(main_x, main_y)
-                                        if main_cell:
-                                            main_tile = main_cell.tile
-                                            if not main_tile == 'none':
-                                                actor_utility.calibrate_actor_info_display(status.tile_info_display, main_tile)
-                                    else:
-                                        actor_utility.calibrate_actor_info_display(status.tile_info_display, current_cell.tile)
+                                    current_mob.select()
+                                    if current_mob.is_pmob:
+                                        current_mob.selection_sound()
             if selected_mob:
                 unit = status.displayed_mob
                 if unit and unit.grids[0] == status.minimap_grid.attached_grid:
@@ -372,7 +341,6 @@ def manage_lmb_down(clicked_button):
                                 if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < status.strategic_map_grid.coordinate_width: #or is harbor
                                     text_utility.print_to_screen('You can only send ships to coastal waters and coastal ports.')
                                     stopping = True
-                            chose_destination = True
                             if not stopping:
                                 status.displayed_mob.end_turn_destination = target_cell.tile
                                 flags.show_selection_outlines = True
@@ -381,6 +349,7 @@ def manage_lmb_down(clicked_button):
                                 actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
                                 actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_mob.images[0].current_cell.tile)
                         else: #cannot move to same continent
+                            actor_utility.calibrate_actor_info_display(status.mob_info_display, None)
                             text_utility.print_to_screen('You can only send ships to other theatres.')
             flags.choosing_destination = False
             
@@ -447,25 +416,19 @@ def click_move_minimap():
     Output:
         None
     '''
-    breaking = False
     for current_grid in status.grid_list: #if grid clicked, move minimap to location clicked
         if current_grid.showing:
             for current_cell in current_grid.get_flat_cell_list():
                 if current_cell.touching_mouse():
                     if current_grid == status.minimap_grid: #if minimap clicked, calibrate to corresponding place on main map
-                        if not current_cell.terrain == 'none': #if off map, do not move minimap there
+                        if current_cell.terrain != 'none': #if off map, do not move minimap there
                             main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
                             status.minimap_grid.calibrate(main_x, main_y)
                     elif current_grid == status.strategic_map_grid:
                         status.minimap_grid.calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
                         actor_utility.calibrate_actor_info_display(status.tile_info_display, current_grid.cell_list[0][0].tile)
-                    breaking = True
-                    break
-                if breaking:
-                    break
-            if breaking:
-                 break
+                    return
 
 def debug_print():
     '''
@@ -478,4 +441,3 @@ def debug_print():
     '''
     print('')
     print(constants.effect_manager)
-    

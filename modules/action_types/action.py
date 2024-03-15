@@ -54,6 +54,7 @@ class action():
         self.roll_lists = []
         self.allow_critical_failures = True
         self.allow_critical_successes = True
+        self.skip_result_notification = False
 
     def button_setup(self, initial_input_dict):
         '''
@@ -90,6 +91,7 @@ class action():
         Output:
             boolean: Returns whether the subclass on_click can continue with its logic
         '''
+        self.current_unit = unit
         if not main_loop_utility.action_possible():
             text_utility.print_to_screen('You are busy and cannot start a ' + self.name + '.')
             return(False)
@@ -195,6 +197,9 @@ class action():
                 return_list += self.current_unit.controlling_minister.generate_icon_input_dicts(alignment='leftmost')
             elif self.actor_type == 'minister':
                 return_list += self.current_unit.generate_icon_input_dicts(alignment='leftmost')
+            elif self.actor_type == 'prosecutor':
+                return_list += status.displayed_minister.generate_icon_input_dicts(alignment='leftmost')
+                return_list += self.current_unit.generate_icon_input_dicts(alignment='left')
         return(return_list)
 
     def generate_audio(self, subject):
@@ -246,7 +251,10 @@ class action():
             self.current_max_crit_fail = 0
         if not self.allow_critical_successes:
             self.current_min_crit_success = 7
-        self.current_unit = unit
+        if self.actor_type == 'prosecutor':
+            self.current_unit = status.current_ministers['Prosecutor']
+        else:
+            self.current_unit = unit
 
     def start(self, unit):
         '''
@@ -282,6 +290,14 @@ class action():
         return(price)
 
     def generate_roll_lists(self, results):
+        '''
+        Description:
+            Creates and returns a list of roll descriptions for the inputted roll results
+        Input:
+            int list: List of dice roll results to describe
+        Output:
+            int/string list list: List of roll result lists containing each roll result and a corresponding description
+        '''
         return_list = []
         roll_type = self.name.capitalize() + ' roll'
         for index in range(len(results)):
@@ -301,16 +317,20 @@ class action():
         '''
         constants.notification_manager.set_lock(True)
         self.roll_result = 0
-        self.current_unit.set_movement_points(0)
+        if self.actor_type == 'mob':
+            self.current_unit.set_movement_points(0)
 
         price = self.process_payment()
 
-        if self.current_unit.veteran:
+        if self.actor_type == 'mob' and self.current_unit.veteran:
             num_dice = 2
         else:
             num_dice = 1
 
-        results = self.current_unit.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, self.action_type, num_dice)
+        if self.actor_type == 'mob':
+            results = self.current_unit.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, self.action_type, num_dice)
+        else:
+            results = self.current_unit.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, self.action_type, num_dice)
         self.roll_lists = self.generate_roll_lists(results)
 
         self.roll_result = 0
@@ -363,22 +383,23 @@ class action():
             'audio': self.generate_audio('roll_finished')
         })
 
-        if self.roll_result <= self.current_max_crit_fail:
-            result = 'critical_failure'
-        elif (not self.current_unit.veteran) and self.roll_result >= self.current_min_crit_success:
-            result = 'critical_success'
-        elif self.roll_result >= self.current_min_success:
-            result = 'success'
-        else:
-            result = 'failure'
+        if not self.skip_result_notification:
+            if self.roll_result <= self.current_max_crit_fail:
+                result = 'critical_failure'
+            elif (self.actor_type == 'mob' and not self.current_unit.veteran) and self.roll_result >= self.current_min_crit_success:
+                result = 'critical_success'
+            elif self.roll_result >= self.current_min_success:
+                result = 'success'
+            else:
+                result = 'failure'
 
-        text += self.generate_notification_text(result)
+            text += self.generate_notification_text(result)
 
-        constants.notification_manager.display_notification({
-            'message': text + 'Click to remove this notification. /n /n',
-            'notification_type': 'action',
-            'attached_interface_elements': self.generate_attached_interface_elements(result)
-        })
+            constants.notification_manager.display_notification({
+                'message': text + 'Click to remove this notification. /n /n',
+                'notification_type': 'action',
+                'attached_interface_elements': self.generate_attached_interface_elements(result)
+            })
 
     def complete(self):
         '''
@@ -391,7 +412,7 @@ class action():
         '''
         if self.actor_type == 'mob' and self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
             self.current_unit.promote()
-            self.current_unit.select()
+            status.displayed_mob.select()
         action_utility.cancel_ongoing_actions()
 
 class campaign(action):

@@ -130,7 +130,6 @@ class officer(pmob):
             None
         '''
         self.in_group = True
-        self.selected = False
         self.hide_images()
         self.remove_from_turn_queue()
 
@@ -147,10 +146,7 @@ class officer(pmob):
         self.x = group.x
         self.y = group.y
         self.show_images()
-        #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
-        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()
-        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding

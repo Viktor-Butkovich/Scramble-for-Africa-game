@@ -21,6 +21,7 @@ class image():
             None
         '''
         self.contains_bundle = False
+        self.text = False
         self.width = width
         self.height = height
         self.Rect = 'none'
@@ -314,6 +315,8 @@ class bundle_image():
                 offset image dictionary: String keys corresponding to extra information for offset images
                     'image'_id': string value - File path to image used for this offset image
                     'size' = 1: float value - Scale of offset image, with 1 being the same size as the bundle
+                    'x_size' = 1: float value - Scale of offset image on x axis, overrides size
+                    'y_size' = 1: float value - Scale of offset image on y axis, overrides size
                     'x_offset' = 0: float value - x-axis offset of image, with 1 being shifted a full width to the right
                     'y_offset' = 0: float value - y-axis offset of image, with 1 being shifted a full height upward
                     'level' = 0: int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
@@ -335,12 +338,15 @@ class bundle_image():
         else:
             self.image_id_dict = image_id
             self.image_id = image_id['image_id']
-            self.size = image_id.get('size', 1)
+            self.x_size = image_id.get('x_size', image_id.get('size', 1)) #uses inputted x_size if present, otherwise inputted size, otherwise 1
+            self.y_size = image_id.get('y_size', image_id.get('size', 1)) #uses inputted y_size if present, otherwise inputted size, otherwise 1
             self.x_offset = image_id.get('x_offset', 0)
             self.y_offset = image_id.get('y_offset', 0)
             self.level = image_id.get('level', 0)
-            if 'override_width' in image_id:
+            if image_id.get('override_width', None):
                 self.override_width = image_id['override_width']
+            if image_id.get('override_height', None):
+                self.override_height = image_id['override_height']
             if 'green_screen' in image_id:
                 self.has_green_screen = True
                 self.green_screen_colors = []
@@ -349,9 +355,15 @@ class bundle_image():
                         self.green_screen_colors.append(image_id['green_screen'][index])
                 else:
                     self.green_screen_colors.append(image_id['green_screen'])
-
             else:
                 self.has_green_screen = False
+            if 'font' in image_id:
+                self.font = image_id['font']
+            elif not self.image_id.endswith('.png'):
+                self.font = constants.myfont
+            if 'free' in image_id:
+                self.free = image_id['free']
+            
         if type(self.image_id) == pygame.Surface: #if given pygame Surface, avoid having to render it again
             self.image = self.image_id
         else:
@@ -367,8 +379,8 @@ class bundle_image():
         Output:
             double: Returns final x offset of this member image when blitted to bundle's combined surface
         '''
-        if hasattr(self, 'override_width'):
-            return(0)
+        if hasattr(self, 'free') and self.free: #if hasattr(self, 'override_width'):
+            return((self.bundle.width * self.x_offset))
         else:
             return((self.bundle.width * self.x_offset) - (self.width / 2) + (self.bundle.width / 2))
 
@@ -381,7 +393,10 @@ class bundle_image():
         Output:
             double: Returns final y offset of this member image when blitted to bundle's combined surface
         '''
-        return((self.bundle.height * self.y_offset * -1) - (self.height / 2) + (self.bundle.height / 2))
+        if hasattr(self, 'free') and self.free: #hasattr(self, 'override_width'):
+            return((self.bundle.height * self.y_offset * -1))
+        else:
+            return((self.bundle.height * self.y_offset * -1) - (self.height / 2) + (self.bundle.height / 2))
 
     def scale(self):
         '''
@@ -396,8 +411,11 @@ class bundle_image():
             if hasattr(self, 'override_width'):
                 self.width = self.override_width
             else:
-                self.width = self.bundle.width * self.size
-            self.height = self.bundle.height * self.size
+                self.width = self.bundle.width * self.x_size
+            if hasattr(self, 'override_height'):
+                self.height = self.override_height
+            else:
+                self.height = self.bundle.height * self.y_size
         else:
             self.width = self.bundle.width
             self.height = self.bundle.height
@@ -413,7 +431,10 @@ class bundle_image():
         Output:
             None
         '''
-        full_image_id = 'graphics/' + self.image_id
+        if self.image_id.endswith('.png'):
+            full_image_id = 'graphics/' + self.image_id
+        else:
+            full_image_id = self.image_id
         key = full_image_id
         if self.is_offset and self.has_green_screen:
             for current_green_screen_color in self.green_screen_colors:
@@ -421,27 +442,32 @@ class bundle_image():
         if key in status.rendered_images: #if image already loaded, use it
             self.image = status.rendered_images[key]
         else: #if image not loaded, load it and add it to the loaded images
-            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                self.image = pygame.image.load(full_image_id)
-            except:
-                print(full_image_id)
-                self.image = pygame.image.load(full_image_id)
-            self.image.convert()
-            if self.is_offset and self.has_green_screen:
-                width, height = self.image.get_size()
-                index = 0
-                for current_green_screen_color in constants.green_screen_colors:
-                    if index < len(self.green_screen_colors):
-                        if type(self.green_screen_colors[index]) == str: #like 'red'
-                            replace_with = self.bundle.constants.color_dict[self.green_screen_colors[index]]
-                        else: #like (255, 0, 0)
-                            replace_with = self.green_screen_colors[index]
-                        for x in range(width):
-                            for y in range(height):
-                                current_color = self.image.get_at((x, y))
-                                if current_color[0] == current_green_screen_color[0] and current_color[1] == current_green_screen_color[1] and current_color[2] == current_green_screen_color[2]:
-                                    self.image.set_at((x, y), (replace_with[0], replace_with[1], replace_with[2], current_color[3])) #preserves alpha value
-                    index += 1
+            if full_image_id.endswith('.png'):
+                self.text = False
+                try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                    self.image = pygame.image.load(full_image_id)
+                except:
+                    print(full_image_id)
+                    self.image = pygame.image.load(full_image_id)
+                self.image.convert()
+                if self.is_offset and self.has_green_screen:
+                    width, height = self.image.get_size()
+                    index = 0
+                    for current_green_screen_color in constants.green_screen_colors:
+                        if index < len(self.green_screen_colors):
+                            if type(self.green_screen_colors[index]) == str: #like 'red'
+                                replace_with = self.bundle.constants.color_dict[self.green_screen_colors[index]]
+                            else: #like (255, 0, 0)
+                                replace_with = self.green_screen_colors[index]
+                            for x in range(width):
+                                for y in range(height):
+                                    current_color = self.image.get_at((x, y))
+                                    if current_color[0] == current_green_screen_color[0] and current_color[1] == current_green_screen_color[1] and current_color[2] == current_green_screen_color[2]:
+                                        self.image.set_at((x, y), (replace_with[0], replace_with[1], replace_with[2], current_color[3])) #preserves alpha value
+                        index += 1
+            else:
+                self.text = True
+                self.image = text_utility.text(self.image_id, self.font)
             status.rendered_images[key] = self.image
 
 class free_image(image):
@@ -467,7 +493,7 @@ class free_image(image):
         '''
         self.image_type = 'free'
         self.showing = False
-        self.has_parent_collection = False    
+        self.has_parent_collection = False
         super().__init__(input_dict['width'], input_dict['height'])
         self.parent_collection = input_dict.get('parent_collection', 'none')
         self.has_parent_collection = self.parent_collection != 'none'
@@ -595,20 +621,28 @@ class free_image(image):
                 self.image_id = new_image
                 if isinstance(new_image, str): #if set to string image path
                     self.contains_bundle = False
-                    full_image_id = 'graphics/' + self.image_id
+                    if new_image.endswith('.png'):
+                        self.text = False
+                        full_image_id = 'graphics/' + self.image_id
+                    else:
+                        self.text = True
+                        full_image_id = self.image_id
                     if full_image_id in status.rendered_images:
                         self.image = status.rendered_images[full_image_id]
                     else:
-                        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                            self.image = pygame.image.load(full_image_id)
-                        except:
-                            print(full_image_id)
-                            self.image = pygame.image.load(full_image_id)
+                        if not self.text:
+                            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                                self.image = pygame.image.load(full_image_id)
+                            except:
+                                print(full_image_id)
+                                self.image = pygame.image.load(full_image_id)
+                        else:
+                            self.image = text_utility.text(full_image_id, constants.myfont)
                         status.rendered_images[full_image_id] = self.image
                     self.image = pygame.transform.scale(self.image, (self.width, self.height))
                 else: #if set to image path list
                     self.contains_bundle = True
-                    self.image = image_bundle(self, self.image_id) #self.image_id
+                    self.image = image_bundle(self, self.image_id)
         
     def can_show_tooltip(self):
         '''
@@ -620,6 +654,22 @@ class free_image(image):
             Returns whether this image's tooltip can currently be shown
         '''
         return(False)
+
+    def get_actor_type(self) -> str:
+        '''
+        Description:
+            Recursively finds the type of actor this interface is attached to
+        Input:
+            None
+        Output:
+            str: Returns type of actor this interface is attached to
+        '''
+        if hasattr(self, 'actor_type'):
+            return(self.actor_type)
+        elif self.has_parent_collection:
+            return(self.parent_collection.get_actor_type())
+        else:
+            return(None)
 
 class background_image(free_image):
     '''
@@ -655,7 +705,7 @@ class background_image(free_image):
             if status.safe_click_area.showing != self.previous_safe_click_area_showing:
                 self.previous_safe_click_area_showing = status.safe_click_area.showing
                 if self.previous_safe_click_area_showing:
-                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': status.safe_click_area.width}])
+                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': status.safe_click_area.width, 'free': True}])
                 else:
                     self.set_image('misc/background.png')
             return(True)
@@ -697,12 +747,10 @@ class tooltip_free_image(free_image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 0
-        font_name = constants.font_name
-        font_size = constants.font_size
+        font = constants.fonts['default']
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (len(self.tooltip_text) * font.size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -960,8 +1008,6 @@ class minister_type_image(tooltip_free_image):
             if new_minister == 'none':
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             image_id_list = ['ministers/icons/' + keyword + '.png']
-            if self.minister_image_type == 'portrait' and self.current_minister != 'none':
-                image_id_list += self.current_minister.image_id
             self.set_image(image_id_list)
         self.update_image_bundle()
 
@@ -1130,15 +1176,23 @@ class actor_image(image):
         if not isinstance(new_image_description, image_bundle):
             if isinstance(self.image_id, str): #if set to string image path
                 self.contains_bundle = False
-                full_image_id = 'graphics/' + self.image_id
+                if self.image_id.endswith('.png'):
+                    self.text = False
+                    full_image_id = 'graphics/' + self.image_id
+                else:
+                    self.text = True
+                    full_image_id = self.image_id
                 if full_image_id in status.rendered_images:
                     self.image = status.rendered_images[full_image_id]
                 else:
-                    try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                        self.image = pygame.image.load(full_image_id)
-                    except:
-                        print(full_image_id)
-                        self.image = pygame.image.load(full_image_id)
+                    if not self.text:
+                        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                            self.image = pygame.image.load(full_image_id)
+                        except:
+                            print(full_image_id)
+                            self.image = pygame.image.load(full_image_id)
+                    else:
+                        self.image = text_utility.text(self.image_id, constants.myfont)
                     status.rendered_images[full_image_id] = self.image
                 self.image = pygame.transform.scale(self.image, (self.width, self.height))
             else: #if set to image path list
@@ -1193,12 +1247,10 @@ class actor_image(image):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
-        font_size = constants.font_size
-        font_name = constants.font_name
+        font = constants.fonts['default']
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (font.size * len(tooltip_text)) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)
         self.actor.tooltip_box = self.tooltip_box
         self.tooltip_outline_width = 1
@@ -1249,7 +1301,7 @@ class mob_image(actor_image):
         Output:
             None
         '''
-        if not self.current_cell == 'none':
+        if not self.current_cell in ['none', None]:
             self.current_cell.contained_mobs = utility.remove_from_list(self.current_cell.contained_mobs, self.actor)
         self.current_cell = 'none'
 

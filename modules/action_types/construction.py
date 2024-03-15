@@ -37,6 +37,7 @@ class construction(action.action):
             self.requirement = 'can_construct'
         if self.building_type == 'resource':
             self.attached_resource = 'none'
+            self.building_name = 'resource production facility'
         self.name = 'construction'
         self.allow_critical_failures = False
 
@@ -229,7 +230,7 @@ class construction(action.action):
                         self.building_name = 'ivory camp'
                 else:
                     self.attached_resource = 'none'
-                    self.building_name = 'none'
+                    self.building_name = 'resource production facility'
                 self.button.image.set_image(constants.resource_building_button_dict[self.attached_resource])
 
         elif self.building_type == 'infrastructure':
@@ -378,7 +379,7 @@ class construction(action.action):
                 'coordinates': (self.current_unit.x, self.current_unit.y),
                 'grids': self.current_unit.grids,
                 'name': self.building_name,
-                'modes': ['strategic'],
+                'modes': self.current_unit.grids[0].modes,
                 'init_type': self.building_type
             }
 
@@ -435,7 +436,6 @@ class construction(action.action):
                     
             actor_utility.calibrate_actor_info_display(status.tile_info_display, self.current_unit.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:
-                new_building.move_to_front()
                 new_building.select()
             else:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self.current_unit) #update mob display to show new upgrade possibilities

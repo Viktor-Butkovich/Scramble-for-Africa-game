@@ -50,6 +50,7 @@ class button(interface_elements.interface_element):
             self.set_keybind(self.keybind_id)
         if 'color' in input_dict:
             self.color = constants.color_dict[input_dict['color']]
+        self.has_button_press_override = False
         self.enable_shader = input_dict.get('enable_shader', False)
         self.showing_outline = False
         self.showing_background = True
@@ -61,6 +62,16 @@ class button(interface_elements.interface_element):
         self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
 
     def calibrate(self, new_actor, override_exempt=False):
+        '''
+        Description:
+            Attaches this button to the inputted actor and updates this button's image to that of the actor. May also display a shader over this button, if its particular
+                requirements are fulfilled
+        Input:
+            string/actor new_actor: The minister whose information is matched by this button. If this equals 'none', this button is detached from any ministers
+            bool override_exempt: Optional parameter that may be given to calibrate functions, does nothing for buttons
+        Output:
+            None
+        '''
         super().calibrate(new_actor, override_exempt)
         if self.enable_shader:
             shader_image_id = 'misc/shader.png'
@@ -294,30 +305,6 @@ class button(interface_elements.interface_element):
             else:
                 self.set_tooltip(['Orders this ' + self.vehicle_type + ' to disembark all of its passengers',
                                   'Disembarking a unit outside of a port renders it disorganized until the next turn, decreasing its combat effectiveness'])
-
-        elif self.button_type == 'pick up commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers 1 unit of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' to the currently displayed unit in this tile'])
-            else:
-                self.set_tooltip(['none'])
-                
-        elif self.button_type == 'pick up all commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers all units of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' to the currently displayed unit in this tile'])
-            else:
-                self.set_tooltip(['none'])
-                
-        elif self.button_type == 'drop commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers 1 unit of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' into this unit\'s tile'])
-            else:
-                self.set_tooltip(['none'])
-                
-        elif self.button_type == 'drop all commodity':
-            if not self.attached_label.actor == 'none':
-                self.set_tooltip(['Transfers all units of ' + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + ' into this unit\'s tile'])
-            else:
-                self.set_tooltip(['none'])
                 
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
@@ -329,16 +316,15 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Ends the current turn'])
             
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-            if not self.attached_label.actor == 'none':
-                commodity_list = self.attached_label.actor.get_held_commodities()
-                commodity = commodity_list[self.attached_label.commodity_index]
-                sell_price = constants.commodity_prices[commodity]
+            if status.displayed_tile:
+                commodity: str = self.attached_label.actor.current_item
+                sell_price: int = constants.commodity_prices[commodity]
                 if self.button_type == 'sell commodity':
                     self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell 1 unit of ' + commodity + ' for about ' + str(sell_price) + ' money at the end of the turn',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
                                       'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
                 else:
-                    num_present = self.attached_label.actor.get_inventory(commodity)
+                    num_present = status.displayed_tile.get_inventory(commodity)
                     self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell your entire stockpile of ' + commodity + ' for about ' + str(sell_price) + ' money each at the end of the turn, ' +
                                           'for a total of about ' + str(sell_price * num_present) + ' money',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
@@ -463,10 +449,10 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Recruits a unit of African workers for 0 money'] +
                              constants.list_descriptions['slums workers'])
 
-        elif self.button_type == 'buy slaves':
-            actor_utility.update_descriptions('slave workers')
-            self.set_tooltip(['Recruits a unit of slave workers for ' + str(constants.recruitment_costs['slave workers']) + ' money'] +
-                             constants.list_descriptions['slave workers'])
+        elif self.button_type == 'recruit workers':
+            actor_utility.update_descriptions(self.worker_type + ' workers')
+            self.set_tooltip(['Recruits a unit of ' + self.worker_type + ' workers for ' + str(status.worker_types[self.worker_type].recruitment_cost) + ' money'] +
+                                constants.list_descriptions[self.worker_type + ' workers'])
 
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(['Displays the previous turn\'s financial report'])
@@ -628,13 +614,11 @@ class button(interface_elements.interface_element):
         self.tooltip_text = tooltip_text
         if self.has_keybind:
             self.tooltip_text.append('Press ' + self.keybind_name + ' to use.')
-        tooltip_width = 0#50
-        font_name = constants.font_name
-        font_size = constants.font_size
+        font = constants.fonts['default']
+        tooltip_width = font.size
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (len(self.tooltip_text) * font.size) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -678,14 +662,14 @@ class button(interface_elements.interface_element):
         '''
         if self.showing:
             if self.showing_outline and allow_show_outline:
-                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
+                pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline, width=2)
             if self.showing_background and hasattr(self, 'color'):
                 pygame.draw.rect(constants.game_display, self.color, self.Rect)
             self.image.draw()
             if self.has_keybind: #The key to which a button is bound will appear on the button's image
                 message = self.keybind_name
                 color = 'white'
-                textsurface = constants.myfont.render(message, False, constants.color_dict[color])
+                textsurface = constants.myfont.pygame_font.render(message, False, constants.color_dict[color])
                 constants.game_display.blit(textsurface, (self.x + scaling.scale_width(10), (constants.display_height -
                     (self.y + self.height - scaling.scale_height(5)))))
 
@@ -862,75 +846,6 @@ class button(interface_elements.interface_element):
             self.battalion.clear_attached_cell_icons()
             self.battalion.move(self.x_change, self.y_change, True)
 
-        elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
-            if main_loop_utility.action_possible():
-                if minister_utility.positions_filled():
-                    displayed_mob = status.displayed_mob
-                    displayed_tile = status.displayed_tile
-                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'drop all commodity':
-                        num_commodity = displayed_mob.get_inventory(commodity)
-                    if displayed_mob and displayed_tile:
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            can_drop_off = True
-                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
-                                can_drop_off = False
-                                text_utility.print_to_screen('A train can only drop off cargo at a train station.')
-                            if can_drop_off:
-                                if displayed_mob.sentry_mode:
-                                    displayed_mob.set_sentry_mode(False)
-                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                                displayed_tile.change_inventory(commodity, num_commodity)
-                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                    text_utility.print_to_screen('This tile cannot hold this many commodities.')
-                                    text_utility.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.')
-                        else:
-                            text_utility.print_to_screen('This unit is not in this tile.')
-                    else:
-                        text_utility.print_to_screen('There is no tile to transfer this commodity to.')
-            else:
-                text_utility.print_to_screen('You are busy and cannot transfer commodities.')
-                
-        elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
-            if main_loop_utility.action_possible():
-                if minister_utility.positions_filled():
-                    displayed_mob = status.displayed_mob
-                    displayed_tile = status.displayed_tile
-                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'pick up all commodity':
-                        num_commodity = displayed_tile.get_inventory(commodity)
-                    if displayed_mob and displayed_tile:
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            if displayed_mob.can_hold_commodities:
-                                can_pick_up = True
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
-                                    can_pick_up = False
-                                    text_utility.print_to_screen('A train can only pick up cargo at a train station.')
-                                if can_pick_up:
-                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                        amount_transferred = num_commodity
-                                    else:
-                                        amount_transferred = displayed_mob.get_inventory_remaining()
-                                        text_utility.print_to_screen('This unit can currently only pick up ' + str(amount_transferred) + ' units of ' + commodity + '.')
-                                    if displayed_mob.sentry_mode:
-                                        displayed_mob.set_sentry_mode(False)
-                                    displayed_mob.change_inventory(commodity, amount_transferred)
-                                    displayed_tile.change_inventory(commodity, -1 * amount_transferred)
-                                    for tab_button in status.mob_tabbed_collection.tabs_collection.members:
-                                        if tab_button.linked_element == status.mob_inventory_collection:
-                                            tab_button.on_click()
-                                            continue
-                            else:
-                                text_utility.print_to_screen('This unit cannot hold commodities.')
-                        else:
-                            text_utility.print_to_screen('This unit is not in this tile.')
-                    else:
-                        text_utility.print_to_screen('There is no unit to transfer this commodity to.')
-            else:
-                text_utility.print_to_screen('You are busy and cannot transfer commodities.')
-
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
                 if not len(self.attached_label.attached_building.contained_workers) == 0:
@@ -951,7 +866,7 @@ class button(interface_elements.interface_element):
                         game_transitions.set_game_mode('strategic')
                     for current_minister in status.minister_list:
                         if current_minister.just_removed and current_minister.current_position == 'none':
-                            text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
+                            text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, he will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
                             current_minister.display_message(text)
                     for current_cell in status.strategic_map_grid.get_flat_cell_list():
                         if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
@@ -977,15 +892,20 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
             if minister_utility.positions_filled():
-                commodity_list = self.attached_label.actor.get_held_commodities()
-                commodity = commodity_list[self.attached_label.commodity_index]
-                num_present = self.attached_label.actor.get_inventory(commodity)
-                num_sold = 0
+                commodity: str = self.attached_label.actor.current_item
+                num_present: int = status.displayed_tile.get_inventory(commodity)
+                num_sold: int
                 if self.button_type == 'sell commodity':
                     num_sold = 1
                 else:
                     num_sold = num_present
-                market_utility.sell(self.attached_label.actor, commodity, num_sold)
+                market_utility.sell(status.displayed_tile, commodity, num_sold)
+
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
+                if status.displayed_tile_inventory and status.displayed_tile_inventory.current_item:
+                    actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
+                else:
+                    actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, None)
 
         elif self.button_type == 'cycle units':
             if main_loop_utility.action_possible():
@@ -1026,7 +946,6 @@ class button(interface_elements.interface_element):
                 displayed_mob.free_and_replace()
 
         elif self.button_type == 'free all':
-            actor_utility.deselect_all()
             pmob_list = utility.copy_list(status.pmob_list) #alllows iterating through each unit without any issues from removing from list during iteration
             old_public_opinion = constants.public_opinion
             num_freed = 0
@@ -1039,7 +958,7 @@ class button(interface_elements.interface_element):
                     current_pmob.free_and_replace()
             public_opinion_increase = constants.public_opinion - old_public_opinion
             if num_freed > 0:
-                message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
+                message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and hired as workers'
                 message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
                 constants.notification_manager.display_notification({
                     'message': message,
@@ -1162,7 +1081,7 @@ class button(interface_elements.interface_element):
                 if status.displayed_mob == None or (not status.displayed_mob.is_pmob):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
-                if status.europe_grid in self.attached_label.actor.grids and self.attached_label.current_commodity != 'consumer goods':
+                if status.displayed_tile and status.europe_grid in status.displayed_tile.grids and self.attached_label.actor.current_item != 'consumer goods':
                     return(True)
                 else:
                     return(False)
@@ -1273,9 +1192,7 @@ class cycle_same_tile_button(button):
             cycled_tile = status.displayed_tile
             moved_mob = cycled_tile.cell.contained_mobs.pop(0)
             cycled_tile.cell.contained_mobs.append(moved_mob)
-            cycled_tile.cell.contained_mobs[0].select()
-            if cycled_tile.cell.contained_mobs[0].is_pmob:
-                cycled_tile.cell.contained_mobs[0].selection_sound()
+            cycled_tile.cell.contained_mobs[0].cycle_select()
             actor_utility.calibrate_actor_info_display(status.tile_info_display, cycled_tile) #updates mob info display list to show changed passenger order
         else:
             text_utility.print_to_screen('You are busy and cannot cycle units.')
@@ -1354,16 +1271,7 @@ class same_tile_icon(button):
             None
         '''
         if (not self.is_last) and self.attached_mob != 'none':
-            if main_loop_utility.action_possible(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-                self.attached_mob.select()
-                if self.attached_mob.is_pmob:
-                    self.attached_mob.selection_sound()
-                for current_image in self.attached_mob.images: #move mob to front of each stack it is in
-                    if not current_image.current_cell == 'none':
-                        while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
-                            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-            else:
-                text_utility.print_to_screen('You are busy and cannot select a different unit')
+            self.attached_mob.cycle_select()
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1433,7 +1341,7 @@ class same_tile_icon(button):
         '''
         if self.showing:
             if self.index == 0 and status.displayed_tile:
-                if status.displayed_tile.cell.contained_mobs[0].selected:
+                if status.displayed_tile.cell.contained_mobs[0] == status.displayed_mob:
                     pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
                 else:
                     pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.outline)
@@ -1495,20 +1403,10 @@ class fire_unit_button(button):
         '''
         if main_loop_utility.action_possible(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
-                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
-                if self.attached_mob.is_worker:
-                    if self.attached_mob.worker_type in ['European', 'religious']:
-                        if self.attached_mob.worker_type == 'European':
-                            message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                        else:
-                            message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                    elif self.attached_mob.worker_type == 'African':
-                        message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
-                    elif self.attached_mob.worker_type == 'slave':
-                        message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-
+                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n'
+                worker = self.attached_mob.get_worker()
+                if worker:
+                    message += status.worker_types[worker.worker_type].fired_description
                 constants.notification_manager.display_notification({
                     'message': message,
                     'choices': ['fire', 'cancel']
@@ -1527,6 +1425,8 @@ class fire_unit_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
+            if status.free_unit_slaves_button and status.free_unit_slaves_button.can_show(skip_parent_collection=skip_parent_collection):
+                return(False)
             if self.attached_mob != status.displayed_mob:
                 self.attached_mob = status.displayed_mob
             if self.attached_mob and self.attached_mob.is_pmob:
@@ -1590,7 +1490,7 @@ class free_unit_slaves_button(button):
         '''
         if main_loop_utility.action_possible():
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
-                message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
+                message = 'Are you sure you want to fire the slaves in this unit? /n /n' + status.worker_types['slave'].fired_description
                 constants.notification_manager.display_notification({
                     'message': message,
                     'choices': ['free', 'cancel']
@@ -1608,12 +1508,8 @@ class free_unit_slaves_button(button):
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
         if super().can_show(skip_parent_collection=skip_parent_collection):
-            if not self.attached_mob == status.displayed_mob:
-                self.attached_mob = status.displayed_mob
-            if self.attached_mob:
-                if self.attached_mob.is_pmob:
-                    if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
-                        return(True)
+            self.attached_mob = status.displayed_mob
+            return(self.attached_mob and self.attached_mob.is_pmob and self.attached_mob.get_worker() and self.attached_mob.get_worker().worker_type == 'slave')
         return(False)
 
     def update_tooltip(self):
@@ -1628,9 +1524,7 @@ class free_unit_slaves_button(button):
         if not self.showing:
             self.set_tooltip([])
         else:
-            tooltip_text = ['Click to free this unit']
-            if self.attached_mob.is_group or self.attached_mob.is_worker:
-                tooltip_text.append('Once freed, this unit\'s slaves will be converted to free African workers with any associated upkeep')
+            tooltip_text = ['Click to free this unit\'s slaves', status.worker_types[self.attached_mob.get_worker().worker_type].fired_description.replace('/n', '')]
             self.set_tooltip(tooltip_text)
 
 class switch_game_mode_button(button):
@@ -1744,8 +1638,9 @@ class minister_portrait_image(button):
         input_dict['image_id'] = self.default_image_id
         input_dict['button_type'] = 'minister portrait'
         super().__init__(input_dict)
-        self.minister_type = input_dict['minister_type'] #position, like General
-        if self.minister_type == 'none': #if available minister portrait
+        self.insert_collection_above()
+        self.minister_type = input_dict['minister_type'] # Position, like General
+        if self.minister_type == 'none': # If available minister portrait
             if 'ministers' in self.modes:
                 status.available_minister_portrait_list.append(self)
             warning_x_offset = scaling.scale_width(-100)
@@ -1757,10 +1652,10 @@ class minister_portrait_image(button):
         self.warning_image = constants.actor_creation_manager.create_interface_element({
             'attached_image': self,
             'init_type': 'warning image',
-            'parent_collection': self.insert_collection_above(),
+            'parent_collection': self.parent_collection,
             'member_config': {'x_offset': warning_x_offset, 'y_offset': 0}
-        }    )
-        self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
+        })
+        self.parent_collection.can_show_override = self # Parent collection is considered showing when this label can show, allowing ordered collection to work correctly
 
         self.calibrate('none')
 
@@ -1776,7 +1671,7 @@ class minister_portrait_image(button):
         if not self.current_minister == 'none':
             if self.current_minister.just_removed and self.current_minister.current_position == 'none':
                 return(True)
-        elif self.minister_type != 'none': #if portrait in minister table and no minister assigned for office
+        elif self.minister_type != 'none': # If portrait in minister table and no minister assigned for office
             return(True)
         return(False)
 
@@ -1790,13 +1685,13 @@ class minister_portrait_image(button):
             None
         '''
         showing = False
-        if self.showing: #draw outline around portrait if minister selected
+        if self.showing and constants.current_game_mode == 'ministers': # Draw outline around portrait if minister selected
             showing = True
-            if not self.current_minister == 'none':
+            if self.current_minister != 'none':
                 pygame.draw.rect(constants.game_display, constants.color_dict['white'], self.Rect) #draw white background
                 if status.displayed_minister == self.current_minister and flags.show_selection_outlines: 
                     pygame.draw.rect(constants.game_display, constants.color_dict['bright green'], self.outline)
-        super().draw()
+        super().draw(allow_show_outline=(constants.current_game_mode == 'ministers')) # Show outline for selection icons on ministers mode but not the overlapping ones on strategic mode
         if showing and self.warning_image.showing:
             self.warning_image.draw()
 
@@ -1810,7 +1705,7 @@ class minister_portrait_image(button):
             None
         '''
         if main_loop_utility.action_possible():
-            if constants.current_game_mode == 'ministers' and not self.current_minister == 'none':
+            if constants.current_game_mode == 'ministers' and self.current_minister != 'none':
                 if self.current_minister != 'none':
                     self.current_minister.play_voice_line('acknowledgement')
                 if self in status.available_minister_portrait_list: #if available minister portrait
@@ -1819,6 +1714,12 @@ class minister_portrait_image(button):
                     minister_utility.update_available_minister_display()
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.current_minister)
+            elif constants.current_game_mode != 'ministers': # If clicked while not on ministers screen, go to ministers screen and select that minister
+                old_minister = self.current_minister
+                game_transitions.set_game_mode('ministers')
+                self.current_minister = old_minister
+                if self.current_minister != 'none':
+                    self.on_click()
         else:
             text_utility.print_to_screen('You are busy and cannot select other ministers.')
 
@@ -1831,16 +1732,30 @@ class minister_portrait_image(button):
         Output:
             None
         '''
-        if not new_minister == 'none':
+        if new_minister == None:
+            new_minister = 'none'
+        if new_minister != 'none': # If calibrated to non-minister, attempt to calibrate to that unit's controlling minister
+            if new_minister.actor_type != 'minister':
+                if hasattr(new_minister, 'controlling_minister'):
+                    new_minister = new_minister.controlling_minister
+                else:
+                    new_minister = 'none'
+
+        if new_minister != 'none':
             new_minister.update_tooltip()
-            self.tooltip_text = new_minister.tooltip_text #[self.minister_type + ' ' + new_minister.name]
-            self.image.set_image(new_minister.image_id)
-        else:
-            if self.minister_type == 'none': #if available minister portrait
+            self.tooltip_text = new_minister.tooltip_text
+            if 'ministers' in self.modes:
+                self.image.set_image(new_minister.image_id + actor_utility.generate_label_image_id(new_minister.get_f_lname()))
+            else:
+                self.image.set_image(new_minister.image_id)
+        elif 'ministers' in self.modes: # Show empty minister if minister screen icon
+            if self.minister_type == 'none': # If available minister portrait
                 self.tooltip_text = ['There is no available candidate in this slot.']
-            else: #if appointed minister portrait
+            else: # If appointed minister portrait
                 self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
             self.image.set_image(self.default_image_id)
+        else: # If minister icon on strategic mode, no need to show empty minister
+            self.image.set_image('misc/empty.png')
         self.current_minister = new_minister
 
     def update_tooltip(self):
@@ -2014,6 +1929,79 @@ class cycle_available_ministers_button(button):
             status.available_minister_portrait_list[2].on_click() #select new middle portrait
         else:
             text_utility.print_to_screen('You are busy and cannot select other ministers.')
+
+class scroll_button(button):
+    '''
+    Button that increments or decrements a particular value of its parent collection
+    '''
+    def __init__(self, input_dict) -> None:
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'value_name': str value - Variable name of value being scrolled
+                'increment': int value - Amount to change attached value each time button is pressed
+        Output:
+            None
+        '''
+        self.value_name: str = input_dict['value_name']
+        self.increment: int = input_dict['increment']
+        input_dict['button_type'] = 'scroll'
+        super().__init__(input_dict)
+        if self.increment > 0:
+            self.parent_collection.scroll_down_button = self
+        elif self.increment < 0:
+            self.parent_collection.scroll_up_button = self
+
+    def on_click(self) -> None:
+        '''
+        Description:
+            When this button is clicked, increment/decrement the corresponding value of the parent collection and update its display
+        Input:
+            None
+        Output:
+            None
+        '''
+        if main_loop_utility.action_possible():
+            setattr(self.parent_collection, self.value_name, getattr(self.parent_collection, self.value_name) + self.increment)
+            self.parent_collection.scroll_update()
+
+    def can_show(self, skip_parent_collection=False) -> bool:
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button's attached collection needs to show a scroll button and would otherwise be shown
+        '''
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.parent_collection.show_scroll_button(self))
+
+    def update_tooltip(self) -> None:
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, describing its scroll functionality
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.increment > 0:
+            descriptor = 'down'
+        elif self.increment < 0:
+            descriptor = 'up'
+        self.set_tooltip(['Click to scroll ' + descriptor + ' ' + str(abs(self.increment)) + ' ' + self.value_name.replace('_', ' ')])
 
 class commodity_button(button):
     '''
@@ -2208,6 +2196,21 @@ class reorganize_unit_button(button):
         input_dict['button_type'] = 'reorganize unit'
         self.allowed_procedures = input_dict['allowed_procedures']
         super().__init__(input_dict)
+        self.has_button_press_override = True
+
+    def button_press_override(self):
+        '''
+        Description:
+            Allows this button to be pressed via keybind when it is not currently showing, under particular circumstances. Requires the
+                has_button_press_override flag to be enabled
+        Input:
+            None
+        Output
+        '''
+        if status.mob_tabbed_collection.showing:
+            actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_reorganization_collection)
+            return(True)
+        return(False)
 
     def enable_shader_condition(self):
         '''
@@ -2292,14 +2295,11 @@ class reorganize_unit_button(button):
                         constants.actor_creation_manager.create_group(procedure_actors['worker'], procedure_actors['officer'])
 
                 elif procedure_type == 'crew':
-                    if procedure_actors['worker'].worker_type == 'religious':
-                        text_utility.print_to_screen('Church volunteers cannot crew vehicles.')
-                    elif procedure_actors['worker'].worker_type == 'slave':
-                        text_utility.print_to_screen('Slave workers cannot crew vehicles.')
-                    elif procedure_actors['worker'].worker_type == 'African' and procedure_actors['officer'].vehicle_type == 'ship' and procedure_actors['officer'].can_swim_ocean:
-                        text_utility.print_to_screen('Only European workers can crew steamships.')
-                    else:
+                    if procedure_actors['officer'].get_vehicle_name() in status.worker_types[procedure_actors['worker'].worker_type].can_crew:
                         procedure_actors['worker'].crew_vehicle(procedure_actors['officer'])
+                    else:
+                        text_utility.print_to_screen(status.worker_types[procedure_actors['worker'].worker_type].name.capitalize() + ' cannot crew ' +
+                            procedure_actors['officer'].get_vehicle_name() + 's.')
 
                 elif procedure_type == 'split':
                     procedure_actors['group'].disband()
@@ -2310,9 +2310,9 @@ class reorganize_unit_button(button):
                     else:
                         procedure_actors['group'].crew.uncrew_vehicle(procedure_actors['group'])
             elif 'merge' in self.allowed_procedures:
-                text_utility.print_to_screen('This button does merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile')
+                text_utility.print_to_screen('This button executes merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile')
             elif 'split' in self.allowed_procedures:
-                text_utility.print_to_screen('This button does split and uncrew procedures, which require a group or crewed vehicle to be selected')
+                text_utility.print_to_screen('This button executes split and uncrew procedures, which require a group or crewed vehicle to be selected')
 
     def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes, override_values={}):
         '''
@@ -2399,7 +2399,6 @@ class cycle_autofill_button(button):
         self.parent_collection.calibrate(status.displayed_mob)
         #start autofill search for corresponding target type at index right after the current target actor
 
-
 class action_button(button):
     '''
     Customizable button with basic functionality entirely determined by the functions mapped to by its corresponding action function
@@ -2467,8 +2466,11 @@ class action_button(button):
             return(status.displayed_mob)
         elif self.corresponding_action.actor_type == 'tile':
             return(status.displayed_tile)
-        elif self.corresponding_action.actor_type == 'minister':
-            return(status.displayed_minister)
+        elif self.corresponding_action.actor_type in ['minister', 'prosecutor']:
+            if constants.current_game_mode == 'trial':
+                return(status.displayed_prosecution)
+            else:
+                return(status.displayed_minister)
 
     def on_click(self):
         '''
@@ -2507,25 +2509,26 @@ class anonymous_button(button):
                     entirely defined by the dictionary's contents:
                         'on_click': tuple value - Tuple containing function object followed by the parameters to be passed to it when this button is clicked
                         'tooltip': string list value - Tuple containing tooltip list to display for this button
-                        'message': string value - Text to display over this button
+                        'message': string value - Optional text to display over this button, intended for notification choice buttons
+                'notification': notification value - Notification the button is attached to, if applicable
         Output:
             None
         '''
-        self.notification = input_dict['notification']
+        self.notification = input_dict.get('notification', None)
         button_info_dict = input_dict['button_type']
         input_dict['button_type'] = 'anonymous'
-
         self.on_click_info = button_info_dict['on_click']
         if type(self.on_click_info[0]) != list:
             self.on_click_info = ([self.on_click_info[0]], [self.on_click_info[1]])
         self.tooltip = button_info_dict['tooltip']
-        self.message = button_info_dict['message']
+        self.message = button_info_dict.get('message')
 
         super().__init__(input_dict)
-        self.font_size = scaling.scale_width(25)
-        self.font_name = constants.font_name
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
-        self.in_notification = True
+        self.font = constants.fonts['default_notification']
+        if self.notification:
+            self.in_notification = True
+        else:
+            self.in_notification = False
 
     def on_click(self):
         '''
@@ -2539,7 +2542,8 @@ class anonymous_button(button):
         super().on_click()
         for index in range(len(self.on_click_info[0])):
             self.on_click_info[0][index](*self.on_click_info[1][index]) #calls each item function with corresponding parameters
-        self.notification.on_click(choice_button_override=True)
+        if self.in_notification:
+            self.notification.on_click(choice_button_override=True)
 
     def draw(self):
         '''
@@ -2551,7 +2555,7 @@ class anonymous_button(button):
             None
         '''
         super().draw()
-        if self.showing:
+        if self.showing and self.in_notification:
             constants.game_display.blit(text_utility.text(self.message, self.font), (self.x + scaling.scale_width(10), constants.display_height -
                 (self.y + self.height)))
 

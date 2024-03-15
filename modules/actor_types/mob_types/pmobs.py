@@ -67,9 +67,7 @@ class pmob(mob):
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
-            actor_utility.deselect_all()
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
                 self.select()
         self.attached_cell_icon_list = []
@@ -137,7 +135,7 @@ class pmob(mob):
             'coordinates': (x, y),
             'grids': self.grids,
             'image': image_id,
-            'modes': ['strategic'],
+            'modes': self.grids[0].modes,
             'init_type': 'cell icon'
         }))
 
@@ -374,10 +372,9 @@ class pmob(mob):
         Output:
             None
         '''
-        if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none':
-            turn_queue = status.player_turn_queue
-            if not self in turn_queue:
-                turn_queue.append(self)
+        if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none' and not self in status.player_turn_queue:
+            if not self in status.player_turn_queue:
+                status.player_turn_queue.append(self)
 
     def remove_from_turn_queue(self):
         '''
@@ -388,7 +385,6 @@ class pmob(mob):
         Output:
             None
         '''
-        turn_queue = status.player_turn_queue
         status.player_turn_queue = utility.remove_from_list(status.player_turn_queue, self)
 
     def replace(self):
@@ -444,7 +440,7 @@ class pmob(mob):
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
                 constants.notification_manager.display_notification({
                     'message': text,
-                    'zoom_destination': self.images[0].current_cell.tile,
+                    'zoom_destination': self,
                 })
 
             self.temp_disable_movement()
@@ -503,7 +499,7 @@ class pmob(mob):
         '''
         if flags.show_selection_outlines:
             for current_image in self.images:
-                if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
+                if current_image.current_cell != 'none' and self == current_image.current_cell.contained_mobs[0] and current_image.current_cell.grid.showing: #only draw outline if on top of stack
                     pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
 
                     if len(self.base_automatic_route) > 0:
@@ -537,7 +533,7 @@ class pmob(mob):
         Output:
             boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
         '''
-        if minister_utility.positions_filled(): #not self.controlling_minister == 'none':
+        if minister_utility.positions_filled():
             return(True)
         else:
             game_transitions.force_minister_appointment()
@@ -613,14 +609,11 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] += change
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
-                for tab_button in status.mob_tabbed_collection.tabs_collection.members:
-                    if tab_button.linked_element == status.mob_inventory_collection:
-                        tab_button.on_click()
-                        continue
+                actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -632,7 +625,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] = new_value
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
@@ -755,7 +748,6 @@ class pmob(mob):
         '''
         self.in_vehicle = True
         self.vehicle = vehicle
-        self.selected = False
         for current_commodity in self.get_held_commodities(): #gives inventory to ship
             num_held = self.get_inventory(current_commodity)
             for current_commodity_unit in range(num_held):
@@ -793,10 +785,9 @@ class pmob(mob):
         self.y = vehicle.y
         for current_image in self.images:
             current_image.add_to_cell()
-        vehicle.selected = False
-        if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.get_intact_building('port') == 'none':
+        if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.grid == status.strategic_map_grid and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
-        if self.can_trade and self.can_hold_commodities: #if caravan
+        if self.can_trade and self.has_inventory: #if caravan
             consumer_goods_present = vehicle.get_inventory('consumer goods')
             if consumer_goods_present > 0:
                 consumer_goods_transferred = consumer_goods_present
@@ -810,7 +801,15 @@ class pmob(mob):
         if focus:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
-            if status.minimap_grid in self.grids:
-                status.minimap_grid.calibrate(self.x, self.y)
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
             constants.sound_manager.play_sound('footsteps')
+
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        return(None)

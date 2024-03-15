@@ -224,10 +224,19 @@ class trial(action.campaign):
         self.current_trial['judge_bias'] = max(self.current_trial['judge_bias'], 1)
         self.current_trial['judge_bias'] = min(self.current_trial['judge_bias'], 6)
         self.current_trial['trial_rolls'] = []
+        self.current_trial['prosecutor_corrupt'] = prosecutor_corrupt
         if prosecutor_corrupt:
             max_roll = 4
         else:
             max_roll = 6
+        text = self.generate_notification_text('initial')
+
+        constants.notification_manager.display_notification({
+            'message': text,
+            'notification_type': 'action',
+            'audio': self.generate_audio('initial')
+        })
+
         self.current_trial['trial_rolls'] = [prosecution.no_corruption_roll(max_roll) for i in range(0, self.current_trial['effective_evidence'])]
         self.roll_lists = self.generate_roll_lists(self.current_trial['trial_rolls'])
         self.roll_result = 0
@@ -236,13 +245,6 @@ class trial(action.campaign):
             if self.roll_result < 5 and self.current_trial['trial_rolls'][index] >= 5:
                 self.roll_result = self.current_trial['trial_rolls'][index]
                 roll_result_index = index
-        
-        text = self.generate_notification_text('initial')
-        constants.notification_manager.display_notification({
-            'message': text,
-            'notification_type': 'action',
-            'audio': self.generate_audio('initial')
-        })
         if self.current_trial['trial_rolls']:
             for i in range(0, roll_result_index + 1):
                 remaining_rolls_message = 'Evidence rolls remaining: ' + str(len(self.roll_lists)) + ' /n /n'
@@ -250,8 +252,7 @@ class trial(action.campaign):
                     'message': remaining_rolls_message + text + self.generate_notification_text('roll_message'),
                     'notification_type': 'action',
                     'attached_interface_elements': self.generate_attached_interface_elements('die'),
-                    'transfer_interface_elements': True,
-                    'audio': self.generate_audio('initial')
+                    'transfer_interface_elements': True
                 })
                 constants.notification_manager.display_notification({
                     'message': remaining_rolls_message + text + 'Rolling... ',
@@ -280,6 +281,17 @@ class trial(action.campaign):
                 'on_remove': self.complete
             })
 
+    def leave_trial_screen(self):
+        '''
+        Description:
+            Callback function to return to ministers screen after trial is completed, regardless of result
+        Input:
+            None
+        Output:
+            None
+        '''
+        game_transitions.set_game_mode('ministers')
+
     def complete(self):
         '''
         Description:
@@ -291,7 +303,6 @@ class trial(action.campaign):
         '''
         prosecution = status.displayed_prosecution
         defense = status.displayed_defense
-        game_transitions.set_game_mode('ministers')
         if self.roll_result >= self.current_min_success:
             confiscated_money = defense.stolen_money / 2.0
             text = 'You have won the trial, removing ' + defense.name + ' as ' + defense.current_position + ' and putting him in prison. /n /n'
@@ -306,7 +317,6 @@ class trial(action.campaign):
                 'notification_type': 'action',
                 'audio': 'guilty'
             })
-            
             defense.appoint('none')
             minister_utility.calibrate_minister_info_display(None)
             defense.respond('prison')
@@ -316,6 +326,7 @@ class trial(action.campaign):
             constants.notification_manager.display_notification({
                 'message': text,
                 'notification_type': 'action',
+                'on_remove': self.leave_trial_screen
             })
 
         else:
@@ -351,7 +362,8 @@ class trial(action.campaign):
             constants.notification_manager.display_notification({
                 'message': text,
                 'notification_type': 'action',
-                'audio': 'not guilty'
+                'audio': 'not guilty',
+                'on_remove': self.leave_trial_screen
             })
             minister_utility.calibrate_minister_info_display(defense)
         flags.prosecution_bribed_judge = False

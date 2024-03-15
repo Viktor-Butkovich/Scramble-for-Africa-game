@@ -127,7 +127,7 @@ class expedition(group):
                     
                     flags.ongoing_action = True
                     constants.notification_manager.display_notification({
-                        'message': text,
+                        'message': text + 'Click to remove this notification. /n /n',
                         'notification_type': 'off_tile_exploration',
                         'extra_parameters': {
                             'cell': target_cell,

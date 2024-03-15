@@ -211,11 +211,9 @@ class interface_element():
             input_dict['member_config']['index'] = self.parent_collection.members.index(self)
             if hasattr(self.parent_collection, 'order_overlap_list') and self in self.parent_collection.order_overlap_list:
                 input_dict['member_config']['order_overlap'] = True
-                #input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
 
             if hasattr(self.parent_collection, 'order_exempt_list') and self in self.parent_collection.order_exempt_list:
                 input_dict['member_config']['order_exempt'] = True
-                #input_dict['member_config']['order_exempt_index'] = self.parent_collection.order_exempt_list.index(self)
 
             if hasattr(self, 'x_offset'):
                 input_dict['member_config']['x_offset'] = self.x_offset
@@ -236,6 +234,22 @@ class interface_element():
         new_parent_collection.add_member(self, {})
 
         return(new_parent_collection)
+
+    def get_actor_type(self) -> str:
+        '''
+        Description:
+            Recursively finds the type of actor this interface is attached to
+        Input:
+            None
+        Output:
+            str: Returns type of actor this interface is attached to
+        '''
+        if hasattr(self, 'actor_type'):
+            return(self.actor_type)
+        elif self.has_parent_collection:
+            return(self.parent_collection.get_actor_type())
+        else:
+            return(None)
 
 class interface_collection(interface_element):
     '''
@@ -334,6 +348,10 @@ class interface_collection(interface_element):
         Description:
             Creates an image associated with this interface element - overrides parent version to create a collection image instead of the default button images at the same
                 initialization step
+        Input:
+            string/list/dict image_id: Single or list of string image file paths and/or offset image dictionaries
+        Output:
+            None
         '''
         self.image = images.collection_image(self, self.width, self.height, image_id)
 
@@ -348,7 +366,7 @@ class interface_collection(interface_element):
         '''
         super().calibrate(new_actor, override_exempt)
         for member in self.members:
-            if override_exempt or not member in self.calibrate_exempt_list:
+            if override_exempt or (not member in self.calibrate_exempt_list):
                 if hasattr(member, 'members'):
                     member.calibrate(new_actor, override_exempt)
                 else:
@@ -389,10 +407,7 @@ class interface_collection(interface_element):
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
         if member_config['calibrate_exempt'] and hasattr(self, 'calibrate_exempt_list'):
-            #if not 'order_overlap_index' in member_config:
             self.calibrate_exempt_list.append(new_member)
-            #else:
-            #    self.calibrate_exempt_list.insert(member_config['order_overlap_index'], new_member)
 
     def remove_member(self, removed_member):
         '''

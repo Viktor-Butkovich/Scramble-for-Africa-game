@@ -4,8 +4,9 @@ import random
 import pygame
 import itertools
 import json
+from typing import Dict
 from . import cells, interface_elements
-from ..util import actor_utility, utility
+from ..util import actor_utility, utility, scaling
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -14,7 +15,7 @@ class grid(interface_elements.interface_element):
     '''
     Grid of cells of the same size with different positions based on the grid's size and the number of cells. Each cell contains various actors, terrain, and resources
     '''
-    def __init__(self, from_save, input_dict):
+    def __init__(self, from_save: bool, input_dict: Dict[str, any]) -> None:
         '''
         Description:
             Initializes this object
@@ -29,24 +30,24 @@ class grid(interface_elements.interface_element):
                 'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
                 'external_line_color': string value - Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
                 'list modes': string list value - Game modes during which this grid can appear
-                'strategic_grid': boolean value - True if this grid is the primary strategic map of the game, False if it is a different grid, like the minimap or the Europe grid
                 'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
+                'grid_type': str value - Type of grid, like 'strategic_map_grid' or 'europe_grid'
         Output:
             None
         '''
         super().__init__(input_dict)
         status.grid_list.append(self)
-        self.grid_line_width = input_dict['grid_line_width']
+        self.grid_type = input_dict['grid_type']
+        self.grid_line_width = input_dict.get('grid_line_width', 3)
         self.from_save = from_save
         self.is_mini_grid = False
         self.is_abstract_grid = False
         self.attached_grid = 'none'
-        self.modes = input_dict['modes']
-        self.coordinate_width = input_dict['coordinate_width']
-        self.coordinate_height = input_dict['coordinate_height']
-        self.internal_line_color = input_dict['internal_line_color']
-        self.external_line_color = input_dict['external_line_color']
+        self.coordinate_width = input_dict.get('coordinate_size', input_dict.get('coordinate_width'))
+        self.coordinate_height = input_dict.get('coordinate_size', input_dict.get('coordinate_height'))
+        self.internal_line_color = input_dict.get('internal_line_color', 'black')
+        self.external_line_color = input_dict.get('external_line_color', 'black')
         self.mini_grid = 'none'
         self.cell_list = [[None] * self.coordinate_height for y in range(self.coordinate_width)]
         #printed list would be inverted - each row corresponds to an x value and each column corresponds to a y value, but can be indexed by cell_list[x][y]
@@ -66,13 +67,10 @@ class grid(interface_elements.interface_element):
                 'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
-        save_dict = {}
-        if status.strategic_map_grid == self:
-            save_dict['grid_type'] = 'strategic_map_grid'
-        else:
-            save_dict['grid_type'] = 'default'
-        save_dict['cell_list'] = [current_cell.to_save_dict() for current_cell in self.get_flat_cell_list()]
-        return(save_dict)
+        return({
+            'grid_type': self.grid_type,
+            'cell_list': [current_cell.to_save_dict() for current_cell in self.get_flat_cell_list()]
+        })
 
     def generate_terrain(self):
         '''
@@ -504,7 +502,7 @@ class mini_grid(grid):
     '''
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell of the attached grid. Which cell is being centered on can be changed
     '''
-    def __init__(self, from_save, input_dict):
+    def __init__(self, from_save: bool, input_dict: Dict[str, any]) -> None:
         '''
         Description:
             Initializes this object
@@ -525,7 +523,6 @@ class mini_grid(grid):
         Output:
             None
         '''
-        input_dict['strategic_grid'] = False
         super().__init__(from_save, input_dict)
         self.is_mini_grid = True
         self.attached_grid = input_dict['attached_grid']
@@ -664,7 +661,7 @@ class abstract_grid(grid):
     '''
     1-cell grid that is not directly connected to the primary strategic grid but can be moved to by mobs from the strategic grid and vice versa
     '''
-    def __init__(self, from_save, input_dict):
+    def __init__(self, from_save: bool, input_dict: Dict[str, any]) -> None:
         '''
         Description:
             Initializes this object
@@ -686,29 +683,66 @@ class abstract_grid(grid):
         '''
         input_dict['coordinate_width'] = 1
         input_dict['coordinate_height'] = 1
-        input_dict['strategic_grid'] = False
         super().__init__(from_save, input_dict)
         self.is_abstract_grid = True
         self.name = input_dict['name']
         self.tile_image_id = input_dict['tile_image_id']
         self.cell_list[0][0].set_visibility(True)
 
-    def to_save_dict(self):
-        '''
-        Description:
-            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
-        Input:
-            None
-        Output:
-            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
-                'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
-        '''
-        save_dict = super().to_save_dict()
-        if status.europe_grid == self:
-            save_dict['grid_type'] = 'europe_grid'
-        elif status.slave_traders_grid == self:
-            save_dict['grid_type'] = 'slave_traders_grid'
-        else:
-            save_dict['grid_type'] = 'default'
-        return(save_dict)
+def create(from_save: bool, grid_type: str, input_dict: Dict[str, any] = None) -> grid:
+    '''
+    Description:
+    '''
+    if not input_dict:
+        input_dict = {}
+
+    input_dict.update({
+        'modes': ['strategic'],
+        'parent_collection': status.grids_collection,
+        'grid_type': grid_type
+    })
+
+    if grid_type == 'strategic_map_grid':
+        input_dict.update({
+            'coordinates': scaling.scale_coordinates(320, 0),
+            'width': scaling.scale_width(constants.strategic_map_pixel_width),
+            'height': scaling.scale_height(constants.strategic_map_pixel_height),
+            'coordinate_width': constants.strategic_map_width,
+            'coordinate_height': constants.strategic_map_height,
+            'grid_line_width': 2
+        })
+        return_grid = grid(from_save, input_dict)
+
+    elif grid_type == 'minimap_grid':
+        input_dict.update({
+            'coordinates': scaling.scale_coordinates(0, -1 * (constants.minimap_grid_pixel_height + 25)),
+            'width': scaling.scale_width(constants.minimap_grid_pixel_width),
+            'height': scaling.scale_height(constants.minimap_grid_pixel_height),
+            'coordinate_size': constants.minimap_grid_coordinate_size,
+            'external_line_color': 'bright red',
+            'attached_grid': status.strategic_map_grid
+        })
+        return_grid = mini_grid(from_save, input_dict)
+
+    elif grid_type in ['europe_grid', 'asia_grid', 'slave_traders_grid']:
+        input_dict.update({
+            'coordinates': scaling.scale_coordinates(getattr(constants, grid_type + '_x_offset'), getattr(constants, grid_type + '_y_offset')),
+                # Like (europe_grid_x_offset, europe_grid_y_offset) or (slave_traders_grid_x_offset, slave_traders_grid_y_offset)
+            'width': scaling.scale_width(120),
+            'height': scaling.scale_height(120)
+        })
+        if grid_type == 'europe_grid':
+            input_dict['tile_image_id'] = 'locations/europe/' + status.current_country.name + '.png'
+            input_dict['modes'].append('europe')
+
+        elif grid_type == 'asia_grid':
+            input_dict['tile_image_id'] = 'locations/asia.png'
+
+        elif grid_type == 'slave_traders_grid':
+            input_dict['tile_image_id'] = 'locations/slave_traders/default.png'
+
+        input_dict['name'] = grid_type[:-5].replace('_', ' ').capitalize() # Replaces europe_grid with Europe, slave_traders_grid with Slave traders
+        return_grid = abstract_grid(from_save, input_dict)
+
+    setattr(status, grid_type, return_grid)
+    return(return_grid)

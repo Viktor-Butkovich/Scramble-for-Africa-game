@@ -54,11 +54,9 @@ class vehicle(pmob):
             self.selection_sound()
         else: #create crew and passengers through recruitment_manager and embark them
             if input_dict['crew'] == 'none':
-                #self.crew = 'none'
                 self.set_crew('none')
             else:
                 constants.actor_creation_manager.create(True, input_dict['crew']).crew_vehicle(self) #creates worker and merges it as crew
-                #print(self.image_dict)
             for current_passenger in input_dict['passenger_dicts']:
                 constants.actor_creation_manager.create(True, current_passenger).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
@@ -66,11 +64,10 @@ class vehicle(pmob):
         if not self.has_crew:
             self.remove_from_turn_queue()
         if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
 
-    def set_crew(self, new_crew): #continue adding set_crew
+    def set_crew(self, new_crew):
         '''
         Description:
             Sets this vehicle's crew to the inputted workers
@@ -361,13 +358,26 @@ class vehicle(pmob):
         for current_mob in (self.contained_mobs + [self.crew]): #make list of all mobs in vehicle
             current_mob.go_to_grid(new_grid, new_coordinates)
             current_mob.in_vehicle = True
-            current_mob.selected = False
             current_mob.hide_images()
         if new_grid == status.europe_grid or self.images[0].current_cell.has_intact_building('port'):
             self.eject_passengers()
             self.drop_inventory()
-        elif new_grid == status.slave_traders_grid:
+        elif new_grid.grid_type in constants.abstract_grid_type_list:
             self.eject_passengers()
+
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        if self.crew == 'none':
+            return(super().get_worker())
+        else:
+            return(self.crew)
 
 class train(vehicle):
     '''
@@ -401,7 +411,7 @@ class train(vehicle):
         self.vehicle_type = 'train'
         self.can_swim = False
         self.can_walk = True
-        self.can_hold_commodities = True
+        self.has_inventory = True
         self.inventory_capacity = 27#9
         if not from_save:
             self.inventory_setup()
@@ -441,6 +451,17 @@ class train(vehicle):
         '''
         return(self.movement_cost)
 
+    def get_vehicle_name(self) -> str:
+        '''
+        Description:
+            Returns the name of this type of vehicle
+        Input:
+            None
+        Output:
+            Returns the name of this type of vehicle
+        '''
+        return('train')
+
 class ship(vehicle):
     '''
     Vehicle that can only move in ocean water and into ports, can cross the ocean, has large inventory capacity, and has infinite movement points
@@ -475,7 +496,7 @@ class ship(vehicle):
         self.can_swim_ocean = True
         self.can_walk = False
         self.travel_possible = True #if this mob would ever be able to travel
-        self.can_hold_commodities = True
+        self.has_inventory = True
         self.inventory_capacity = 27
         if not from_save:
             self.inventory_setup()
@@ -519,6 +540,17 @@ class ship(vehicle):
                 if not self.temp_movement_disabled:
                     return(True)
         return(False)
+
+    def get_vehicle_name(self) -> str:
+        '''
+        Description:
+            Returns the name of this type of vehicle
+        Input:
+            None
+        Output:
+            Returns the name of this type of vehicle
+        '''
+        return('steamship')
 
 class boat(ship):
     '''
@@ -566,3 +598,14 @@ class boat(ship):
             double: How many movement points would be spent by moving by the inputted amount
         '''
         return(self.movement_cost)
+
+    def get_vehicle_name(self) -> str:
+        '''
+        Description:
+            Returns the name of this type of vehicle
+        Input:
+            None
+        Output:
+            Returns the name of this type of vehicle
+        '''
+        return('steamboat')

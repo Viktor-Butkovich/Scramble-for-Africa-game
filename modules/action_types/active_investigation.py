@@ -1,8 +1,9 @@
 #Contains all functionality for minister investigations
 
 import random
+from typing import Tuple, Dict
 from . import action
-from ..util import action_utility
+from ..util import action_utility, text_utility, minister_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -22,7 +23,10 @@ class active_investigation(action.campaign):
         super().initial_setup()
         constants.transaction_descriptions[self.action_type] = 'investigations'
         self.name = 'active investigation'
-        self.actor_type = 'minister'
+        self.actor_type = 'prosecutor'
+        self.allow_critical_failures = False
+        self.allow_critical_successes = False
+        self.skip_result_notification = True
 
     def button_setup(self, initial_input_dict):
         '''
@@ -71,20 +75,13 @@ class active_investigation(action.campaign):
             text += '? /n /n'
             text += 'This may uncover information regarding ' + status.displayed_minister.name + '\'s loyalty, skills, or past crimes. /n /n'
             text += 'The investigation will cost ' + str(self.get_price()) + ' money. /n /n '
+        elif subject == 'initial':
+            text += 'Prosecutor ' + status.current_ministers['Prosecutor'].name + ' launches an investigation against ' 
+            if status.displayed_minister.current_position != 'none':
+                text += status.displayed_minister.current_position + ' ' + status.displayed_minister.name + '. /n /n'
+            else:
+                text += status.displayed_minister.name + '. /n /n'
         return(text)
-
-    def generate_attached_interface_elements(self, subject):
-        '''
-        Description:
-            Returns list of input dicts of interface elements to attach to a notification regarding a particular subject for this action
-        Input:
-            string subject: Determines input dicts
-        Output:
-            dictionary list: Returns list of input dicts for inputted subject
-        '''
-        if subject == 'dice':
-            return_list = self.current_unit.generate_icon_input_dicts(alignment='left')
-        return(return_list)
 
     def can_show(self):
         '''
@@ -109,7 +106,10 @@ class active_investigation(action.campaign):
             None
         '''
         if super().on_click(unit):
-            self.start(unit)
+            if status.current_ministers['Prosecutor'] == None:
+                text_utility.print_to_screen('An active investigation requires a prosecutor to be appointed.')
+            else:
+                self.start(unit)
 
     def start(self, unit):
         '''
@@ -138,50 +138,61 @@ class active_investigation(action.campaign):
                 ],
             })
 
-    def middle(self):
+    def complete(self):
         '''
         Description:
-            Controls the campaign process, determining and displaying its result through a series of notifications
+            Used when the player finishes rolling, shows the action's results and makes any changes caused by the result
         Input:
             None
         Output:
             None
         '''
-        prosecutor = status.current_ministers['Prosecutor']
-        previous_values = {}
-        new_values = {}
-        roll_result = prosecutor.roll(6, 4, 0, self.process_payment(), self.action_type)
-        if roll_result >= 4:
-            for category in constants.minister_types + ['loyalty']:
-                if category == 'loyalty' or category == self.current_unit.current_position: #simplify this
-                    if random.randrange(1, 7) >= 4:
-                        if category == 'loyalty':
-                            previous_values[category] = self.current_unit.apparent_corruption_description
-                        else:
-                            previous_values[category] = self.current_unit.apparent_skill_descriptions[category]
-                        self.current_unit.attempt_rumor(category, prosecutor)
-                        if category == 'loyalty':
-                            if self.current_unit.apparent_corruption_description != previous_values[category]:
-                                new_values[category] = self.current_unit.apparent_corruption_description
-                        else:
-                            if self.current_unit.apparent_skill_descriptions[category] != previous_values[category]:
-                                new_values[category] = self.current_unit.apparent_skill_descriptions[category]
+        prosecutor = self.current_unit
+        target = status.displayed_minister
+        previous_values: Dict = {}
+        new_values: Dict = {}
+        corruption_event: Tuple[float, str] = None
+        if self.roll_result >= self.current_min_success:
+            for category in constants.minister_types + ['loyalty', 'evidence']:
+                if category == target.current_position:
+                    difficulty = 4
+                elif category in ['loyalty', 'evidence']:
+                    difficulty = 5
                 else:
-                    if random.randrange(1, 7) == 1:
+                    difficulty = 6
+                if random.randrange(1, 7) >= difficulty: # More common to find rumors for current position or for loyalty than for random skill
+                    if category == 'evidence':
+                        if len(target.undetected_corruption_events) > 0:
+                            random_index = random.randrange(0, len(target.undetected_corruption_events))
+                            corruption_event = target.undetected_corruption_events[random_index] #random.choice(target.undetected_corruption_events)
+                            if (target.check_corruption() or target.check_corruption()) and (prosecutor.check_corruption() or prosecutor.check_corruption()): #conspiracy check with advantage
+                                bribe_cost = 5
+                                if target.personal_savings + target.stolen_money >= bribe_cost:
+                                    target.personal_savings -= bribe_cost
+                                    if target.personal_savings < 0: #spend from personal savings, transfer stolen to personal savings if not enough
+                                        target.stolen_money += target.personal_savings
+                                        target.personal_savings = 0
+                                    prosecutor.steal_money(bribe_cost, 'bribery')
+                                    corruption_event = None
+                            else:
+                                target.corruption_evidence += 1
+                                target.undetected_corruption_events.pop(random_index)
+                                minister_utility.calibrate_minister_info_display(target)
+                    else:
                         if category == 'loyalty':
-                            previous_values[category] = self.current_unit.apparent_corruption_description
+                            previous_values[category] = target.apparent_corruption_description
                         else:
-                            previous_values[category] = self.current_unit.apparent_skill_descriptions[category]
-                        self.current_unit.attempt_rumor(category, prosecutor)
+                            previous_values[category] = target.apparent_skill_descriptions[category]
+                        target.attempt_rumor(category, prosecutor)
                         if category == 'loyalty':
-                            if self.current_unit.apparent_corruption_description != previous_values[category]:
-                                new_values[category] = self.current_unit.apparent_corruption_description
+                            if target.apparent_corruption_description != previous_values[category]:
+                                new_values[category] = target.apparent_corruption_description
                         else:
-                            if self.current_unit.apparent_skill_descriptions[category] != previous_values[category]:
-                                new_values[category] = self.current_unit.apparent_skill_descriptions[category]
-
+                            if target.apparent_skill_descriptions[category] != previous_values[category]:
+                                new_values[category] = target.apparent_skill_descriptions[category]
         message = ''
-        if new_values:
+        audio = None
+        if new_values or corruption_event:
             message = 'The investigation resulted in the following discoveries: /n /n'
             for category in new_values:
                 if category == 'loyalty':
@@ -193,11 +204,16 @@ class active_investigation(action.campaign):
                     message += ' /n'
                 else:
                     message += ' (formerly ' + previous_values[category] + ') /n'
-
+            if corruption_event:
+                theft_amount, theft_type = corruption_event
+                message += '    Evidence of a previous theft of ' + str(theft_amount) + ' money relating to ' + constants.transaction_descriptions[theft_type] + '. /n'
+                audio = prosecutor.get_voice_line('evidence')
         else:
             message = 'The investigation failed to make any significant discoveries. /n'
         message += ' /n'
         constants.notification_manager.display_notification({
             'message': message,
+            'notification_type': 'action',
+            'audio': audio
         })
-        self.complete()
+        super().complete()

@@ -20,7 +20,7 @@ def generate_autofill_actors(search_start_index=0):
     if displayed_mob and displayed_mob.is_pmob:
 
         required_dummy_attributes = ['name', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
-                              'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
+                              'movement_points', 'max_movement_points', 'has_inventory', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
                               'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination', 'officer', 'worker', 'group_type', 'battalion_type']
 
         dummy_input_dict = {

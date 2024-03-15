@@ -1,4 +1,4 @@
-from ...util import scaling, text_utility
+from ...util import scaling
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -21,6 +21,7 @@ class notification_manager_template():
         self.default_notification_height = 300
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
+        self.font = constants.fonts['default_notification']
 
     def update_notification_layout(self, notification_height=0):
         '''
@@ -34,26 +35,29 @@ class notification_manager_template():
         self.notification_width = 500
         self.notification_height = self.default_notification_height
         self.notification_y = self.default_notification_y
-        #if constants.current_game_mode in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-        #    self.notification_x = constants.minimap_grid_x - (self.notification_width + 40)
-        #else: #show notifications in center on europe mode
         self.notification_x = 610
         if notification_height > self.notification_height:
             self.notification_height = notification_height
         self.notification_y -= self.notification_height / 2
 
     def format_message(self, message):
+        '''
+        Description:
+            Converts a message string with newlines designated by /n's to a list of strings
+        Input:
+            string message: Initial message string
+        Output:
+            string list: Returns list of strings extracted from input string
+        '''
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = 25
-        font_name = constants.font_name
         for index in range(len(message)):
             if not ((not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n'): #don't add if /n
                 if not (index > 0 and message[index - 1] + message[index] == '/n'): #if on n after /, skip
                     next_word += message[index]
             if message[index] == ' ':
-                if text_utility.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+                if self.font.calculate_size(next_line + next_word) > self.notification_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word
@@ -63,51 +67,12 @@ class notification_manager_template():
                 next_line = ''
                 next_line += next_word
                 next_word = ''
-        if text_utility.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+        if self.font.calculate_size(next_line + next_word) > self.notification_width:
             new_message.append(next_line)
             next_line = ''
         next_line += next_word
         new_message.append(next_line)
         return(new_message)
-    '''
-    def get_notification_height(self, notification_text):
-        
-        Description:
-            Returns the height in pixels of the inputted text if it were put in a notification
-        Input:
-            string notification_text: Text that will appear on the notification with lines separated by /n
-        Output:
-            int: height in pixels of the inputted text if it were put in a notification
-        
-        new_message = []
-        next_line = ''
-        next_word = ''
-        font_size = 25 #scaling.scale_height(25) #constants.font_size #25
-        font_name = constants.font_name
-        font = pygame.font.SysFont(font_name, font_size)
-        for index in range(len(notification_text)):
-            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n'): #don't add if /n
-                if not (index > 0 and notification_text[index - 1] + notification_text[index] == '/n'): #if on n after /, skip
-                    next_word += notification_text[index]
-            if notification_text[index] == ' ':
-                if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
-                    new_message.append(next_line)
-                    next_line = ''
-                next_line += next_word
-                next_word = ''
-            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n': #don't check for /n if at last index
-                new_message.append(next_line)
-                next_line = ''
-                next_line += next_word
-                next_word = ''
-        if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
-            new_message.append(next_line)
-            next_line = ''
-        next_line += next_word
-        new_message.append(next_line)
-        new_message.append('Click to remove this notification.')
-        return(len(new_message) * font_size)#self.message = new_message
-    '''
 
     def handle_next_notification(self, transferred_interface_elements = None):
         '''
@@ -175,7 +140,7 @@ class notification_manager_template():
         '''
         message = notification_dict['message'] #message should be the only required parameter
 
-        height = len(self.format_message(message)) * (constants.default_font_size + 10) #maybe font size is being scaled incorrectly here?
+        height = len(self.format_message(message)) * constants.fonts['default_notification'].size
         self.update_notification_layout(height)
 
         if 'notification_type' in notification_dict:
@@ -242,7 +207,7 @@ class notification_manager_template():
             for current_die in status.dice_list:
                 current_die.start_rolling()
 
-        if 'audio' in notification_dict and notification_dict['audio'] != 'none':
+        if 'audio' in notification_dict and not notification_dict['audio'] in ['none', None]:
             if type(notification_dict['audio']) == list:
                 sound_list = notification_dict['audio']
             else:
@@ -255,11 +220,12 @@ class notification_manager_template():
                     if current_sound.get('dampen_music', False):
                         constants.sound_manager.dampen_music(current_sound.get('dampen_time_interval', 0.5))
                     in_sequence = current_sound.get('in_sequence', False)
+                    volume = current_sound.get('volume', 0.3)
                 else:
                     sound_file = current_sound
+                    volume = 0.3
                 if in_sequence and channel:
-                    constants.sound_manager.queue_sound(sound_file, channel)
+                    constants.sound_manager.queue_sound(sound_file, channel, volume=volume)
                 else:
-                    channel = constants.sound_manager.play_sound(sound_file)
-
+                    channel = constants.sound_manager.play_sound(sound_file, volume=volume)
         return(new_notification)

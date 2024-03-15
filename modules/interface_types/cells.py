@@ -39,23 +39,21 @@ class cell():
         self.tile = 'none'
         self.resource = 'none'
         self.village = 'none'
+        self.settlement = None
         self.terrain = 'none'
         self.terrain_variant = 0
         self.set_terrain('clear')
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        
-        if not save_dict == 'none': #if from save
+        if save_dict != 'none': #if from save
             self.save_dict = save_dict
             if constants.effect_manager.effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
             self.terrain_variant = save_dict['terrain_variant']
         else: #if creating new map
-            if constants.effect_manager.effect_active('remove_fog_of_war'):
-                self.set_visibility(True)
-            else:
-                self.set_visibility(False)
+            self.set_visibility(constants.effect_manager.effect_active('remove_fog_of_war'))
             
     def to_save_dict(self):
         '''
@@ -84,7 +82,7 @@ class cell():
         save_dict['resource'] = self.resource
 
         saved_inventory = {}
-        if self.tile.can_hold_commodities: #only save inventory if not empty
+        if self.tile.has_inventory: #only save inventory if not empty
             for current_commodity in constants.commodity_types:
                if self.tile.inventory[current_commodity] > 0:
                    saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
@@ -248,13 +246,10 @@ class cell():
         if self.has_building(building_type):
             if building_type == 'village':
                 return(self.village)
-                
             elif building_type in ['road', 'railroad']:
-                return(self.contained_buildings['infrastructure'])
-                
+                return(self.contained_buildings['infrastructure']) 
             else:
                 return(self.contained_buildings[building_type])
-            
         else:
             return('none')
 
@@ -387,7 +382,7 @@ class cell():
             'coordinates': (self.x, self.y),
             'grids': [self.grid, self.grid.mini_grid],
             'name': 'slums',
-            'modes': ['strategic'],
+            'modes': self.grid.modes,
             'init_type': 'slums'
         })
         if self.tile == status.displayed_tile:
@@ -453,7 +448,7 @@ class cell():
                     return(current_mob)
         return('none')
 
-    def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious'], required_number=1):
+    def has_worker(self, possible_types=None, required_number=1):
         '''
         Description:
             Returns whether this cell contains a worker of one of the inputted types
@@ -465,7 +460,7 @@ class cell():
         '''
         num_found = 0
         for current_mob in self.contained_mobs:
-            if current_mob.is_pmob and current_mob.is_worker and current_mob.worker_type in possible_types: 
+            if current_mob.is_pmob and current_mob.is_worker and ((not possible_types) or current_mob.worker_type in possible_types): 
                 num_found += 1
                 if num_found >= required_number:
                     return(True)
@@ -489,7 +484,7 @@ class cell():
                     return(True)
         return(False)
 
-    def get_worker(self, possible_types=['African', 'European', 'slave', 'religious'], start_index=0):
+    def get_worker(self, possible_types=None, start_index=0):
         '''
         Description:
             Finds and returns the first worker in this cell of the inputted types, or 'none' if none are present
@@ -506,7 +501,7 @@ class cell():
         else:
             iterated_list = self.contained_mobs[start_index:len(self.contained_mobs)] + self.contained_mobs[0:start_index]
         for current_mob in iterated_list:
-            if current_mob.is_pmob and current_mob.is_worker and current_mob.worker_type in possible_types:
+            if current_mob.is_pmob and current_mob.is_worker and ((not possible_types) or current_mob.worker_type in possible_types):
                 return(current_mob)
         return('none')
 
@@ -615,10 +610,8 @@ class cell():
                         elif current_combat_modifier == best_combat_modifier:
                             if current_mob.veteran and not best_combatants[0].veteran: #use veteran as tiebreaker
                                 best_combatants = [current_mob]
-                                best_combatant_modifier = current_combat_modifier
                             else:
                                 best_combatants.append(current_mob)
-                        
         return(random.choice(best_combatants))
 
     def get_noncombatants(self, mob_type):
@@ -652,7 +645,7 @@ class cell():
             None
         '''
         self.visible = new_visibility
-        if update_image_bundle and not self.tile == 'none':
+        if update_image_bundle and self.tile != 'none':
             self.tile.update_image_bundle()
     
     def set_resource(self, new_resource, update_image_bundle=True):
@@ -739,12 +732,13 @@ class cell():
         length = len(self.contained_mobs)
         if length >= 2:
             message = str(length)
-            color = 'white'
-            font_size = round(self.width * 0.3)
-            current_font = pygame.font.SysFont(constants.font_name, font_size)
-            textsurface = current_font.render(message, False, constants.color_dict[color])
-            text_x = self.pixel_x + self.width - (font_size * 0.5)
-            text_y = self.pixel_y - font_size
+            font = constants.fonts['max_detail_white']
+            font_width = self.width * 0.13 * 1.3
+            font_height = self.width * 0.3 * 1.3
+            textsurface = font.pygame_font.render(message, False, font.color)
+            textsurface = pygame.transform.scale(textsurface, (font_width * len(message), font_height))
+            text_x = self.pixel_x + self.width - (font_width * (len(message) + 0.3))
+            text_y = self.pixel_y + (-0.8 * self.height) - (0.5 * font_height)
             constants.game_display.blit(textsurface, (text_x, text_y))
 
     def touching_mouse(self):

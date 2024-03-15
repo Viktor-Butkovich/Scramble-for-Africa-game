@@ -18,9 +18,6 @@ def end_turn():
     remove_excess_inventory()
     for current_pmob in status.pmob_list:
         current_pmob.end_turn_move()
-
-    actor_utility.deselect_all()
-        
     flags.player_turn = False
     status.player_turn_queue = []
     start_enemy_turn()
@@ -60,9 +57,9 @@ def start_player_turn(first_turn = False):
             if current_building.building_type == 'resource':
                 current_building.reattach_work_crews()
         manage_attrition() #have attrition before or after enemy turn? Before upkeep?
+        manage_production()
         reset_mobs('pmobs')
         manage_villages()
-        manage_production()
         manage_public_opinion()
         manage_upkeep()
         manage_loans()
@@ -82,17 +79,15 @@ def start_player_turn(first_turn = False):
     constants.turn_tracker.change(1)
         
     if not first_turn:
-        market_utility.adjust_prices()#adjust_prices()
+        market_utility.adjust_prices()
 
     if status.displayed_mob == None or status.displayed_mob.is_npmob:
-        actor_utility.deselect_all()
         game_transitions.cycle_player_turn(True)
 
-    selected_mob = status.displayed_mob
-    actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-    if selected_mob:
-        selected_mob.select()
-        actor_utility.calibrate_actor_info_display(status.tile_info_display, selected_mob.images[0].current_cell.tile)
+    if status.displayed_mob:
+        status.displayed_mob.select()
+    else:
+        actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
        
 
 def reset_mobs(mob_type):
@@ -162,7 +157,7 @@ def remove_excess_inventory():
             current_tile = current_cell.tile
             if len(current_tile.get_held_commodities()) > 0:
                 current_tile.remove_excess_inventory()
-    
+
 def manage_production():
     '''
     Description:
@@ -185,9 +180,8 @@ def manage_production():
                     else:
                         expected_production[current_resource_building.resource_type] += 0.5 * current_resource_building.efficiency
             current_resource_building.produce()
-            if len(current_resource_building.contained_work_crews) == 0:
-                if not current_resource_building.resource_type in constants.attempted_commodities:
-                    constants.attempted_commodities.append(current_resource_building.resource_type)
+            if not current_resource_building.resource_type in constants.attempted_commodities:
+                constants.attempted_commodities.append(current_resource_building.resource_type)
     manage_production_report(expected_production)
 
 def manage_production_report(expected_production):
@@ -311,30 +305,33 @@ def manage_worker_price_changes():
     Output:
         None
     '''
-    european_worker_roll = random.randrange(1, 7)
-    if european_worker_roll >= 5:
-        current_price = constants.european_worker_upkeep
-        changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
-        if changed_price >= constants.min_european_worker_upkeep:
-            constants.european_worker_upkeep = changed_price
-            text_utility.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
-    elif european_worker_roll == 1:
-        current_price = constants.european_worker_upkeep
-        changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
-        constants.european_worker_upkeep = changed_price
-        text_utility.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
+    for worker_type in status.worker_types:
+        if status.worker_types[worker_type].upkeep_variance:
+            worker_roll = random.randrange(1, 7)
+            if worker_roll >= 5:
+                current_price = status.worker_types[worker_type].upkeep
+                changed_price = round(current_price - constants.worker_upkeep_increment, 2)
+                if changed_price >= status.worker_types[worker_type].min_upkeep:
+                    status.worker_types[worker_type].upkeep = changed_price
+                    text_utility.print_to_screen('An influx of ' + worker_type + ' workers has decreased their upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.')
+            elif worker_roll == 1:
+                current_price = status.worker_types[worker_type].upkeep
+                changed_price = round(current_price + constants.worker_upkeep_increment, 2)
+                status.worker_types[worker_type].upkeep = changed_price
+                text_utility.print_to_screen('An shortage of ' + worker_type + ' workers has increased their upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.')
+
     if constants.slave_traders_strength > 0:
-        slave_worker_roll = random.randrange(1, 7)
-        if slave_worker_roll == 6:
-            current_price = constants.recruitment_costs['slave workers']
-            changed_price = round(current_price - constants.worker_upkeep_fluctuation_amount, 2)
-            if changed_price >= constants.min_slave_worker_recruitment_cost:
-                constants.recruitment_costs['slave workers'] = changed_price
+        worker_roll = random.randrange(1, 7)
+        if worker_roll == 6:
+            current_price = status.worker_types['slave'].recruitment_cost
+            changed_price = round(current_price - constants.slave_recruitment_cost_increment, 2)
+            if changed_price >= status.worker_types['slave'].min_recruitment_cost:
+                status.worker_types['slave'].set_recruitment_cost(changed_price)
                 text_utility.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
-        elif slave_worker_roll == 1:
-            current_price = constants.recruitment_costs['slave workers']
-            changed_price = round(current_price + constants.worker_upkeep_fluctuation_amount, 2)
-            constants.recruitment_costs['slave workers'] = changed_price
+        elif worker_roll == 1:
+            current_price = status.worker_types['slave'].recruitment_cost
+            changed_price = round(current_price + constants.slave_recruitment_cost_increment, 2)
+            status.worker_types['slave'].set_recruitment_cost(changed_price)
             text_utility.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.')
         
 def manage_worker_migration(): 
@@ -372,83 +369,63 @@ def trigger_worker_migration(): #resolves migration if it occurs
     '''
     possible_source_village_list = actor_utility.get_migration_sources() #list of villages that could have migration
     destination_cell_list = actor_utility.get_migration_destinations()
-    if not len(destination_cell_list) == 0:
+
+    if destination_cell_list:
         weighted_destination_cell_list = create_weighted_migration_destinations(destination_cell_list)
+
         village_destination_dict = {}
-        village_destination_coordinates_dict = {}
         village_num_migrated_dict = {}
-        source_village_list = [] #list of villages that actually had migration occur
-        any_migrated = False
-        #resolve village worker migration
         for source_village in possible_source_village_list:
             num_migrated = 0
             for available_worker in range(source_village.available_workers):
                 if random.randrange(1, 7) >= 4:
                     num_migrated += 1
-                    
+
             if num_migrated > 0:
-                any_migrated = True
-                
-                source_village_list.append(source_village)
-                destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
+                destination = random.choice(weighted_destination_cell_list)
                 if not destination.has_building('slums'):
                     destination.create_slums()
                 source_village.change_available_workers(-1 * num_migrated)
                 source_village.change_population(-1 * num_migrated)
                 destination.get_building('slums').change_population(num_migrated)
-                if destination.has_intact_building('port'):
-                    destination_type = 'port'
-                elif destination.has_intact_building('resource'):
-                    destination_type = destination.get_building('resource').name
-                elif destination.has_intact_building('train_station'):
-                    destination_type = 'train station'
-                village_destination_dict[source_village] = destination_type
-                village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
+                village_destination_dict[source_village] = destination
                 village_num_migrated_dict[source_village] = num_migrated
 
-        
-        #resolve wandering worker migration
-        wandering_destinations = []
-        wandering_destination_dict = {}
-        wandering_destination_coordinates_dict = {}
         wandering_num_migrated_dict = {}
-        num_migrated = constants.num_wandering_workers
-        if num_migrated > 0:
-            any_migrated = True
-            for i in range(num_migrated):
-                destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
-                if not destination.has_building('slums'):
-                    destination.create_slums()
-                destination.get_building('slums').change_population(1) #num_migrated
-                constants.num_wandering_workers -= 1
-                if destination.has_intact_building('port'):
-                    destination_type = 'port'
-                elif destination.has_intact_building('resource'):
-                    destination_type = destination.get_building('resource').name
-                elif destination.has_intact_building('train_station'):
-                    destination_type = 'train station'
-                wandering_destination_dict[destination] = destination_type #destination 0: port
-                wandering_destination_coordinates_dict[destination] = (destination.x, destination.y) #destination 0: (2, 2)
-                if destination in wandering_destinations:
-                    wandering_num_migrated_dict[destination] += 1
-                else:
-                    wandering_num_migrated_dict[destination] = 1
-                    wandering_destinations.append(destination)
+        for i in range(constants.num_wandering_workers):
+            destination = random.choice(weighted_destination_cell_list)
+            if not destination.has_building('slums'):
+                destination.create_slums()
+            destination.get_building('slums').change_population(1)
+            constants.num_wandering_workers -= 1
+            wandering_num_migrated_dict[destination] = wandering_num_migrated_dict.get(destination, 0) + 1
                 
-        if any_migrated:        
-            migration_report_text = 'A wave of migration from villages to your colony has occurred as African workers search for employment. /n'
-            for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
-                current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
-                current_line += ' village to the slums surrounding your ' + village_destination_dict[source_village]
-                current_line += ' at (' + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
-                migration_report_text += current_line + ' /n'
-            for wandering_destination in wandering_destinations:
-                current_line = str(wandering_num_migrated_dict[wandering_destination]) + ' wandering worker' + utility.generate_plural(wandering_num_migrated_dict[wandering_destination]) + ' settled in the slums surrounding your '
-                current_line += wandering_destination_dict[wandering_destination] + ' at (' + str(wandering_destination_coordinates_dict[wandering_destination][0]) + ', ' + str(wandering_destination_coordinates_dict[wandering_destination][1]) + ').'
-                migration_report_text += current_line + ' /n'
-            constants.notification_manager.display_notification({
-                'message': migration_report_text,
-            })
+        if village_num_migrated_dict or wandering_num_migrated_dict:        
+            migration_report_text = 'A wave of migration from villages to your colony has occurred as African workers search for employment. /n /n'
+            for source_village in village_destination_dict: # 2 workers migrated from villageName village to the slums surrounding Port Young at (0, 0). /n /n
+                destination = village_destination_dict[source_village]
+                destination_settlement = destination.settlement
+
+                current_notification_text = str(village_num_migrated_dict[source_village]) + ' worker' + \
+                    utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from the village of ' + source_village.name + \
+                    ' to the slums surrounding ' + destination_settlement.name + ' at (' + str(destination.x) + ', ' + str(destination.y) + '). /n /n'
+
+                constants.notification_manager.display_notification({
+                    'message': migration_report_text + current_notification_text,
+                    'zoom_destination': destination.tile
+                })
+
+            for destination in wandering_num_migrated_dict: # 3 wandering workers settled in the slums surrounding Port Young at (0, 0). /n /n 
+                destination_settlement = destination.settlement
+
+                current_notification_text = str(wandering_num_migrated_dict[destination]) + ' wandering worker' + \
+                    utility.generate_plural(wandering_num_migrated_dict[destination]) + ' settled in the slums surrounding ' + \
+                    destination_settlement.name + ' at (' + str(destination.x) + ', ' + str(destination.y) + '). /n /n'
+
+                constants.notification_manager.display_notification({
+                    'message': migration_report_text + current_notification_text,
+                    'zoom_destination': destination.tile
+                })
     
 def create_weighted_migration_destinations(destination_cell_list):
     '''
@@ -511,16 +488,20 @@ def manage_villages():
             elif roll >= 5: #5-6
                 current_village.change_aggressiveness(1)
             if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
-                text = 'The previously pacified village at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
+                text = 'The previously pacified village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
                 constants.notification_manager.display_notification({
                     'message': text,
                     'zoom_destination': current_village.cell.tile,
                 })
-
-        roll = random.randrange(1, 7)
-        second_roll = random.randrange(1, 7)
-        if roll == 6 and second_roll == 6:
+        if random.randrange(1, 7) >= 0 or (random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6):
+            previous_population = current_village.population
             current_village.change_population(1)
+            if previous_population <= 0 and current_village.cell.visible:
+                text = 'The previously abandonded village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') is now being re-settled. /n /n'
+                constants.notification_manager.display_notification({
+                    'message': text,
+                    'zoom_destination': current_village.cell.tile,
+                })
 
 def manage_beasts():
     '''
@@ -629,7 +610,7 @@ def manage_ministers():
         while len(status.minister_list) < constants.minister_limit:
             constants.actor_creation_manager.create_minister(False, {})
         constants.notification_manager.display_notification({
-            'message': 'Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n',
+            'message': 'Several new minister candidates are available for appointment and can be found in the candidate pool. /n /n',
         })
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
@@ -736,5 +717,5 @@ def manage_lore():
         None
     '''
     if status.current_lore_mission == None:
-        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or constants.effect_manager.effect_active('instant_lore_mission'):
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2) or constants.effect_manager.effect_active('instant_lore_mission'):
             constants.actor_creation_manager.create_lore_mission(False, {})

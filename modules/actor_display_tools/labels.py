@@ -3,7 +3,7 @@
 import pygame
 
 from ..interface_types.labels import label
-from ..util import utility, scaling
+from ..util import utility, scaling, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -40,7 +40,7 @@ class actor_display_label(label):
         super().__init__(input_dict)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
         s_increment = scaling.scale_width(6)
-        m_increment = scaling.scale_width(11)
+        m_increment = scaling.scale_width(9)
         l_increment = scaling.scale_width(30)
 
         s_size = self.height + s_increment
@@ -48,8 +48,8 @@ class actor_display_label(label):
         l_size = self.height + l_increment
         input_dict = {
             'coordinates': (self.x, self.y),
-            'width': s_size,
-            'height': s_size,
+            'width': m_size,
+            'height': m_size,
             'modes': self.modes,
             'attached_label': self
         }
@@ -85,7 +85,26 @@ class actor_display_label(label):
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             self.add_attached_button(input_dict)
 
-            input_dict['width'], input_dict['height'] = (s_size, s_size)
+            input_dict = {
+                'coordinates': (self.x, self.y),
+                'width': m_size,
+                'height': m_size,
+                'modes': self.modes,
+                'attached_label': self
+            }
+            input_dict['init_type'] = 'automatic route button'
+            input_dict['image_id'] = 'buttons/clear_automatic_route_button.png'
+            input_dict['button_type'] = 'clear automatic route'
+            self.add_attached_button(input_dict)
+
+            input_dict['image_id'] = 'buttons/draw_automatic_route_button.png'
+            input_dict['button_type'] = 'draw automatic route'
+            self.add_attached_button(input_dict)
+
+            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
+            input_dict['button_type'] = 'follow automatic route'
+            self.add_attached_button(input_dict)
+
             for action_type in status.actions:
                 if status.actions[action_type].actor_type in ['mob', 'tile'] and status.actions[action_type].placement_type == 'label':
                     button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
@@ -137,19 +156,6 @@ class actor_display_label(label):
             input_dict['keybind_id'] = pygame.K_f
             self.add_attached_button(input_dict)
             del input_dict['keybind_id']
-
-            input_dict['init_type'] = 'automatic route button'
-            input_dict['image_id'] = 'buttons/clear_automatic_route_button.png'
-            input_dict['button_type'] = 'clear automatic route'
-            self.add_attached_button(input_dict)
-
-            input_dict['image_id'] = 'buttons/draw_automatic_route_button.png'
-            input_dict['button_type'] = 'draw automatic route'
-            self.add_attached_button(input_dict)
-
-            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
-            input_dict['button_type'] = 'follow automatic route'
-            self.add_attached_button(input_dict)
             
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
@@ -230,23 +236,29 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
-            buy_slaves_image_id_list = ['mobs/default/button.png']
-            left_worker_dict = {
-                'image_id': 'mobs/slave workers/default.png',
-                'size': 0.8,
-                'x_offset': -0.2,
-                'y_offset': 0,
-                'level': 1
-            }
-            buy_slaves_image_id_list.append(left_worker_dict)
+            for worker_type in ['slave', 'Asian']:
+                current_image_id_list = ['mobs/default/button.png']
+                left_worker_dict = {
+                    'image_id': 'mobs/' + worker_type + ' workers/default.png',
+                    'size': 0.8,
+                    'x_offset': -0.2,
+                    'y_offset': 0,
+                    'level': 1
+                }
+                current_image_id_list.append(left_worker_dict)
 
-            right_worker_dict = left_worker_dict.copy()
-            right_worker_dict['x_offset'] *= -1
-            buy_slaves_image_id_list.append(right_worker_dict)
-            input_dict['init_type'] = 'buy slaves button'
-            input_dict['image_id'] = buy_slaves_image_id_list
-            input_dict['width'], input_dict['height'] = (l_size, l_size)
-            self.add_attached_button(input_dict)
+                right_worker_dict = left_worker_dict.copy()
+                right_worker_dict['x_offset'] *= -1
+
+                if worker_type == 'Asian':
+                    right_worker_dict['image_id'] = 'mobs/' + worker_type + ' workers 1/default.png'
+
+                current_image_id_list.append(right_worker_dict)
+                input_dict['init_type'] = 'recruit workers button'
+                input_dict['worker_type'] = worker_type
+                input_dict['image_id'] = current_image_id_list
+                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
@@ -264,6 +276,14 @@ class actor_display_label(label):
                 'parent_collection': self.insert_collection_above(),
                 'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
             })
+            attached_minister_portrait_image = constants.actor_creation_manager.create_interface_element({
+                'width': self.height + m_increment,
+                'height': self.height + m_increment,
+                'init_type': 'minister portrait image',
+                'minister_type': 'none',
+                'parent_collection': attached_minister_position_image.parent_collection,
+                'member_config': {'x_offset': -1 * (self.height + m_increment), 'y_offset': -0.5 * m_increment}
+            })
 
             self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
@@ -273,7 +293,7 @@ class actor_display_label(label):
             if self.actor_label_type == 'minister_name':
                 input_dict['width'], input_dict['height'] = (s_size, s_size)
                 for action_type in status.actions:
-                    if status.actions[action_type].actor_type == 'minister' and status.actions[action_type].placement_type == 'label':
+                    if status.actions[action_type].actor_type in ['minister', 'prosecutor'] and status.actions[action_type].placement_type == 'label':
                         button_input_dict = status.actions[action_type].button_setup(input_dict.copy())
                         if button_input_dict:
                             self.add_attached_button(button_input_dict)
@@ -286,6 +306,7 @@ class actor_display_label(label):
             input_dict['init_type'] = 'remove minister button'
             self.add_attached_button(input_dict)
             input_dict['init_type'] = 'appoint minister button'
+            input_dict['width'], input_dict['height'] = (s_size, s_size)
             for current_position in constants.minister_types:
                 input_dict['appoint_type'] = current_position
                 self.add_attached_button(input_dict)
@@ -333,6 +354,55 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
+
+        elif self.actor_label_type == 'inventory_name':
+            self.message_start = ''
+        
+        elif self.actor_label_type == 'inventory_quantity':
+            self.message_start = 'Quantity: '
+
+            if self.actor_type == 'mob':
+                input_dict['init_type'] = 'anonymous button'
+                input_dict['image_id'] = 'buttons/commodity_drop_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_mob_inventory', 'transfer', 1]),
+                        'tooltip': ['Orders the selected unit to drop this item']
+                }
+                self.add_attached_button(input_dict)
+
+                input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_mob_inventory', 'transfer', 'all']),
+                        'tooltip': ['Orders the selected unit to drop all of this item']
+                }
+                self.add_attached_button(input_dict)
+
+            elif self.actor_type == 'tile':
+                original_input_dict = input_dict.copy()
+
+                input_dict['init_type'] = 'anonymous button'
+                input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_tile_inventory', 'transfer', 1]),
+                        'tooltip': ['Orders the selected unit to pick up this item']
+                }
+                self.add_attached_button(input_dict)
+
+                input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
+                input_dict['button_type'] = {
+                        'on_click': (actor_utility.callback, ['displayed_tile_inventory', 'transfer', 'all']),
+                        'tooltip': ['Orders the selected unit to pick up all of this item']
+                }
+                self.add_attached_button(input_dict)
+
+                input_dict = original_input_dict
+                input_dict['init_type'] = 'sell commodity button'
+                input_dict['image_id'] = 'buttons/commodity_sell_button.png'
+                self.add_attached_button(input_dict)
+
+                input_dict['init_type'] = 'sell all commodity button'
+                input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
+                self.add_attached_button(input_dict)
 
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
@@ -428,9 +498,9 @@ class actor_display_label(label):
             elif self.actor_label_type == 'tile inventory capacity':
                 if not self.actor == 'none':
                     if not self.actor.cell.visible:
-                        tooltip_text.append('This tile has not been discovered')
-                    elif self.actor.can_hold_infinite_commodities:
-                        tooltip_text.append('This tile can hold infinite commodities.')
+                        tooltip_text.append('This tile has not been explored')
+                    elif self.actor.infinite_inventory_capacity:
+                        tooltip_text.append('This tile can hold infinite commodities')
                     else:
                         tooltip_text.append('This tile currently contains ' + str(self.actor.get_inventory_used()) + ' commodities')
                         tooltip_text.append('This tile can retain a maximum of ' + str(self.actor.inventory_capacity) + ' commodities')
@@ -558,10 +628,10 @@ class actor_display_label(label):
             None
         '''
         self.actor = new_actor
-        if not new_actor == 'none':
+        if new_actor != 'none':
             if self.actor_label_type == 'name':
                 self.set_label(self.message_start + utility.capitalize(new_actor.name))
-                
+
             elif self.actor_label_type == 'coordinates':
                 self.set_label(self.message_start + '(' + str(new_actor.x) + ', ' + str(new_actor.y) + ')')
                 
@@ -686,12 +756,21 @@ class actor_display_label(label):
                         self.set_label(self.message_start + str(self.actor.cell.get_building('village').available_workers))
 
             elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
+                inventory_used = self.actor.get_inventory_used()
                 if self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
-                    self.set_label(self.message_start + 'n/a')
-                elif self.actor.can_hold_infinite_commodities:
-                    self.set_label(self.message_start + 'unlimited')
+                    text = self.message_start + 'n/a'
+                elif self.actor.infinite_inventory_capacity:
+                    text = self.message_start + 'unlimited'
                 else:
-                    self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
+                    text = self.message_start + str(inventory_used) + '/' + str(self.actor.inventory_capacity)
+                inventory_grid = getattr(status, self.actor_type + '_inventory_grid')
+                if inventory_grid.inventory_page > 0:
+                    minimum = (inventory_grid.inventory_page * 27) + 1
+                    functional_capacity = max(inventory_used, self.actor.inventory_capacity)
+                    maximum = min(minimum + 26, functional_capacity)
+                    if maximum >= minimum:
+                        text += ' (' + str(minimum) + '-' + str(maximum) + ')'
+                self.set_label(text)
                     
             elif self.actor_label_type == 'minister':
                 if self.actor.is_pmob and self.actor.controlling_minister != 'none':
@@ -748,6 +827,12 @@ class actor_display_label(label):
             elif self.actor_label_type == 'slave_traders_strength':
                 self.set_label('Strength: ' + str(constants.slave_traders_strength) + '/' + str(constants.slave_traders_natural_max_strength))
 
+            elif self.actor_label_type == 'inventory_name':
+                self.set_label(self.message_start + utility.capitalize(new_actor.current_item))
+
+            elif self.actor_label_type == 'inventory_quantity':
+                self.set_label(self.message_start + str(new_actor.actor.get_inventory(new_actor.current_item)))
+
         elif self.actor_label_type == 'tooltip':
             return #do not set text for tooltip label
         else:
@@ -763,7 +848,7 @@ class actor_display_label(label):
             boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result ==  False:
+        if not result:
             return(False)
         elif self.actor == 'none':
             return(False)
@@ -833,7 +918,6 @@ class list_item_label(actor_display_label):
         '''
         self.list_index = input_dict['list_index']
         self.list_type = input_dict['list_type']
-        #input_dict['actor_label_type'] = self.list_type + ' list item'
         self.attached_list = []
         super().__init__(input_dict)
 
@@ -847,7 +931,6 @@ class list_item_label(actor_display_label):
             None
         '''
         self.attached_list = []
-        #print(self.actor_label_type)
         super().calibrate(new_actor)
 
     def can_show(self, skip_parent_collection=False):
@@ -862,6 +945,52 @@ class list_item_label(actor_display_label):
         if len(self.attached_list) > self.list_index:
             return(super().can_show(skip_parent_collection=skip_parent_collection))
         return(False)
+
+class actor_tooltip_label(actor_display_label):
+    '''
+    Label used for actor tooltips that can calibrate to actors and select them when clicked
+    '''
+    def __init__(self, input_dict):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
+        Output:
+            None
+        '''
+        input_dict['actor_label_type'] = 'tooltip'
+        super().__init__(input_dict)
+
+    def on_click(self):
+        '''
+        Description:
+            Selects the calibrated unit when clicked - used to allow selecting units from reorganization interface
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.actor.is_dummy:
+            if self.actor.is_group or (self.actor.is_vehicle and self.actor.has_crew):
+                status.reorganize_unit_right_button.on_click()
+                if not self.actor.is_dummy: # Only select if dummy unit successfully became real
+                    self.actor.cycle_select()
+            else:
+                status.reorganize_unit_left_button.on_click()
+                if not self.actor.is_dummy: # Only select if dummy unit successfully became real
+                    self.actor.cycle_select()
+        else:
+            self.actor.cycle_select()
 
 class building_work_crews_label(actor_display_label):
     '''
@@ -904,7 +1033,7 @@ class building_work_crews_label(actor_display_label):
         '''
         self.actor = new_actor
         self.show_label = False
-        if not new_actor == 'none':
+        if new_actor != 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
@@ -965,7 +1094,7 @@ class building_efficiency_label(actor_display_label):
         '''
         self.actor = new_actor
         self.show_label = False
-        if not new_actor == 'none':
+        if new_actor != 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label('Efficiency: ' + str(self.attached_building.efficiency))
@@ -1003,137 +1132,3 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
             if self.actor.cell.has_building('village') and self.actor.cell.visible:
                 return(True)
         return(False)
-        
-
-class commodity_display_label(actor_display_label):
-    '''
-    Label that changes its text and attached image and button to match the commodity in a certain part of a currently selected actor's inventory    
-    '''
-    def __init__(self, input_dict):
-
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
-                'commodity_index': int value - Index of actor's inventory reflected
-        Output:
-            None
-        '''
-        self.current_commodity = 'none'
-        input_dict['actor_label_type'] = 'commodity'
-        super().__init__(input_dict)
-        self.showing_commodity = False
-        self.commodity_index = input_dict['commodity_index']
-
-        input_dict = {
-            'coordinates': (self.x, self.y + 200),
-            'width': self.height,
-            'height': self.height,
-            'modes': self.modes,
-            'attached_label': self,
-            'init_type': 'label button'
-        }
-
-        self.insert_collection_above()
-
-        self.commodity_image = constants.actor_creation_manager.create_interface_element({
-            'coordinates': (0, 0),
-            'width': self.height + 10,
-            'height': self.height + 10,
-            'modes': self.modes,
-            'attached_label': self,
-            'init_type': 'label image',
-            'parent_collection': self.parent_collection,
-            'member_config': {'x_offset': -1 * self.height - 10, 'y_offset': -5}
-        })
-
-        input_dict['coordinates'] = (0, 0)
-        if self.actor_type == 'mob':
-            input_dict['init_type'] = 'drop commodity button'
-            input_dict['image_id'] = 'buttons/commodity_drop_button.png'
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'drop all commodity button'
-            input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
-            self.add_attached_button(input_dict)
-            
-        elif self.actor_type == 'tile':
-            input_dict['init_type'] = 'pick up commodity button'
-            input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'pick up all commodity button'
-            input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'sell commodity button'
-            input_dict['image_id'] = 'buttons/commodity_sell_button.png'
-            self.add_attached_button(input_dict)
-            
-            input_dict['init_type'] = 'sell all commodity button'
-            input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
-            self.add_attached_button(input_dict)
-
-    def set_label(self, new_message):
-        '''
-        Description:
-            Sets this label's text to the inputted string and changes locations of attached buttons since the length of the label may change. Also changes this label's attached image to match the commodity
-        Input:
-            string new_message: New text to set this label to
-        Output:
-            None
-        '''
-        super().set_label(new_message)
-        if self.actor != 'none':
-            commodity_list = self.actor.get_held_commodities()
-            if len(commodity_list) > self.commodity_index:
-                commodity = commodity_list[self.commodity_index]
-                self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
-
-    def calibrate(self, new_actor):
-        '''
-        Description:
-            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
-        Input:
-            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
-        Output:
-            None
-        '''
-        self.actor = new_actor
-        if not new_actor == 'none':
-            commodity_list = new_actor.get_held_commodities()
-            if len(commodity_list) - 1 >= self.commodity_index: #if index in commodity list
-                self.showing_commodity = True
-                commodity = commodity_list[self.commodity_index]
-                self.current_commodity = commodity
-                self.set_label(commodity + ': ' + str(new_actor.get_inventory(commodity))) #format - commodity_name: how_many
-            else:
-                self.showing_commodity = False
-                self.set_label('n/a')
-        else:
-            self.showing_commodity = False
-            self.set_label('n/a')
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this label should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if this label's commodity_index is not in the attached actor's inventory. Otherwise, returns same value as superclass
-        '''
-        if not self.showing_commodity:
-            return(False)
-        else:
-            return(super().can_show(skip_parent_collection=skip_parent_collection))

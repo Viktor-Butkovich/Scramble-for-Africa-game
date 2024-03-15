@@ -6,11 +6,11 @@ from ...actor_types.mob_types import vehicles, officers, dummy, workers
 from ...actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
 from ...actor_types.mob_types.npmob_types import native_warriors, beasts
 from ...interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons, \
-    europe_transactions
+    europe_transactions, inventory_interface
 from ...actor_display_tools import buttons as actor_display_buttons
 from ...actor_display_tools import labels as actor_display_labels
 from ...actor_display_tools import images as actor_display_images
-from ...constructs import ministers, lore_missions, images
+from ...constructs import ministers, lore_missions, images, settlements
 from ...util import utility, actor_utility, market_utility
 from .. import mouse_followers
 import modules.constants.constants as constants
@@ -101,10 +101,14 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.resource_building(from_save, input_dict)
         elif init_type == 'slums':
             new_actor = buildings.slums(from_save, input_dict)
+        elif init_type == 'settlement':
+            new_actor = settlements.settlement(from_save, input_dict)
 
         #cell icons
         elif init_type == 'cell icon':
             new_actor = cell_icons.cell_icon(from_save, input_dict)
+        elif init_type == 'name icon':
+            new_actor = cell_icons.name_icon(from_save, input_dict)
 
         #loans
         elif init_type == 'loan':
@@ -148,6 +152,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = interface_elements.autofill_collection(input_dict)
         elif init_type == 'ordered collection':
             new_element = interface_elements.ordered_collection(input_dict)
+        elif init_type == 'inventory grid':
+            new_element = inventory_interface.inventory_grid(input_dict)
         elif init_type == 'tabbed collection':
             new_element = interface_elements.tabbed_collection(input_dict)
         if init_type.endswith('button'):
@@ -183,6 +189,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.anonymous_button(input_dict)
                 elif base == 'action':
                     new_element = buttons.action_button(input_dict)
+                elif base == 'scroll':
+                    new_element = buttons.scroll_button(input_dict)
 
                 #instructions buttons
                 elif base == 'instructions':
@@ -247,8 +255,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.bribe_judge_button(input_dict)
                 elif base == 'hire african workers':
                     new_element = actor_display_buttons.hire_african_workers_button(input_dict)
-                elif base == 'buy slaves':
-                    new_element = actor_display_buttons.buy_slaves_button(input_dict)
+                elif base == 'recruit workers':
+                    new_element = actor_display_buttons.recruit_workers_button(input_dict)
                 elif base == 'automatic route':
                     new_element = actor_display_buttons.automatic_route_button(input_dict)
 
@@ -261,14 +269,14 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = buttons.minister_portrait_image(input_dict)
         elif init_type == 'country selection image': #^likewise
             new_element = buttons.country_selection_image(input_dict)
+        elif init_type == 'item icon':
+            new_element = inventory_interface.item_icon(input_dict)
         elif init_type == 'die':
             new_element = dice.die(input_dict)
         elif init_type == 'panel':
             new_element = panels.panel(input_dict)
         elif init_type == 'safe click panel':
             new_element = panels.safe_click_panel(input_dict)
-        elif init_type == 'cell_icon':
-            new_element = cell_icons.cell_icon(input_dict)
 
         elif init_type.endswith('label'):
             base = init_type.removesuffix('label')
@@ -289,6 +297,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 #actor display labels
                 elif base == 'actor display':
                     new_element = actor_display_labels.actor_display_label(input_dict)
+                elif base == 'actor tooltip':
+                    new_element = actor_display_labels.actor_tooltip_label(input_dict)
                 elif base == 'list item':
                     new_element = actor_display_labels.list_item_label(input_dict)
                 elif base == 'building work crews':
@@ -297,8 +307,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_labels.building_efficiency_label(input_dict)
                 elif base in ['native info', 'native population', 'native available workers', 'native aggressiveness']:
                     new_element = actor_display_labels.native_info_label(input_dict)
-                elif base == 'commodity display':
-                    new_element = actor_display_labels.commodity_display_label(input_dict)
 
                 else:
                     new_element = actor_display_labels.actor_display_label(input_dict)
@@ -357,6 +365,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = action_notifications.off_tile_exploration_notification(input_dict)
                 else:
                     new_element = notifications.notification(input_dict)
+        new_element.showing = new_element.can_show()
         return(new_element)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name):
@@ -377,18 +386,20 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         recruitment_type = recruitment_name
         if recruitment_name in ['slave workers', 'steamship']:
             verb = 'purchase'
-        elif recruitment_name in ['African workers', 'European workers']:
+        elif recruitment_name.endswith(' workers'):
             verb = 'hire'
             if recruitment_name == 'African workers':
                 recruitment_type = choice_info_dict['source_type'] + ' workers' #slums workers or village workers
         else:
             verb = 'recruit'
+
         if recruitment_name == 'African workers' and choice_info_dict['source_type'] == 'labor broker':
             message = 'Are you sure you want to pay a labor broker ' + str(choice_info_dict['cost']) + ' money to hire a unit of African workers from a nearby village? /n /n' 
-        elif recruitment_name in ['slave workers', 'African workers', 'European workers']:
+        elif recruitment_name.endswith(' workers'):
             message = 'Are you sure you want to ' + verb + ' a unit of ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
         else:
             message = 'Are you sure you want to ' + verb + ' ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
+
         actor_utility.update_descriptions(recruitment_type)
         message += constants.string_descriptions[recruitment_type]
         

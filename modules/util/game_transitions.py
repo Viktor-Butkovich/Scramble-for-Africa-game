@@ -20,24 +20,19 @@ def cycle_player_turn(start_of_turn = False):
     if len(turn_queue) == 0:
         if not start_of_turn: #print no units message if there are no units in turn queue
             text_utility.print_to_screen('There are no units left to move this turn.')
-            actor_utility.deselect_all()
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
     else:
-        if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
+        if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0] == status.displayed_mob: #only print no other units message if there is only 1 unit in turn queue and it is already selected
             text_utility.print_to_screen('There are no other units left to move this turn.')
-        if constants.current_game_mode == 'europe' and not status.europe_grid in turn_queue[0].grids:
-            set_game_mode('strategic')
-        if not turn_queue[0].selected:
+        if turn_queue[0] != status.displayed_mob:
             turn_queue[0].selection_sound()
         else: 
             turn_queue.append(turn_queue.pop(0)) #if unit is already selected, move it to the end and shift to the next one
+        cycled_mob = turn_queue[0]
+        if constants.current_game_mode == 'europe' and not status.europe_grid in cycled_mob.grids:
+            set_game_mode('strategic')
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-        turn_queue[0].select()
-        turn_queue[0].move_to_front()
-        if not turn_queue[0].grids[0].mini_grid == 'none':
-            turn_queue[0].grids[0].mini_grid.calibrate(turn_queue[0].x, turn_queue[0].y)
-        else:
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, turn_queue[0].images[0].current_cell.tile)
+        cycled_mob.select()
         if not start_of_turn:
             turn_queue.append(turn_queue.pop(0))
 
@@ -66,32 +61,34 @@ def set_game_mode(new_game_mode):
         start_loading()
         constants.current_game_mode = new_game_mode
         if new_game_mode == 'strategic':
-            constants.default_text_box_height = scaling.scale_height(90)
+            constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
-            centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
-            if centered_cell.tile != 'none':
-                actor_utility.calibrate_actor_info_display(status.tile_info_display, centered_cell.tile)
-                #calibrate tile info to minimap center
-        elif new_game_mode == 'europe':
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main_menu':
-            constants.default_text_box_height = scaling.scale_height(90)
+            constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
             status.text_list = [] #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
         elif not new_game_mode in ['trial', 'new_game_setup']:
-            constants.default_text_box_height = scaling.scale_height(90)
+            constants.default_text_box_height = constants.font_size * 5.5
             constants.text_box_height = constants.default_text_box_height
-    for current_mob in status.mob_list:
-        current_mob.selected = False
         
-    if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
+    if previous_game_mode in ['strategic', 'europe', 'new_game_setup', 'ministers']:
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True) #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(status.tile_info_display, None, override_exempt=True)
-        actor_utility.calibrate_actor_info_display(status.minister_info_display, None)
+        minister_utility.calibrate_minister_info_display(None)
         actor_utility.calibrate_actor_info_display(status.country_info_display, None)
-
+        if new_game_mode == 'europe':
+            if status.europe_grid.cell_list[0][0].contained_mobs:
+                status.europe_grid.cell_list[0][0].contained_mobs[0].cycle_select()
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile) #calibrate tile info to Europe
+        elif new_game_mode == 'strategic':
+            centered_cell = status.strategic_map_grid.find_cell(status.minimap_grid.center_x, status.minimap_grid.center_y)
+            if centered_cell.tile != 'none':
+                actor_utility.calibrate_actor_info_display(status.tile_info_display, centered_cell.tile)
+                if centered_cell.visible and centered_cell.contained_mobs:
+                    actor_utility.calibrate_actor_info_display(status.mob_info_display, centered_cell.contained_mobs[0])
+                #calibrate tile info to minimap center
     if new_game_mode == 'ministers':
         constants.available_minister_left_index = -2
         minister_utility.update_available_minister_display()
@@ -129,7 +126,7 @@ def create_strategic_map(from_save=False):
                 'grid': current_grid,
                 'image': 'misc/empty.png',
                 'name': 'default',
-                'modes': ['strategic'],
+                'modes': current_grid.modes,
                 'show_terrain': True,
             }
             if (not from_save) and current_grid == status.strategic_map_grid:

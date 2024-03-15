@@ -121,7 +121,7 @@ class slave_capture(action.action):
             else:
                 text += 'A majority of the natives managed to evade capture. /n /n'
             
-            if self.current_unit.controlling_minister.most_recent_corruption == False and random.randrange(1, 7) >= 4:
+            if self.current_village.population > 1 and random.randrange(1, 7) >= 4:
                 self.aggressiveness_increase = 1
                 text += 'The natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n /n'
             else:
@@ -244,7 +244,7 @@ class slave_capture(action.action):
                 'grids': self.current_unit.grids,
                 'image': 'mobs/slave workers/default.png',
                 'name': 'slave workers',
-                'modes': ['strategic'],
+                'modes': self.current_unit.grid.modes,
                 'init_type': 'slaves',
                 'purchased': False,
                 'worker_type': 'slave'

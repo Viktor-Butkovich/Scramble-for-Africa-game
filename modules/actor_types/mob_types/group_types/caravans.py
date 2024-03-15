@@ -36,7 +36,7 @@ class caravan(group):
             None
         '''
         super().__init__(from_save, input_dict)
-        self.can_hold_commodities = True
+        self.has_inventory = True
         self.can_trade = True
         self.inventory_capacity = 9
         if not from_save:

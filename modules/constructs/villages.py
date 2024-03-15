@@ -48,6 +48,8 @@ class village():
         self.tiles = [] #added in set_resource for tiles
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
             status.village_list.append(self) #have more permanent fix later
+            if not self.cell.settlement:
+                self.cell.tile.set_name(self.name)
 
     def remove_complete(self):
         '''
@@ -129,9 +131,9 @@ class village():
         new_warrior = constants.actor_creation_manager.create(False, {
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'image': 'mobs/native_warriors/default.png',
-            'canoes_image': 'mobs/native_warriors/canoe_default.png',
-            'modes': ['strategic'],
+            'image': 'mobs/native warriors/default.png',
+            'canoes_image': 'mobs/native warriors/canoe_default.png',
+            'modes': self.cell.grid.modes,
             'name': 'native warriors',
             'init_type': 'native_warriors',
             'origin_village': self
@@ -148,18 +150,16 @@ class village():
         Output:
             None
         '''
-        self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
-        self.change_population(-1)
-        constants.actor_creation_manager.create(False, {
+        input_dict = {
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'image': 'mobs/African workers/default.png',
-            'modes': ['strategic'],
-            'name': 'African workers',
-            'init_type': 'workers',
-            'worker_type': 'African'
-        })
+            'modes': self.cell.grid.modes
+        }
+        input_dict.update(status.worker_types['African'].generate_input_dict())
+        constants.actor_creation_manager.create(False, input_dict)
+        self.change_available_workers(-1)
+        self.change_population(-1)
 
     def set_initial_population(self):
         '''

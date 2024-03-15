@@ -43,17 +43,24 @@ class building(actor):
         self.cell = self.grids[0].find_cell(self.x, self.y)
         status.building_list.append(self)
         self.set_name(input_dict['name'])
-        self.contained_work_crews = []        
+        self.contained_work_crews = []
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
                 constants.actor_creation_manager.create(True, current_work_crew).work_building(self)
             if self.can_damage():
                 self.set_damaged(input_dict['damaged'], True)
-        elif self.can_damage():
+
+        if (not from_save) and self.can_damage():
             self.set_damaged(False, True)
         self.cell.contained_buildings[self.building_type] = self
         self.cell.tile.update_image_bundle()
-        self.is_port = False #used to determine if port is in a tile to move there
+
+        if (not from_save) and input_dict['building_type'] in ['resource', 'port', 'train_station', 'fort'] and not self.cell.settlement:
+            constants.actor_creation_manager.create(False, {
+                'init_type': 'settlement',
+                'coordinates': (self.cell.x, self.cell.y)
+            })
+        self.cell.tile.set_name(self.cell.tile.name)
 
         self.set_inventory_capacity(self.default_inventory_capacity)
         if constants.effect_manager.effect_active('damaged_buildings'):
@@ -168,12 +175,10 @@ class building(actor):
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
-        font_size = constants.font_size
-        font_name = constants.font_name
+        font = constants.fonts['default']
         for text_line in tooltip_text:
-            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10) > tooltip_width:
-                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10)
-        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5)
+            tooltip_width = max(tooltip_width, font.calculate_size(text_line) + scaling.scale_width(10))
+        tooltip_height = (font.size * len(tooltip_text)) + scaling.scale_height(5)
         self.tooltip_box = pygame.Rect(self.cell.tile.x, self.cell.y, tooltip_width, tooltip_height)
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.cell.tile.x - self.tooltip_outline_width, self.cell.tile.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -547,8 +552,7 @@ class port(building):
         '''
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict)
-        self.is_port = True #used to determine if port is in a tile to move there
-        if (not from_save) and not self.cell.village == 'none':
+        if (not from_save) and self.cell.village != 'none':
             constants.sound_manager.play_random_music('europe')
 
 class warehouses(building):
@@ -770,12 +774,11 @@ class resource_building(building):
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
                 if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
-                    officer_attrition_list.append(current_work_crew) #current_work_crew.attrition_death('officer')
+                    officer_attrition_list.append(current_work_crew)
             if current_cell.local_attrition():
                 if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or constants.effect_manager.effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
-                        current_work_crew.attrition_death('worker')
                         worker_attrition_list.append(current_work_crew)
         for current_work_crew in worker_attrition_list:
             current_work_crew.attrition_death('worker')
@@ -965,16 +968,14 @@ class slums(building):
         Output:
             None
         '''
-        constants.actor_creation_manager.create(False, {
+        input_dict = {
             'select_on_creation': True,
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'image': 'mobs/African workers/default.png',
-            'modes': ['strategic'],
-            'name': 'African workers',
-            'worker_type': 'African',
-            'init_type': 'workers'
-        })
+            'modes': self.cell.grid.modes
+        }
+        input_dict.update(status.worker_types['African'].generate_input_dict())
+        constants.actor_creation_manager.create(False, input_dict)
         self.change_population(-1)
 
     def to_save_dict(self):

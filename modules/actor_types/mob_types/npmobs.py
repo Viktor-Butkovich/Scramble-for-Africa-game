@@ -137,7 +137,8 @@ class npmob(mob):
         else:
             self.kill_noncombatants()
             self.damage_buildings()
-            
+            if self.npmob_type == 'beast':
+                self.set_hidden(True)
             if len(status.attacker_queue) > 0:
                 status.attacker_queue.pop(0).attempt_local_combat()
             elif flags.enemy_combat_phase: #if enemy combat phase done, go to player turn
@@ -160,7 +161,7 @@ class npmob(mob):
         noncombatants = current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
             constants.notification_manager.display_notification({
-                'message': 'The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
+                'message': 'The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + '). /n',
             })
             current_noncombatant.die()
 
@@ -181,7 +182,7 @@ class npmob(mob):
         for current_building in current_cell.get_intact_buildings():
             if current_building.can_damage():
                 constants.notification_manager.display_notification({
-                    'message': 'The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').',
+                    'message': 'The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + '). /n',
                 })
                 current_building.set_damaged(True)
             

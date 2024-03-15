@@ -1,6 +1,5 @@
 #Contains functionality for choice notifications
 
-import pygame
 from . import buttons, action_notifications
 from ..util import text_utility, scaling, market_utility, utility
 import modules.constants.constants as constants
@@ -132,7 +131,7 @@ class choice_button(buttons.button):
                 self.message = 'Hire'
                 self.verb = 'hire'
             self.cost = self.notification.choice_info_dict['cost']
-            self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
+            self.mob_image_id = self.notification.choice_info_dict.get('mob_image_id') # Image ID provided for most units, but generated on creation for workers
 
         elif input_dict['button_type'] == 'confirm main menu':
             self.message = 'Main menu'
@@ -149,9 +148,7 @@ class choice_button(buttons.button):
         else:
             self.message = input_dict['button_type'].capitalize()
         super().__init__(input_dict)
-        self.font_size = scaling.scale_width(25)
-        self.font_name = constants.font_name
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.font = constants.fonts['default_notification']
         self.in_notification = True
 
     def on_click(self):
@@ -226,13 +223,11 @@ class recruitment_choice_button(choice_button):
         input_dict = {'select_on_creation': True}
         if self.recruitment_type == 'slave workers':
             constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
+            input_dict.update(status.worker_types['slave'].generate_input_dict())
             input_dict['grids'] = [status.slave_traders_grid]
             attached_cell = input_dict['grids'][0].cell_list[0][0]
             input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
-            input_dict['image'] = 'mobs/slave workers/default.png'
-            input_dict['modes'] = ['strategic']
-            input_dict['name'] = 'slave workers'
-            input_dict['init_type'] = 'slaves'
+            input_dict['modes'] = input_dict['grids'][0].modes
             input_dict['purchased'] = True
             constants.actor_creation_manager.create(False, input_dict)
 
@@ -244,17 +239,15 @@ class recruitment_choice_button(choice_button):
 
         elif self.recruitment_type == 'African worker labor broker':
             recruiter = status.displayed_mob
+            input_dict.update(status.worker_types['African'].generate_input_dict())
             input_dict['coordinates'] = (recruiter.x, recruiter.y)
             input_dict['grids'] = recruiter.grids
-            input_dict['image'] = 'mobs/African workers/default.png'
-            input_dict['modes'] = ['strategic']
-            input_dict['name'] = 'African workers'
-            input_dict['init_type'] = 'workers'
-            input_dict['worker_type'] = 'African'
+            input_dict['modes'] = status.displayed_tile.cell.grid.modes
             constants.money_tracker.change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African') #adds 1 worker to the pool
             worker = constants.actor_creation_manager.create(False, input_dict)
+
             if recruiter.is_vehicle:
                 recruiter.set_movement_points(0)
                 worker.crew_vehicle(recruiter)
@@ -264,9 +257,13 @@ class recruitment_choice_button(choice_button):
 
         else:
             input_dict['coordinates'] = (0, 0)
-            input_dict['grids'] = [status.europe_grid]
-            input_dict['image'] = self.mob_image_id
-            input_dict['modes'] = ['strategic', 'europe']
+            if status.displayed_tile: # When recruiting in Asia, slave traders, Africa, etc., tile will be selected - use that tile's grids
+                input_dict['grids'] = status.displayed_tile.grids
+            else: # If no tile selected, assume recruiting in Europe
+                input_dict['grids'] = [status.europe_grid]
+            if self.mob_image_id:
+                input_dict['image'] = self.mob_image_id
+            input_dict['modes'] = input_dict['grids'][0].modes
             constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
             if self.recruitment_type in constants.officer_types:
                 name = ''
@@ -279,15 +276,8 @@ class recruitment_choice_button(choice_button):
                 input_dict['init_type'] = self.recruitment_type
                 input_dict['officer_type'] = self.recruitment_type
 
-            elif self.recruitment_type == 'European workers':
-                input_dict['name'] = 'European workers'
-                input_dict['init_type'] = 'workers'
-                input_dict['worker_type'] = 'European'
-
-            elif self.recruitment_type == 'African workers':
-                input_dict['name'] = 'African workers'
-                input_dict['init_type'] = 'workers'
-                input_dict['worker_type'] = 'African'
+            elif self.recruitment_type.endswith(' workers'):
+                input_dict.update(status.worker_types[self.recruitment_type.replace(' workers', '')].generate_input_dict()) # Like European workers
 
             elif self.recruitment_type == 'steamship':
                 image_dict = {'default': self.mob_image_id, 'uncrewed': 'mobs/steamship/uncrewed.png'}
@@ -295,6 +285,5 @@ class recruitment_choice_button(choice_button):
                 input_dict['name'] = 'steamship'
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'ship'
-                
             constants.actor_creation_manager.create(False, input_dict)
         super().on_click()

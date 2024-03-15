@@ -78,39 +78,21 @@ class group(pmob):
             'modes': self.modes
         }
 
-        if new_worker_type == 'European':
-            input_dict['image'] = 'mobs/European workers/default.png'
-            input_dict['name'] = 'European workers'
-            input_dict['init_type'] = 'workers'
-            input_dict['worker_type'] = 'European'
-        elif new_worker_type == 'African':
-            input_dict['image'] = 'mobs/African workers/default.png'
-            input_dict['name'] = 'African workers'
-            input_dict['init_type'] = 'workers'
-            input_dict['worker_type'] = 'African'
-        elif new_worker_type == 'slaves':
-            constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
-            input_dict['image'] = 'mobs/slave workers/default.png'
-            input_dict['name'] = 'slave workers'
-            input_dict['init_type'] = 'slaves'
-            input_dict['purchased'] = False
+        input_dict.update(status.worker_types[new_worker_type].generate_input_dict())
+        constants.money_tracker.change(-1 * status.worker_types[new_worker_type].recruitment_cost, 'unit_recruitment')
         previous_selected = status.displayed_mob
         new_worker = constants.actor_creation_manager.create(False, input_dict)
-        new_worker.set_automatically_replace(self.worker.automatically_replace)
+        if self.worker.worker_type == 'slave':
+            new_worker.set_automatically_replace(True)
+        else:
+            new_worker.set_automatically_replace(self.worker.automatically_replace)
         self.worker.fire(wander = False)
         self.worker = new_worker
         self.worker.update_image_bundle()
         self.worker.join_group()
         self.update_image_bundle()
-        if previous_selected == self:
-            self.select()
-        elif previous_selected:
+        if previous_selected:
             previous_selected.select()
-        else:
-            actor_utility.deselect_all()
-
-        if self.images[0].current_cell != 'none' and status.displayed_tile == self.images[0].current_cell.tile:
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -150,7 +132,7 @@ class group(pmob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
-        if current_cell == 'none':
+        if current_cell in ['none', None]:
             return()
 
         transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
@@ -173,27 +155,23 @@ class group(pmob):
         Output:
             None
         '''
-        constants.evil_tracker.change(3)
+        constants.evil_tracker.change(2)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle
-            destination_type = 'vehicle'
             destination_message = ' from the ' + self.name + ' aboard the ' + zoom_destination.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
         elif self.in_building:
             zoom_destination = self.building.cell.get_intact_building('resource')
-            destination_type = 'building'
             destination_message = ' from the ' + self.name + ' working in the ' + zoom_destination.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
         else:
             zoom_destination = self
-            destination_type = 'self'
             destination_message = ' from the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
             
-        remaining_unit = 'none'
         if target == 'officer':
             text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
             if self.officer.automatically_replace:
                 text += self.officer.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
-                self.officer.replace(self) #self.officer.die()
+                self.officer.replace(self)
                 self.officer.death_sound()
             else:
                 if self.in_vehicle:
@@ -299,9 +277,8 @@ class group(pmob):
             self.officer.veteran = True
         self.update_image_bundle()
         self.officer.update_image_bundle()
-        #self.officer.update_image_bundle()
         if status.displayed_mob == self:
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) # Updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -329,7 +306,7 @@ class group(pmob):
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.drop_inventory()
         self.worker.leave_group(self)
 
@@ -367,8 +344,18 @@ class group(pmob):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
         image_id_list = super().get_image_id_list(override_values)
-        image_id_list.remove(self.image_dict['default']) #group default image is empty
+        image_id_list.remove(self.image_dict['default']) # Group default image is empty
         image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer)
         return(image_id_list)
+
+    def get_worker(self) -> 'pmob':
+        '''
+        Description:
+            Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
+        Input:
+            None
+        Output:
+            worker: Returns the worker associated with this unit, if any
+        '''
+        return(self.worker)

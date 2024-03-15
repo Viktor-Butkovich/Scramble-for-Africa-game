@@ -1,13 +1,13 @@
 #Contains functionality for mobs
 
-import pygame
-import random
+import pygame, random
 from ..constructs import images
-from ..util import utility, actor_utility
+from ..util import utility, actor_utility, main_loop_utility, text_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
+from typing import List
 
 class mob(actor):
     '''
@@ -51,7 +51,6 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_trade = False #if can trade or create trading posts
         self.can_convert = False #if can convert natives or build missions
-        self.selected = False
         self.number = 1 #how many entities are in a unit, used for verb conjugation
         self.actor_type = 'mob'
         self.end_turn_destination = 'none'
@@ -487,13 +486,12 @@ class mob(actor):
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
-        
         old_image_id = self.images[0].image_id
         for current_image in self.images:
             current_image.remove_from_cell()
         self.grids = [new_grid]
         self.grid = new_grid
-        if not new_grid.mini_grid == 'none':
+        if new_grid.mini_grid != 'none':
             new_grid.mini_grid.calibrate(new_coordinates[0], new_coordinates[1])
             self.grids.append(new_grid.mini_grid)
         self.images = []
@@ -510,11 +508,34 @@ class mob(actor):
         Output:
             None
         '''
-        actor_utility.deselect_all()
-        self.selected = True
+        self.move_to_front()
         flags.show_selection_outlines = True
         constants.last_selection_outline_switch = constants.current_time
         actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, self.images[0].current_cell.tile)
+        if self.grids[0].mini_grid != 'none':
+            self.grids[0].mini_grid.calibrate(self.x, self.y)
+
+    def cycle_select(self):
+        '''
+        Description:
+            Selects this mob while also moving it to the front of the tile and playing its selection sound - should be used when unit is clicked on
+        Input:
+            None
+        Output:
+            None
+        '''
+        if main_loop_utility.action_possible():
+            if status.displayed_mob != self:
+                self.select()
+                if self.is_pmob:
+                    self.selection_sound()
+                for current_image in self.images: #move mob to front of each stack it is in
+                    if current_image.current_cell != 'none':
+                        while not self == current_image.current_cell.contained_mobs[0]:
+                            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        else:
+            text_utility.print_to_screen('You are busy and cannot select a different unit')
 
     def move_to_front(self):
         '''
@@ -541,7 +562,7 @@ class mob(actor):
         '''
         if flags.show_selection_outlines:
             for current_image in self.images:
-                if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
+                if current_image.current_cell != 'none' and self == current_image.current_cell.contained_mobs[0] and current_image.current_cell.grid.showing: #only draw outline if on top of stack
                     pygame.draw.rect(constants.game_display, constants.color_dict[self.selection_outline_color], (current_image.outline), current_image.outline_width)
         
     def update_tooltip(self):
@@ -634,8 +655,6 @@ class mob(actor):
         Output:
             None
         '''
-        if self.selected:
-            self.selected = False
         if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
         for current_image in self.images:
@@ -660,7 +679,7 @@ class mob(actor):
             self.death_sound(death_type)
         self.remove_complete()
 
-    def death_sound(self, death_type = 'violent'):
+    def death_sound(self, death_type: str = 'violent'):
         '''
         Description:
             Makes a sound when this unit dies, depending on the type of death
@@ -669,13 +688,13 @@ class mob(actor):
         Output:
             None
         '''
-        possible_sounds = []
+        possible_sounds: List[str] = []
         if death_type == 'fired':
             possible_sounds = []
         elif death_type == 'quit':
             possible_sounds = ['quit 1', 'quit 2', 'quit 3']
         elif death_type == 'violent':
-            possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5']
+            possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5', 'dead 6', 'dead 7', 'dead 8', 'dead 9']
         if len(possible_sounds) > 0:
             constants.sound_manager.play_sound('voices/' + random.choice(possible_sounds), 0.5)
 
@@ -755,7 +774,6 @@ class mob(actor):
             previous_infrastructure = previous_cell.get_intact_building('infrastructure')
             if self.images[0].current_cell.terrain == 'water' and not (previous_infrastructure != 'none' and previous_infrastructure.is_bridge):
                 if (not self.can_swim) or (self.y == 0 and not self.can_swim_ocean) or (self.y > 0 and not self.can_swim_river): #board if moving to ship in water
-                    self.selected = False
                     vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
                     if self.is_worker and not vehicle.has_crew:
                         self.crew_vehicle(vehicle)
@@ -764,7 +782,7 @@ class mob(actor):
                         self.embark_vehicle(vehicle)
                         self.set_movement_points(0)
                     vehicle.select()
-        if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
+        if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self == status.displayed_mob: #if can build any type of building, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
@@ -879,7 +897,7 @@ class mob(actor):
             None
         '''
         super().set_name(new_name)
-        if status.displayed_mob == self: #self.selected:
+        if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def hide_images(self):

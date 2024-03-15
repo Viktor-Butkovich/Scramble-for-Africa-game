@@ -4,22 +4,6 @@ import pygame
 import modules.constants.constants as constants
 import modules.constants.status as status
 
-def message_width(message, fontsize, font_name):
-    '''
-    Description:
-        Returns the pixel width of the inputted text if rendered with the inputted font and font size
-    Input:
-        String message: Text whose width will be found
-        int fontsize: Font size of the text whose width will be found, like 12
-        string font_name: Font name of the text whose width will be found, like 'times new roman'
-    Output:
-        int: Pixel width of the inputted text
-    '''
-    current_font = pygame.font.SysFont(font_name, fontsize)
-    text_width, text_height = current_font.size(message)
-    return(text_width)
-
-
 def get_input(solicitant, message):
     '''
     Description:
@@ -38,12 +22,12 @@ def text(message, font):
         Returns a rendered pygame.Surface of the inputted text
     Input:
         string message: Text to be rendered
-        pygame.font font: pygame font with which the text is rendered
+        font font: Constructs font with which the text is rendered
     Output:
         pygame.Surface: Rendered pygame.Surface of the inputted text
     '''
     try:
-        text_surface = font.render(message, False, constants.color_dict['black'])
+        text_surface = font.pygame_font.render(message, False, font.color)
     except:
         text_surface = pygame.Surface((1, 1)) #prevents error when trying to render very small text (of width 0) on very low resolutions
     return(text_surface)
@@ -97,3 +81,27 @@ def remove_underscores(message):
         string: the inputted message but with spaces
     '''
     return(message.replace('_', ' '))
+
+def prepare_render(message, font=None, override_input_dict = None):
+    '''
+    Description:
+        Prepares a dictionary that can be passed to as an image id to render the inputted message in the desired font
+    Input:
+        string message: Text to render
+        font font: Constructs font to render text in - myfont by default
+    Output:
+        dictionary: Returns image id dictionary of inputted message in inputted font
+    '''
+    if not font:
+        font = constants.myfont
+    width, height = font.pygame_font.size(message)
+    return_dict = {
+        'image_id': message,
+        'override_width': width,
+        'override_height': height,
+        'font': font
+    }
+    if override_input_dict:
+        for value in override_input_dict:
+            return_dict[value] = override_input_dict[value]
+    return(return_dict)

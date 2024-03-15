@@ -1083,6 +1083,7 @@ class switch_theatre_button(button):
                             current_mob.select()
                         current_mob.clear_automatic_route()
                         current_mob.end_turn_destination = 'none'
+                        current_mob.add_to_turn_queue()
                         flags.choosing_destination = True
                 else:
                     text_utility.print_to_screen('You are inland and cannot cross the ocean.') 
@@ -1214,16 +1215,16 @@ class remove_minister_button(button):
         if main_loop_utility.action_possible():
             appointed_minister = status.displayed_minister
             public_opinion_penalty = appointed_minister.status_number
-            text = 'Are you sure you want to remove ' + appointed_minister.name + ' from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n.'
+            text = 'Are you sure you want to remove ' + appointed_minister.name + ' from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n'
             text += 'Removing ' + appointed_minister.name + ' from office would incur a small public opinion penalty of ' + str(public_opinion_penalty) + ', even if he were reappointed. /n /n'
-            text += appointed_minister.name + ' would expect to be reappointed to a different position by the end of the turn, and would be fired permanently and incur a much larger public opinion penalty if not reappointed. /n /n'
+            text += appointed_minister.name + ' expects to be reappointed to a different position by the end of the turn. If not reappointed, he will be fired permanently and incur a much larger public opinion penalty. /n /n'
             if appointed_minister.status_number >= 3:
                 if appointed_minister.status_number == 4:
-                    text += appointed_minister.name + ' is of extremely high social status, and firing him would cause a national outrage. /n /n'
+                    text += appointed_minister.name + ' is of extremely high social status, so firing him would cause a national outrage. /n /n'
                 else:
-                    text += appointed_minister.name + ' is of high social status, and firing him would reflect particularly poorly on your company. /n /n'
+                    text += appointed_minister.name + ' is of high social status, so firing him would reflect particularly poorly on your company. /n /n'
             elif appointed_minister.status_number == 1:
-                text += appointed_minister.name + ' is of low social status, and firing him would have a relatively minimal impact on your company\'s reputation. /n /n'
+                text += appointed_minister.name + ' is of low social status, so firing him would have a relatively minimal impact on your company\'s reputation. /n /n'
             constants.notification_manager.display_notification({
                 'message': text,
                 'choices': ['confirm remove minister', 'none']
@@ -1493,14 +1494,17 @@ class hire_african_workers_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
-            constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
+            if not status.displayed_tile.cell.has_npmob():
+                choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
+            else:
+                text_utility.print_to_screen('You cannot recruit workers when hostile units are present.')
         else:
             text_utility.print_to_screen('You are busy and cannot hire a worker.')
 
-class buy_slaves_button(button):
+class recruit_workers_button(button):
     '''
-    Button that buys slaves from slave traders
+    Button that buys workers from an abstract grid - currently either slave workers from slave traders or Asian workers from Asia
     '''
     def __init__(self, input_dict):
         '''
@@ -1518,10 +1522,12 @@ class buy_slaves_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'worker_type': str value - Type of workers this button recruits, like 'slave' or 'Asian'
         Output:
             None
         '''
-        input_dict['button_type'] = 'buy slaves'
+        input_dict['button_type'] = 'recruit workers'
+        self.worker_type = input_dict['worker_type']
         super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
@@ -1533,9 +1539,12 @@ class buy_slaves_button(button):
         Output:
             boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
         '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if status.displayed_tile and status.displayed_tile.cell.grid == status.slave_traders_grid:
-                if constants.slave_traders_strength > 0:
+        if super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_tile:
+            if self.worker_type == 'slave':
+                if status.displayed_tile.cell.grid == status.slave_traders_grid and constants.slave_traders_strength > 0:
+                    return(True)
+            elif self.worker_type == 'Asian':
+                if status.displayed_tile.cell.grid == status.asia_grid:
                     return(True)
         return(False)
 
@@ -1549,14 +1558,14 @@ class buy_slaves_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            self.cost = constants.recruitment_costs['slave workers']
-            if constants.money_tracker.get() >= self.cost:
-                choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
-                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers')
+            cost = status.worker_types[self.worker_type].recruitment_cost
+            if constants.money_tracker.get() >= cost:
+                choice_info_dict = {'recruitment_type': self.worker_type + ' workers', 'cost': cost}
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, self.worker_type + ' workers')
             else:
-                text_utility.print_to_screen('You do not have enough money to buy slaves.')
+                text_utility.print_to_screen('You do not have enough money to purhase ' + self.worker_type + ' workers.')
         else:
-            text_utility.print_to_screen('You are busy and cannot buy slaves.')
+            text_utility.print_to_screen('You are busy and cannot purchase ' + self.worker_type + ' workers.')
 
 class automatic_route_button(button):
     '''

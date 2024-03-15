@@ -10,7 +10,9 @@ import modules.constants.flags as flags
 import modules.util.scaling as scaling
 import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
+import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
+import modules.constructs.worker_types as worker_types
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
@@ -41,8 +43,57 @@ def misc():
     Output:
         None
     '''
-    constants.font_size = scaling.scale_height(15)
-    constants.myfont = pygame.font.SysFont(constants.font_name, constants.font_size)
+    constants.font_size = scaling.scale_height(constants.default_font_size)
+    constants.notification_font_size = scaling.scale_height(constants.default_notification_font_size)
+
+    constants.myfont = fonts.font({
+        'descriptor': 'default',
+        'name': constants.font_name,
+        'size': constants.font_size,
+        'color': 'black'
+    })
+    fonts.font({
+        'descriptor': 'white',
+        'name': constants.font_name,
+        'size': constants.font_size,
+        'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'default_notification',
+        'name': constants.font_name,
+        'size': constants.notification_font_size,
+        'color': 'black'
+    })
+    fonts.font({
+        'descriptor': 'white_notification',
+        'name': constants.font_name,
+        'size': constants.notification_font_size,
+        'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'large_notification',
+        'name': constants.font_name,
+        'size': scaling.scale_height(30),
+        'color': 'black'
+    })
+    fonts.font({
+        'descriptor': 'large_white_notification',
+        'name': constants.font_name,
+        'size': scaling.scale_height(30),
+        'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'max_detail_white',
+        'name': 'helvetica',
+        'size': scaling.scale_height(100),
+        'color': 'white'
+    })
+    fonts.font({
+        'descriptor': 'max_detail_black',
+        'name': 'helvetica',
+        'size': scaling.scale_height(100),
+        'color': 'black'
+    })
 
     #page 1
     instructions_message = 'Placeholder instructions, use += to add'
@@ -87,9 +138,63 @@ def misc():
         'description': 'general information panel',
         'resize_with_contents': True,
     })
-    anchor = constants.actor_creation_manager.create_interface_element(
-        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}
-    ) #rect at original location prevents collection from moving unintentionally when resizing
+
+    status.grids_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(constants.grids_collection_x, constants.grids_collection_y),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'modes': ['strategic', 'europe'],
+        'init_type': 'interface collection'
+    })
+
+    #anchor = constants.actor_creation_manager.create_interface_element(
+    #    {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': status.info_displays_collection}
+    #) #rect at original location prevents collection from moving unintentionally when resizing
+
+def worker_types_config():
+    '''
+    Description:
+        Defines worker type templates
+    Input:
+        None
+    Output:
+        None
+    '''
+    worker_types.worker_type(False, {
+        'adjective': 'European',
+        'upkeep': 6.0,
+        'can_crew': ['steamship', 'steamboat', 'train'],
+        'upkeep_variance': True,
+        'fired_description': 'Unlike African workers, fired European workers will return home rather than settle in slums. /n /n' + \
+                                'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+    })
+    worker_types.worker_type(False, {
+        'adjective': 'African',
+        'upkeep': 4.0,
+        'can_crew': ['steamboat', 'train'],
+        'fired_description': 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again. /n /n'
+    })
+    worker_types.worker_type(False, {
+        'adjective': 'Asian',
+        'upkeep': 4.0,
+        'can_crew': ['steamboat', 'train'],
+        'upkeep_variance': True,
+        'fired_description': 'Like European workers, fired Asian workers will return home rather than settle in slums, but can be fired with no effect on your reputation. /n /n'
+    })
+    worker_types.worker_type(False, {
+        'init_type': 'slaves',
+        'adjective': 'slave',
+        'recruitment_cost': 5.0,
+        'upkeep': 2.0,
+        'fired_description': 'Firing slaves frees them, increasing public opinion. Freed slaves join the labor pool and are automatically hired as workers. /n /n'
+    })
+    worker_types.worker_type(False, {
+        'adjective': 'religious',
+        'name': 'church volunteers',
+        'upkeep': 0.0,
+        'fired_description': 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n' + \
+                                'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+    })
 
 def terrains():
     '''
@@ -116,6 +221,13 @@ def actions():
     Output:
         none
     '''
+    for building_type in constants.building_types + ['train', 'steamboat']:
+        if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
+            construction.construction(building_type=building_type)
+            if not building_type in ['train', 'steamboat', 'infrastructure']:
+                repair.repair(building_type=building_type)
+    for upgrade_type in constants.upgrade_types:
+        upgrade.upgrade(building_type=upgrade_type)
     public_relations_campaign.public_relations_campaign()
     religious_campaign.religious_campaign()
     suppress_slave_trade.suppress_slave_trade()
@@ -132,13 +244,6 @@ def actions():
     active_investigation.active_investigation()
     track_beasts.track_beasts()
     trial.trial()
-    for building_type in constants.building_types + ['train', 'steamboat']:
-        if not building_type in ['warehouses', 'slums']: #only include buildings that can be built manually
-            construction.construction(building_type=building_type)
-            if not building_type in ['train', 'steamboat', 'infrastructure']:
-                repair.repair(building_type=building_type)
-    for upgrade_type in constants.upgrade_types:
-        upgrade.upgrade(building_type=upgrade_type)
 
     for action_type in status.actions:
         if status.actions[action_type].placement_type == 'free':
@@ -209,7 +314,7 @@ def def_countries():
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier')
+    british_country_effect = effects.effect('british_country_modifier', 'construction_plus_modifier')
 
     status.Britain = countries.country({
         'name': 'Britain',
@@ -400,17 +505,6 @@ def value_trackers():
         'member_config': {'order_x_offset': scaling.scale_width(275), 'order_overlap': True}
     })
 
-    constants.public_opinion_tracker = value_tracker_template.public_opinion_tracker_template('public_opinion', 0, 0, 100)
-    constants.actor_creation_manager.create_interface_element({
-        'minimum_width': scaling.scale_width(10),
-        'height': scaling.scale_height(30),
-        'modes': ['strategic', 'europe', 'ministers'],
-        'image_id': 'misc/default_label.png',
-        'value_name': 'public_opinion',
-        'init_type': 'value label',
-        'parent_collection': value_trackers_ordered_collection
-    })
-
     constants.money_tracker = value_tracker_template.money_tracker_template(100)
     constants.money_label =  constants.actor_creation_manager.create_interface_element({
         'minimum_width': scaling.scale_width(10),
@@ -420,6 +514,17 @@ def value_trackers():
         'init_type': 'money label',
         'parent_collection': value_trackers_ordered_collection,
         'member_config': {'index': 1} #should appear before public opinion in collection but relies on public opinion existing
+    })
+
+    constants.public_opinion_tracker = value_tracker_template.public_opinion_tracker_template('public_opinion', 0, 0, 100)
+    constants.actor_creation_manager.create_interface_element({
+        'minimum_width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'modes': ['strategic', 'europe', 'ministers'],
+        'image_id': 'misc/default_label.png',
+        'value_name': 'public_opinion',
+        'init_type': 'value label',
+        'parent_collection': value_trackers_ordered_collection
     })
 
     if constants.effect_manager.effect_active('track_fps'):
@@ -460,21 +565,21 @@ def buttons():
     europe_button_width = 150
     europe_button_height = 100
     input_dict = {
-        'coordinates': scaling.scale_coordinates(constants.europe_grid_x - europe_button_width - 25, constants.europe_grid_y + 10),
+        'coordinates': scaling.scale_coordinates(0, 10),
         'width': scaling.scale_width(europe_button_width),
         'height': scaling.scale_height(europe_button_height),
         'keybind_id': pygame.K_e,
-        'modes': ['strategic'],
         'image_id': 'buttons/european_hq_button.png',
+        'modes': ['strategic'],
         'to_mode': 'europe',
-        'init_type': 'switch game mode button'
+        'init_type': 'switch game mode button',
+        'parent_collection': status.grids_collection
     }
     strategic_to_europe_button = constants.actor_creation_manager.create_interface_element(input_dict)
     status.flag_icon_list.append(strategic_to_europe_button) #sets button image to update to flag icon when country changes
 
     europe_button_width = 60
     europe_button_height = 60
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.europe_grid_y))
     input_dict['width'] = scaling.scale_width(europe_button_width)
     input_dict['height'] = scaling.scale_height(europe_button_height)
     input_dict['modes'] = ['europe']
@@ -483,6 +588,27 @@ def buttons():
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
     europe_to_strategic_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
+    rhs_menu_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height),
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe', 'ministers'],
+        'init_type': 'ordered collection',
+        'member_config': {'order_exempt': True},
+        'separation': 5
+    })
+
+    lhs_menu_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 50),
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe', 'ministers'],
+        'init_type': 'ordered collection',
+        'member_config': {'order_exempt': True},
+        'separation': 5,
+        'direction': 'horizontal'
+    })
+
     input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 50)
     input_dict['width'] = scaling.scale_width(50)
     input_dict['height'] = scaling.scale_height(50)
@@ -490,6 +616,7 @@ def buttons():
     input_dict['keybind_id'] = 'none'
     input_dict['to_mode'] = 'main_menu'
     to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(to_main_menu_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['new_game_setup']
@@ -502,12 +629,14 @@ def buttons():
     input_dict['image_id'] = 'buttons/european_hq_button.png'
     input_dict['to_mode'] = 'ministers'
     to_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(to_ministers_button)
 
     input_dict['modes'] = ['ministers']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     input_dict['image_id'] = 'buttons/exit_european_hq_button.png'
     input_dict['to_mode'] = 'previous'
     from_ministers_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(from_ministers_button)
 
     input_dict['modes'] = ['trial']
     input_dict['to_mode'] = 'ministers'
@@ -586,12 +715,14 @@ def buttons():
         'init_type': 'save game button'
     }
     save_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(save_game_button)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 200))
     input_dict['modes'] = ['strategic']
     input_dict['image_id'] = 'buttons/grid_line_button.png'
     input_dict['init_type'] = 'toggle grid lines button'
     toggle_grid_lines_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(toggle_grid_lines_button)
 
     input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.default_display_height - 275))
     input_dict['modes'] = ['strategic', 'europe', 'ministers']
@@ -599,6 +730,7 @@ def buttons():
     input_dict['image_id'] = 'buttons/text_box_size_button.png'
     input_dict['init_type'] = 'expand text box button'
     expand_text_box_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    rhs_menu_collection.add_member(expand_text_box_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(110, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
@@ -606,6 +738,7 @@ def buttons():
     input_dict['image_id'] = 'buttons/cycle_units_button.png'
     input_dict['init_type'] = 'cycle units button'
     cycle_units_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(cycle_units_button)
 
     input_dict['coordinates'] = (scaling.scale_width(55), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic']
@@ -613,17 +746,20 @@ def buttons():
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free all button'
     free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(free_all_slaves_button)
 
     input_dict['coordinates'] = (scaling.scale_width(165), input_dict['coordinates'][1])
     input_dict['modes'] = ['strategic', 'europe']
     input_dict['image_id'] = 'buttons/disable_sentry_mode_button.png'
     input_dict['init_type'] = 'wake up all button'
     wake_up_all_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(wake_up_all_button)
 
     input_dict['coordinates'] = (scaling.scale_width(220), input_dict['coordinates'][1])
     input_dict['image_id'] = 'buttons/execute_movement_routes_button.png'
     input_dict['init_type'] = 'execute movement routes button'
     execute_movement_routes_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(execute_movement_routes_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(constants.default_display_width - 50, 0)
     input_dict['modes'] = ['main_menu']
@@ -649,9 +785,9 @@ def europe_screen():
         'modes': ['europe'],
         'init_type': 'recruitment button'
     }
-    for recruitment_index in range(len(constants.recruitment_types)):
+    for recruitment_index, recruitment_type in enumerate(constants.recruitment_types):
         input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
-        input_dict['recruitment_type'] = constants.recruitment_types[recruitment_index]
+        input_dict['recruitment_type'] = recruitment_type
         new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
     new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({
@@ -966,8 +1102,8 @@ def mob_interface():
     #mob background image's tooltip
     mob_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
-        'minimum_width': scaling.scale_width(125),
-        'height': scaling.scale_height(125),
+        'minimum_width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1000,10 +1136,9 @@ def mob_interface():
     }
     fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict)
     
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(actor_display_current_y + 40))
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free unit slaves button'
-    free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    status.free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
 
     #mob info labels setup
@@ -1020,7 +1155,7 @@ def mob_interface():
             'coordinates': scaling.scale_coordinates(0, 0),
             'minimum_width': scaling.scale_width(10),
             'height': scaling.scale_height(30),
-            'image_id': 'misc/default_label.png', #'misc/underline.png',
+            'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
             'parent_collection': status.mob_info_display,
@@ -1108,8 +1243,8 @@ def tile_interface():
     #tile background image's tooltip
     tile_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(0, 0),
-        'minimum_width': scaling.scale_width(125),
-        'height': scaling.scale_height(125),
+        'minimum_width': scaling.scale_width(115),
+        'height': scaling.scale_height(115),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
@@ -1193,7 +1328,7 @@ def inventory_interface():
         None
     '''
     commodity_prices_x, commodity_prices_y = (870, 100)
-    commodity_prices_height = 30 + (30 * len(constants.commodity_types))
+    commodity_prices_height = 35 + (30 * len(constants.commodity_types))
     commodity_prices_width = 200
 
     status.commodity_prices_label = constants.actor_creation_manager.create_interface_element({
@@ -1236,12 +1371,78 @@ def inventory_interface():
         'parent_collection': status.mob_inventory_collection,
     }
     mob_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
-    
-    del input_dict['actor_label_type']
-    for current_index in range(len(constants.commodity_types)): #commodities held in selected mob
-        input_dict['commodity_index'] = current_index
-        input_dict['init_type'] = 'commodity display label'
-        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
+
+    inventory_cell_height = scaling.scale_height(34)
+    inventory_cell_width = scaling.scale_width(34)
+
+    status.mob_inventory_grid = constants.actor_creation_manager.create_interface_element({
+        'width': scaling.scale_width(10),
+        'height': (inventory_cell_height + scaling.scale_height(5)) * 3,
+        'init_type': 'inventory grid',
+        'parent_collection': status.mob_inventory_collection,
+        'second_dimension_increment': inventory_cell_width + scaling.scale_height(5)
+    })
+    for current_index in range(27):
+        constants.actor_creation_manager.create_interface_element({
+            'width': inventory_cell_width,
+            'height': inventory_cell_height,
+            'image_id': 'buttons/default_button.png',
+            'init_type': 'item icon',
+            'parent_collection': status.mob_inventory_grid,
+            'icon_index': current_index,
+            'actor_type': 'mob_inventory',
+            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': status.mob_inventory_grid.height}
+        })
+
+    status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element({
+        #'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'is_info_display': True,
+        'actor_type': 'mob_inventory',
+        'description': 'mob inventory panel',
+        'parent_collection': status.mob_inventory_collection,
+        'member_config': {'calibrate_exempt': True}
+    })
+
+    #mob inventory background image's tooltip
+    mob_inventory_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
+        'minimum_width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
+        'image_id': 'misc/empty.png',
+        'actor_label_type': 'tooltip',
+        'actor_type': 'tile',
+        'init_type': 'actor display label',
+        'parent_collection': status.mob_inventory_info_display,
+        'member_config': {'order_overlap': True}
+    })
+
+    mob_inventory_image = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(5, 5),
+        'width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
+        'modes': ['strategic', 'europe'],
+        'actor_image_type': 'inventory_default',
+        'init_type': 'actor display free image',
+        'parent_collection': status.mob_inventory_info_display,
+        'member_config': {'order_overlap': False}
+    })
+
+    mob_info_display_labels = ['inventory_name', 'inventory_quantity']
+    for current_actor_label_type in mob_info_display_labels:
+        x_displacement = 0
+        input_dict = {
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
+            'image_id': 'misc/default_label.png',
+            'actor_label_type': current_actor_label_type,
+            'actor_type': 'mob',
+            'parent_collection': status.mob_inventory_info_display,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
+        }
+        input_dict['init_type'] = 'actor display label'
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
     status.tile_inventory_collection = constants.actor_creation_manager.create_interface_element({
         'width': scaling.scale_width(10),
@@ -1263,11 +1464,96 @@ def inventory_interface():
     }
     tile_inventory_capacity_label = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    del input_dict['actor_label_type']
-    for current_index in range(len(constants.commodity_types)): #commodities held in selected tile
-        input_dict['commodity_index'] = current_index
-        input_dict['init_type'] = 'commodity display label'
-        new_commodity_display_label = constants.actor_creation_manager.create_interface_element(input_dict)
+    status.tile_inventory_grid = constants.actor_creation_manager.create_interface_element({
+        'width': scaling.scale_width(10),
+        'height': (inventory_cell_height + scaling.scale_height(5)) * 3,
+        'init_type': 'inventory grid',
+        'parent_collection': status.tile_inventory_collection,
+        'second_dimension_increment': inventory_cell_width + scaling.scale_height(5)
+    })
+
+    tile_scroll_up_button = constants.actor_creation_manager.create_interface_element({
+        'width': inventory_cell_width,
+        'height': inventory_cell_height,
+        'parent_collection': status.tile_inventory_grid,
+        'image_id': 'buttons/cycle_ministers_up_button.png',
+        'value_name': 'inventory_page',
+        'increment': -1,
+        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_width), 'y_offset': status.tile_inventory_grid.height - ((inventory_cell_height + scaling.scale_height(5)) * 3) + scaling.scale_height(5)},
+        'init_type': 'scroll button'
+    })
+
+    tile_scroll_down_button = constants.actor_creation_manager.create_interface_element({
+        'width': inventory_cell_width,
+        'height': inventory_cell_height,
+        'parent_collection': status.tile_inventory_grid,
+        'image_id': 'buttons/cycle_ministers_down_button.png',
+        'value_name': 'inventory_page',
+        'increment': 1,
+        'member_config': {'order_exempt': True, 'x_offset': scaling.scale_width(-1.3 * inventory_cell_width), 'y_offset': status.tile_inventory_grid.height - (inventory_cell_height)},
+        'init_type': 'scroll button'
+    })
+
+    for current_index in range(27):
+        constants.actor_creation_manager.create_interface_element({
+            'width': inventory_cell_width,
+            'height': inventory_cell_height,
+            'image_id': 'buttons/default_button.png',
+            'init_type': 'item icon',
+            'parent_collection': status.tile_inventory_grid,
+            'icon_index': current_index,
+            'actor_type': 'tile_inventory',
+            'member_config': {'second_dimension_coordinate': current_index % 9, 'order_y_offset': status.tile_inventory_grid.height}
+        })
+
+    status.tile_inventory_info_display = constants.actor_creation_manager.create_interface_element({
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'is_info_display': True,
+        'actor_type': 'tile_inventory',
+        'description': 'tile inventory panel',
+        'parent_collection': status.tile_inventory_collection,
+        'member_config': {'calibrate_exempt': True}
+    })
+
+    #tile inventory background image's tooltip
+    tile_inventory_free_image_background_tooltip = constants.actor_creation_manager.create_interface_element({
+        'minimum_width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
+        'image_id': 'misc/empty.png',
+        'actor_label_type': 'tooltip',
+        'actor_type': 'tile',
+        'init_type': 'actor display label',
+        'parent_collection': status.tile_inventory_info_display,
+        'member_config': {'order_overlap': True}
+    })
+
+    tile_inventory_image = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(5, 5),
+        'width': scaling.scale_width(90),
+        'height': scaling.scale_height(90),
+        'modes': ['strategic', 'europe'],
+        'actor_image_type': 'inventory_default',
+        'init_type': 'actor display free image',
+        'parent_collection': status.tile_inventory_info_display,
+        'member_config': {'order_overlap': False}
+    })
+
+    tile_info_display_labels = ['inventory_name', 'inventory_quantity']
+    for current_actor_label_type in tile_info_display_labels:
+        x_displacement = 0
+        input_dict = {
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
+            'image_id': 'misc/default_label.png',
+            'actor_label_type': current_actor_label_type,
+            'actor_type': 'tile',
+            'parent_collection': status.tile_inventory_info_display,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
+        }
+        input_dict['init_type'] = 'actor display label'
+        constants.actor_creation_manager.create_interface_element(input_dict)
 
 def unit_organization_interface():
     '''
@@ -1282,7 +1568,7 @@ def unit_organization_interface():
     lhs_x_offset = 35
     rhs_x_offset = image_height + 80
 
-    unit_organization_collection = constants.actor_creation_manager.create_interface_element({
+    status.mob_reorganization_collection = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(-30, -1 * image_height - 115),
         'width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
@@ -1300,13 +1586,12 @@ def unit_organization_interface():
         'minimum_width': scaling.scale_width(image_height - 10),
         'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
+        'init_type': 'actor tooltip label',
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True}
     })
-    unit_organization_collection.autofill_targets['officer'].append(lhs_top_tooltip)
+    status.mob_reorganization_collection.autofill_targets['officer'].append(lhs_top_tooltip)
 
     #mob image
     lhs_top_mob_free_image = constants.actor_creation_manager.create_interface_element({
@@ -1317,10 +1602,10 @@ def unit_organization_interface():
         'actor_image_type': 'default',
         'default_image_id': 'mobs/default/mock_officer.png',
         'init_type': 'actor display free image',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset)}
     })
-    unit_organization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
+    status.mob_reorganization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
 
     #mob background image's tooltip
     lhs_bottom_tooltip = constants.actor_creation_manager.create_interface_element({
@@ -1328,13 +1613,12 @@ def unit_organization_interface():
         'minimum_width': scaling.scale_width(image_height - 10),
         'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
+        'init_type': 'actor tooltip label',
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True},
     })
-    unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_tooltip)
+    status.mob_reorganization_collection.autofill_targets['worker'].append(lhs_bottom_tooltip)
 
     #mob image
     default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'left', to_front=True), actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'right', to_front=True)]
@@ -1346,10 +1630,10 @@ def unit_organization_interface():
         'actor_image_type': 'default',
         'default_image_id': default_image_id,
         'init_type': 'actor display free image',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset), 'y_offset': scaling.scale_height(-1 * (image_height - 5))}
     })
-    unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
+    status.mob_reorganization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
 
     #right side
     #mob background image's tooltip
@@ -1358,13 +1642,12 @@ def unit_organization_interface():
         'minimum_width': scaling.scale_width(image_height - 10),
         'height': scaling.scale_height(image_height - 10),
         'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
+        'init_type': 'actor tooltip label',
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
     })
-    unit_organization_collection.autofill_targets['group'].append(rhs_top_tooltip)
+    status.mob_reorganization_collection.autofill_targets['group'].append(rhs_top_tooltip)
 
     #mob image
     default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group left', to_front=True)]
@@ -1378,18 +1661,18 @@ def unit_organization_interface():
         'actor_image_type': 'default',
         'default_image_id': default_image_id,
         'init_type': 'actor display free image',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset), 'y_offset': -0.5 * (image_height - 5)}
     })
-    unit_organization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
+    status.mob_reorganization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
 
     #reorganize unit to right button
-    reorganize_unit_right_button = constants.actor_creation_manager.create_interface_element({
+    status.reorganize_unit_right_button = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15 + 30),
         'width': scaling.scale_width(60),
         'height': scaling.scale_height(25),
         'init_type': 'reorganize unit button',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'image_id': 'buttons/cycle_units_button.png',
         'allowed_procedures': ['merge', 'crew'],
         'keybind_id': pygame.K_m,
@@ -1397,12 +1680,12 @@ def unit_organization_interface():
     })
 
     #reorganize unit to left button
-    reorganize_unit_left_button = constants.actor_creation_manager.create_interface_element({
+    status.reorganize_unit_left_button = constants.actor_creation_manager.create_interface_element({
         'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15),
         'width': scaling.scale_width(60),
         'height': scaling.scale_height(25),
         'init_type': 'reorganize unit button',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'image_id': 'buttons/cycle_units_reverse_button.png',
         'allowed_procedures': ['split', 'uncrew'],
         'keybind_id': pygame.K_n,
@@ -1414,7 +1697,7 @@ def unit_organization_interface():
         'width': scaling.scale_width(30),
         'height': scaling.scale_height(30),
         'init_type': 'cycle autofill button',
-        'parent_collection': unit_organization_collection,
+        'parent_collection': status.mob_reorganization_collection,
         'image_id': 'buttons/reset_button.png',
         'autofill_target_type': 'officer'
     }

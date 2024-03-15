@@ -34,7 +34,7 @@ class porters(group):
         '''
         super().__init__(from_save, input_dict)
         self.number = 2 #porters is plural
-        self.can_hold_commodities = True
+        self.has_inventory = True
         self.inventory_capacity = 9
         if not from_save:
             self.inventory_setup()

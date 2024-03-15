@@ -11,6 +11,7 @@ from modules.tools.data_managers.notification_manager_template import notificati
 from modules.tools.data_managers.value_tracker_template import value_tracker_template, public_opinion_tracker_template, money_tracker_template
 from modules.tools.mouse_followers import mouse_follower_template
 from modules.interface_types.labels import money_label_template
+from modules.constructs.fonts import font
 
 pygame.init()
 pygame.mixer.init()
@@ -18,6 +19,21 @@ pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
 pygame.display.set_caption('SFA')
 pygame.key.set_repeat(300, 200)
 pygame.mixer.music.set_endevent(pygame.USEREVENT+1)
+music_endevent: int = pygame.mixer.music.get_endevent()
+
+key_codes: List[int] = [
+    pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l,
+    pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p, pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u, pygame.K_v, pygame.K_w, pygame.K_x,
+    pygame.K_y, pygame.K_z, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_0
+]
+lowercase_key_values: List[str] = [
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3',
+    '4', '5', '6', '7', '8', '9', '0'
+]
+uppercase_key_values: List[str] = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#',
+    '$', '%', '^', '&', '*', '(', ')'
+]
 
 default_display_width: int = 1728 #all parts of game made to be at default_display and scaled to display
 default_display_height: int = 972
@@ -68,7 +84,10 @@ old_mouse_y: int = pygame.mouse.get_pos()[1]
 font_name: str = 'times new roman'
 default_font_size: int = 15
 font_size: float = None
-myfont: pygame.font.SysFont = None
+default_notification_font_size: int = 25
+notification_font_size: float = None
+myfont: font = None
+fonts: Dict[str, font] = {}
 
 default_music_volume: float = 0.5
 
@@ -76,12 +95,26 @@ current_instructions_page_index: int = 0
 current_instructions_page_text: str = ''
 message: str = ''
 
-grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid']
-minimap_grid_x: int = default_display_width - (640 + 100)
-europe_grid_x: int = default_display_width - (320 + 100 + 120 + 25)
-europe_grid_y: int = default_display_height - (300 + 25)
+grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'asia_grid', 'slave_traders_grid', 'minimap_grid']
+abstract_grid_type_list: List[str] = ['europe_grid', 'asia_grid', 'slave_traders_grid']
+
+grids_collection_x: int = default_display_width - 740
+grids_collection_y: int = default_display_height - 325
+
+strategic_map_pixel_width: int = 320
+strategic_map_pixel_height: int = 300
 strategic_map_width: int = 15
 strategic_map_height: int = 16
+
+europe_grid_x_offset: int = 30
+europe_grid_y_offset: int = 145
+asia_grid_x_offset: int = 175
+asia_grid_y_offset: int = 145
+slave_traders_grid_x_offset: int = 175
+slave_traders_grid_y_offset: int = 0
+
+minimap_grid_pixel_width: int = strategic_map_pixel_width * 2
+minimap_grid_pixel_height: int = strategic_map_pixel_height * 2
 minimap_grid_coordinate_size: int = 5
 
 default_text_box_height: int = 0
@@ -359,28 +392,11 @@ recruitment_costs: Dict[str, int] = {
     'steamship': 10,
     'officer': 5
 }
-num_african_workers: int = 0
-african_worker_upkeep: float = 0.0
-initial_african_worker_upkeep: float = 4.0
-min_african_worker_upkeep: float = 0.5
-
-num_european_workers: int = 0
-european_worker_upkeep: float = 0.0
-initial_european_worker_upkeep: float = 6.0
-min_european_worker_upkeep: float = 0.5
-
-num_slave_workers: int = 0
-initial_slave_worker_upkeep: float = 2.0
-slave_worker_upkeep: float = 0.0
-base_slave_recruitment_cost: float = 5.0
-recruitment_costs['slave workers'] = base_slave_recruitment_cost
-min_slave_worker_recruitment_cost: float = 2.0
 
 num_wandering_workers: int = 0
-num_church_volunteers: int = 0
 
-worker_upkeep_fluctuation_amount: float = 0.25
-slave_recruitment_cost_fluctuation_amount: float = 1.0
+worker_upkeep_increment: float = 0.25
+slave_recruitment_cost_increment: float = 1.0
 base_upgrade_price: float = 20.0 #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 consumer_goods_starting_price: int = 1
 
@@ -416,3 +432,11 @@ lore_types_effect_descriptions_dict: Dict[str, str] = {
     'theology': 'chance of a positive modifier for religious campaign rolls'
 }
 completed_lore_mission_types: List[str] = []
+
+titles: List[str] = [
+    'Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 
+    'Duc', 'Marquis', 'Count', 'Vicomte', 'Chevalier', 'Écuyer',
+    'Duque', 'Marquês', 'Infante', 'Visconde', 'Barão', 'Conde', 'Dom', 'Fidalgo',
+    'Herzog', 'Markgraf', 'Landgraf', 'Pfalzgraf', 'Reichsgraf', 'Burggraf', 'Reichsfürst', 'Graf', 'Freiherr', 'Herr',
+    'Principe', 'Duca', 'Marchese', 'Conte', 'Visconte', 'Barone', 'Nobile', 'Cavaliere', 'Patrizio'                  
+]

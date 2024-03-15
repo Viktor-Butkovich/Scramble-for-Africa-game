@@ -35,7 +35,6 @@ class notification(multi_line_label):
         self.is_action_notification = False
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         constants.sound_manager.play_sound('opening_letter')
-        self.creation_time = time.time()
         self.notification_type = input_dict['notification_type']
         if input_dict.get('on_reveal', None):
             input_dict['on_reveal']()
@@ -89,11 +88,11 @@ class notification(multi_line_label):
         Output:
             None
         '''
+        if self.on_remove:
+            self.on_remove()
         super().remove()
         if status.displayed_notification == self:
             status.displayed_notification = None
-        if self.on_remove:
-            self.on_remove()
 
 class zoom_notification(notification):
     '''
@@ -121,18 +120,17 @@ class zoom_notification(notification):
         '''
         super().__init__(input_dict)
         target = input_dict['target']
-        if status.strategic_map_grid in target.grids:
-            status.minimap_grid.calibrate(target.x, target.y)
+        if target.actor_type == 'building':
+            target = target.cell.tile
+
         if target.actor_type == 'tile':
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None)
             actor_utility.calibrate_actor_info_display(status.tile_info_display, target)
-            if not target.cell.grid.mini_grid == 'none':
+            if target.cell.grid.mini_grid != 'none':
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
         elif target.actor_type == 'mob':
-            if not target.images[0].current_cell == 'none': #if non-hidden mob, move to front of tile and select
+            if target.images[0].current_cell != 'none': #if non-hidden mob, move to front of tile and select
                 target.select()
-                target.move_to_front()
-                if (not target.grids[0].mini_grid == 'none'): #if not in abstract grid, calibrate mini map to mob location
-                   target.grids[0].mini_grid.calibrate(target.x, target.y)
             else: #if hidden mob, move to location and select tile
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, target.grids[0].find_cell(target.x, target.y).tile)

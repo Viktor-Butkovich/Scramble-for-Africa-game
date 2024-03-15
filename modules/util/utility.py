@@ -1,5 +1,7 @@
 #Contains miscellaneous functions, like removing an item from a list or finding the distance between 2 points
 
+from typing import List
+
 def find_object_distance(first, second):
     '''
     Description:
@@ -169,3 +171,23 @@ def capitalize(string):
         return(string[:1].capitalize() + string[1:])
     else:
         return(string[:1].capitalize())
+
+def combine(*args) -> List:
+    '''
+    Description:
+        Combines any number of inputted arguments into a single list
+    Input:
+        *args: Any number of inputted non-keyword arguments
+    Output:
+        List: Returns combination of inputted arguments
+    '''
+    return_list: List = []
+    for arg in args:
+        if type(arg) == list:
+            if return_list:
+                return_list += arg
+            else:
+                return_list = arg.copy()
+        else:
+            return_list.append(arg)
+    return(return_list)

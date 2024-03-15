@@ -97,7 +97,7 @@ class conversion(action.action):
             text += 'Angered by your company\' attempts to destroy their spiritual traditions, the natives attack the missionaries. /n /n'
         elif subject == 'critical_success':
             text += self.generate_notification_text('success')
-            text += 'The evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n /n'
+            text += 'The evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity - this evangelist is now a veteran. /n /n'
         return(text)
 
     def generate_current_roll_modifier(self):

@@ -3,7 +3,7 @@
 import pygame
 import random
 from ..constructs import images, villages
-from ..util import utility, actor_utility, main_loop_utility
+from ..util import utility, actor_utility, main_loop_utility, text_utility
 from .actors import actor
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -33,6 +33,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.selection_outline_color = 'yellow'#'bright blue'
         self.actor_match_outline_color = 'white'
         input_dict['grids'] = [input_dict['grid']] #give actor a 1-item list of grids as input
+        self.name_icon = None
         super().__init__(from_save, input_dict)
         self.set_name(input_dict['name'])
         self.image_dict = {'default': input_dict['image']}
@@ -45,22 +46,68 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.cell.tile = self
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
-            self.can_hold_commodities = True
+            self.has_inventory = True
             self.inventory_setup()
             if self.cell.grid.from_save: #load in saved inventory from cell
                 self.load_inventory(self.cell.save_dict['inventory'])
-        elif self.name in ['Europe', 'Slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
+        elif self.grid.grid_type in constants.abstract_grid_type_list:
             self.cell.tile = self
-            self.can_hold_commodities = True
-            self.can_hold_infinite_commodities = True
-            self.inventory_setup()
             self.terrain = 'none'
-            if self.cell.grid.from_save: #load in saved inventory from cell
-                self.load_inventory(self.cell.save_dict['inventory'])
+            if self.grid.grid_type == 'europe_grid': # Europe should be able to hold commodities despite not being terrain
+                self.has_inventory = True
+                self.infinite_inventory_capacity = True
+                self.inventory_setup()
+                if self.cell.grid.from_save: #load in saved inventory from cell
+                    self.load_inventory(self.cell.save_dict['inventory'])
         else:
             self.terrain = 'none'
         self.update_tooltip()
         self.update_image_bundle()
+
+    def set_name(self, new_name):
+        '''
+        Description:
+            Sets this actor's name, also updating its name icon if applicable
+        Input:
+            string new_name: Name to set this actor's name to
+        Output:
+            None
+        '''
+        super().set_name(new_name)
+        if self.grid == status.strategic_map_grid and not new_name in ['default', 'placeholder']: #make sure user is not allowed to input default or *.png as a tile name
+            if self.name_icon:
+                self.name_icon.remove_complete()
+
+            y_offset = -0.75
+            has_building = False
+            for building_type in constants.building_types:
+                if self.cell.has_building(building_type): #if any building present, shift name up to not cover them
+                    has_building = True
+                    break
+            if has_building:
+                y_offset += 0.3
+
+            self.name_icon = constants.actor_creation_manager.create(False, {
+                'coordinates': (self.x, self.y),
+                'grids': [self.grid, self.grid.mini_grid],
+                'image': actor_utility.generate_label_image_id(new_name, y_offset=y_offset),
+                'modes': self.cell.grid.modes,
+                'init_type': 'name icon',
+                'tile': self
+            })
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        if self.name_icon:
+            self.name_icon.remove()
 
     def draw_destination_outline(self, color = 'default'): #called directly by mobs
         '''
@@ -106,7 +153,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.can_hold_commodities and not self.can_hold_infinite_commodities:
+        if self.has_inventory and not self.infinite_inventory_capacity:
             inventory_used = self.get_inventory_used()
             amount_to_remove = inventory_used - self.inventory_capacity
             if amount_to_remove > 0:
@@ -128,16 +175,13 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] += change
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
             if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
-                for tab_button in status.tile_tabbed_collection.tabs_collection.members:
-                    if tab_button.linked_element == status.tile_inventory_collection:
-                        tab_button.on_click()
-                        continue
+                actor_utility.select_interface_tab(status.tile_tabbed_collection, status.tile_inventory_collection)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -149,7 +193,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.can_hold_commodities:
+        if self.has_inventory:
             self.inventory[commodity] = new_value
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile.inventory[commodity] = new_value
@@ -212,7 +256,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 image_id_list = equivalent_tile.get_image_id_list()
             else:
                 image_id_list.append(self.image_dict['default']) #blank void image if outside of matched area
-        elif self.cell.grid.is_abstract_grid and self.cell.tile.name == 'Slave traders':
+        elif self.cell.grid.grid_type == 'slave_traders_grid':
             image_id_list.append(self.image_dict['default'])
             strength_modifier = actor_utility.get_slave_traders_strength_modifier()
             if strength_modifier == 'none':
@@ -228,7 +272,11 @@ class tile(actor): #to do: make terrain tiles a subclass
             if self.cell.visible or force_visibility: #force visibility shows full tile even if tile is not yet visible
                 image_id_list.append({'image_id': self.image_dict['default'], 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -9})
                 if self.cell.resource != 'none':
-                    image_id_list.append(actor_utility.generate_resource_icon(self))
+                    resource_icon = actor_utility.generate_resource_icon(self)
+                    if type(resource_icon) == str:
+                        image_id_list.append(resource_icon)
+                    else:
+                        image_id_list += resource_icon
                 for current_building_type in constants.building_types:
                     current_building = self.cell.get_building(current_building_type)
                     if current_building != 'none':
@@ -387,7 +435,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.show_terrain == True:
+        if self.show_terrain:
             if self.touching_mouse() and constants.current_game_mode in self.modes: #and not targeting_ability
                 if self.cell.terrain == 'none':
                     return(False)
@@ -408,7 +456,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         if flags.player_turn and main_loop_utility.action_possible(): #(not flags.choosing_destination):
-            if self.name == 'Slave traders' and constants.slave_traders_strength > 0:
+            if self.cell.grid.grid_type == 'slave_traders_grid' and constants.slave_traders_strength > 0:
                 if constants.sound_manager.previous_state != 'slave traders':
                     constants.event_manager.clear()
                     constants.sound_manager.play_random_music('slave traders')
@@ -453,7 +501,7 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        if self.name == 'Slave traders':
+        if self.cell.grid.grid_type == 'slave_traders_grid':
             self.set_tooltip([self.name, 'Slave traders strength: ' + str(constants.slave_traders_strength)])
         else:
             self.set_tooltip([self.name])
