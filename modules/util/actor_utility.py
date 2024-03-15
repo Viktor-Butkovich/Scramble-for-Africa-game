@@ -142,13 +142,13 @@ def update_descriptions(target = 'all'):
                 text_list.append('Each unit of ' + worker_name + ' purchased may increase the purchase cost of all ' + worker_name + '.')
             
             if worker_type == 'European':
-                text_list.append(worker_name.capitalize() + ' tend to be more susceptible to attrition but are more accustomed to modern weaponry.')
+                text_list.append(worker_name.capitalize() + ' tend to be more susceptible to attrition than African workers, but are more accustomed to modern vehicles and weaponry.')
             elif worker_type == 'Asian':
-                text_list.append('Asian worker placeholder')
+                text_list.append(worker_name.capitalize() + ' tend to be cheaper than European workers and less accustomed to modern vehicles and weaponry, while being easier to obtain and more susceptible to attrition than African workers.')
             else:
                 if worker_type != 'slave':
                     text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
-                text_list.append('African workers tend to be more resistant to attrition but are less accustomed to using modern weaponry.')
+                text_list.append('African workers tend to be more resistant to attrition but are less accustomed to using modern vehicles and weaponry.')
             
             if worker_type == 'slave':
                 if constants.effect_manager.effect_active('no_slave_trade_penalty'):

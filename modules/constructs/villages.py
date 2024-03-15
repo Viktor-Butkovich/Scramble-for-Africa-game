@@ -131,8 +131,8 @@ class village():
         new_warrior = constants.actor_creation_manager.create(False, {
             'coordinates': (self.cell.x, self.cell.y),
             'grids': [self.cell.grid, self.cell.grid.mini_grid],
-            'image': 'mobs/native_warriors/default.png',
-            'canoes_image': 'mobs/native_warriors/canoe_default.png',
+            'image': 'mobs/native warriors/default.png',
+            'canoes_image': 'mobs/native warriors/canoe_default.png',
             'modes': self.cell.grid.modes,
             'name': 'native warriors',
             'init_type': 'native_warriors',

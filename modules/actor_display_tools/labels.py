@@ -236,23 +236,29 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
-            buy_slaves_image_id_list = ['mobs/default/button.png']
-            left_worker_dict = {
-                'image_id': 'mobs/slave workers/default.png',
-                'size': 0.8,
-                'x_offset': -0.2,
-                'y_offset': 0,
-                'level': 1
-            }
-            buy_slaves_image_id_list.append(left_worker_dict)
+            for worker_type in ['slave', 'Asian']:
+                current_image_id_list = ['mobs/default/button.png']
+                left_worker_dict = {
+                    'image_id': 'mobs/' + worker_type + ' workers/default.png',
+                    'size': 0.8,
+                    'x_offset': -0.2,
+                    'y_offset': 0,
+                    'level': 1
+                }
+                current_image_id_list.append(left_worker_dict)
 
-            right_worker_dict = left_worker_dict.copy()
-            right_worker_dict['x_offset'] *= -1
-            buy_slaves_image_id_list.append(right_worker_dict)
-            input_dict['init_type'] = 'buy slaves button'
-            input_dict['image_id'] = buy_slaves_image_id_list
-            input_dict['width'], input_dict['height'] = (l_size, l_size)
-            self.add_attached_button(input_dict)
+                right_worker_dict = left_worker_dict.copy()
+                right_worker_dict['x_offset'] *= -1
+
+                if worker_type == 'Asian':
+                    right_worker_dict['image_id'] = 'mobs/' + worker_type + ' workers 1/default.png'
+
+                current_image_id_list.append(right_worker_dict)
+                input_dict['init_type'] = 'recruit workers button'
+                input_dict['worker_type'] = worker_type
+                input_dict['image_id'] = current_image_id_list
+                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '

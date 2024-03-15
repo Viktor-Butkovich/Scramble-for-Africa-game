@@ -165,7 +165,7 @@ def worker_types_config():
         'upkeep': 6.0,
         'can_crew': ['steamship', 'steamboat', 'train'],
         'upkeep_variance': True,
-        'fired_description': 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n' + \
+        'fired_description': 'Unlike African workers, fired European workers will return home rather than settle in slums. /n /n' + \
                                 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
     worker_types.worker_type(False, {
@@ -179,7 +179,7 @@ def worker_types_config():
         'upkeep': 4.0,
         'can_crew': ['steamboat', 'train'],
         'upkeep_variance': True,
-        'fired_description': 'Placeholder fired description. /n /n'
+        'fired_description': 'Like European workers, fired Asian workers will return home rather than settle in slums, but can be fired with no effect on your reputation. /n /n'
     })
     worker_types.worker_type(False, {
         'init_type': 'slaves',
@@ -565,22 +565,21 @@ def buttons():
     europe_button_width = 150
     europe_button_height = 100
     input_dict = {
-        
-        'coordinates': scaling.scale_coordinates(constants.grids_collection_x + constants.europe_grid_x_offset - europe_button_width - 25, constants.grids_collection_y + constants.europe_grid_y_offset + 10),
+        'coordinates': scaling.scale_coordinates(0, 10),
         'width': scaling.scale_width(europe_button_width),
         'height': scaling.scale_height(europe_button_height),
         'keybind_id': pygame.K_e,
-        'modes': ['strategic'],
         'image_id': 'buttons/european_hq_button.png',
+        'modes': ['strategic'],
         'to_mode': 'europe',
-        'init_type': 'switch game mode button'
+        'init_type': 'switch game mode button',
+        'parent_collection': status.grids_collection
     }
     strategic_to_europe_button = constants.actor_creation_manager.create_interface_element(input_dict)
     status.flag_icon_list.append(strategic_to_europe_button) #sets button image to update to flag icon when country changes
 
     europe_button_width = 60
     europe_button_height = 60
-    input_dict['coordinates'] = (input_dict['coordinates'][0], scaling.scale_height(constants.grids_collection_y + constants.europe_grid_y_offset))
     input_dict['width'] = scaling.scale_width(europe_button_width)
     input_dict['height'] = scaling.scale_height(europe_button_height)
     input_dict['modes'] = ['europe']

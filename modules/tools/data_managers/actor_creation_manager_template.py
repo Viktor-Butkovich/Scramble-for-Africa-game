@@ -255,8 +255,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.bribe_judge_button(input_dict)
                 elif base == 'hire african workers':
                     new_element = actor_display_buttons.hire_african_workers_button(input_dict)
-                elif base == 'buy slaves':
-                    new_element = actor_display_buttons.buy_slaves_button(input_dict)
+                elif base == 'recruit workers':
+                    new_element = actor_display_buttons.recruit_workers_button(input_dict)
                 elif base == 'automatic route':
                     new_element = actor_display_buttons.automatic_route_button(input_dict)
 

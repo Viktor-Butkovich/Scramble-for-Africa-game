@@ -50,10 +50,10 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory_setup()
             if self.cell.grid.from_save: #load in saved inventory from cell
                 self.load_inventory(self.cell.save_dict['inventory'])
-        elif self.name in ['Europe', 'Slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
+        elif self.grid.grid_type in constants.abstract_grid_type_list:
             self.cell.tile = self
             self.terrain = 'none'
-            if self.name == 'Europe':
+            if self.grid.grid_type == 'europe_grid': # Europe should be able to hold commodities despite not being terrain
                 self.has_inventory = True
                 self.infinite_inventory_capacity = True
                 self.inventory_setup()
@@ -256,7 +256,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                 image_id_list = equivalent_tile.get_image_id_list()
             else:
                 image_id_list.append(self.image_dict['default']) #blank void image if outside of matched area
-        elif self.cell.grid.is_abstract_grid and self.cell.tile.name == 'Slave traders':
+        elif self.cell.grid.grid_type == 'slave_traders_grid':
             image_id_list.append(self.image_dict['default'])
             strength_modifier = actor_utility.get_slave_traders_strength_modifier()
             if strength_modifier == 'none':
@@ -456,7 +456,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         if flags.player_turn and main_loop_utility.action_possible(): #(not flags.choosing_destination):
-            if self.name == 'Slave traders' and constants.slave_traders_strength > 0:
+            if self.cell.grid.grid_type == 'slave_traders_grid' and constants.slave_traders_strength > 0:
                 if constants.sound_manager.previous_state != 'slave traders':
                     constants.event_manager.clear()
                     constants.sound_manager.play_random_music('slave traders')
@@ -501,7 +501,7 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        if self.name == 'Slave traders':
+        if self.cell.grid.grid_type == 'slave_traders_grid':
             self.set_tooltip([self.name, 'Slave traders strength: ' + str(constants.slave_traders_strength)])
         else:
             self.set_tooltip([self.name])

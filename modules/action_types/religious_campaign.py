@@ -93,8 +93,8 @@ class religious_campaign(action.campaign):
             return_list.append(
                 action_utility.generate_free_image_input_dict(
                     ['mobs/default/button.png',
-                        actor_utility.generate_unit_component_image_id('mobs/church_volunteers/default.png', 'left', to_front=True), 
-                        actor_utility.generate_unit_component_image_id('mobs/church_volunteers/default.png', 'right', to_front=True)
+                        actor_utility.generate_unit_component_image_id('mobs/church volunteers/default.png', 'left', to_front=True), 
+                        actor_utility.generate_unit_component_image_id('mobs/church volunteers/default.png', 'right', to_front=True)
                     ],
                     200,
                     override_input_dict={'member_config': {'second_dimension_coordinate': -2, 'centered': True}}
@@ -188,7 +188,7 @@ class religious_campaign(action.campaign):
             church_volunteers = constants.actor_creation_manager.create(False, {
                 'coordinates': (0, 0),
                 'grids': [status.europe_grid],
-                'image': 'mobs/church_volunteers/default.png',
+                'image': 'mobs/church volunteers/default.png',
                 'name': 'church volunteers',
                 'modes': ['strategic', 'europe'],
                 'init_type': 'church_volunteers',

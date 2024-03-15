@@ -95,7 +95,8 @@ current_instructions_page_index: int = 0
 current_instructions_page_text: str = ''
 message: str = ''
 
-grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'slave_traders_grid', 'minimap_grid']
+grid_types_list: List[str] = ['strategic_map_grid', 'europe_grid', 'asia_grid', 'slave_traders_grid', 'minimap_grid']
+abstract_grid_type_list: List[str] = ['europe_grid', 'asia_grid', 'slave_traders_grid']
 
 grids_collection_x: int = default_display_width - 740
 grids_collection_y: int = default_display_height - 325
@@ -105,10 +106,12 @@ strategic_map_pixel_height: int = 300
 strategic_map_width: int = 15
 strategic_map_height: int = 16
 
-europe_grid_x_offset: int = 175
-europe_grid_y_offset: int = 0
-slave_traders_grid_x_offset: int = europe_grid_x_offset
-slave_traders_grid_y_offset: int = 145
+europe_grid_x_offset: int = 30
+europe_grid_y_offset: int = 145
+asia_grid_x_offset: int = 175
+asia_grid_y_offset: int = 145
+slave_traders_grid_x_offset: int = 175
+slave_traders_grid_y_offset: int = 0
 
 minimap_grid_pixel_width: int = strategic_map_pixel_width * 2
 minimap_grid_pixel_height: int = strategic_map_pixel_height * 2
@@ -383,7 +386,7 @@ group_minister_dict: Dict[str, str] = {
     'battalion': type_minister_dict['military']
 }
 country_specific_units: List[str] = ['major']
-recruitment_types: List[str] = officer_types + ['European workers', 'Asian workers', 'steamship']
+recruitment_types: List[str] = officer_types + ['European workers', 'steamship']
 recruitment_costs: Dict[str, int] = {
     'European workers': 0,
     'steamship': 10,

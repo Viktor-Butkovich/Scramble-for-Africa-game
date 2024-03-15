@@ -1494,14 +1494,17 @@ class hire_african_workers_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
-            constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
+            if not status.displayed_tile.cell.has_npmob():
+                choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
+            else:
+                text_utility.print_to_screen('You cannot recruit workers when hostile units are present.')
         else:
             text_utility.print_to_screen('You are busy and cannot hire a worker.')
 
-class buy_slaves_button(button):
+class recruit_workers_button(button):
     '''
-    Button that buys slaves from slave traders
+    Button that buys workers from an abstract grid - currently either slave workers from slave traders or Asian workers from Asia
     '''
     def __init__(self, input_dict):
         '''
@@ -1519,10 +1522,12 @@ class buy_slaves_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'worker_type': str value - Type of workers this button recruits, like 'slave' or 'Asian'
         Output:
             None
         '''
-        input_dict['button_type'] = 'buy slaves'
+        input_dict['button_type'] = 'recruit workers'
+        self.worker_type = input_dict['worker_type']
         super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
@@ -1534,9 +1539,12 @@ class buy_slaves_button(button):
         Output:
             boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
         '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            if status.displayed_tile and status.displayed_tile.cell.grid == status.slave_traders_grid:
-                if constants.slave_traders_strength > 0:
+        if super().can_show(skip_parent_collection=skip_parent_collection) and status.displayed_tile:
+            if self.worker_type == 'slave':
+                if status.displayed_tile.cell.grid == status.slave_traders_grid and constants.slave_traders_strength > 0:
+                    return(True)
+            elif self.worker_type == 'Asian':
+                if status.displayed_tile.cell.grid == status.asia_grid:
                     return(True)
         return(False)
 
@@ -1550,14 +1558,14 @@ class buy_slaves_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            self.cost = constants.recruitment_costs['slave workers']
-            if constants.money_tracker.get() >= self.cost:
-                choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
-                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'slave workers')
+            cost = status.worker_types[self.worker_type].recruitment_cost
+            if constants.money_tracker.get() >= cost:
+                choice_info_dict = {'recruitment_type': self.worker_type + ' workers', 'cost': cost}
+                constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, self.worker_type + ' workers')
             else:
-                text_utility.print_to_screen('You do not have enough money to buy slaves.')
+                text_utility.print_to_screen('You do not have enough money to purhase ' + self.worker_type + ' workers.')
         else:
-            text_utility.print_to_screen('You are busy and cannot buy slaves.')
+            text_utility.print_to_screen('You are busy and cannot purchase ' + self.worker_type + ' workers.')
 
 class automatic_route_button(button):
     '''

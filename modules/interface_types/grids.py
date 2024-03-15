@@ -32,11 +32,13 @@ class grid(interface_elements.interface_element):
                 'list modes': string list value - Game modes during which this grid can appear
                 'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
                 'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
+                'grid_type': str value - Type of grid, like 'strategic_map_grid' or 'europe_grid'
         Output:
             None
         '''
         super().__init__(input_dict)
         status.grid_list.append(self)
+        self.grid_type = input_dict['grid_type']
         self.grid_line_width = input_dict.get('grid_line_width', 3)
         self.from_save = from_save
         self.is_mini_grid = False
@@ -65,13 +67,10 @@ class grid(interface_elements.interface_element):
                 'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
                 'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
         '''
-        save_dict = {}
-        if status.strategic_map_grid == self:
-            save_dict['grid_type'] = 'strategic_map_grid'
-        else:
-            save_dict['grid_type'] = 'default'
-        save_dict['cell_list'] = [current_cell.to_save_dict() for current_cell in self.get_flat_cell_list()]
-        return(save_dict)
+        return({
+            'grid_type': self.grid_type,
+            'cell_list': [current_cell.to_save_dict() for current_cell in self.get_flat_cell_list()]
+        })
 
     def generate_terrain(self):
         '''
@@ -690,26 +689,6 @@ class abstract_grid(grid):
         self.tile_image_id = input_dict['tile_image_id']
         self.cell_list[0][0].set_visibility(True)
 
-    def to_save_dict(self):
-        '''
-        Description:
-            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
-        Input:
-            None
-        Output:
-            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'grid_type': string value - String matching the status key of this grid, used to initialize the correct type of grid on loading
-                'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
-        '''
-        save_dict = super().to_save_dict()
-        if status.europe_grid == self:
-            save_dict['grid_type'] = 'europe_grid'
-        elif status.slave_traders_grid == self:
-            save_dict['grid_type'] = 'slave_traders_grid'
-        else:
-            save_dict['grid_type'] = 'default'
-        return(save_dict)
-
 def create(from_save: bool, grid_type: str, input_dict: Dict[str, any] = None) -> grid:
     '''
     Description:
@@ -719,7 +698,8 @@ def create(from_save: bool, grid_type: str, input_dict: Dict[str, any] = None) -
 
     input_dict.update({
         'modes': ['strategic'],
-        'parent_collection': status.grids_collection
+        'parent_collection': status.grids_collection,
+        'grid_type': grid_type
     })
 
     if grid_type == 'strategic_map_grid':
@@ -744,27 +724,25 @@ def create(from_save: bool, grid_type: str, input_dict: Dict[str, any] = None) -
         })
         return_grid = mini_grid(from_save, input_dict)
 
-    elif grid_type in ['europe_grid', 'slave_traders_grid']:
+    elif grid_type in ['europe_grid', 'asia_grid', 'slave_traders_grid']:
         input_dict.update({
             'coordinates': scaling.scale_coordinates(getattr(constants, grid_type + '_x_offset'), getattr(constants, grid_type + '_y_offset')),
                 # Like (europe_grid_x_offset, europe_grid_y_offset) or (slave_traders_grid_x_offset, slave_traders_grid_y_offset)
             'width': scaling.scale_width(120),
-            'height': scaling.scale_height(120),
+            'height': scaling.scale_height(120)
         })
         if grid_type == 'europe_grid':
-            input_dict.update({
-                'tile_image_id': 'locations/europe/' + status.current_country.name + '.png',
-                'name': 'Europe'
-            })
+            input_dict['tile_image_id'] = 'locations/europe/' + status.current_country.name + '.png'
             input_dict['modes'].append('europe')
-            return_grid = abstract_grid(from_save, input_dict)
+
+        elif grid_type == 'asia_grid':
+            input_dict['tile_image_id'] = 'locations/asia.png'
 
         elif grid_type == 'slave_traders_grid':
-            input_dict.update({
-                'tile_image_id': 'locations/slave_traders/default.png',
-                'name': 'Slave traders'
-            })
-            return_grid = abstract_grid(from_save, input_dict)
+            input_dict['tile_image_id'] = 'locations/slave_traders/default.png'
+
+        input_dict['name'] = grid_type[:-5].replace('_', ' ').capitalize() # Replaces europe_grid with Europe, slave_traders_grid with Slave traders
+        return_grid = abstract_grid(from_save, input_dict)
 
     setattr(status, grid_type, return_grid)
     return(return_grid)

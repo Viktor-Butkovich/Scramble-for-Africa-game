@@ -362,7 +362,7 @@ class vehicle(pmob):
         if new_grid == status.europe_grid or self.images[0].current_cell.has_intact_building('port'):
             self.eject_passengers()
             self.drop_inventory()
-        elif new_grid == status.slave_traders_grid:
+        elif new_grid.grid_type in constants.abstract_grid_type_list:
             self.eject_passengers()
 
     def get_worker(self) -> 'pmob':

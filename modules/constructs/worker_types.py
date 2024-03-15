@@ -1,8 +1,12 @@
 # Contains functionality for worker type templates, such as European, African, Asian, slave workers
 
+import random
 from typing import Dict, List
 import modules.constants.status as status
 import modules.constants.constants as constants
+import modules.util.market_utility as market_utility
+import modules.util.text_utility as text_utility
+import modules.util.actor_utility as actor_utility
 
 class worker_type():
     '''
@@ -111,9 +115,83 @@ class worker_type():
         return(self.number * self.upkeep)
 
     def generate_input_dict(self) -> Dict:
-        return({
+        '''
+        Description:
+            Generates an input dict to create a worker of this type
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary with standard entries for this worker type
+        '''
+        input_dict = {
             'image': 'mobs/' + self.name + '/default.png',
             'name': self.name,
             'init_type': self.init_type,
             'worker_type': self.adjective
-        })
+        }
+        if self.adjective == 'Asian' and random.randrange(1, 7) >= 4: # Half chance each for East/South Asian variants
+            input_dict['image'] = 'mobs/' + self.name + ' 1/default.png'
+        return(input_dict)
+
+    def on_recruit(self, purchased=True) -> None:
+        '''
+        Description:
+            Makes any updates required when worker first recruited (not on load)
+        Input:
+            boolean purchased=None: Whether this worker was purchased, only required for slave workers
+        Output:
+            None
+        '''
+        if not self.adjective in ['religious', 'slave']:
+            market_utility.attempt_worker_upkeep_change('increase', self.adjective)
+        elif self.adjective == 'slave':
+            if purchased: #as opposed to captured
+                if not constants.effect_manager.effect_active('no_slave_trade_penalty'):
+                    public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
+                    current_public_opinion = constants.public_opinion_tracker.get()
+                    constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
+                    resulting_public_opinion = constants.public_opinion_tracker.get()
+                    if not resulting_public_opinion == current_public_opinion:
+                        text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
+                else:
+                    text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.')
+                market_utility.attempt_slave_recruitment_cost_change('increase')
+                constants.evil_tracker.change(6)
+                actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1)
+            else:
+                public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
+                current_public_opinion = constants.public_opinion_tracker.get()
+                constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
+                resulting_public_opinion = constants.public_opinion_tracker.get()
+                if not resulting_public_opinion == current_public_opinion:
+                    text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
+                constants.evil_tracker.change(6)
+
+    def on_fire(self, wander=False):
+        if not self.adjective in ['religious', 'slave']:
+            market_utility.attempt_worker_upkeep_change('decrease', self.adjective)
+
+        if self.adjective == 'slave':
+            constants.evil_tracker.change(-2)
+            public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average
+            current_public_opinion = constants.public_opinion_tracker.get()
+            constants.public_opinion_tracker.change(public_opinion_bonus)
+            resulting_public_opinion = constants.public_opinion_tracker.get()
+            if not resulting_public_opinion == current_public_opinion:
+                text_utility.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
+            
+            if wander:
+                text_utility.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums.')
+                constants.num_wandering_workers += 1
+            status.worker_types['African'].on_fire(wander=wander) # Also get effect of adding African worker to labor pool
+
+        if self.adjective == 'African' and wander:
+            text_utility.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.')
+            constants.num_wandering_workers += 1
+
+        elif self.adjective in ['European', 'religious']:
+            current_public_opinion = constants.public_opinion
+            constants.public_opinion_tracker.change(-1)
+            resulting_public_opinion = constants.public_opinion
+            if not current_public_opinion == resulting_public_opinion:
+                text_utility.print_to_screen('Firing ' + self.name + ' reflected poorly on your company and reduced your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')

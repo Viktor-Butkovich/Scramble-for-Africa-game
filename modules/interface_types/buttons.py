@@ -449,10 +449,10 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Recruits a unit of African workers for 0 money'] +
                              constants.list_descriptions['slums workers'])
 
-        elif self.button_type == 'buy slaves':
-            actor_utility.update_descriptions('slave workers')
-            self.set_tooltip(['Recruits a unit of slave workers for ' + str(constants.recruitment_costs['slave workers']) + ' money'] +
-                             constants.list_descriptions['slave workers'])
+        elif self.button_type == 'recruit workers':
+            actor_utility.update_descriptions(self.worker_type + ' workers')
+            self.set_tooltip(['Recruits a unit of ' + self.worker_type + ' workers for ' + str(status.worker_types[self.worker_type].recruitment_cost) + ' money'] +
+                                constants.list_descriptions[self.worker_type + ' workers'])
 
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(['Displays the previous turn\'s financial report'])

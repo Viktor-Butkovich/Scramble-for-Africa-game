@@ -14,20 +14,17 @@ except Exception: #displays error message and records error message in crash log
     manage_crash(Exception)
 
 # tasks:
-#   general:
-# make sure version of game on GitHub works when cloned - missing things like Belgian music folder, save game folder
+#   general (game-agnostic):
 # replace usages of 'none' with None
 # Add type hints on sight - gradual process
-#
-#   new features:
-# make generic contested action type
 # add minister speech bubbles
+# Add random events
+# Add debug settings menu within game, rather than needing to edit .json out of game
+# Change game to be fullscreen by default, along with debug setting to make it windowed
+# Add autosave and multiple save slots
+#
+#   new SFA features:
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
-# add Asian workers, maybe with starting upkeep bonus for Britain and (less so) France - 4.0 upkeep, from abstract grid, no penalty for firing, European attrition,
-#   no slums, otherwise like African
-#       Have grids in configuration
-#           flag  Asia               Africa
-#           Europe Slave Traders     Africa
 # look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
 #      would need to modify text box to capture the output for a particular purpose, with a standard listen/receive function
 #       when an object uses listen, it starts the typing process and captures the output when typing is cancelled or entered
@@ -41,26 +38,17 @@ except Exception: #displays error message and records error message in crash log
 # Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
 #   pending units - pending is a state like sentry mode
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description
-# Maybe have special corruption event involving Minister of Geography attempting to steal an artifact
 # Add ambient resource production facility, settlement, and village sounds
 # Allow some inventory attrition to occur in Europe
 # Add direct attack on native villages action
 # Allow water exploration for steamboat/train with expedition on board
 # Add cannibals
-# Add notification when village goes from 0 to 1 population
 # Add train/ship sounds
-# Change visual size of porter boxes
 # Replace resource production facility images
 # Add equipment
 #   Battalions should be 1 weaker, and rifles should give a +1 to combat strength - soldiers without rifles should have uniforms but no rifles in the image
-# Add random events
-# Add debug settings menu within game, rather than needing to edit .json out of game
 # Add cosmetic flag to minister screen
-# Fix scaling issue with inventory interface - going over edge of safe click panel
 # Add transfer all button to inventory that ignores which commodities are involved, as well as a sell all button in Europe
-# Change game to be fullscreen by default, along with debug setting to make it windowed
-# Put __init__ file in each subfolder to organize module imports
-# Add autosave and multiple save slots
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 # When steamship/steamboat moves to non-port land from water, disembark and move all passengers - any passengers w/o enough movement should stay on vehicle, and can't move
 #   into npmobs
@@ -72,7 +60,6 @@ except Exception: #displays error message and records error message in crash log
 # Find some solution to overlapping 3rd work crew and text box
 # incorrect behavior when attacked while in vehicle/resource building - includes graphical error with unit not showing afterward
 
-# Notes: Possibly allow choosing minister but not confirming yet
+# Notes:
 #   Don't allow any actions while any notifications are visible, even purely informational ones
 #   Make sure movement buttons move the selected unit
-#   Possibly add way to repeatedly do action every turn, especially for advertising/public opinion

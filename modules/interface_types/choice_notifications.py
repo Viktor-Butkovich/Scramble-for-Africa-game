@@ -131,7 +131,7 @@ class choice_button(buttons.button):
                 self.message = 'Hire'
                 self.verb = 'hire'
             self.cost = self.notification.choice_info_dict['cost']
-            self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
+            self.mob_image_id = self.notification.choice_info_dict.get('mob_image_id') # Image ID provided for most units, but generated on creation for workers
 
         elif input_dict['button_type'] == 'confirm main menu':
             self.message = 'Main menu'
@@ -257,9 +257,13 @@ class recruitment_choice_button(choice_button):
 
         else:
             input_dict['coordinates'] = (0, 0)
-            input_dict['grids'] = [status.europe_grid]
-            input_dict['image'] = self.mob_image_id
-            input_dict['modes'] = status.europe_grid.modes
+            if status.displayed_tile: # When recruiting in Asia, slave traders, Africa, etc., tile will be selected - use that tile's grids
+                input_dict['grids'] = status.displayed_tile.grids
+            else: # If no tile selected, assume recruiting in Europe
+                input_dict['grids'] = [status.europe_grid]
+            if self.mob_image_id:
+                input_dict['image'] = self.mob_image_id
+            input_dict['modes'] = input_dict['grids'][0].modes
             constants.money_tracker.change(-1 * self.cost, 'unit_recruitment')
             if self.recruitment_type in constants.officer_types:
                 name = ''
@@ -281,6 +285,5 @@ class recruitment_choice_button(choice_button):
                 input_dict['name'] = 'steamship'
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'ship'
-
             constants.actor_creation_manager.create(False, input_dict)
         super().on_click()
