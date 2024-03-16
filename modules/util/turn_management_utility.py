@@ -493,7 +493,7 @@ def manage_villages():
                     'message': text,
                     'zoom_destination': current_village.cell.tile,
                 })
-        if random.randrange(1, 7) >= 0 or (random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6):
+        if random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6:
             previous_population = current_village.population
             current_village.change_population(1)
             if previous_population <= 0 and current_village.cell.visible:
