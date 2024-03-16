@@ -54,6 +54,7 @@ except Exception: #displays error message and records error message in crash log
 #   into npmobs
 # Should only select 1st unit at start of turn after getting through initial notifications - currently causing tile/building zoom notifications to be overridden by the
 #    start of turn cycle
+# Redo terrain images - fancier, variants
 #
 #   bugfixes
 # continue looking for steamship crew disembarking error, possibly from enemies spawning on square (like failed missionaries) - occurs after combat
