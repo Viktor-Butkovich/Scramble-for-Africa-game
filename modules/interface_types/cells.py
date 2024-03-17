@@ -42,7 +42,7 @@ class cell():
         self.settlement = None
         self.terrain = 'none'
         self.terrain_variant = 0
-        self.set_terrain('clear')
+        self.set_terrain('savannah')
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        
@@ -145,7 +145,7 @@ class cell():
                 if random.randrange(1, 7) >= 2 or random.randrange(1, 7) >= 3: #same effect as clear area with port
                     return(False)
         else:
-            if self.terrain in ['clear', 'hills']:
+            if self.terrain in ['savannah', 'hills']:
                 if random.randrange(1, 7) >= 2: #only attrition on 1's
                     return(False)
             elif self.terrain in ['mountain', 'desert', 'water']:

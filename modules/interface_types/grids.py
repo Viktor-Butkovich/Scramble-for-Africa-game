@@ -331,8 +331,8 @@ class grid(interface_elements.interface_element):
             None
         Output:
             dictionary: Returns a dictionary in the format
-                {'clear': [('none', 140), ('diamond', 142)]}
-                for resource_frequencies.json {'clear': {'none': 140, 'diamond': 2}}
+                {'savannah': [('none', 140), ('diamond', 142)]}
+                for resource_frequencies.json {'savannah': {'none': 140, 'diamond': 2}}
         '''
         file = open('configuration/resource_frequencies.json')
         resource_frequencies = json.load(file)

@@ -197,9 +197,9 @@ green_screen_colors: List[tuple[int, int, int]] = [
 ]
 
 terrain_variant_dict: Dict[str, int] = {}
-terrain_list: List[str] = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
+terrain_list: List[str] = ['savannah', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
 terrain_colors: Dict[str, tuple[int, int, int]] = {
-    'clear': (150, 200, 104),
+    'savannah': (150, 200, 104),
     'hills': (50, 205, 50),
     'jungle': (0, 100, 0),
     'water': (0, 0, 200),
@@ -209,7 +209,7 @@ terrain_colors: Dict[str, tuple[int, int, int]] = {
     'none': (0, 0, 0)
 }
 terrain_animal_dict: Dict[str, tuple[str, str, str]] = {
-    'clear': ['lion', 'bull elephant', 'Cape buffalo'],
+    'savannah': ['lion', 'bull elephant', 'Cape buffalo'],
     'hills': ['gorilla', 'Cape buffalo', 'hippopotamus'],
     'jungle': ['gorilla', 'crocodile', 'leopard'],
     'water': ['crocodile', 'hippopotamus', 'leopard'],
@@ -218,9 +218,9 @@ terrain_animal_dict: Dict[str, tuple[str, str, str]] = {
     'desert': ['lion', 'bull elephant', 'Cape buffalo']
 }
 animal_terrain_dict: Dict[str, tuple[str, str, str]] = {
-    'lion': ['clear', 'desert', 'mountain'],
-    'bull elephant': ['clear', 'swamp', 'desert'],
-    'Cape buffalo': ['clear', 'hills', 'desert'],
+    'lion': ['savannah', 'desert', 'mountain'],
+    'bull elephant': ['savannah', 'swamp', 'desert'],
+    'Cape buffalo': ['savannah', 'hills', 'desert'],
     'crocodile': ['water', 'swamp', 'jungle'],
     'hippopotamus': ['water', 'swamp', 'hills'],
     'gorilla': ['mountain', 'jungle', 'hills'],
@@ -228,7 +228,7 @@ animal_terrain_dict: Dict[str, tuple[str, str, str]] = {
 }
 animal_adjectives: List[str] = ['man-eating', 'bloodthirsty', 'rampaging', 'giant', 'ravenous', 'ferocious', 'king', 'lurking', 'spectral', 'infernal']
 terrain_movement_cost_dict: Dict[str, int] = {
-    'clear': 1,
+    'savannah': 1,
     'hills': 2,
     'jungle': 3,
     'water': 1,
@@ -237,7 +237,7 @@ terrain_movement_cost_dict: Dict[str, int] = {
     'desert': 2
 }
 terrain_build_cost_multiplier_dict: Dict[str, int] = {
-    'clear': 1,
+    'savannah': 1,
     'hills': 2,
     'jungle': 3,
     'water': 1,
