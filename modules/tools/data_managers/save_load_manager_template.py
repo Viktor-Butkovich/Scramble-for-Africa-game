@@ -124,7 +124,7 @@ class save_load_manager_template():
         constants.fear_tracker.set(1)
 
         for i in range(1, random.randrange(5, 8)):
-            turn_management_utility.manage_villages()
+            turn_management_utility.manage_villages(verbose=False)
             turn_management_utility.manage_warriors()
             actor_utility.spawn_beast()
         

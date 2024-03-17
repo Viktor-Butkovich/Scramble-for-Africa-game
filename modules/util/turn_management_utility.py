@@ -469,7 +469,7 @@ def manage_warriors():
     for current_village in status.village_list:
         current_village.manage_warriors()
 
-def manage_villages():
+def manage_villages(verbose: bool = True):
     '''
     Description:
         Controls the aggressiveness and population changes of villages and native warrior spawning/despawning
@@ -488,11 +488,12 @@ def manage_villages():
             elif roll >= 5: #5-6
                 current_village.change_aggressiveness(1)
             if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
-                text = 'The previously pacified village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
-                constants.notification_manager.display_notification({
-                    'message': text,
-                    'zoom_destination': current_village.cell.tile,
-                })
+                if verbose: # Should not display this message when simulating turns before the start of the game
+                    text = 'The previously pacified village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
+                    constants.notification_manager.display_notification({
+                        'message': text,
+                        'zoom_destination': current_village.cell.tile,
+                    })
         if random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6:
             previous_population = current_village.population
             current_village.change_population(1)
