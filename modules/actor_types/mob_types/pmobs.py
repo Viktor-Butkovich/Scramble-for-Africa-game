@@ -524,21 +524,6 @@ class pmob(mob):
                 if not equivalent_tile == 'none':
                     equivalent_tile.draw_destination_outline()
 
-    def ministers_appointed(self):
-        '''
-        Description:
-            Returns whether all ministers are appointed to do an action, otherwise prints an error message
-        Input:
-            None
-        Output:
-            boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
-        '''
-        if minister_utility.positions_filled():
-            return(True)
-        else:
-            game_transitions.force_minister_appointment()
-            return(False)
-
     def set_controlling_minister_type(self, new_type):
         '''
         Description:
@@ -599,22 +584,6 @@ class pmob(mob):
         '''
         return(False) #different for subclasses
 
-    def change_inventory(self, commodity, change):
-        '''
-        Description:
-            Changes the number of commodities of a certain type held by this mob. Also ensures that the mob info display is updated correctly
-        Input:
-            string commodity: Type of commodity to change the inventory of
-            int change: Amount of commodities of the inputted type to add. Removes commodities of the inputted type if negative
-        Output:
-            None
-        '''
-        if self.has_inventory:
-            self.inventory[commodity] += change
-            if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
-                actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
-
     def set_inventory(self, commodity, new_value):
         '''
         Description:
@@ -625,10 +594,9 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.has_inventory:
-            self.inventory[commodity] = new_value
-            if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+        super().set_inventory(commodity, new_value)
+        if status.displayed_mob == self:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def fire(self):
         '''
@@ -758,7 +726,6 @@ class pmob(mob):
         self.hide_images()
         self.remove_from_turn_queue()
         vehicle.contained_mobs.append(self)
-        self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
@@ -787,7 +754,7 @@ class pmob(mob):
             current_image.add_to_cell()
         if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.grid == status.strategic_map_grid and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
-        if self.can_trade and self.has_inventory: #if caravan
+        if self.can_trade and self.inventory_capacity > 0: #if caravan
             consumer_goods_present = vehicle.get_inventory('consumer goods')
             if consumer_goods_present > 0:
                 consumer_goods_transferred = consumer_goods_present

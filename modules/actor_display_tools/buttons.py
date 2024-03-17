@@ -993,7 +993,7 @@ class labor_broker_button(button):
                     if not cost_info_list == 'none':
                         if current_mob.movement_points >= 1:
                             if constants.money_tracker.get() >= cost_info_list[1]:
-                                if current_mob.ministers_appointed():
+                                if minister_utility.positions_filled():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
@@ -1291,8 +1291,6 @@ class to_trial_button(button):
                         minister_utility.trial_setup(defense, prosecution) #sets up defense and prosecution displays
                     else:
                         text_utility.print_to_screen('There are currently no available appointees to replace this minister in the event of a successful trial.')
-                else:
-                    game_transitions.force_minister_appointment()
             else:
                 text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.')
         else:

@@ -80,13 +80,7 @@ class cell():
         save_dict['terrain'] = self.terrain
         save_dict['terrain_variant'] = self.terrain_variant
         save_dict['resource'] = self.resource
-
-        saved_inventory = {}
-        if self.tile.has_inventory: #only save inventory if not empty
-            for current_commodity in constants.commodity_types:
-               if self.tile.inventory[current_commodity] > 0:
-                   saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
-        save_dict['inventory'] = saved_inventory
+        save_dict['inventory'] = self.tile.inventory
         
         if self.resource == 'natives':
             save_dict['village_name'] = self.village.name

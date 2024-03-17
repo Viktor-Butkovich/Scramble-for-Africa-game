@@ -752,8 +752,6 @@ class button(interface_elements.interface_element):
                             text_utility.print_to_screen('You cannot move while in the European HQ screen.')
                     else:
                         text_utility.print_to_screen('There are no selected units to move.')
-                else:
-                    game_transitions.force_minister_appointment()
             else:
                 text_utility.print_to_screen('You are busy and cannot move.')
         elif self.button_type == 'toggle grid lines':
@@ -833,8 +831,6 @@ class button(interface_elements.interface_element):
                         transportation_minister.display_message(text)
                     else:
                         transportation_minister.display_message('There were no units with designated movement routes. /n /n')
-                else:
-                    game_transitions.force_minister_appointment()
             else:
                 text_utility.print_to_screen('You are busy and cannot move units.')
                 

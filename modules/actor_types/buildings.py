@@ -35,7 +35,6 @@ class building(actor):
         self.damaged = False
         super().__init__(from_save, input_dict)
         self.default_inventory_capacity = 0
-        self.inventory_capacity = 0
         no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
         self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
         if input_dict['building_type'] == 'warehouses':
@@ -62,7 +61,7 @@ class building(actor):
             })
         self.cell.tile.set_name(self.cell.tile.name)
 
-        self.set_inventory_capacity(self.default_inventory_capacity)
+        self.set_building_inventory_capacity(self.default_inventory_capacity)
         if constants.effect_manager.effect_active('damaged_buildings'):
             if self.can_damage():
                 self.set_damaged(True, True)
@@ -196,9 +195,9 @@ class building(actor):
         if self.building_type == 'infrastructure':
             actor_utility.update_roads()
         if self.damaged:
-            self.set_inventory_capacity(0)
+            self.set_building_inventory_capacity(0)
         else:
-            self.set_inventory_capacity(self.default_inventory_capacity)
+            self.set_building_inventory_capacity(self.default_inventory_capacity)
         if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
             self.cell.get_building('warehouses').set_damaged(new_value)
         self.cell.tile.update_image_bundle()
@@ -213,9 +212,9 @@ class building(actor):
             None
         '''
         self.default_inventory_capacity = new_value
-        self.set_inventory_capacity(new_value)
+        self.set_building_inventory_capacity(new_value)
     
-    def set_inventory_capacity(self, new_value):
+    def set_building_inventory_capacity(self, new_value):
         '''
         Description:
             Sets a new current inventory capacity for a building. A building's inventory capacity may change when it is upgraded, damaged, or repaired
@@ -241,13 +240,7 @@ class building(actor):
         Output:
             None
         '''
-        current_index = 0
-        if current_index == 0:
-            self.cell.tile.inventory_capacity -= previous_value
-            self.cell.tile.inventory_capacity += new_value
-        else:
-            self.cell.tile.inventory_capacity = self.cell.tile.inventory_capacity
-        current_index += 1
+        self.cell.tile.set_inventory_capacity(self.cell.tile.inventory_capacity + new_value - previous_value)
             
     def touching_mouse(self):
         '''

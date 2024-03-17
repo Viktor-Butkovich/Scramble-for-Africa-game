@@ -45,11 +45,10 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        for current_commodity in constants.commodity_types: #merges individual inventory to group inventory and clears individual inventory
-            self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
-            self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
-        self.worker.inventory_setup()
-        self.officer.inventory_setup()
+        for current_mob in [self.worker, self.officer]: # Merges individual inventory to group inventory and clears individual inventory
+            for current_commodity in current_mob.inventory:
+                self.change_inventory(current_commodity, current_mob.get_inventory(current_commodity))
+                current_mob.set_inventory(current_commodity, 0)
         self.set_group_type('none')
         self.update_image_bundle()
         if not from_save:
@@ -306,8 +305,7 @@ class group(pmob):
         Output:
             None
         '''
-        if self.has_inventory:
-            self.drop_inventory()
+        self.drop_inventory()
         self.worker.leave_group(self)
 
         movement_ratio_remaining = self.movement_points / self.max_movement_points

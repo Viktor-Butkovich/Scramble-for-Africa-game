@@ -155,7 +155,7 @@ def remove_excess_inventory():
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
-            if len(current_tile.get_held_commodities()) > 0:
+            if current_tile.inventory:
                 current_tile.remove_excess_inventory()
 
 def manage_production():

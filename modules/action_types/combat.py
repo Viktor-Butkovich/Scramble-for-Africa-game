@@ -471,6 +471,8 @@ class combat(action.action):
 
         if constants.effect_manager.effect_active('ministry_of_magic'):
             results = [1, 6, 6]
+        elif constants.effect_manager.effect_active('nine_mortal_men'):
+            results = [6, 1, 1]
         
         self.opponent_roll_result = results.pop(0) #first minister roll is for enemies
         roll_types = (self.name.capitalize() + ' roll', 'second')
@@ -619,3 +621,10 @@ class combat(action.action):
             status.attacker_queue.pop(0).attempt_local_combat()
         elif flags.enemy_combat_phase: #if enemy combat phase done, go to player turn
             turn_management_utility.start_player_turn()
+        else:
+            for current_pmob in status.pmob_list:
+                if current_pmob.is_vehicle:
+                    current_pmob.reembark()
+            for current_building in status.building_list:
+                if current_building.building_type == 'resource':
+                    current_building.reattach_work_crews()

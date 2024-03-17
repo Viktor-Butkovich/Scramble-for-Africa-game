@@ -79,11 +79,13 @@ class vehicle(pmob):
         self.crew = new_crew
         if new_crew == 'none':
             self.has_crew = False
+            self.set_inventory_capacity(0)
         else:
             self.has_crew = True
+            self.set_inventory_capacity(27)
         self.update_image_bundle()
         if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def get_image_id_list(self, override_values={}):
         '''
@@ -254,11 +256,11 @@ class vehicle(pmob):
         Output:
             None
         '''
-        if not self.ejected_crew == 'none':
-            if self.ejected_crew in status.pmob_list: #not self.ejected_crew.dead:
+        if self.ejected_crew != 'none':
+            if self.ejected_crew in status.pmob_list:
                 self.ejected_crew.crew_vehicle(self)
                 for current_passenger in self.ejected_passengers:
-                    if current_passenger in status.pmob_list: #not current_passenger.dead:
+                    if current_passenger in status.pmob_list:
                         current_passenger.embark_vehicle(self)
             self.ejected_crew = 'none'
             self.ejected_passengers = []
@@ -407,17 +409,11 @@ class train(vehicle):
         super().__init__(from_save, input_dict)
         self.set_max_movement_points(16)
         self.has_infinite_movement = False
-        #self.has_infinite_movement = True
         self.vehicle_type = 'train'
         self.can_swim = False
         self.can_walk = True
-        self.has_inventory = True
-        self.inventory_capacity = 27#9
         if not from_save:
-            self.inventory_setup()
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
-        else:
-            self.load_inventory(input_dict['inventory'])
 
     def can_move(self, x_change, y_change, can_print = True):
         '''
@@ -496,13 +492,8 @@ class ship(vehicle):
         self.can_swim_ocean = True
         self.can_walk = False
         self.travel_possible = True #if this mob would ever be able to travel
-        self.has_inventory = True
-        self.inventory_capacity = 27
         if not from_save:
-            self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for travel_possible changing
-        else:
-            self.load_inventory(input_dict['inventory'])
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def can_leave(self):
         '''
@@ -585,7 +576,6 @@ class boat(ship):
         self.can_swim_ocean = False
         self.can_walk = False
         self.travel_possible = False
-        self.inventory_capacity = 27#9
 
     def get_movement_cost(self, x_change, y_change):
         '''

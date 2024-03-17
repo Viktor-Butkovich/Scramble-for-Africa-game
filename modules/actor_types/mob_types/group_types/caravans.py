@@ -36,12 +36,6 @@ class caravan(group):
             None
         '''
         super().__init__(from_save, input_dict)
-        self.has_inventory = True
         self.can_trade = True
-        self.inventory_capacity = 9
-        if not from_save:
-            self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for inventory capacity changing
-        else:
-            self.load_inventory(input_dict['inventory'])
+        self.set_inventory_capacity(9)
         self.set_group_type('caravan')

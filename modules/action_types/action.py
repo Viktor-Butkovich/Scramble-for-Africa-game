@@ -1,6 +1,6 @@
 #Contains functionality for generic actions
 
-from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility
+from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility, minister_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -101,7 +101,7 @@ class action():
         elif constants.money < self.get_price():
             text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.')
             return(False)
-        elif self.actor_type == 'mob' and not (unit.ministers_appointed()):
+        elif self.actor_type == 'mob' and not minister_utility.positions_filled():
             return(False)
         if self.actor_type == 'mob' and unit.sentry_mode:
             unit.set_sentry_mode(False)
