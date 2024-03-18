@@ -83,7 +83,7 @@ class slave_capture(action.action):
         if subject in ['success', 'critical_success']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['mobs/default/button.png',
+                    ['buttons/default_button_alt.png',
                         actor_utility.generate_unit_component_image_id('mobs/slave workers/default.png', 'left', to_front=True), 
                         actor_utility.generate_unit_component_image_id('mobs/slave workers/default.png', 'right', to_front=True)
                     ],

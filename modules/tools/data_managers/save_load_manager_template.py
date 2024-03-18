@@ -84,7 +84,7 @@ class save_load_manager_template():
         game_transitions.set_game_mode('ministers')
 
         for current_commodity in constants.commodity_types:
-            if not current_commodity == 'consumer goods':
+            if current_commodity != 'consumer goods':
                 price = round((random.randrange(1, 7) + random.randrange(1, 7))/2)
                 increase = 0
                 if current_commodity == 'gold':

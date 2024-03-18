@@ -22,7 +22,7 @@ class actor_display_label(label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_label_type': string value - Type of actor information shown
@@ -212,7 +212,7 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
-            african_workers_image_id_list = ['mobs/default/button.png']
+            african_workers_image_id_list = ['buttons/default_button_alt.png']
             left_worker_dict = {
                 'image_id': 'mobs/African workers/default.png',
                 'size': 0.8,
@@ -237,7 +237,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
             for worker_type in ['slave', 'Asian']:
-                current_image_id_list = ['mobs/default/button.png']
+                current_image_id_list = ['buttons/default_button_alt.png']
                 left_worker_dict = {
                     'image_id': 'mobs/' + worker_type + ' workers/default.png',
                     'size': 0.8,
@@ -327,7 +327,7 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
-            african_workers_image_id_list = ['mobs/default/button.png']
+            african_workers_image_id_list = ['buttons/default_button_alt.png']
             left_worker_dict = {
                 'image_id': 'mobs/African workers/default.png',
                 'size': 0.8,
@@ -905,7 +905,7 @@ class list_item_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_label_type': string value - Type of actor information shown
@@ -961,7 +961,7 @@ class actor_tooltip_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
@@ -1007,7 +1007,7 @@ class building_work_crews_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
@@ -1068,7 +1068,7 @@ class building_efficiency_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'

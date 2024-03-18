@@ -198,7 +198,7 @@ class advertising_campaign(action.campaign):
         flags.choosing_advertised_commodity = False
         self.target_commodity = commodity
         self.target_unadvertised_commodity = random.choice(constants.commodity_types)
-        while self.target_unadvertised_commodity == 'consumer goods' or self.target_unadvertised_commodity == self.target_commodity or constants.commodity_prices[self.target_unadvertised_commodity] == 1:
+        while (not self.target_unadvertised_commodity in constants.collectable_resources) or self.target_unadvertised_commodity == self.target_commodity or constants.commodity_prices[self.target_unadvertised_commodity] == 1:
             self.target_unadvertised_commodity = random.choice(constants.commodity_types)
 
         if super().start(unit):

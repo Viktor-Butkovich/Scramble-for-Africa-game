@@ -157,7 +157,7 @@ transaction_descriptions: Dict[str, str] = {
     'subsidies': 'subsidies',
     'trial_compensation': 'trial compensation',
     'fabricated_evidence': 'fabricated evidence',
-    'consumer_goods': 'consumer goods',
+    'items': 'Europe items',
     'unit_recruitment': 'unit recruitment',
     'attrition_replacements': 'attrition replacements',
     'misc_revenue': 'misc',
@@ -246,6 +246,7 @@ terrain_build_cost_multiplier_dict: Dict[str, int] = {
     'desert': 2
 }
 
+equipment_types: List[str] = ['Maxim gun', 'rifles', 'canoes']
 commodity_types: List[str] = ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
 collectable_resources: List[str] = ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
 commodity_prices: Dict[str, int] = {}

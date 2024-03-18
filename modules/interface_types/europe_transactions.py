@@ -24,7 +24,7 @@ class recruitment_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'recruitment_type': string value - Type of unit recruited by this button, like 'explorer'
         Output:
@@ -46,10 +46,9 @@ class recruitment_button(button):
                 self.recruitment_name += character
             else:
                 self.recruitment_name += ' '
-        self.cost = constants.recruitment_costs[self.recruitment_type]
         status.recruitment_button_list.append(self)
         if self.recruitment_name.endswith(' workers'):
-            image_id_list = ['mobs/default/button.png']
+            image_id_list = ['buttons/default_button_alt.png']
             left_worker_dict = {
                 'image_id': self.mob_image_id,
                 'size': 0.8,
@@ -63,7 +62,7 @@ class recruitment_button(button):
             right_worker_dict['x_offset'] *= -1
             image_id_list.append(right_worker_dict)
         else:
-            image_id_list = ['mobs/default/button.png', {'image_id': self.mob_image_id, 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+            image_id_list = ['buttons/default_button_alt.png', {'image_id': self.mob_image_id, 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
         input_dict['image_id'] = image_id_list
         input_dict['button_type'] = 'recruitment'
         super().__init__(input_dict)
@@ -77,9 +76,10 @@ class recruitment_button(button):
         Output:
             None
         '''
+        cost = constants.recruitment_costs[self.recruitment_type]
         if main_loop_utility.action_possible():
-            if constants.money_tracker.get() >= self.cost:
-                choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
+            if constants.money_tracker.get() >= cost:
+                choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
                 constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, self.recruitment_name)
             else:
                 text_utility.print_to_screen('You do not have enough money to recruit this unit')
@@ -97,7 +97,7 @@ class recruitment_button(button):
             None
         '''
         self.mob_image_id = {'image_id': 'mobs/' + self.recruitment_type + '/' + country.adjective + '/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
-        image_id_list = ['mobs/default/button.png', self.mob_image_id]
+        image_id_list = ['buttons/default_button_alt.png', self.mob_image_id]
         self.image.set_image(image_id_list)
 
     def update_tooltip(self):
@@ -110,10 +110,11 @@ class recruitment_button(button):
             None
         '''
         actor_utility.update_descriptions(self.recruitment_type)
+        cost = constants.recruitment_costs[self.recruitment_type]
         if self.recruitment_type.endswith(' workers'):
-            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
+            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
         else:
-            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
+            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(cost) + ' money.'] + constants.list_descriptions[self.recruitment_type])
 
     def remove(self):
         '''
@@ -152,10 +153,9 @@ class buy_commodity_button(button):
         possible_commodity_types = constants.commodity_types
         self.commodity_type = input_dict['commodity_type']
         if self.commodity_type in possible_commodity_types:
-            input_dict['image_id'] = 'scenery/resources/buttons/' + self.commodity_type + '.png'
+            input_dict['image_id'] = ['buttons/default_button_alt.png', 'scenery/resources/' + self.commodity_type + '.png']
         else:
             input_dict['image_id'] = 'buttons/default_button.png'
-        self.cost = constants.commodity_prices[self.commodity_type] #update this when price changes
         input_dict['button_type'] = 'buy commodity'
         super().__init__(input_dict)
 
@@ -169,21 +169,24 @@ class buy_commodity_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            self.cost = constants.commodity_prices[self.commodity_type]
-            if constants.money_tracker.get() >= self.cost:
+            cost = constants.commodity_prices[self.commodity_type]
+            if constants.money_tracker.get() >= cost:
                 if minister_utility.positions_filled():
                     actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile)
                     status.europe_grid.cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
-                    constants.money_tracker.change(-1 * self.cost, 'consumer_goods')
-                    text_utility.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.')
-                    if random.randrange(1, 7) == 1: #1/6 chance
-                        market_utility.change_price('consumer goods', 1)
-                        text_utility.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.')
+                    constants.money_tracker.change(-1 * cost, 'items')
+                    if self.commodity_type.endswith('s'):
+                        text_utility.print_to_screen('You spent ' + str(cost) + ' money to buy 1 unit of ' + self.commodity_type + '.')
+                    else:
+                        text_utility.print_to_screen('You spent ' + str(cost) + ' money to buy 1 ' + self.commodity_type + '.')
+                    if random.randrange(1, 7) == 1 and self.commodity_type in constants.commodity_types: #1/6 chance
+                        market_utility.change_price(self.commodity_type, 1)
+                        text_utility.print_to_screen('The price of ' + self.commodity_type + ' has increased from ' + str(cost) + ' to ' + str(cost + 1) + '.')
                     actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
             else:
                 text_utility.print_to_screen('You do not have enough money to purchase this commodity')
         else:
-            text_utility.print_to_screen('You are busy and cannot purchase commodities')
+            text_utility.print_to_screen('You are busy and cannot purchase ' + self.commodity_type + '.')
 
     def update_tooltip(self):
         '''
@@ -194,6 +197,8 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        self.cost = constants.commodity_prices[self.commodity_type]
-        self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])
+        if self.commodity_type.endswith('s'):
+            self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(constants.commodity_prices[self.commodity_type]) + ' money.'])
+        else:
+            self.set_tooltip(['Purchases 1 ' + self.commodity_type + ' for ' + str(constants.commodity_prices[self.commodity_type]) + ' money.'])
         

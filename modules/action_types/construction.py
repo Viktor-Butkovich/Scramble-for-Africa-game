@@ -58,12 +58,12 @@ class construction(action.action):
             initial_input_dict['image_id'] = 'buildings/buttons/road.png'
         elif self.building_type == 'train':
             initial_input_dict['image_id'] = [
-                'mobs/default/button.png',
+                'buttons/default_button_alt.png',
                 {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
             ]
         elif self.building_type == 'steamboat':
             initial_input_dict['image_id'] = [
-                'mobs/default/button.png', 
+                'buttons/default_button_alt.png', 
                 {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
             ]
         else:
