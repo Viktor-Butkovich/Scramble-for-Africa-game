@@ -22,6 +22,7 @@ except Exception: #displays error message and records error message in crash log
 # Add debug settings menu within game, rather than needing to edit .json out of game
 # Change game to be fullscreen by default, along with debug setting to make it windowed
 # Add autosave and multiple save slots
+# Performance impacts from repeated exit/load - not everything is being removed each time
 #
 #   new SFA features:
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
