@@ -143,7 +143,7 @@ class choice_button(buttons.button):
             self.message = 'Exit game'
 
         elif input_dict['button_type'] == 'none':
-            self.message = 'Do nothing'
+            self.message = 'Cancel'
     
         else:
             self.message = input_dict['button_type'].capitalize()
@@ -202,7 +202,7 @@ class choice_button(buttons.button):
             self.set_tooltip(['Exits the game without saving'])
 
         elif self.button_type == 'none':
-            self.set_tooltip(['Do nothing'])
+            self.set_tooltip(['Cancel'])
             
         else:
             self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']

@@ -169,8 +169,8 @@ class exploration(action.action):
                     },
                     {
                     'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[], []]),
-                    'tooltip': ['Stop ' + self.name],
-                    'message': 'Do nothing'
+                    'tooltip': ['Cancel'],
+                    'message': 'Cancel'
                     }
                 ],
             })

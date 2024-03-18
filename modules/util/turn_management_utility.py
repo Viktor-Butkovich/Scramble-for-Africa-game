@@ -720,3 +720,44 @@ def manage_lore():
     if status.current_lore_mission == None:
         if (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2) or constants.effect_manager.effect_active('instant_lore_mission'):
             constants.actor_creation_manager.create_lore_mission(False, {})
+
+def end_turn_warnings():
+    '''
+    Description:
+        Displays any warnings for player to see before ending turn - can cancel end turn based on any of these
+    Input:
+        None
+    Output:
+        None
+    '''
+    for current_minister in status.minister_list: # Warn for firing minister
+        if current_minister.just_removed and current_minister.current_position == 'none':
+            text = 'Warning: if you do not reappoint ' + current_minister.name + ' by the end of the turn, he will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
+            current_minister.display_message(text)
+
+    for current_cell in status.strategic_map_grid.get_flat_cell_list(): # Warn for insufficient warehouses
+        if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
+            text = 'Warning: the warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
+            text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
+            constants.notification_manager.display_notification({
+                'message': text,
+                'zoom_destination': current_cell.tile,
+            })
+
+    for grid_type in constants.abstract_grid_type_list: # Warn for leaving units behind in non-Europe grids
+        if grid_type != 'europe_grid':
+            current_cell = getattr(status, grid_type).find_cell(0, 0)
+            num_leaving, num_reserve = (00, 0) # Vehicles leaving, and vehicles staying behind, respectively
+            for current_mob in current_cell.contained_mobs:
+                if current_mob.end_turn_destination != 'none' and current_mob.is_vehicle:
+                    num_leaving += 1
+                elif current_mob.is_vehicle and current_mob.has_crew:
+                    num_reserve += 1
+            num_stranded = len(current_cell.contained_mobs) - (num_leaving + num_reserve) # Number of non-vehicles left behind
+            grid_name = grid_type[:-5].replace('_', ' ').capitalize() # slave_traders_grid -> Slave traders
+            if num_leaving > 0 and num_stranded > 0 and num_reserve == 0: # If at least 1 vehicle leaving grid and at least 1 unit left behind, give warning
+                text = 'Warning: at least 1 unit is being left behind in ' + grid_name + ' and will not be able to leave without another ship. /n /n'
+                constants.notification_manager.display_notification({
+                    'message': text,
+                    'zoom_destination': current_cell.tile
+                })

@@ -143,8 +143,8 @@ class artifact_search(action.action):
                     },
                     {
                     'on_click': (action_utility.cancel_ongoing_actions, []),
-                    'tooltip': ['Stop ' + self.name],
-                    'message': 'Do nothing'
+                    'tooltip': ['Cancel'],
+                    'message': 'Cancel'
                     }
                 ],
             })
