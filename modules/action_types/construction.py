@@ -53,7 +53,14 @@ class construction(action.action):
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
         if self.building_type == 'resource':
-            initial_input_dict['image_id'] = constants.resource_building_button_dict[self.attached_resource]
+            displayed_resource = self.attached_resource
+            if displayed_resource == 'none':
+                displayed_resource = 'consumer goods'
+            initial_input_dict['image_id'] = [
+                'buttons/default_button_alt2.png',
+                {'image_id': 'scenery/resources/' + displayed_resource + '.png'},
+                {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
+            ]
         elif self.building_type == 'infrastructure':
             initial_input_dict['image_id'] = 'buildings/buttons/road.png'
         elif self.building_type == 'train':
@@ -231,7 +238,14 @@ class construction(action.action):
                 else:
                     self.attached_resource = 'none'
                     self.building_name = 'resource production facility'
-                self.button.image.set_image(constants.resource_building_button_dict[self.attached_resource])
+                displayed_resource = self.attached_resource
+                if displayed_resource == 'none':
+                    displayed_resource = 'consumer goods'
+                self.button.image.set_image([
+                    'buttons/default_button_alt2.png',
+                    {'image_id': 'scenery/resources/' + displayed_resource + '.png'},
+                    {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
+                ])
 
         elif self.building_type == 'infrastructure':
             cell = status.displayed_mob.images[0].current_cell

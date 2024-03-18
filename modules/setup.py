@@ -1348,7 +1348,7 @@ def inventory_interface():
     }
     for current_index in range(len(constants.commodity_types)): #commodity prices in Europe
         input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index))
-        input_dict['image_id'] = 'scenery/resources/large/' + constants.commodity_types[current_index] + '.png'
+        input_dict['image_id'] = ['misc/green_circle.png', 'scenery/resources/' + constants.commodity_types[current_index] + '.png'] #'scenery/resources/large/' + constants.commodity_types[current_index] + '.png'
         input_dict['commodity'] = constants.commodity_types[current_index]
         new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
@@ -1357,7 +1357,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.mob_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'scenery/resources/consumer goods.png', 'size': 0.75}], 'identifier': 'inventory'},
         'description': 'unit inventory panel'
     })
 
@@ -1449,7 +1449,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.tile_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'scenery/resources/consumer goods.png', 'size': 0.75}]},
         'description': 'tile inventory panel'
     })
 

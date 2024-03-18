@@ -431,28 +431,23 @@ def generate_resource_icon(tile):
     Output:
         string/list: Returns string or list image id for tile's resource icon
     '''
-    small = False
-    for building_type in constants.building_types:
-        if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
-            small = True
-
     if tile.cell.resource == 'natives':
         attached_village = tile.cell.get_building('village')
         if attached_village.aggressiveness <= 3:
-            aggressiveness_color = (15, 154, 54)
+            aggressiveness_color = constants.color_dict['green_icon']
         elif attached_village.aggressiveness <= 6:
-            aggressiveness_color = (255, 242, 0)
+            aggressiveness_color = constants.color_dict['yellow_icon']
         else:
-            aggressiveness_color = (231, 0, 46)
+            aggressiveness_color = constants.color_dict['red_icon']
         population_key = str((attached_village.population + 2) // 3) # 0 for 0, 1 for 1-3, 2 for 4-6, 3 for 7-9
-        image_id = [{'image_id': 'scenery/resources/misc/circle.png', 'green_screen': aggressiveness_color}, {'image_id': 'scenery/resources/natives/' + population_key + '.png'}]
-
+        image_id = [{'image_id': 'misc/circle.png', 'green_screen': aggressiveness_color, 'size': 0.75}, {'image_id': 'scenery/resources/natives/' + population_key + '.png'}]
     else:
-        image_id = [{'image_id': 'scenery/resources/' + tile.cell.resource + '.png'}]
+        image_id = [{'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'scenery/resources/' + tile.cell.resource + '.png', 'size': 0.75}]
 
-    if small:
-        for current_image in image_id: # Make each component of image smaller and shift to bottom left corner
-            current_image.update({'size': 0.5, 'x_offset': -0.33, 'y_offset': -0.33})
+    if bool(tile.cell.get_buildings()): # Make small icon if tile has any buildings
+        for current_image in image_id: # To make small icon, make each component of image smaller and shift to bottom left corner
+            current_image.update({'x_offset': -0.33, 'y_offset': -0.33})
+            current_image['size'] = current_image.get('size', 1.0) * 0.45
     return(image_id)
 
 def get_image_variants(base_path, keyword = 'default'):

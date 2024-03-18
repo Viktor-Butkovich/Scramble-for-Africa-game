@@ -153,7 +153,11 @@ class buy_commodity_button(button):
         possible_commodity_types = constants.commodity_types
         self.commodity_type = input_dict['commodity_type']
         if self.commodity_type in possible_commodity_types:
-            input_dict['image_id'] = ['buttons/default_button_alt.png', 'scenery/resources/' + self.commodity_type + '.png']
+            input_dict['image_id'] = [
+                'buttons/default_button_alt.png',
+                {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                {'image_id': 'scenery/resources/' + self.commodity_type + '.png', 'size': 0.75}
+            ]
         else:
             input_dict['image_id'] = 'buttons/default_button.png'
         input_dict['button_type'] = 'buy commodity'

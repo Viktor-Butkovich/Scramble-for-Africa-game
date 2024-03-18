@@ -723,6 +723,7 @@ class pmob(mob):
                     vehicle.change_inventory(current_commodity, 1)
                 else:
                     self.images[0].current_cell.tile.change_inventory(current_commodity, 1)
+            self.inventory = {}
         self.hide_images()
         self.remove_from_turn_queue()
         vehicle.contained_mobs.append(self)

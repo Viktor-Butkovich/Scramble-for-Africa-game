@@ -163,9 +163,9 @@ class item_icon(button):
                 self.current_item = new_actor.check_inventory(display_index)
                 if self.current_item:
                     if new_actor.inventory_capacity >= display_index + 1 or new_actor.infinite_inventory_capacity: # If item in capacity
-                        self.image.set_image(utility.combine(self.default_image_id, 'scenery/resources/large/' + self.current_item + '.png'))
+                        self.image.set_image(utility.combine(self.default_image_id, 'misc/green_circle.png', 'scenery/resources/' + self.current_item + '.png'))
                     else: # If item over capacity
-                        self.image.set_image(['scenery/resources/large/' + self.current_item + '.png', 'misc/warning_icon.png'])
+                        self.image.set_image(['misc/green_circle.png', 'scenery/resources/' + self.current_item + '.png', 'misc/warning_icon.png'])
                 else:
                     self.image.set_image(self.default_image_id)
                     if self.icon_index == 0 and new_actor.infinite_inventory_capacity and self.parent_collection.inventory_page > 0:

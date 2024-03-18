@@ -122,16 +122,20 @@ class advertising_campaign(action.campaign):
         if subject in ['success', 'critical_success']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['scenery/resources/' + self.target_unadvertised_commodity + '.png',
-                     {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                    [
+                        {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                        {'image_id': 'scenery/resources/' + self.target_unadvertised_commodity + '.png', 'size': 0.75},
+                        {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'left', 'centered': True}}
             ))
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['scenery/resources/' + self.target_commodity + '.png',
-                     {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                    [
+                        {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                        {'image_id': 'scenery/resources/' + self.target_commodity + '.png', 'size': 0.75},
+                        {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'leftmost', 'centered': True}}
