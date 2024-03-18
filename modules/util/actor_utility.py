@@ -435,31 +435,24 @@ def generate_resource_icon(tile):
     for building_type in constants.building_types:
         if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
             small = True
+
     if tile.cell.resource == 'natives':
         attached_village = tile.cell.get_building('village')
-        if attached_village.population == 0: #0
-            key = '0'
-        elif attached_village.population <= 3: #1-3
-            key = '1'
-        elif attached_village.population <= 6: #4-6
-            key = '2'
-        else: #7-10
-            key = '3'
-        if attached_village.aggressiveness <= 3: #1-3
-            key += '1'
-        elif attached_village.aggressiveness <= 6: #4-6
-            key += '2'
-        else: #7-10
-            key += '3'
-        if small:
-            image_id = 'scenery/resources/natives/small/' + key + '.png'
+        if attached_village.aggressiveness <= 3:
+            aggressiveness_color = (15, 154, 54)
+        elif attached_village.aggressiveness <= 6:
+            aggressiveness_color = (255, 242, 0)
         else:
-            image_id = 'scenery/resources/natives/' + key + '.png'
+            aggressiveness_color = (231, 0, 46)
+        population_key = str((attached_village.population + 2) // 3) # 0 for 0, 1 for 1-3, 2 for 4-6, 3 for 7-9
+        image_id = [{'image_id': 'scenery/resources/misc/circle.png', 'green_screen': aggressiveness_color}, {'image_id': 'scenery/resources/natives/' + population_key + '.png'}]
+
     else:
-        if small:
-            image_id = 'scenery/resources/small/' + tile.cell.resource + '.png'
-        else:
-            image_id = 'scenery/resources/' + tile.cell.resource + '.png'
+        image_id = [{'image_id': 'scenery/resources/' + tile.cell.resource + '.png'}]
+
+    if small:
+        for current_image in image_id: # Make each component of image smaller and shift to bottom left corner
+            current_image.update({'size': 0.5, 'x_offset': -0.33, 'y_offset': -0.33})
     return(image_id)
 
 def get_image_variants(base_path, keyword = 'default'):
