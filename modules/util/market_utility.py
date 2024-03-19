@@ -44,9 +44,9 @@ def change_price(changed_commodity, num_change):
     Output:
         None
     '''
-    constants.commodity_prices[changed_commodity] += num_change
-    if constants.commodity_prices[changed_commodity] < 1:
-        constants.commodity_prices[changed_commodity] = 1
+    constants.item_prices[changed_commodity] += num_change
+    if constants.item_prices[changed_commodity] < 1:
+        constants.item_prices[changed_commodity] = 1
     status.commodity_prices_label.update_label()
     constants.money_label.check_for_updates()
 
@@ -60,9 +60,9 @@ def set_price(changed_commodity, new_value):
     Output:
         None
     '''
-    constants.commodity_prices[changed_commodity] = new_value
-    if constants.commodity_prices[changed_commodity] < 1:
-        constants.commodity_prices[changed_commodity] = 1
+    constants.item_prices[changed_commodity] = new_value
+    if constants.item_prices[changed_commodity] < 1:
+        constants.item_prices[changed_commodity] = 1
     status.commodity_prices_label.update_label()
 
 def sell(seller, sold_commodity, num_sold):
@@ -92,7 +92,7 @@ def calculate_total_sale_revenue():
     '''
     total_sale_price = 0
     for commodity in constants.commodity_types:
-        total_sale_price += constants.sold_commodities[commodity] * constants.commodity_prices[commodity]
+        total_sale_price += constants.sold_commodities[commodity] * constants.item_prices[commodity]
     return(total_sale_price)
 
 def attempt_worker_upkeep_change(change_type, worker_type):

@@ -207,7 +207,7 @@ def terrains():
     '''
     for current_terrain in (constants.terrain_list + ['ocean_water', 'river_water']):
         current_index = 0
-        while os.path.exists('graphics/scenery/terrain/' + current_terrain + '_' + str(current_index) + '.png'):
+        while os.path.exists('graphics/terrains/' + current_terrain + '_' + str(current_index) + '.png'):
             current_index += 1
         current_index -= 1 #back up from index that didn't work
         constants.terrain_variant_dict[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
@@ -262,11 +262,14 @@ def commodities():
         None
     '''
     for current_commodity in constants.commodity_types:
-        constants.commodity_prices[current_commodity] = 0
+        constants.item_prices[current_commodity] = 0
         constants.sold_commodities[current_commodity] = 0
 
     for current_commodity in constants.collectable_resources:
         constants.commodities_produced[current_commodity] = 0
+
+    for current_equipment in constants.equipment_types:
+        constants.item_prices[current_equipment] = 5
 
 def def_ministers():
     '''
@@ -790,14 +793,16 @@ def europe_screen():
         input_dict['recruitment_type'] = recruitment_type
         new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8))),
-        'width': scaling.scale_width(100),
-        'height': scaling.scale_height(100),
-        'modes': ['europe'],
-        'init_type': 'buy commodity button',
-        'commodity_type': 'consumer goods'
-    })
+    for item_type in ['consumer goods']: #, 'Maxim gun']:
+        constants.actor_creation_manager.create_interface_element({
+            'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8))),
+            'width': scaling.scale_width(100),
+            'height': scaling.scale_height(100),
+            'modes': ['europe'],
+            'init_type': 'buy item button',
+            'item_type': item_type
+        })
+        recruitment_index += 1
 
 def ministers_screen():
     '''
@@ -1348,7 +1353,7 @@ def inventory_interface():
     }
     for current_index in range(len(constants.commodity_types)): #commodity prices in Europe
         input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index))
-        input_dict['image_id'] = ['misc/green_circle.png', 'scenery/resources/' + constants.commodity_types[current_index] + '.png'] #'scenery/resources/large/' + constants.commodity_types[current_index] + '.png'
+        input_dict['image_id'] = ['misc/green_circle.png', 'items/' + constants.commodity_types[current_index] + '.png']
         input_dict['commodity'] = constants.commodity_types[current_index]
         new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
@@ -1357,7 +1362,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.mob_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'scenery/resources/consumer goods.png', 'size': 0.75}], 'identifier': 'inventory'},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/consumer goods.png', 'size': 0.75}], 'identifier': 'inventory'},
         'description': 'unit inventory panel'
     })
 
@@ -1449,7 +1454,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.tile_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'scenery/resources/consumer goods.png', 'size': 0.75}]},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/consumer goods.png', 'size': 0.75}]},
         'description': 'tile inventory panel'
     })
 

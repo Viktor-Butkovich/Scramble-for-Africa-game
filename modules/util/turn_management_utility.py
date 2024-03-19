@@ -679,7 +679,7 @@ def manage_commodity_sales():
     for current_commodity in constants.commodity_types:
         if sold_commodities[current_commodity] > 0:
             any_sold = True
-            sell_price = constants.commodity_prices[current_commodity]
+            sell_price = constants.item_prices[current_commodity]
             expected_revenue = sold_commodities[current_commodity] * sell_price
             expected_revenue = status.current_ministers['Prosecutor'].estimate_expected(expected_revenue, False)
             actual_revenue = 0

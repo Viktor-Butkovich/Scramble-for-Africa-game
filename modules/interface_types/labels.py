@@ -319,7 +319,7 @@ class commodity_prices_label_template(label):
             current_line = ''
             while self.font.calculate_size(current_line + current_commodity) < widest_commodity_width:
                 current_line += ' '
-            current_line += current_commodity + ': ' +  str(constants.commodity_prices[current_commodity])
+            current_line += current_commodity + ': ' +  str(constants.item_prices[current_commodity])
             message.append(current_line)
         self.set_label(message)
             

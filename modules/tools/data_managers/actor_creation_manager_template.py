@@ -209,8 +209,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 #europe_transactions buttons
                 elif base == 'recruitment':
                     new_element = europe_transactions.recruitment_button(input_dict)
-                elif base == 'buy commodity':
-                    new_element = europe_transactions.buy_commodity_button(input_dict)
+                elif base == 'buy item':
+                    new_element = europe_transactions.buy_item_button(input_dict)
 
                 #actor_display_buttons buttons
                 elif base == 'embark all passengers':

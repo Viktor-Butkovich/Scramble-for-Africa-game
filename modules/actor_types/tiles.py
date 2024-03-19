@@ -44,7 +44,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.hosted_images = []
         if self.show_terrain:
             self.cell.tile = self
-            self.image_dict['hidden'] = 'scenery/paper_hidden.png'
+            self.image_dict['hidden'] = 'terrains/paper_hidden.png'
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
             if self.cell.grid.from_save:
                 self.inventory = self.cell.save_dict['inventory']
@@ -354,9 +354,9 @@ class tile(actor): #to do: make terrain tiles a subclass
                     base_word = 'ocean_' + new_terrain
                 else:
                     base_word = 'river_' + new_terrain
-            self.image_dict['default'] = 'scenery/terrain/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
+            self.image_dict['default'] = 'terrains/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
         elif new_terrain == 'none':
-            self.image_dict['default'] = 'scenery/hidden.png'
+            self.image_dict['default'] = 'terrains/hidden.png'
         if update_image_bundle:
             self.update_image_bundle() #self.image.set_image('default')
 

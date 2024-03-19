@@ -318,7 +318,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
             if status.displayed_tile:
                 commodity: str = self.attached_label.actor.current_item
-                sell_price: int = constants.commodity_prices[commodity]
+                sell_price: int = constants.item_prices[commodity]
                 if self.button_type == 'sell commodity':
                     self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell 1 unit of ' + commodity + ' for about ' + str(sell_price) + ' money at the end of the turn',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
@@ -2037,7 +2037,7 @@ class commodity_button(button):
             else:
                 can_advertise = False
                 for current_commodity in constants.collectable_resources:
-                    if current_commodity != self.commodity and constants.commodity_prices[current_commodity] > 1:
+                    if current_commodity != self.commodity and constants.item_prices[current_commodity] > 1:
                         can_advertise = True
                         break
                 if can_advertise:

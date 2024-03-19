@@ -109,7 +109,7 @@ class work_crew(group):
                                 'zoom_destination': building.cell.tile,
                             })
                     else:
-                        value_stolen += constants.commodity_prices[building.resource_type]
+                        value_stolen += constants.item_prices[building.resource_type]
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
                 if random.randrange(1, 7) <= 1: #1/6 chance

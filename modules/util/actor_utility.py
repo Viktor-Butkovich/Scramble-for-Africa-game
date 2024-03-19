@@ -440,9 +440,9 @@ def generate_resource_icon(tile):
         else:
             aggressiveness_color = constants.color_dict['red_icon']
         population_key = str((attached_village.population + 2) // 3) # 0 for 0, 1 for 1-3, 2 for 4-6, 3 for 7-9
-        image_id = [{'image_id': 'misc/circle.png', 'green_screen': aggressiveness_color, 'size': 0.75}, {'image_id': 'scenery/resources/natives/' + population_key + '.png'}]
+        image_id = [{'image_id': 'misc/circle.png', 'green_screen': aggressiveness_color, 'size': 0.75}, {'image_id': 'terrains/features/natives/' + population_key + '.png'}]
     else:
-        image_id = [{'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'scenery/resources/' + tile.cell.resource + '.png', 'size': 0.75}]
+        image_id = [{'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/' + tile.cell.resource + '.png', 'size': 0.75}]
 
     if bool(tile.cell.get_buildings()): # Make small icon if tile has any buildings
         for current_image in image_id: # To make small icon, make each component of image smaller and shift to bottom left corner

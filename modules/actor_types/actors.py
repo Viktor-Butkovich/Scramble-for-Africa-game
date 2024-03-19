@@ -288,7 +288,7 @@ class actor():
                 amounts_lost_list.append(amount_lost)
                 self.change_inventory(current_commodity, -1 * amount_lost)
                 if stealing:
-                    value_stolen += (constants.commodity_prices[current_commodity] * amount_lost)
+                    value_stolen += (constants.item_prices[current_commodity] * amount_lost)
                     for i in range(amount_lost):
                         if random.randrange(1, 7) <= 1: #1/6 chance
                             market_utility.change_price(current_commodity, -1)

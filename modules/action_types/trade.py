@@ -52,7 +52,7 @@ class trade(action.action):
         Output:
             float: Returns the amount paid
         '''
-        return(constants.commodity_prices['consumer goods'])
+        return(constants.item_prices['consumer goods'])
 
     def button_setup(self, initial_input_dict):
         '''
@@ -87,7 +87,7 @@ class trade(action.action):
             text += '/n'
             if subject == 'success':
                 self.commodity = random.choice(constants.collectable_resources)
-                text += 'The merchant managed to buy a unit of ' + self.commodity + ' (currently worth ' + str(constants.commodity_prices[self.commodity]) + ' money). /n /n'
+                text += 'The merchant managed to buy a unit of ' + self.commodity + ' (currently worth ' + str(constants.item_prices[self.commodity]) + ' money). /n /n'
             else:
                 text += 'The merchant bought items that turned out to be worthless. /n /n'
             if (self.current_village.population != self.current_village.available_workers) and random.randrange(1, 7) >= 4: #half chance of getting worker
@@ -115,8 +115,8 @@ class trade(action.action):
                 action_utility.generate_free_image_input_dict(
                     [
                         {'image_id': 'misc/green_circle.png', 'size': 0.75},
-                        {'image_id': 'scenery/resources/consumer goods.png', 'size': 0.75},
-                        {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                        {'image_id': 'items/consumer goods.png', 'size': 0.75},
+                        {'image_id': 'misc/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'left', 'centered': True}}
@@ -126,8 +126,8 @@ class trade(action.action):
                 action_utility.generate_free_image_input_dict(
                     [
                         {'image_id': 'misc/green_circle.png', 'size': 0.75},
-                        {'image_id': 'scenery/resources/' + self.commodity + '.png', 'size': 0.75},
-                        {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                        {'image_id': 'items/' + self.commodity + '.png', 'size': 0.75},
+                        {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'leftmost', 'centered': True}}

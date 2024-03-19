@@ -128,7 +128,7 @@ class recruitment_button(button):
         super().remove()
         status.recruitment_button_list = utility.remove_from_list(status.recruitment_button_list, self)
 
-class buy_commodity_button(button):
+class buy_item_button(button):
     '''
     Button that buys a unit of commodity_type when clicked and has an image matching that of its commodity
     '''
@@ -150,47 +150,43 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        possible_commodity_types = constants.commodity_types
-        self.commodity_type = input_dict['commodity_type']
-        if self.commodity_type in possible_commodity_types:
-            input_dict['image_id'] = [
-                'buttons/default_button_alt.png',
-                {'image_id': 'misc/green_circle.png', 'size': 0.75},
-                {'image_id': 'scenery/resources/' + self.commodity_type + '.png', 'size': 0.75}
-            ]
-        else:
-            input_dict['image_id'] = 'buttons/default_button.png'
-        input_dict['button_type'] = 'buy commodity'
+        self.item_type = input_dict['item_type']
+        input_dict['image_id'] = [
+            'buttons/default_button_alt.png',
+            {'image_id': 'misc/green_circle.png', 'size': 0.75},
+            {'image_id': 'items/' + self.item_type + '.png', 'size': 0.75}
+        ]
+        input_dict['button_type'] = 'buy item'
         super().__init__(input_dict)
 
     def on_click(self):
         '''
         Description:
-            Controls this button's behavior when clicked. This type of button buys a unit of the commodity_type commodity
+            Controls this button's behavior when clicked. This type of button buys a unit of the item_type commodity
         Input:
             None
         Output:
             None
         '''
         if main_loop_utility.action_possible():
-            cost = constants.commodity_prices[self.commodity_type]
+            cost = constants.item_prices[self.item_type]
             if constants.money_tracker.get() >= cost:
                 if minister_utility.positions_filled():
                     actor_utility.calibrate_actor_info_display(status.tile_info_display, status.europe_grid.cell_list[0][0].tile)
-                    status.europe_grid.cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
+                    status.europe_grid.cell_list[0][0].tile.change_inventory(self.item_type, 1) #adds 1 of commodity type to
                     constants.money_tracker.change(-1 * cost, 'items')
-                    if self.commodity_type.endswith('s'):
-                        text_utility.print_to_screen('You spent ' + str(cost) + ' money to buy 1 unit of ' + self.commodity_type + '.')
+                    if self.item_type.endswith('s'):
+                        text_utility.print_to_screen('You spent ' + str(cost) + ' money to buy 1 unit of ' + self.item_type + '.')
                     else:
-                        text_utility.print_to_screen('You spent ' + str(cost) + ' money to buy 1 ' + self.commodity_type + '.')
-                    if random.randrange(1, 7) == 1 and self.commodity_type in constants.commodity_types: #1/6 chance
-                        market_utility.change_price(self.commodity_type, 1)
-                        text_utility.print_to_screen('The price of ' + self.commodity_type + ' has increased from ' + str(cost) + ' to ' + str(cost + 1) + '.')
+                        text_utility.print_to_screen('You spent ' + str(cost) + ' money to buy 1 ' + self.item_type + '.')
+                    if random.randrange(1, 7) == 1 and self.item_type in constants.commodity_types: #1/6 chance
+                        market_utility.change_price(self.item_type, 1)
+                        text_utility.print_to_screen('The price of ' + self.item_type + ' has increased from ' + str(cost) + ' to ' + str(cost + 1) + '.')
                     actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
             else:
                 text_utility.print_to_screen('You do not have enough money to purchase this commodity')
         else:
-            text_utility.print_to_screen('You are busy and cannot purchase ' + self.commodity_type + '.')
+            text_utility.print_to_screen('You are busy and cannot purchase ' + self.item_type + '.')
 
     def update_tooltip(self):
         '''
@@ -201,8 +197,8 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        if self.commodity_type.endswith('s'):
-            self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(constants.commodity_prices[self.commodity_type]) + ' money.'])
+        if self.item_type.endswith('s'):
+            self.set_tooltip(['Purchases 1 unit of ' + self.item_type + ' for ' + str(constants.item_prices[self.item_type]) + ' money.'])
         else:
-            self.set_tooltip(['Purchases 1 ' + self.commodity_type + ' for ' + str(constants.commodity_prices[self.commodity_type]) + ' money.'])
+            self.set_tooltip(['Purchases 1 ' + self.item_type + ' for ' + str(constants.item_prices[self.item_type]) + ' money.'])
         

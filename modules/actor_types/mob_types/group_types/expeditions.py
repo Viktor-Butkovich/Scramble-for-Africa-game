@@ -117,7 +117,7 @@ class expedition(group):
                         if target_cell.resource == 'natives':
                             text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + ' that contains the village of ' + target_cell.village.name + '. /n /n'
                         else:
-                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource (currently worth ' + str(constants.commodity_prices[target_cell.resource]) + ' money each) to the ' + cardinal_directions[current_direction] + '. /n /n'
+                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource (currently worth ' + str(constants.item_prices[target_cell.resource]) + ' money each) to the ' + cardinal_directions[current_direction] + '. /n /n'
                         public_opinion_increase += 3
                     else:
                         text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'

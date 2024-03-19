@@ -58,8 +58,8 @@ class construction(action.action):
                 displayed_resource = 'consumer goods'
             initial_input_dict['image_id'] = [
                 'buttons/default_button_alt2.png',
-                {'image_id': 'scenery/resources/' + displayed_resource + '.png'},
-                {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
+                {'image_id': 'items/' + displayed_resource + '.png'},
+                {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
             ]
         elif self.building_type == 'infrastructure':
             initial_input_dict['image_id'] = 'buildings/buttons/road.png'
@@ -243,8 +243,8 @@ class construction(action.action):
                     displayed_resource = 'consumer goods'
                 self.button.image.set_image([
                     'buttons/default_button_alt2.png',
-                    {'image_id': 'scenery/resources/' + displayed_resource + '.png'},
-                    {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
+                    {'image_id': 'items/' + displayed_resource + '.png'},
+                    {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
                 ])
 
         elif self.building_type == 'infrastructure':
