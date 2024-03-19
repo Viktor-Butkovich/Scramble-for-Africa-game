@@ -773,34 +773,42 @@ def buttons():
 def europe_screen():
     '''
     Description:
-        Initializes static interface of Europe screen
+        Initializes static interface of Europe screen - purchase buttons for units and items, 8 per column
     Input:
         None
     Output:
         None
     '''
-    #Europe screen buttons setup
-    #max of 8 in column
-    buy_button_y = 0#140
-    input_dict = {
-        'width': scaling.scale_width(100),
-        'height': scaling.scale_height(100),
+    europe_purchase_buttons = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(1500, 20),
+        'width': 10,
+        'height': 10,
         'modes': ['europe'],
-        'init_type': 'recruitment button'
-    }
-    for recruitment_index, recruitment_type in enumerate(constants.recruitment_types):
-        input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
-        input_dict['recruitment_type'] = recruitment_type
-        new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict)
+        'init_type': 'ordered collection',
+        'separation': scaling.scale_height(20),
+        'reversed': True,
+        'second_dimension_increment': scaling.scale_width(125),
+        'direction': 'vertical'
+    })
 
-    for item_type in ['consumer goods']: #, 'Maxim gun']:
+    for recruitment_index, recruitment_type in enumerate(constants.recruitment_types): # Creates recruitment button for each officer type, workers, and steamship
         constants.actor_creation_manager.create_interface_element({
-            'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8))),
             'width': scaling.scale_width(100),
             'height': scaling.scale_height(100),
-            'modes': ['europe'],
+            'init_type': 'recruitment button',
+            'parent_collection': europe_purchase_buttons,
+            'recruitment_type': recruitment_type,
+            'member_config': {'second_dimension_coordinate': -1 * (recruitment_index // 8)}
+        })
+
+    for item_type in ['consumer goods', 'Maxim gun']: # Creates purchase button for items from Europe
+        constants.actor_creation_manager.create_interface_element({
+            'width': scaling.scale_width(100),
+            'height': scaling.scale_height(100),
             'init_type': 'buy item button',
-            'item_type': item_type
+            'parent_collection': europe_purchase_buttons,
+            'item_type': item_type,
+            'member_config': {'second_dimension_coordinate': -1 * (recruitment_index // 8)} # Re-uses recruitment index from previous loop
         })
         recruitment_index += 1
 
