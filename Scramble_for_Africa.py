@@ -35,7 +35,6 @@ except Exception: #displays error message and records error message in crash log
 #   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
 # Add cataracts
-# Add confirmation for free all slaves button
 # Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
 #   pending units - pending is a state like sentry mode
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description

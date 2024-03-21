@@ -766,7 +766,7 @@ def buttons():
     input_dict['modes'] = ['strategic']
     del input_dict['keybind_id']
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
-    input_dict['init_type'] = 'free all button'
+    input_dict['init_type'] = 'confirm free all button'
     free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
     lhs_menu_collection.add_member(free_all_slaves_button)
 

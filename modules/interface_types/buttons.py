@@ -436,7 +436,7 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Bribes the judge of the next trial this turn for ' + str(self.get_cost()) + ' money',
                               'While having unpredictable results, bribing the judge may swing the trial in your favor or blunt the defense\'s efforts to do the same'])
 
-        elif self.button_type == 'free all':
+        elif self.button_type in ['free all', 'confirm free all']:
             self.set_tooltip(['Frees all slaves from your company, converting them to workers'])
 
         elif self.button_type == 'hire village worker':
@@ -970,6 +970,20 @@ class button(interface_elements.interface_element):
                 displayed_mob.replace_worker('African')
             elif displayed_mob.is_worker:
                 displayed_mob.free_and_replace()
+
+        elif self.button_type == 'confirm free all':
+            num_slaves = 0
+            for current_pmob in status.pmob_list:
+                if (current_pmob.is_group and current_pmob.worker.worker_type == 'slave') or (current_pmob.is_worker and (not current_pmob.in_group) and current_pmob.worker_type == 'slave'):
+                    num_slaves += 1
+            if num_slaves > 0:
+                constants.notification_manager.display_notification({
+                    'message': 'Are you sure you want to free all of your company\'s slaves? /n /n',
+                    'transfer_interface_elements': True,
+                    'choices': ['free all', 'Cancel'],
+                })
+            else:
+                text_utility.print_to_screen('Your company has no slaves to free.')
 
         elif self.button_type == 'free all':
             pmob_list = utility.copy_list(status.pmob_list) #alllows iterating through each unit without any issues from removing from list during iteration
