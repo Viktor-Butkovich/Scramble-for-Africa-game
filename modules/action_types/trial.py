@@ -84,7 +84,7 @@ class trial(action.campaign):
         '''
         audio = []
         if subject == 'initial':
-            audio.append('trial starting')
+            audio.append('voices/trial starting')
         return(audio)
 
     def generate_notification_text(self, subject):
@@ -315,7 +315,7 @@ class trial(action.campaign):
             constants.notification_manager.display_notification({
                 'message': text,
                 'notification_type': 'action',
-                'audio': 'guilty'
+                'audio': 'voices/guilty'
             })
             defense.appoint('none')
             minister_utility.calibrate_minister_info_display(None)
@@ -362,7 +362,7 @@ class trial(action.campaign):
             constants.notification_manager.display_notification({
                 'message': text,
                 'notification_type': 'action',
-                'audio': 'not guilty',
+                'audio': 'voices/not guilty',
                 'on_remove': self.leave_trial_screen
             })
             minister_utility.calibrate_minister_info_display(defense)

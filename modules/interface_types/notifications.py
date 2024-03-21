@@ -34,7 +34,7 @@ class notification(multi_line_label):
         self.in_notification = True
         self.is_action_notification = False
         self.notification_dice = 0 #by default, do not show any dice when notification shown
-        constants.sound_manager.play_sound('opening_letter')
+        constants.sound_manager.play_sound('effects/opening_letter')
         self.notification_type = input_dict['notification_type']
         if input_dict.get('on_reveal', None):
             input_dict['on_reveal']()

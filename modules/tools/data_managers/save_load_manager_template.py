@@ -45,7 +45,7 @@ class save_load_manager_template():
         self.copied_constants.append('fear')
         self.copied_constants.append('current_game_mode')
         self.copied_constants.append('sold_commodities')
-        self.copied_constants.append('commodity_prices')
+        self.copied_constants.append('item_prices')
         self.copied_constants.append('recruitment_costs')
         self.copied_constants.append('num_wandering_workers')
         self.copied_constants.append('slave_traders_strength')

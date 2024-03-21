@@ -1578,7 +1578,7 @@ class automatic_route_button(button):
                 'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
                 'width': int value - pixel width of this element
                 'height': int value - pixel height of this element
-                'button_type': string value - Determines the function of this button, like 'clear automatic route', 'follow automatic route', or 'draw automatic route'
+                'button_type': string value - Determines the function of this button, like 'clear automatic route', 'execute automatic route', or 'draw automatic route'
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
@@ -1594,7 +1594,7 @@ class automatic_route_button(button):
     def can_show(self, skip_parent_collection=False):
         '''
         Description:
-            Returns whether this button should be drawn. All automatic route buttons can only appear if the selected unit is porters or a crewed vehicle. Additionally, clear and follow automatic route buttons require that an automatic
+            Returns whether this button should be drawn. All automatic route buttons can only appear if the selected unit is porters or a crewed vehicle. Additionally, clear and execute automatic route buttons require that an automatic
                 route already exists
         Input:
             None
@@ -1604,7 +1604,7 @@ class automatic_route_button(button):
         if super().can_show(skip_parent_collection=skip_parent_collection):
             attached_mob = status.displayed_mob
             if attached_mob.inventory_capacity > 0 and (not (attached_mob.is_group and attached_mob.can_trade)) and (not (attached_mob.is_vehicle and attached_mob.crew == 'none')):
-                if self.button_type in ['clear automatic route', 'follow automatic route']:
+                if self.button_type in ['clear automatic route', 'execute automatic route']:
                     if len(attached_mob.base_automatic_route) > 0:
                         return(True)
                 else:
@@ -1615,7 +1615,7 @@ class automatic_route_button(button):
         '''
         Description:
             Does a certain action when clicked or when corresponding key is pressed, depending on button_type. Clear automatic route buttons remove the selected unit's automatic route. Draw automatic route buttons enter the route
-            drawing mode, in which the player can click on consecutive tiles to add them to the route. Follow automatic route buttons command the selected unit to execute its in-progress automatic route, stopping when it cannot
+            drawing mode, in which the player can click on consecutive tiles to add them to the route. Execute automatic route buttons command the selected unit to execute its in-progress automatic route, stopping when it cannot
             continue the route for any reason
         Input:
             None
@@ -1636,7 +1636,7 @@ class automatic_route_button(button):
                     attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
                     flags.drawing_automatic_route = True
                     
-                elif self.button_type == 'follow automatic route':
+                elif self.button_type == 'execute automatic route':
                     if attached_mob.can_follow_automatic_route():
                         attached_mob.follow_automatic_route()
                         attached_mob.remove_from_turn_queue()
@@ -1646,7 +1646,7 @@ class automatic_route_button(button):
             else:
                 text_utility.print_to_screen('You can only create movement routes in Africa.')
         else:
-            if self.button_type == 'follow automatic route':
+            if self.button_type == 'execute automatic route':
                 text_utility.print_to_screen('You are busy and cannot move this unit.')
             else:
                 text_utility.print_to_screen('You are busy and cannot modify this unit\'s movement route.')

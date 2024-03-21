@@ -65,7 +65,7 @@ class suppress_slave_trade(action.action):
         '''
         audio = super().generate_audio(subject)
         if subject == 'roll_started':
-            audio.append('gunfire')
+            audio.append('effects/gunfire')
         return(audio)
 
     def generate_current_roll_modifier(self):

@@ -497,7 +497,7 @@ class button(interface_elements.interface_element):
                               'When moving along its route, a unit will pick up as many commodities as possible at the start and drop them at the destination',
                               'A unit may not be able to move along its route because of enemy units, a lack of movement points, or not having any commodities to pick up at the start'])
             
-        elif self.button_type == 'follow automatic route':
+        elif self.button_type == 'execute automatic route':
             self.set_tooltip(['Moves this unit along its currently designated movement route'])
         
         elif self.button_type == 'generate crash':

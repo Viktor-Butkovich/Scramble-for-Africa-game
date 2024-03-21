@@ -290,11 +290,7 @@ class npmob(mob):
         if not (self.npmob_type == 'beast' and self.hidden):
             for current_image in self.images:
                 current_image.add_to_cell()
-            if self.visible():
-                if self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-                    constants.sound_manager.play_sound('water')
-                else:
-                    constants.sound_manager.play_sound('footsteps')
+            self.movement_sound()
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)

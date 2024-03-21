@@ -741,6 +741,63 @@ class mob(actor):
             else:
                 return(False)
 
+    def selection_sound(self):
+        '''
+        Description:
+            Plays a sound when this unit is selected, with a varying sound based on this unit's type
+        Input:
+            None
+        Output:
+            None
+        '''
+        possible_sounds = []
+        if self.is_pmob:
+            if self.is_vehicle: # Overlaps with voices
+                if self.vehicle_type == 'train':
+                    constants.sound_manager.play_sound('effects/train_horn')
+                else:
+                    constants.sound_manager.play_sound('effects/foghorn')
+
+            if self.is_officer or self.is_group or self.is_vehicle:
+                if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
+                    constants.sound_manager.play_sound('effects/bolt_action_2')
+                if status.current_country.name == 'France':
+                    possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
+                elif status.current_country.name == 'Germany':
+                    possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
+                else:
+                    possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
+                    if self.is_vehicle and self.vehicle_type == 'ship':
+                        possible_sounds.append('voices/steady she goes')
+        if possible_sounds:
+            constants.sound_manager.play_sound(random.choice(possible_sounds))
+
+    def movement_sound(self):
+        '''
+        Description:
+            Plays a sound when this unit moves or embarks/disembarks a vehicle, with a varying sound based on this unit's type
+        Input:
+            None
+        Output:
+            None
+        '''
+        if constants.sound_manager.busy():
+            constants.sound_manager.fadeout(500)
+        possible_sounds = []
+        if self.is_pmob or self.visible():
+            if self.is_vehicle:
+                if self.vehicle_type == 'train':
+                    possible_sounds.append('effects/train_moving')
+                else:
+                    constants.sound_manager.play_sound('effects/ocean_splashing')
+                    possible_sounds.append('effects/ship_propeller')
+            elif self.images[0].current_cell != 'none' and self.images[0].current_cell.terrain == 'water':
+                possible_sounds.append('effects/river_splashing')
+            else:
+                possible_sounds.append('effects/footsteps')
+        if possible_sounds:
+            constants.sound_manager.play_sound(random.choice(possible_sounds))
+
     def move(self, x_change, y_change):
         '''
         Description:
@@ -765,10 +822,7 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
 
-        if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-            constants.sound_manager.play_sound('water')
-        else:
-            constants.sound_manager.play_sound('footsteps')
+        self.movement_sound()
 
         if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle): #test this logic
             previous_infrastructure = previous_cell.get_intact_building('infrastructure')

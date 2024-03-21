@@ -214,7 +214,7 @@ class action():
         audio = []
         if subject == 'roll_finished':
             if self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
-                audio.append('trumpet_1')
+                audio.append('effects/trumpet')
         return(audio)
 
     def generate_current_roll_modifier(self):

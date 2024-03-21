@@ -404,10 +404,10 @@ class combat(action.action):
         audio =  super().generate_audio(subject)
         if subject == 'initial':
             if self.current_unit.is_battalion or self.current_unit.is_safari:
-                audio.append('bolt_action_1')
+                audio.append('effects/bolt_action_1')
         elif subject == 'roll_started':
             if self.current_unit.is_battalion or self.current_unit.is_safari:
-                audio.append('gunfire')
+                audio.append('effects/gunfire')
         return(audio)
 
     def middle(self, combat_info_dict=None):

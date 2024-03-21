@@ -163,9 +163,9 @@ class slave_capture(action.action):
         '''
         audio =  super().generate_audio(subject)
         if subject == 'roll_started':
-            audio.append('gunfire')
+            audio.append('effects/gunfire')
         elif subject == 'initial':
-            audio.append('bolt_action_1')
+            audio.append('effects/bolt_action_1')
         return(audio)
 
     def can_show(self):

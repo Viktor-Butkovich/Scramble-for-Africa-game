@@ -282,28 +282,6 @@ class pmob(mob):
         if self == status.displayed_mob:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
-    def selection_sound(self):
-        '''
-        Description:
-            Plays a sound when this unit is selected, with a varying sound based on this unit's type
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.is_officer or self.is_group or self.is_vehicle:
-            if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
-                constants.sound_manager.play_sound('bolt_action_2')
-            if status.current_country.name == 'France':
-                possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
-            elif status.current_country.name == 'Germany':
-                possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
-            else:
-                possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
-                if self.is_vehicle and self.vehicle_type == 'ship':
-                    possible_sounds.append('voices/steady she goes')
-            constants.sound_manager.play_sound(random.choice(possible_sounds))
-
     def set_automatically_replace(self, new_value):
         '''
         Description:
@@ -733,7 +711,7 @@ class pmob(mob):
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             vehicle.select()
         if not flags.loading_save:
-            constants.sound_manager.play_sound('footsteps')
+            self.movement_sound()
         self.clear_automatic_route()
 
     def disembark_vehicle(self, vehicle, focus = True):
@@ -769,7 +747,7 @@ class pmob(mob):
         if focus:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
-            constants.sound_manager.play_sound('footsteps')
+            self.movement_sound()
 
     def get_worker(self) -> 'pmob':
         '''

@@ -101,8 +101,8 @@ class actor_display_label(label):
             input_dict['button_type'] = 'draw automatic route'
             self.add_attached_button(input_dict)
 
-            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
-            input_dict['button_type'] = 'follow automatic route'
+            input_dict['image_id'] = 'buttons/execute_single_movement_route_button.png'
+            input_dict['button_type'] = 'execute automatic route'
             self.add_attached_button(input_dict)
 
             for action_type in status.actions:

@@ -182,9 +182,9 @@ class construction(action.action):
             if self.roll_result >= self.current_min_success:
                 if self.building_type == 'mission':
                     if status.current_country.religion == 'protestant':
-                        sound_id = 'onward christian soldiers'
+                        sound_id = 'effects/onward_christian_soldiers'
                     elif status.current_country.religion == 'catholic':
-                        sound_id = 'ave maria'
+                        sound_id = 'effects/ave_maria'
                     audio.append({'sound_id': sound_id, 'dampen_music': True})
         return(audio)
 

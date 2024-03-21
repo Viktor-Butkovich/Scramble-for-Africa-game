@@ -226,7 +226,8 @@ class actor():
         held_commodities = []
         for current_commodity in self.inventory:
             if not (ignore_consumer_goods and current_commodity == 'consumer goods'):
-                held_commodities.append(current_commodity)
+                if self.inventory[current_commodity] > 0:
+                    held_commodities.append(current_commodity)
         return(held_commodities)
 
     def manage_inventory_attrition(self):
