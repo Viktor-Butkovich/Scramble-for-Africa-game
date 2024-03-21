@@ -167,7 +167,6 @@ class rumor_search(action.action):
                     'message': 'Start search'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Cancel'],
                     'message': 'Cancel'
                     }
@@ -192,8 +191,6 @@ class rumor_search(action.action):
                 location.set_revealed(True)
                 village.found_rumors = True
                 text = 'The villagers tell rumors that the ' + status.current_lore_mission.name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
-                flags.ongoing_action = True
-                status.ongoing_action_type = 'rumor_search'
                 constants.notification_manager.display_notification({
                     'message': text + 'Click to remove this notification. /n /n',
                     'notification_type': 'off_tile_exploration',

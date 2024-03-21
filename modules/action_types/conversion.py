@@ -192,7 +192,6 @@ class conversion(action.action):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }

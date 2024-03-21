@@ -119,7 +119,6 @@ current_instructions_page: instructions_page = None
 current_country: country = None
 current_country_name: str = None
 current_lore_mission: lore_mission = None
-ongoing_action_type: str = None
 current_ministers: Dict[str, minister] = {}
 lore_types_effects_dict: Dict[str, effect] = {}
 previous_financial_report: str = None

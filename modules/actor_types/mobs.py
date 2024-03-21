@@ -618,10 +618,10 @@ class mob(actor):
         if not self.end_turn_destination == 'none':
             if self.end_turn_destination.cell.grid == status.strategic_map_grid:
                 tooltip_list.append('This unit has been issued an order to travel to (' + str(self.end_turn_destination.cell.x) + ', ' + str(self.end_turn_destination.cell.y) + ') in Africa at the end of the turn')
-            elif self.end_turn_destination.cell.grid == status.europe_grid:
-                tooltip_list.append('This unit has been issued an order to travel to Europe at the end of the turn')
             elif self.end_turn_destination.cell.grid == status.slave_traders_grid:
                 tooltip_list.append('This unit has been issued an order to travel to the slave traders at the end of the turn')
+            else:
+                tooltip_list.append('This unit has been issued an order to travel to ' + self.end_turn_destination.cell.grid.grid_type[:-5].capitalize() + ' at the end of the turn')
                 
         if self.is_npmob and self.npmob_type == 'beast':
             tooltip_list.append('This beast tends to live in ' + self.preferred_terrains[0] + ', ' + self.preferred_terrains[1] + ', and ' + self.preferred_terrains[2] + ' terrain ')

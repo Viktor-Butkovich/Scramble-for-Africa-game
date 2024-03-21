@@ -251,12 +251,14 @@ class minister():
         minister_portrait_icon_dict['minister_image_type'] = 'portrait'
         return([minister_position_icon_dict, minister_portrait_icon_dict])
 
-    def display_message(self, text, audio='none'):
+    def display_message(self, text, audio='none', transfer=False):
         '''
         Description:
             Displays a notification message from this minister with an attached portrait
         Input:
             string text: Message to display in notification
+            string audio: Any audio to play with notification
+            boolean transfer: Whether the minister icon should carry on to future notifications - should set to True for actions, False for misc. messages
         Output:
             None
         '''
@@ -266,7 +268,7 @@ class minister():
             'audio': audio,
             'attached_minister': self,
             'attached_interface_elements': self.generate_icon_input_dicts(alignment='left'),
-            'transfer_interface_elements': not main_loop_utility.action_possible() #Transfer if during action, don't transfer if misc. messages
+            'transfer_interface_elements': transfer
         })
 
     def can_pay(self, value):
@@ -326,7 +328,7 @@ class minister():
                     evidence_message += constants.transaction_descriptions[theft_type] + ' and has filed a piece of evidence against him. /n /n'
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
-                    prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'))
+                    prosecutor.display_message(evidence_message, prosecutor.get_voice_line('evidence'), transfer=False) # Don't need to transfer since evidence is last step in action
                     if constants.effect_manager.effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who chose to create evidence.')
                     return(True)
@@ -799,12 +801,8 @@ class minister():
                             self.personal_savings = 0
                         prosecutor.steal_money(bribe_cost, 'bribery')
                         apparent_value = random.randrange(1, 4)
-            #if self.apparent_corruption_description == 'unknown' or prosecutor != 'none': #don't actually change value unless 
-            #    changed_value = True
             self.set_apparent_corruption(apparent_value)
         else:
-            #if self.apparent_skill_descriptions[rumor_type] == 'unknown' or prosecutor != 'none': #don't actually change established value from rumor
-                #changed_value = True
             self.set_apparent_skill(rumor_type, apparent_value)
 
         if prosecutor == 'none' :
@@ -821,8 +819,6 @@ class minister():
                     skill_name = constants.minister_type_dict[rumor_type]
                     message += utility.generate_article(self.apparent_skill_descriptions[rumor_type]) + ' ' + self.apparent_skill_descriptions[rumor_type] + ' ' + skill_name + ' ability'
                 message += '. /n /n'
-                #if not changed_value:
-                #    message + 'As this information is just a rumor, it will not replace '
                 self.display_message(message)
 
     def check_corruption(self): #returns true if stealing for this roll
@@ -1130,7 +1126,7 @@ class minister():
                 text += ' /n /n /n' + self.current_position + ' ' + self.name + ' has chosen to step down and retire. /n /n'
                 text += 'Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n'
         constants.public_opinion_tracker.change(public_opinion_change)
-        if not text == '':
+        if text != '':
             self.display_message(text, audio)
 
     def get_voice_line(self, type):

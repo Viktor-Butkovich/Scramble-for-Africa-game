@@ -191,7 +191,6 @@ class trial(action.campaign):
                     'message': 'Start trial'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Cancel'],
                     'message': 'Cancel'
                     }

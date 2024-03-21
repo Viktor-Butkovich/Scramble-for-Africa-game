@@ -220,8 +220,6 @@ class off_tile_exploration_notification(action_notification):
                 }
             ))
 
-        flags.ongoing_action = True
-        status.ongoing_action_type = 'exploration'
         if reveal_cell:
             cell.set_visibility(True)
         constants.public_opinion_tracker.change(public_opinion_increase)
@@ -238,6 +236,4 @@ class off_tile_exploration_notification(action_notification):
             None
         '''
         status.minimap_grid.calibrate(status.displayed_mob.x, status.displayed_mob.y)
-        flags.ongoing_action = False
-        status.ongoing_action_type = None
         super().remove()

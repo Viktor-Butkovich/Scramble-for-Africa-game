@@ -1007,7 +1007,6 @@ class button(interface_elements.interface_element):
                 text_utility.print_to_screen('Your company has no slaves to free.')
 
         elif self.button_type == 'confirm main menu':
-            flags.game_over = False
             game_transitions.to_main_menu()
 
         elif self.button_type == 'quit':
@@ -2595,8 +2594,8 @@ class anonymous_button(button):
         self.notification = input_dict.get('notification', None)
         button_info_dict = input_dict['button_type']
         input_dict['button_type'] = 'anonymous'
-        self.on_click_info = button_info_dict['on_click']
-        if type(self.on_click_info[0]) != list:
+        self.on_click_info = button_info_dict.get('on_click', None)
+        if self.on_click_info and type(self.on_click_info[0]) != list:
             self.on_click_info = ([self.on_click_info[0]], [self.on_click_info[1]])
         self.tooltip = button_info_dict['tooltip']
         self.message = button_info_dict.get('message')
@@ -2618,8 +2617,9 @@ class anonymous_button(button):
             None
         '''
         super().on_click()
-        for index in range(len(self.on_click_info[0])):
-            self.on_click_info[0][index](*self.on_click_info[1][index]) #calls each item function with corresponding parameters
+        if self.on_click_info:
+            for index in range(len(self.on_click_info[0])):
+                self.on_click_info[0][index](*self.on_click_info[1][index]) #calls each item function with corresponding parameters
         if self.in_notification:
             self.notification.on_click(choice_button_override=True)
 

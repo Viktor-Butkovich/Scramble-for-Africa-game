@@ -168,7 +168,7 @@ class exploration(action.action):
                     'message': 'Explore'
                     },
                     {
-                    'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[], []]),
+                    'on_click': (self.current_unit.clear_attached_cell_icons, []),
                     'tooltip': ['Cancel'],
                     'message': 'Cancel'
                     }

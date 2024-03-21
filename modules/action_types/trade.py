@@ -163,7 +163,6 @@ class trade(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }
@@ -187,17 +186,13 @@ class trade(action.action):
             self.current_village.change_available_workers(1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African')
         self.trades_remaining -= 1
-        flags.ongoing_action = True
-        status.ongoing_action_type = 'rumor_search'
         if self.trades_remaining == 0:
             constants.notification_manager.display_notification({
-                'message': 'The villagers are not willing to trade any more with this caravan this turn. /n /n',
-                'on_remove': action_utility.cancel_ongoing_actions
+                'message': 'The villagers are not willing to trade any more with this caravan this turn. /n /n'
             })
         elif self.current_unit.get_inventory('consumer goods') == 0:
             constants.notification_manager.display_notification({
-                'message': 'The caravan does not have any more consumer goods to sell. /n /n',
-                'on_remove': action_utility.cancel_ongoing_actions
+                'message': 'The caravan does not have any more consumer goods to sell. /n /n'
             })
         else:
             self.start(self.current_unit)

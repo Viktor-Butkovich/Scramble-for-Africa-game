@@ -38,10 +38,8 @@ class expedition(group):
         super().__init__(from_save, input_dict)
         self.can_explore = True
         self.set_has_canoes(True)
-        
         self.set_group_type('expedition')
-        if self.images[0].current_cell != 'none': #if did not just board vehicle
-            self.resolve_off_tile_exploration()
+        self.resolve_off_tile_exploration()
 
     def move(self, x_change, y_change):
         '''
@@ -77,8 +75,20 @@ class expedition(group):
             status.actions['exploration'].on_click(self, on_click_info_dict={'x_change': x_change, 'y_change': y_change, 'direction': direction})
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
-            if self.images[0].current_cell != 'none': #if not in vehicle
-                self.resolve_off_tile_exploration()
+            #if self.images[0].current_cell != 'none': #if not in vehicle
+            #    self.resolve_off_tile_exploration()
+
+    def calibrate_sub_mob_positions(self):
+        '''
+        Description:
+            Updates the positions of this mob's submobs (mobs inside of a building or other mob that are not able to be independently viewed or selected) to match this mob
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().calibrate_sub_mob_positions()
+        self.resolve_off_tile_exploration()
 
     def disembark_vehicle(self, vehicle):
         '''
@@ -103,7 +113,10 @@ class expedition(group):
         '''
         self.current_action_type = 'exploration' #used in action notification to tell whether off tile notification should explore tile or not
         cardinal_directions = {'up': 'north', 'down': 'south', 'right': 'east', 'left': 'west'}
-        current_cell = self.images[0].current_cell
+        if self.in_vehicle:
+            current_cell = self.vehicle.images[0].current_cell
+        else:
+            current_cell = self.images[0].current_cell
         for current_direction in ['up', 'down', 'left', 'right']:
             target_cell = current_cell.adjacent_cells[current_direction]
             if target_cell and not target_cell.visible:
@@ -125,7 +138,6 @@ class expedition(group):
                     if public_opinion_increase > 0: #Royal/National/Imperial
                         text += 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
                     
-                    flags.ongoing_action = True
                     constants.notification_manager.display_notification({
                         'message': text + 'Click to remove this notification. /n /n',
                         'notification_type': 'off_tile_exploration',

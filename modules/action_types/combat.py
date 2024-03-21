@@ -372,7 +372,7 @@ class combat(action.action):
                     'message': 'Attack'
                     },
                     {
-                    'on_click': ([action_utility.cancel_ongoing_actions, self.current_unit.clear_attached_cell_icons], [[], []]),
+                    'on_click': (self.current_unit.clear_attached_cell_icons, []),
                     'tooltip': ['Stop attack'],
                     'message': 'Stop attack'
                     }
@@ -435,8 +435,6 @@ class combat(action.action):
         else:
             self.current_unit.clear_attached_cell_icons()
             self.current_unit.move(self.x_change, self.y_change, True)
-        flags.ongoing_action = True
-        status.ongoing_action_type = 'combat'
 
         self.roll_lists = []
         if self.current_unit.veteran:

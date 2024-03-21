@@ -148,6 +148,5 @@ class track_beasts(action.action):
                 'attached_interface_elements': self.generate_attached_interface_elements('completion')
             })
             unit.change_movement_points(-1)
-            action_utility.cancel_ongoing_actions()
             for current_beast in ambush_list:
                 current_beast.attempt_local_combat()

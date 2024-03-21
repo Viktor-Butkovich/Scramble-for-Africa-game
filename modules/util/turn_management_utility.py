@@ -88,7 +88,6 @@ def start_player_turn(first_turn = False):
         status.displayed_mob.select()
     else:
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-       
 
 def reset_mobs(mob_type):
     '''
@@ -205,7 +204,7 @@ def manage_production_report(expected_production):
                         expected_production[max_commodity] = status.current_ministers['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
             text += max_commodity.capitalize() + ': ' + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
-        production_minister.display_message(text)       
+        production_minister.display_message(text, transfer=True)
 
 def manage_upkeep():
     '''
@@ -652,7 +651,6 @@ def game_end_check():
         None
     '''
     if constants.money < 0:
-        flags.game_over = True
         text = ''
         text += 'Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER'
         constants.notification_manager.display_notification({
@@ -701,7 +699,7 @@ def manage_commodity_sales():
     constants.money_tracker.change(reported_revenue, 'sold_commodities')
     
     if any_sold:
-        trade_minister.display_message(text)
+        trade_minister.display_message(text, transfer=True)
     if money_stolen > 0:
         trade_minister.steal_money(money_stolen, 'sold_commodities')
 

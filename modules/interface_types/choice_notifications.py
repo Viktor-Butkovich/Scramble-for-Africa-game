@@ -55,7 +55,6 @@ class choice_notification(action_notifications.action_notification):
                 'notification': self,
                 'init_type': init_type
             }))
-        flags.making_choice = True
 
     def on_click(self, choice_button_override=False):
         '''
@@ -91,7 +90,6 @@ class choice_notification(action_notifications.action_notification):
         Output:
             None
         '''
-        flags.making_choice = False
         super().remove()
         for current_choice_button in self.choice_buttons:
             current_choice_button.remove_complete()

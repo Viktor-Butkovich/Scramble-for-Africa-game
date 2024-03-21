@@ -547,13 +547,9 @@ class pmob(mob):
         Output:
             None
         '''
-        if not self.end_turn_destination == 'none':
-            if self.grids[0] in self.end_turn_destination.grids: #if on same grid
-                nothing = 0 #do once queued movement is added
-            else: #if on different grid
-                if self.can_travel():
-                    self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
-                    self.manage_inventory_attrition() #do an inventory check when crossing ocean, using the destination's terrain
+        if self.end_turn_destination != 'none' and self.can_travel():
+            self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
+            self.manage_inventory_attrition() #do an inventory check when crossing ocean, using the destination's terrain
             self.end_turn_destination = 'none'
     
     def can_travel(self): #if can move between Europe, Africa, etc.

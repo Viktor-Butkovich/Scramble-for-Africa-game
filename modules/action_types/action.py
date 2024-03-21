@@ -272,8 +272,6 @@ class action():
             })
             return(False)
         else:
-            flags.ongoing_action = True
-            status.ongoing_action_type = self.action_type
             return(True)
 
     def process_payment(self):
@@ -413,7 +411,6 @@ class action():
         if self.actor_type == 'mob' and self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
             self.current_unit.promote()
             status.displayed_mob.select()
-        action_utility.cancel_ongoing_actions()
 
 class campaign(action):
     '''

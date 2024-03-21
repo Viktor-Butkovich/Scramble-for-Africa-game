@@ -41,9 +41,7 @@ except Exception: #displays error message and records error message in crash log
 # Add ambient resource production facility, settlement, and village sounds
 # Allow some inventory attrition to occur in Europe
 # Add direct attack on native villages action
-# Allow water exploration for steamboat/train with expedition on board
 # Add cannibals
-# Add train/ship sounds
 # Replace resource production facility images
 # Add equipment
 #   Battalions should be 1 weaker, and rifles should give a +1 to combat strength - soldiers without rifles should have uniforms but no rifles in the image
@@ -52,12 +50,6 @@ except Exception: #displays error message and records error message in crash log
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 # When steamship/steamboat moves to non-port land from water, disembark and move all passengers - any passengers w/o enough movement should stay on vehicle, and can't move
 #   into npmobs
-# Should only select 1st unit at start of turn after getting through initial notifications - currently causing tile/building zoom notifications to be overridden by the
-#    start of turn cycle
 #
 #   bugfixes
 # Find some solution to overlapping 3rd work crew and text box
-
-# Notes:
-#   Don't allow any actions while any notifications are visible, even purely informational ones
-#   Make sure movement buttons move the selected unit

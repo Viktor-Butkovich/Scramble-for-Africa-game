@@ -96,21 +96,7 @@ def action_possible():
     Output:
         boolean: Returns False if the player is in an ongoing event that prevents other actions from being taken, otherwise returns True
     '''
-    if flags.ongoing_action:
-        return(False)
-    elif flags.game_over:
-        return(False)
-    elif flags.making_choice:
-        return(False)
-    elif not flags.player_turn:
-        return(False)
-    elif flags.choosing_destination:
-        return(False)
-    elif flags.choosing_advertised_commodity:
-        return(False)
-    elif flags.drawing_automatic_route:
-        return(False)
-    return(True)
+    return(not (status.displayed_notification or (not flags.player_turn) or flags.choosing_destination or flags.choosing_advertised_commodity or flags.drawing_automatic_route))
 
 def draw_loading_screen():
     '''

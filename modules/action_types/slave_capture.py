@@ -220,7 +220,6 @@ class slave_capture(action.action):
                     'message': 'Capture slaves'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Cancel'],
                     'message': 'Cancel'
                     }

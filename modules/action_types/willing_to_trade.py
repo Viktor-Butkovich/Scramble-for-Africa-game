@@ -183,7 +183,6 @@ class willing_to_trade(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }

@@ -1,6 +1,5 @@
 #Contains functionality for notifications
 
-import time
 from .labels import multi_line_label
 from ..util import actor_utility
 import modules.constants.constants as constants
