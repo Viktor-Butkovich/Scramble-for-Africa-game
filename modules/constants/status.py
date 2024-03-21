@@ -5,6 +5,7 @@ from modules.actor_types.mobs import mob
 from modules.constructs.ministers import minister
 from modules.constructs.countries import country
 from modules.constructs.worker_types import worker_type
+from modules.constructs.equipment_types import equipment_type
 from modules.constructs.images import image, free_image
 from modules.interface_types.interface_elements import interface_collection, tabbed_collection, ordered_collection
 from modules.interface_types.inventory_interface import inventory_grid
@@ -61,6 +62,7 @@ minister_list: List[minister] = []
 available_minister_list: List[minister] = []
 country_list: List[country] = []
 worker_types: Dict[str, worker_type] = {}
+equipment_types: Dict[str, equipment_type] = {}
 flag_icon_list: List[button] = []
 grid_list: List[grid] = []
 text_list: List[str] = []

@@ -233,7 +233,7 @@ class mob(actor):
         Input:
             None
         Output:
-            int: Returns this unit's combst strength
+            int: Returns this unit's combat strength
         '''
         #A unit with 0 combat strength cannot fight
         #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
@@ -248,6 +248,8 @@ class mob(actor):
         base = self.get_combat_modifier()
         result = base + 3
         if self.veteran:
+            result += 1
+        if self.is_pmob and self.equipment.get('Maxim gun', False):
             result += 1
         if self.is_officer or (self.is_vehicle and self.crew == 'none'):
             result = 0
@@ -677,6 +679,7 @@ class mob(actor):
         '''
         if self.is_pmob:
             self.death_sound(death_type)
+        self.drop_inventory()
         self.remove_complete()
 
     def death_sound(self, death_type: str = 'violent'):

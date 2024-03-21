@@ -233,6 +233,13 @@ class actor_display_label(label):
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+            if self.actor_label_type == 'mob inventory capacity':
+                input_dict['init_type'] = 'remove equipment button'
+                input_dict['width'], input_dict['height'] = (m_size, m_size)
+                for equipment_type in status.equipment_types:
+                    input_dict['equipment_type'] = equipment_type
+                    input_dict['image_id'] = ['buttons/default_button.png', 'misc/green_circle.png', 'items/' + equipment_type + '.png']
+                    self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
@@ -360,7 +367,6 @@ class actor_display_label(label):
         
         elif self.actor_label_type == 'inventory_quantity':
             self.message_start = 'Quantity: '
-
             if self.actor_type == 'mob':
                 input_dict['init_type'] = 'anonymous button'
                 input_dict['image_id'] = 'buttons/commodity_drop_button.png'
@@ -379,7 +385,6 @@ class actor_display_label(label):
 
             elif self.actor_type == 'tile':
                 original_input_dict = input_dict.copy()
-
                 input_dict['init_type'] = 'anonymous button'
                 input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
                 input_dict['button_type'] = {
@@ -402,6 +407,10 @@ class actor_display_label(label):
 
                 input_dict['init_type'] = 'sell all commodity button'
                 input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
+                self.add_attached_button(input_dict)
+
+                input_dict['init_type'] = 'use equipment button'
+                input_dict['image_id'] = 'buttons/use_equipment_button.png'
                 self.add_attached_button(input_dict)
 
         else:

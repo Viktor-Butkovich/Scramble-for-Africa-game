@@ -247,7 +247,6 @@ terrain_build_cost_multiplier_dict: Dict[str, int] = {
     'desert': 2
 }
 
-equipment_types: List[str] = ['Maxim gun', 'rifles', 'canoes']
 commodity_types: List[str] = ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
 collectable_resources: List[str] = ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
 item_prices: Dict[str, int] = {}

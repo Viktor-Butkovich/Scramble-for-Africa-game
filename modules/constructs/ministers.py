@@ -474,13 +474,9 @@ class minister():
         '''
         min_result = 1
         max_result = num_sides
-        result = random.randrange(1, num_sides + 1)
-        result += self.get_roll_modifier(roll_type)
-        
-        if result < min_result:
-            result = min_result
-        elif result > max_result:
-            result = max_result
+        result = random.randrange(1, num_sides + 1) + self.get_roll_modifier(roll_type)
+        result = max(min_result, result)
+        result = min(max_result, result)
         return(result)
 
     def roll_to_list(self, num_sides, min_success, max_crit_fail, value, roll_type, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice

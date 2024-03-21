@@ -197,8 +197,11 @@ class buy_item_button(button):
         Output:
             None
         '''
+        new_tooltip = []
         if self.item_type.endswith('s'):
-            self.set_tooltip(['Purchases 1 unit of ' + self.item_type + ' for ' + str(constants.item_prices[self.item_type]) + ' money.'])
+            new_tooltip.append('Purchases 1 unit of ' + self.item_type + ' for ' + str(constants.item_prices[self.item_type]) + ' money.')
         else:
-            self.set_tooltip(['Purchases 1 ' + self.item_type + ' for ' + str(constants.item_prices[self.item_type]) + ' money.'])
-        
+            new_tooltip.append('Purchases 1 ' + self.item_type + ' for ' + str(constants.item_prices[self.item_type]) + ' money.')
+        if self.item_type in status.equipment_types:
+            new_tooltip += status.equipment_types[self.item_type].description
+        self.set_tooltip(new_tooltip)

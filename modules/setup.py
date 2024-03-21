@@ -13,6 +13,7 @@ import modules.util.game_transitions as game_transitions
 import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
 import modules.constructs.worker_types as worker_types
+import modules.constructs.equipment_types as equipment_types
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
@@ -196,6 +197,24 @@ def worker_types_config():
                                 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
 
+class equipment_types_config():
+    '''
+    Description:
+        Defines equipment type templates
+    Input:
+        None
+    Output:
+        None
+    '''
+    equipment_types.equipment_type({
+        'equipment_type': 'Maxim gun',
+        'requirement': 'is_battalion',
+        'description': [
+            'A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls',
+            'Can only be equipped by battalions'
+        ]
+    })
+
 def terrains():
     '''
     Description:
@@ -268,8 +287,8 @@ def commodities():
     for current_commodity in constants.collectable_resources:
         constants.commodities_produced[current_commodity] = 0
 
-    for current_equipment in constants.equipment_types:
-        constants.item_prices[current_equipment] = 5
+    for current_equipment in status.equipment_types:
+        constants.item_prices[current_equipment] = status.equipment_types[current_equipment].price
 
 def def_ministers():
     '''

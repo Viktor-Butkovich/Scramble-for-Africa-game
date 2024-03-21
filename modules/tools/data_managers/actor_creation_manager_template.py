@@ -191,6 +191,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.action_button(input_dict)
                 elif base == 'scroll':
                     new_element = buttons.scroll_button(input_dict)
+                elif base == 'remove equipment':
+                    new_element = buttons.remove_equipment_button(input_dict)
 
                 #instructions buttons
                 elif base == 'instructions':

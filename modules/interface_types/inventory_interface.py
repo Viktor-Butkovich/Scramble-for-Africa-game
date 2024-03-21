@@ -209,7 +209,10 @@ class item_icon(button):
             None
         '''
         if self.current_item:
-            self.set_tooltip([self.current_item.capitalize()])
+            if self.current_item in status.equipment_types:
+                self.set_tooltip([self.current_item.capitalize()] + status.equipment_types[self.current_item].description)
+            else:
+                self.set_tooltip([self.current_item.capitalize()])
         else:
             self.set_tooltip(['Empty'])
 
@@ -246,7 +249,7 @@ class item_icon(button):
             if minister_utility.positions_filled():
                 displayed_mob = status.displayed_mob
                 displayed_tile = status.displayed_tile
-                if displayed_mob and displayed_tile and displayed_mob.images[0].current_cell.tile == displayed_tile:
+                if displayed_mob and displayed_tile and displayed_mob.is_pmob and displayed_mob.images[0].current_cell.tile == displayed_tile:
                     if amount == 'all':
                         if self.actor_type == 'tile_inventory':
                             amount = displayed_tile.get_inventory(self.current_item)

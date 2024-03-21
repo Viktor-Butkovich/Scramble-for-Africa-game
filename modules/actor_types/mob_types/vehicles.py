@@ -294,9 +294,9 @@ class vehicle(pmob):
         for current_passenger in self.contained_mobs:
             current_passenger.fire()
         self.contained_mobs = []
-        if not self.crew == 'none':
+        if self.crew != 'none':
             self.crew.fire()
-            self.crew = 'none'
+            self.set_crew('none')
         super().fire()
 
     def to_save_dict(self):

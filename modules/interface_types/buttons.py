@@ -331,7 +331,15 @@ class button(interface_elements.interface_element):
                                       'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
             else:
                 self.set_tooltip(['none'])
-                
+
+        elif self.button_type == 'use equipment':
+            if status.displayed_tile:
+                self.set_tooltip(['Orders the selected unit to equip ' + self.attached_label.actor.current_item])
+        
+        elif self.button_type == 'remove equipment':
+            if status.displayed_mob:
+                self.set_tooltip(['Click to unequip ' + self.equipment_type] + status.equipment_types[self.equipment_type].description)
+
         elif self.button_type == 'switch theatre':
            self.set_tooltip(['Moves this steamship across the ocean to another theatre at the end of the turn',
                              'Once clicked, the mouse pointer can be used to click on the destination',
@@ -716,7 +724,7 @@ class button(interface_elements.interface_element):
         '''
         self.on_click()
 
-    def on_click(self): #sell commodity, sell all commodity
+    def on_click(self):
         '''
         Description:
             Controls this button's behavior when left clicked. This behavior depends on the button's button_type
@@ -893,6 +901,38 @@ class button(interface_elements.interface_element):
                 else:
                     actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, None)
 
+        elif self.button_type == 'use equipment':
+            if main_loop_utility.action_possible():
+                if status.displayed_mob and status.displayed_mob.is_pmob:
+                    equipment = status.equipment_types[self.attached_label.actor.current_item]
+                    if equipment.check_requirement(status.displayed_mob):
+                        if not status.displayed_mob.equipment.get(equipment.equipment_type, False):
+                            status.displayed_mob.equipment[equipment.equipment_type] = True
+                            status.displayed_tile.change_inventory(equipment.equipment_type, -1)
+                            actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
+                            actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
+                            actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
+                            if status.displayed_tile_inventory and status.displayed_tile_inventory.current_item:
+                                actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, status.displayed_tile_inventory)
+                            else:
+                                actor_utility.calibrate_actor_info_display(status.tile_inventory_info_display, None)
+                        else:
+                            text_utility.print_to_screen('This unit already has ' + equipment.equipment_type + ' equipped.')
+                    else:
+                        text_utility.print_to_screen('This type of unit can not equip ' + equipment.equipment_type + '.')
+                else:
+                    text_utility.print_to_screen('There is no unit to use this equipment.')
+            else:
+                text_utility.print_to_screen('You are busy and cannot transfer equipment.')
+
+        elif self.button_type == 'remove equipment':
+            if main_loop_utility.action_possible():
+                del status.displayed_mob.equipment[self.equipment_type]
+                status.displayed_tile.change_inventory(self.equipment_type, 1)
+                actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
+            else:
+                text_utility.print_to_screen('You are busy and cannot transfer equipment.')
+
         elif self.button_type == 'cycle units':
             if main_loop_utility.action_possible():
                 game_transitions.cycle_player_turn()
@@ -1067,12 +1107,50 @@ class button(interface_elements.interface_element):
                 if status.displayed_mob == None or (not status.displayed_mob.is_pmob):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
-                if status.displayed_tile and status.europe_grid in status.displayed_tile.grids and self.attached_label.actor.current_item in constants.collectable_resources:
-                    return(True)
-                else:
-                    return(False)
+                return(status.displayed_tile and status.europe_grid in status.displayed_tile.grids and self.attached_label.actor.current_item in constants.collectable_resources)
+            elif self.button_type == 'use equipment':
+                return(self.attached_label.actor.current_item in status.equipment_types)
             return(True)
         return(False)
+
+class remove_equipment_button(button):
+    '''
+    Button linked to a particular equipment type that can unequip it when equipped, and shows that is is equipped
+    '''
+    def __init__(self, input_dict):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'equipment_type': string value - Type of equipment, like 'Maxim gun'
+        Output:
+            None
+        '''
+        input_dict['button_type'] = 'remove equipment'
+        self.equipment_type = input_dict['equipment_type']
+        super().__init__(input_dict)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: If superclass would show, returns True if the selected unit has this button's equipment type equipped
+        '''
+        return(super().can_show() and self.attached_label.actor.is_pmob and self.attached_label.actor.equipment.get(self.equipment_type, False))
 
 class end_turn_button(button):
     '''

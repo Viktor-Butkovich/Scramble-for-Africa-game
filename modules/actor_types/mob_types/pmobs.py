@@ -35,6 +35,8 @@ class pmob(mob):
                 'base_automatic_route': int tuple list value - Required if from save, list of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - Required if from save, list of the coordinates and string commands this unit will execute, changes as the route is executed
+                'inventory': dictionary value - This actor's initial items carried, with an integer value corresponding to amount of each item type 
+                'equipment': dictionary value - This actor's initial items equipped, with a boolean value corresponding to whether each type of equipment is equipped
         Output:
             None
         '''
@@ -44,6 +46,7 @@ class pmob(mob):
         status.pmob_list.append(self)
         self.is_pmob = True
         self.set_controlling_minister_type('none')
+        self.equipment = input_dict.get('equipment', {})
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
@@ -90,6 +93,7 @@ class pmob(mob):
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - List of the coordinates and string commands this unit will execute, changes as the route is executed
                 'automatically_replace': boolean value  Whether this unit or any of its components should be replaced automatically in the event of attrition
+                'equipment': dictionary value - This actor's items equipped, with a boolean value corresponding to whether each type of equipment is equipped
         '''
         save_dict = super().to_save_dict()
         if self.end_turn_destination == 'none':
@@ -105,6 +109,7 @@ class pmob(mob):
         save_dict['base_automatic_route'] = self.base_automatic_route
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
         save_dict['automatically_replace'] = self.automatically_replace
+        save_dict['equipment'] = self.equipment
         return(save_dict)
 
     def clear_attached_cell_icons(self):

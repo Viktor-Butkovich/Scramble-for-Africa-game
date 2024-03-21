@@ -20,6 +20,7 @@ class actor():
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grid': grid value - grid in which this tile can appear
                 'modes': string list value - Game modes during which this actor's images can appear
+                'inventory': dictionary value - This actor's initial items carried, with an integer value corresponding to amount of each item type 
         Output:
             None
         '''
@@ -58,7 +59,7 @@ class actor():
                 'modes': string list value - Game modes during which this actor's images can appear
                 'grid_type': string value - String matching the status key of this actor's primary grid, allowing loaded object to start in that grid
                 'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
+                'inventory': dictionary value - This actor's items carried, with an integer value corresponding to amount of each item type
         '''
         save_dict = {}
         init_type = ''
@@ -127,9 +128,14 @@ class actor():
         Output:
             None
         '''
-        for current_commodity in self.get_held_commodities(): #current_commodity in constants.commodity_types:
-            self.images[0].current_cell.tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
+        for current_commodity in self.get_held_commodities():
+            status.displayed_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
             self.set_inventory(current_commodity, 0)
+        if self.actor_type == 'mob' and self.is_pmob:
+            for current_equipment in self.equipment:
+                if self.equipment[current_equipment]:
+                    status.displayed_tile.change_inventory(current_equipment, 1)
+            self.equipment = {}
 
     def get_inventory_remaining(self, possible_amount_added = 0):
         '''

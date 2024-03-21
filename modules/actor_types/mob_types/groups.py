@@ -221,6 +221,7 @@ class group(pmob):
         Output:
             None
         '''
+        self.drop_inventory()
         self.officer.fire()
         self.worker.fire()
         self.remove_complete()

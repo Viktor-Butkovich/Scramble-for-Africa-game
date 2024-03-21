@@ -281,6 +281,7 @@ class combat(action.action):
             roll_modifier = self.opponent.get_combat_modifier()
         else:
             roll_modifier = super().generate_current_roll_modifier()
+            roll_modifier += int(self.current_unit.equipment.get('Maxim gun', False)) * random.randrange(0, 2) # positive modifier if Maxim gun equipped
             roll_modifier += self.current_unit.get_combat_modifier(opponent=self.opponent, include_tile=True)
         return(roll_modifier)
 
