@@ -54,6 +54,8 @@ class save_load_manager_template():
 
         self.copied_statuses = []
         self.copied_statuses.append('current_country_name')
+        self.copied_statuses.append('previous_production_report')
+        self.copied_statuses.append('previous_sales_report')
         self.copied_statuses.append('previous_financial_report')
         self.copied_statuses.append('minister_appointment_tutorial_completed')
         self.copied_statuses.append('exit_minister_screen_tutorial_completed')

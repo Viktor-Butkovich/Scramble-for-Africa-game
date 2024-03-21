@@ -177,8 +177,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.cycle_available_ministers_button(input_dict)
                 elif base == 'commodity':
                     new_element = buttons.commodity_button(input_dict)
-                elif base == 'show previous financial report':
-                    new_element = buttons.show_previous_financial_report_button(input_dict)
+                elif base == 'show previous reports':
+                    new_element = buttons.show_previous_reports_button(input_dict)
                 elif base == 'tab':
                     new_element = buttons.tab_button(input_dict)
                 elif base == 'reorganize unit':

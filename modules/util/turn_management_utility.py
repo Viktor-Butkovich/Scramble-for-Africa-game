@@ -47,6 +47,7 @@ def start_player_turn(first_turn = False):
     Output:
         None
     '''
+    status.previous_production_report, status.previous_sales_report, status.previous_financial_report = (None, None, None)
     text_utility.print_to_screen('')
     text_utility.print_to_screen('Turn ' + str(constants.turn + 1))
     if not first_turn:
@@ -204,7 +205,8 @@ def manage_production_report(expected_production):
                         expected_production[max_commodity] = status.current_ministers['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
             text += max_commodity.capitalize() + ': ' + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
-        production_minister.display_message(text, transfer=True)
+        status.previous_production_report = text
+        production_minister.display_message(text)
 
 def manage_upkeep():
     '''
@@ -689,7 +691,7 @@ def manage_commodity_sales():
                     individual_sell_price -= 1
                 if individual_sell_price < 1:
                     individual_sell_price = 1
-                reported_revenue += individual_sell_price#constants.money_tracker.change(individual_sell_price, 'commodity sales')
+                reported_revenue += individual_sell_price
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
                     market_utility.change_price(current_commodity, -1)
@@ -699,7 +701,8 @@ def manage_commodity_sales():
     constants.money_tracker.change(reported_revenue, 'sold_commodities')
     
     if any_sold:
-        trade_minister.display_message(text, transfer=True)
+        trade_minister.display_message(text)
+        status.previous_sales_report = text
     if money_stolen > 0:
         trade_minister.steal_money(money_stolen, 'sold_commodities')
 

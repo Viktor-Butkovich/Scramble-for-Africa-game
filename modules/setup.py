@@ -567,7 +567,7 @@ def value_trackers():
         'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial'],
         'image_id': 'buttons/instructions.png',
-        'init_type': 'show previous financial report button'
+        'init_type': 'show previous reports button'
     })
     
     constants.evil_tracker = value_tracker_template.value_tracker_template('evil', 0, 0, 100)

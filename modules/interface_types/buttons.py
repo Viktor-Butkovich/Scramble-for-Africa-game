@@ -462,8 +462,8 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Recruits a unit of ' + self.worker_type + ' workers for ' + str(status.worker_types[self.worker_type].recruitment_cost) + ' money'] +
                                 constants.list_descriptions[self.worker_type + ' workers'])
 
-        elif self.button_type == 'show previous financial report':
-            self.set_tooltip(['Displays the previous turn\'s financial report'])
+        elif self.button_type == 'show previous reports':
+            self.set_tooltip(['Displays the previous turn\'s production, sales, and financial, reports'])
 
         elif self.button_type in ['enable sentry mode', 'disable sentry mode']:
             if self.button_type == 'enable sentry mode':
@@ -2147,9 +2147,9 @@ class commodity_button(button):
         '''
         return(False)
 
-class show_previous_financial_report_button(button):
+class show_previous_reports_button(button):
     '''
-    Button appearing near money label that can be clicked to display the previous turn's financial report again
+    Button appearing near money label that can be clicked to display the previous turn's production, sales, and financial reports again
     '''
     def __init__(self, input_dict):
         '''
@@ -2170,7 +2170,7 @@ class show_previous_financial_report_button(button):
         Output:
             None
         '''
-        input_dict['button_type'] = 'show previous financial report'
+        input_dict['button_type'] = 'show previous reports'
         super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
@@ -2182,7 +2182,7 @@ class show_previous_financial_report_button(button):
         Output:
             boolean: Returns False during the first turn when there is no previous financial report to show, otherwise returns same as superclass
         '''
-        return(super().can_show(skip_parent_collection=skip_parent_collection) and status.previous_financial_report)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and (status.previous_financial_report or status.previous_production_report or status.previous_sales_report))
     
     def on_click(self):
         '''
@@ -2194,11 +2194,13 @@ class show_previous_financial_report_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            constants.notification_manager.display_notification({
-                'message': status.previous_financial_report,
-            })
+            for report in [status.previous_production_report, status.previous_sales_report, status.previous_financial_report]:
+                if report:
+                    constants.notification_manager.display_notification({
+                        'message': report,
+                    })
         else:
-            text_utility.print_to_screen('You are busy and cannot view the last turn\'s financial report')
+            text_utility.print_to_screen('You are busy and cannot view the last turn\'s reports')
 
 class tab_button(button):
     '''
