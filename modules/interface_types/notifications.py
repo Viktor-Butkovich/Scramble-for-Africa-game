@@ -36,7 +36,10 @@ class notification(multi_line_label):
         constants.sound_manager.play_sound('effects/opening_letter')
         self.notification_type = input_dict['notification_type']
         if input_dict.get('on_reveal', None):
-            input_dict['on_reveal']()
+            if type(input_dict['on_reveal']) == tuple: # If given tuple, call function in 1st index with list of arguments in 2nd index
+                input_dict['on_reveal'][0](*input_dict['on_reveal'][1])
+            else:
+                input_dict['on_reveal']()
         self.on_remove = input_dict.get('on_remove', None)
 
     def format_message(self):

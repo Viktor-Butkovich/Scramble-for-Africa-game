@@ -82,28 +82,22 @@ def transfer(item_type: str, amount, source_type: str):
                 if displayed_mob.sentry_mode:
                     displayed_mob.set_sentry_mode(False)
 
+                if source_type == 'tile_inventory':
+                    source = status.displayed_tile
+                    destination = status.displayed_mob
+                elif source_type == 'mob_inventory':
+                    source = status.displayed_mob
+                    destination = status.displayed_tile
                 if item_type == 'each':
-                    if source_type == 'tile_inventory':
-                        source = status.displayed_tile
-                        destination = status.displayed_mob
-                    elif source_type == 'mob_inventory':
-                        source = status.displayed_mob
-                        destination = status.displayed_tile
                     for item in source.inventory:
                         amount = source.inventory[item]
                         if destination.get_inventory_remaining(amount) < 0 and destination == status.displayed_mob:
                             amount = destination.get_inventory_remaining()
                         destination.change_inventory(item, amount)
                         source.change_inventory(item, amount * -1)
-
                 else:
-                    if source_type == 'tile_inventory': # Pick up item(s)
-                        displayed_mob.change_inventory(item_type, amount)
-                        displayed_tile.change_inventory(item_type, amount * -1)
-
-                    elif source_type == 'mob_inventory': # Drop item(s)
-                        displayed_tile.change_inventory(item_type, amount)
-                        displayed_mob.change_inventory(item_type, amount * -1)
+                    destination.change_inventory(item_type, amount)
+                    source.change_inventory(item_type, amount * -1)
 
                 if source_type == 'tile_inventory': # Pick up item(s)
                     actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)

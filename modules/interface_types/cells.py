@@ -410,6 +410,21 @@ class cell():
                 return(current_mob)
         return('none')
 
+    def get_vehicles(self, vehicle_type, is_worker = False):
+        '''
+        Description:
+            Returns each crewed vehicle of the inputted type in this cell, or 'none' if none are present
+        Input:
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+        Output:
+            string/vehicle: Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
+        '''
+        return_list = []
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
+                return_list.append(current_mob)
+        return(return_list) 
+
     def has_uncrewed_vehicle(self, vehicle_type):
         '''
         Description:

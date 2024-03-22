@@ -678,26 +678,74 @@ class embark_vehicle_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            displayed_mob = status.displayed_mob
-            if displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
-                vehicle = displayed_mob.images[0].current_cell.get_vehicle(self.vehicle_type)
-                rider = displayed_mob
+            if status.displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
+                rider = status.displayed_mob
+                vehicles = rider.images[0].current_cell.get_vehicles(self.vehicle_type)
                 can_embark = True
-                if vehicle.vehicle_type == 'train':
-                    if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                if vehicles[0].vehicle_type == 'train':
+                    if vehicles[0].images[0].current_cell.contained_buildings['train_station'] == 'none':
                         text_utility.print_to_screen('A train can only pick up passengers at a train station.')
                         can_embark = False
                 if can_embark:
-                    if rider.sentry_mode:
-                        rider.set_sentry_mode(False)
-                    if vehicle.sentry_mode:
-                        vehicle.set_sentry_mode(False)
-                    rider.embark_vehicle(vehicle)
-                    constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                    rider.set_sentry_mode(False)
+                    if len(vehicles) > 1:
+                        vehicles[0].select()
+                        for vehicle in vehicles:
+                            constants.notification_manager.display_notification({
+                                'message': 'There are ' + str(len(vehicles)) + ' possible vehicles to embark - click next until you find the vehicle you would like to embark. /n /n',
+                                'choices': [
+                                    {
+                                    'on_click': (self.finish_embark_vehicle, [rider, vehicle]),
+                                    'tooltip': ['Embarks this vehicle'],
+                                    'message': 'Embark'
+                                    },
+                                    {
+                                    'on_click': (self.skip_embark_vehicle, [rider, vehicles, vehicles.index(vehicle)]),
+                                    'tooltip': ['Cycles to the next possible vehicle'],
+                                    'message': 'Next vehicle'
+                                    }
+                                ],
+                            })
+                    else:
+                        vehicle = vehicles[0]
+                        if vehicle.sentry_mode:
+                            vehicle.set_sentry_mode(False)
+                        rider.embark_vehicle(vehicle)
+                        constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
             else:
                 text_utility.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.')
         else:
             text_utility.print_to_screen('You are busy and cannot embark a ' + self.vehicle_type + '.')
+
+    def finish_embark_vehicle(self, rider, vehicle):
+        '''
+        Description:
+            Selects a vehicle to embark when multiple vehicle options are available, called by choice notification
+        Input:
+            pmob rider: Unit embarking vehicle
+            vehicle vehicle: Vehicle to embark
+        Output:
+            None
+        '''
+        constants.notification_manager.clear_notification_queue() # Skip remaining embark notifications
+        vehicle.set_sentry_mode(False)
+        rider.embark_vehicle(vehicle)
+        constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+
+    def skip_embark_vehicle(self, rider, vehicles, index):
+        '''
+        Description:
+            Selects the next possible vehicle to embark when multiple vehicle options are available, called by choice notification
+        Input:
+            pmob rider: Unit embarking vehicle
+            vehicle vehicle: Vehicle to embark
+        Output:
+            None
+        '''
+        if index == len(vehicles) - 1:
+            rider.select()
+        else:
+            vehicles[index + 1].select()
 
 class cycle_passengers_button(button):
     '''

@@ -899,6 +899,10 @@ class button(interface_elements.interface_element):
             else:
                 source_type = 'mob_inventory'
             equipment_types.transfer('each', 'all', source_type)
+            if status.displayed_tile_inventory:
+                status.displayed_tile_inventory.on_click()
+            if status.displayed_mob_inventory:
+                status.displayed_mob_inventory.on_click()
 
         elif self.button_type in ['sell commodity', 'sell all commodity', 'sell each commodity']:
             if self.button_type == 'sell each commodity':
