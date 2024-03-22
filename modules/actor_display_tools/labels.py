@@ -233,9 +233,23 @@ class actor_display_label(label):
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+            input_dict['width'], input_dict['height'] = (m_size, m_size)
+            if self.actor_label_type == 'tile inventory capacity':
+                input_dict['init_type'] = 'pick up each commodity button'
+                input_dict['image_id'] = 'buttons/commodity_pick_up_each_button.png'
+                self.add_attached_button(input_dict)
+
+                input_dict['init_type'] = 'sell each commodity button'
+                input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
+                self.add_attached_button(input_dict)
+
+            else:
+                input_dict['init_type'] = 'drop each commodity button'
+                input_dict['image_id'] = 'buttons/commodity_drop_each_button.png'
+                self.add_attached_button(input_dict)
+
             if self.actor_label_type == 'mob inventory capacity':
                 input_dict['init_type'] = 'remove equipment button'
-                input_dict['width'], input_dict['height'] = (m_size, m_size)
                 for equipment_type in status.equipment_types:
                     input_dict['equipment_type'] = equipment_type
                     input_dict['image_id'] = ['buttons/default_button.png', 'misc/green_circle.png', 'items/' + equipment_type + '.png']
@@ -399,6 +413,8 @@ class actor_display_label(label):
                         'tooltip': ['Orders the selected unit to pick up all of this item']
                 }
                 self.add_attached_button(input_dict)
+
+                # Add pick up each button to inventory capacity label - if has at least 1 inventory capacity, show button that drops/picks up each type of item at once
 
                 input_dict = original_input_dict
                 input_dict['init_type'] = 'sell commodity button'

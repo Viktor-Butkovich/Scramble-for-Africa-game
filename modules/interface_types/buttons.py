@@ -3,6 +3,7 @@
 import pygame
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
     minister_utility
+from ..constructs import equipment_types
 from . import interface_elements
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -315,22 +316,30 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
             self.set_tooltip(['Ends the current turn'])
             
-        elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+        elif self.button_type in ['sell commodity', 'sell all commodity', 'sell each commodity']:
             if status.displayed_tile:
-                commodity: str = self.attached_label.actor.current_item
-                sell_price: int = constants.item_prices[commodity]
                 if self.button_type == 'sell commodity':
-                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell 1 unit of ' + commodity + ' for about ' + str(sell_price) + ' money at the end of the turn',
+                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell 1 unit of ' + self.attached_label.actor.current_item + ' for about ' + str(constants.item_prices[self.attached_label.actor.current_item]) + ' money at the end of the turn',
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
-                                      'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
+                                      'Each unit of ' + self.attached_label.actor.current_item + ' sold has a chance of reducing its sale price'])
+                elif self.button_type == 'sell all commodity':
+                    num_present = status.displayed_tile.get_inventory(self.attached_label.actor.current_item)
+                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell your entire stockpile of ' + self.attached_label.actor.current_item + ' for about ' + str(constants.item_prices[self.attached_label.actor.current_item]) + ' money each at the end of the turn, ' +
+                                          'for a total of about ' + str(constants.item_prices[self.attached_label.actor.current_item] * num_present) + ' money',
+                                      'The amount each commodity was sold for is reported at the beginning of your next turn',
+                                      'Each unit of ' + self.attached_label.actor.current_item + ' sold has a chance of reducing its sale price'])
                 else:
-                    num_present = status.displayed_tile.get_inventory(commodity)
-                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell your entire stockpile of ' + commodity + ' for about ' + str(sell_price) + ' money each at the end of the turn, ' +
-                                          'for a total of about ' + str(sell_price * num_present) + ' money',
+                    self.set_tooltip(['Orders your ' + constants.type_minister_dict['trade'] + ' to sell all commodities at the end of the turn, ' +
                                       'The amount each commodity was sold for is reported at the beginning of your next turn',
-                                      'Each unit of ' + commodity + ' sold has a chance of reducing its sale price'])
+                                      'Each commodity sold has a chance of reducing its sale price'])
             else:
                 self.set_tooltip(['none'])
+
+        elif self.button_type == 'pick up each commodity':
+            self.set_tooltip(['Orders the selected unit to pick up all items'])
+
+        elif self.button_type == 'drop each commodity':
+            self.set_tooltip(['Orders the selected unit to drop all items'])
 
         elif self.button_type == 'use equipment':
             if status.displayed_tile:
@@ -463,7 +472,7 @@ class button(interface_elements.interface_element):
                                 constants.list_descriptions[self.worker_type + ' workers'])
 
         elif self.button_type == 'show previous reports':
-            self.set_tooltip(['Displays the previous turn\'s production, sales, and financial, reports'])
+            self.set_tooltip(['Displays the previous turn\'s production, sales, and financial reports'])
 
         elif self.button_type in ['enable sentry mode', 'disable sentry mode']:
             if self.button_type == 'enable sentry mode':
@@ -884,16 +893,28 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'end turn':
             turn_management_utility.end_turn()
 
-        elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+        elif self.button_type in ['pick up each commodity', 'drop each commodity']:
+            if self.button_type == 'pick up each commodity':
+                source_type = 'tile_inventory'
+            else:
+                source_type = 'mob_inventory'
+            equipment_types.transfer('each', 'all', source_type)
+
+        elif self.button_type in ['sell commodity', 'sell all commodity', 'sell each commodity']:
+            if self.button_type == 'sell each commodity':
+                commodities = constants.collectable_resources
+            else:
+                commodities = [self.attached_label.actor.current_item]
             if minister_utility.positions_filled():
-                commodity: str = self.attached_label.actor.current_item
-                num_present: int = status.displayed_tile.get_inventory(commodity)
-                num_sold: int
-                if self.button_type == 'sell commodity':
-                    num_sold = 1
-                else:
-                    num_sold = num_present
-                market_utility.sell(status.displayed_tile, commodity, num_sold)
+                for commodity in commodities:
+                    num_present: int = status.displayed_tile.get_inventory(commodity)
+                    if num_present > 0:
+                        num_sold: int
+                        if self.button_type == 'sell commodity':
+                            num_sold = 1
+                        else:
+                            num_sold = num_present
+                        market_utility.sell(status.displayed_tile, commodity, num_sold)
 
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
                 if status.displayed_tile_inventory and status.displayed_tile_inventory.current_item:
@@ -1121,6 +1142,14 @@ class button(interface_elements.interface_element):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
                 return(status.displayed_tile and status.europe_grid in status.displayed_tile.grids and self.attached_label.actor.current_item in constants.collectable_resources)
+            elif self.button_type == 'sell each commodity':
+                if status.displayed_tile and status.europe_grid in status.displayed_tile.grids:
+                    for commodity in constants.collectable_resources:
+                        if status.displayed_tile.get_inventory(commodity) > 0:
+                            return(True)
+                return(False)
+            elif self.button_type in ['pick up each commodity', 'drop each commodity']:
+                return(self.attached_label.actor.get_inventory_used() > 0)
             elif self.button_type == 'use equipment':
                 return(self.attached_label.actor.current_item in status.equipment_types)
             return(True)

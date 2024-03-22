@@ -37,6 +37,7 @@ except Exception: #displays error message and records error message in crash log
 # Add cataracts
 # Add boarding pending state - unit can enter pending state if attempting to board with 0 or 2+ crewed vehicles present, then a vehicle can pick up any
 #   pending units - pending is a state like sentry mode
+#       Alternatively, just have a chain of choice notifications when attempting to board when multiple eligible vehicles are present - give yes/no for each, and stop chain on yes
 # Change slums to be based around settlements rather than buildings, and use settlement name in migration description
 # Add ambient resource production facility, settlement, and village sounds
 # Allow some inventory attrition to occur in Europe

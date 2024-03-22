@@ -4,6 +4,7 @@ import pygame
 from .interface_elements import ordered_collection
 from .buttons import button
 from ..util import actor_utility, utility, main_loop_utility, text_utility, minister_utility
+from ..constructs import equipment_types
 import modules.constants.status as status
 import modules.constants.constants as constants
 
@@ -236,7 +237,7 @@ class item_icon(button):
         else:
             actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), None)
 
-    def transfer(self, amount):
+    def transfer(self, amount): # calling transfer but not doing anything from mob
         '''
         Description:
             Drops or picks up the inputted amount of this tile's current item type, depending on if this is a tile or mob item icon
@@ -245,54 +246,5 @@ class item_icon(button):
         Output:
             None
         '''
-        if main_loop_utility.action_possible():
-            if minister_utility.positions_filled():
-                displayed_mob = status.displayed_mob
-                displayed_tile = status.displayed_tile
-                if displayed_mob and displayed_tile and displayed_mob.is_pmob and displayed_mob.images[0].current_cell.tile == displayed_tile:
-                    if amount == 'all':
-                        if self.actor_type == 'tile_inventory':
-                            amount = displayed_tile.get_inventory(self.current_item)
-                        elif self.actor_type == 'mob_inventory':
-                            amount = displayed_mob.get_inventory(self.current_item)
-                    elif self.actor_type == 'mob_inventory' and amount > displayed_mob.get_inventory(self.current_item):
-                        text_utility.print_to_screen('This unit does not have enough ' + self.current_item + ' to transfer.')
-                        return
-                    elif self.actor_type == 'tile_inventory' and amount > displayed_tile.get_inventory(self.current_item):
-                        text_utility.print_to_screen('This tile does not have enough ' + self.current_item + ' to transfer.')
-                        return
-                    
-                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_tile.cell.has_intact_building('train_station'):
-                        text_utility.print_to_screen('A train can only transfer cargo at a train station.')
-                        return
-                    
-                    if self.actor_type == 'tile_inventory':
-                        if displayed_mob.get_inventory_remaining(amount) < 0:
-                            amount = displayed_mob.get_inventory_remaining()
-                            if amount == 0:
-                                text_utility.print_to_screen('This unit can not pick up any ' + self.current_item + '.')
-                                return
-
-                    if displayed_mob.sentry_mode:
-                        displayed_mob.set_sentry_mode(False)
-
-                    if self.actor_type == 'tile_inventory': # Pick up item(s)
-                        displayed_mob.change_inventory(self.current_item, amount)
-                        displayed_tile.change_inventory(self.current_item, amount * -1)
-                        actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
-                        actor_utility.calibrate_actor_info_display(status.tile_info_display, displayed_tile)
-
-                    elif self.actor_type == 'mob_inventory': # Drop item(s)
-                        displayed_tile.change_inventory(self.current_item, amount)
-                        displayed_mob.change_inventory(self.current_item, amount * -1)
-                        actor_utility.select_interface_tab(status.tile_tabbed_collection, status.tile_inventory_collection)
-                        actor_utility.calibrate_actor_info_display(status.mob_info_display, displayed_mob)
-
-                    self.on_click()
-
-                elif self.actor_type == 'mob_inventory':
-                    text_utility.print_to_screen('There is no tile to transfer this commodity to.')
-                elif self.actor_type == 'tile_inventory':
-                    text_utility.print_to_screen('There is no unit to transfer this commodity to.')
-        else:
-            text_utility.print_to_screen('You are busy and cannot transfer commodities.')
+        equipment_types.transfer(self.current_item, amount, self.actor_type)
+        self.on_click()

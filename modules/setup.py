@@ -1396,7 +1396,7 @@ def inventory_interface():
     input_dict = {
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
-        'image_id': 'misc/default_label.png', #'misc/underline.png',
+        'image_id': 'misc/default_label.png',
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',

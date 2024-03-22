@@ -146,6 +146,8 @@ class actor():
         Output:
             int: Amount of space remaining in inventory after possible_amount_added is added
         '''
+        if self.infinite_inventory_capacity:
+            return(100)
         num_commodities = possible_amount_added #if not 0, will show how much inventory will be remaining after an inventory change
         for current_commodity in self.get_held_commodities():
             num_commodities += self.get_inventory(current_commodity)
