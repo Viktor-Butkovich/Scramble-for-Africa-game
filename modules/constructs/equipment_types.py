@@ -8,6 +8,8 @@ from ..util import actor_utility, text_utility, main_loop_utility, minister_util
 class equipment_type():
     '''
     Equipment template that tracks the effects, descriptions, and requirements of a particular equipment type
+        Equipment inclues any item that provides an optional enhancement to a unit's capabilities, so essential battalion rifles are not included,
+            while optional but powerful Maxim guns are
     '''
     def __init__(self, input_dict: Dict) -> None:
         '''

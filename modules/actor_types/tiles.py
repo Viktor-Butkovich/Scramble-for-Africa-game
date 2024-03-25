@@ -52,10 +52,10 @@ class tile(actor): #to do: make terrain tiles a subclass
         elif self.grid.grid_type in constants.abstract_grid_type_list:
             self.cell.tile = self
             self.terrain = 'none'
+            if self.cell.grid.from_save:
+                self.inventory = self.cell.save_dict['inventory']
             if self.grid.grid_type == 'europe_grid': # Europe should be able to hold commodities despite not being terrain
                 self.infinite_inventory_capacity = True
-                if self.cell.grid.from_save:
-                    self.inventory = self.cell.save_dict['inventory']
                 if constants.effect_manager.effect_active('infinite_commodities'):
                     for current_commodity in constants.commodity_types:
                         self.inventory[current_commodity] = 10

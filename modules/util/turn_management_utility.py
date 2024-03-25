@@ -135,7 +135,10 @@ def manage_attrition():
     for current_pmob in status.pmob_list:
         current_pmob.manage_inventory_attrition()
 
-    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list(), [status.slave_traders_grid.cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
+    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list()]
+    for current_grid in status.grid_list:
+        if current_grid.grid_type in constants.abstract_grid_type_list:
+            terrain_cell_lists.append([current_grid.cell_list[0][0]])
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
@@ -151,7 +154,10 @@ def remove_excess_inventory():
     Output:
         None
     '''
-    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list(), [status.slave_traders_grid.cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
+    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list()]
+    for current_grid in status.grid_list:
+        if current_grid.grid_type in constants.abstract_grid_type_list:
+            terrain_cell_lists.append([current_grid.cell_list[0][0]])
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
@@ -744,6 +750,16 @@ def end_turn_warnings():
                 'message': text,
                 'zoom_destination': current_cell.tile,
             })
+    for current_grid in status.grid_list:
+        if current_grid.is_abstract_grid:
+            current_cell = current_grid.cell_list[0][0]
+            if current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity and not current_cell.tile.infinite_inventory_capacity:
+                text = 'Warning: the warehouses in ' + current_grid.cell_list[0][0].tile.name + ' are not sufficient to hold the commodities stored there. /n /n'
+                text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
+                constants.notification_manager.display_notification({
+                    'message': text,
+                    'zoom_destination': current_cell.tile,
+                })
 
     for grid_type in constants.abstract_grid_type_list: # Warn for leaving units behind in non-Europe grids
         if grid_type != 'europe_grid':

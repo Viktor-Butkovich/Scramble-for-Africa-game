@@ -1122,7 +1122,6 @@ def mob_interface():
         'member_config': {'order_overlap': False}
     })
 
-    # go here for fire unit button
     input_dict = {
         'coordinates': scaling.scale_coordinates(125, -115),
         'width': scaling.scale_width(35),
