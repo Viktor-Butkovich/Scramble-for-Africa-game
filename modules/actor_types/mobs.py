@@ -608,7 +608,7 @@ class mob(actor):
         else:
             tooltip_list.append('Movement points: ???')
         
-        tooltip_list.append('Combat strength: ' + str(self.get_combat_strength()))    
+        tooltip_list.append('Combat strength: ' + str(self.get_combat_strength()))
         if self.disorganized:
             if self.is_npmob and self.npmob_type == 'beast':
                 tooltip_list.append('This unit is currently injured, giving a combat penalty until its next turn')

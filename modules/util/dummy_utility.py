@@ -20,8 +20,8 @@ def generate_autofill_actors(search_start_index=0):
     if displayed_mob and displayed_mob.is_pmob:
 
         required_dummy_attributes = ['name', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
-                              'movement_points', 'max_movement_points', 'inventory_capacity', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
-                              'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination', 'officer', 'worker', 'group_type', 'battalion_type']
+                              'movement_points', 'max_movement_points', 'inventory_capacity', 'inventory', 'equipment', 'contained_mobs', 'temp_movement_disabled',
+                              'disorganized', 'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination', 'officer', 'worker', 'group_type', 'battalion_type']
 
         dummy_input_dict = {
             'actor_type': 'mob',
@@ -102,6 +102,7 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
         dummy_input_dict['worker'] = worker
         dummy_input_dict['group_type'] = constants.officer_group_type_dict[officer.officer_type]
         if dummy_input_dict['group_type'] == 'battalion':
+            dummy_input_dict['disorganized'] = True
             if worker.worker_type == 'European':
                 dummy_input_dict['battalion_type'] = 'imperial'
             else:
@@ -109,10 +110,14 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
         dummy_input_dict['name'] = actor_utility.generate_group_name(worker, officer, add_veteran=True)
         dummy_input_dict['movement_points'] = actor_utility.generate_group_movement_points(worker, officer)
         dummy_input_dict['max_movement_points'] = actor_utility.generate_group_movement_points(worker, officer, generate_max=True)
-        dummy_input_dict['is_group'] = True #also need to set things like is_batallion for combat strength, anything that shows up in image or tooltip
+        dummy_input_dict['is_officer'] = False
+        dummy_input_dict['is_group'] = True
         image_id_list = officer.get_image_id_list()
         image_id_list.remove(officer.image_dict['default']) #group default image is empty
         dummy_input_dict['image_id_list'] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer)
+        if dummy_input_dict.get('disorganized', False):
+            dummy_input_dict['image_id_list'].append('misc/disorganized_icon.png')
+
         return_value = constants.actor_creation_manager.create_dummy(dummy_input_dict)
     return(return_value)
 
@@ -147,6 +152,7 @@ def simulate_split(unit, required_dummy_attributes, dummy_input_dict):
         dummy, dummy tuple: Returns tuple of dummy objects representing output officer and worker resulting from split
     '''
     dummy_worker_dict = dummy_input_dict
+    unit.worker.disorganized = unit.disorganized
     dummy_officer_dict = dummy_input_dict.copy()
     dummy_worker = create_dummy_copy(unit.worker, dummy_worker_dict, required_dummy_attributes)
     dummy_officer = create_dummy_copy(unit.officer, dummy_officer_dict, required_dummy_attributes)
