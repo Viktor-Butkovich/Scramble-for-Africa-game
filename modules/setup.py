@@ -694,40 +694,6 @@ def buttons():
     input_dict['init_type'] = 'load game button'
     load_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    button_start_x = 750 #x position of leftmost button
-    button_separation = 60 #x separation between each button
-    current_button_number = 0 #tracks current button to move each one farther right
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20),
-        'width': scaling.scale_width(50),
-        'height': scaling.scale_height(50),
-        'modes': ['strategic'],
-        'keybind_id': pygame.K_a,
-        'image_id': 'buttons/left_button.png',
-        'init_type': 'move left button'
-    }
-    left_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-    current_button_number += 1
-
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
-    input_dict['keybind_id'] = pygame.K_s
-    input_dict['image_id'] = 'buttons/down_button.png'
-    input_dict['init_type'] = 'move down button'
-    down_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80)
-    input_dict['keybind_id'] = pygame.K_w
-    input_dict['image_id'] = 'buttons/up_button.png'
-    input_dict['init_type'] = 'move up button'
-    up_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-    current_button_number += 1
-
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
-    input_dict['keybind_id'] = pygame.K_d
-    input_dict['image_id'] = 'buttons/right_button.png'
-    input_dict['init_type'] = 'move right button'
-    right_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-
     input_dict = {
         'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 125),
         'width': scaling.scale_width(50),
@@ -1156,6 +1122,7 @@ def mob_interface():
         'member_config': {'order_overlap': False}
     })
 
+    # go here for fire unit button
     input_dict = {
         'coordinates': scaling.scale_coordinates(125, -115),
         'width': scaling.scale_width(35),
@@ -1167,10 +1134,58 @@ def mob_interface():
         'member_config': {'order_exempt': True}
     }
     fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict)
-    
+
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free unit slaves button'
     status.free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
+
+    left_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(200, -105),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_a,
+        'image_id': 'buttons/left_button.png',
+        'init_type': 'move left button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+    down_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(245, -105),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_s,
+        'image_id': 'buttons/down_button.png',
+        'init_type': 'move down button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+
+    up_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(245, -60),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_w,
+        'image_id': 'buttons/up_button.png',
+        'init_type': 'move up button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+
+    right_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(290, -105),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_d,
+        'image_id': 'buttons/right_button.png',
+        'init_type': 'move right button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+
 
 
     #mob info labels setup
