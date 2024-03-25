@@ -1312,14 +1312,11 @@ def tile_interface():
     })
 
     #tile info labels setup
-    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
-                                'resource building', 'building efficiency', 'building work crews', 'current building work crew',
-                                'village', 'native population', 'native available workers', 'native aggressiveness',
-                                'slave_traders_strength']
+    tile_info_display_labels = [
+        'coordinates', 'terrain', 'resource', 'village', 'native population', 'native available workers', 'native aggressiveness', 'slave_traders_strength'
+    ]
     for current_actor_label_type in tile_info_display_labels:
-        if current_actor_label_type == 'current building work crew':
-            x_displacement = 50
-        elif current_actor_label_type in ['building efficiency', 'building work crews', 'native population', 'native available workers', 'native aggressiveness']:
+        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             x_displacement = 25
         else:
             x_displacement = 0
@@ -1332,25 +1329,12 @@ def tile_interface():
             'parent_collection': status.tile_info_display,
             'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
         }
-        if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
-            input_dict['init_type'] = 'actor display label'
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type == 'building efficiency':
-            input_dict['init_type'] = 'building efficiency label'
-            input_dict['building_type'] = 'resource'
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type == 'building work crews':
-            input_dict['init_type'] = 'building work crews label'
-            input_dict['building_type'] = 'resource'
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type == 'current building work crew':
-            input_dict['init_type'] = 'list item label'
-            input_dict['list_type'] = 'resource building'
-            for i in range(0, 3):
-                input_dict['list_index'] = i
-                constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
+
+        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = current_actor_label_type + ' label'
+            constants.actor_creation_manager.create_interface_element(input_dict)
+        else:
+            input_dict['init_type'] = 'actor display label'
             constants.actor_creation_manager.create_interface_element(input_dict)
 
     tab_collection_relative_coordinates = (450, -30)
@@ -1496,7 +1480,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.tile_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/consumer goods.png', 'size': 0.75}]},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/consumer goods.png', 'size': 0.75}], 'identifier': 'inventory'},
         'description': 'tile inventory panel'
     })
 
@@ -1601,6 +1585,64 @@ def inventory_interface():
         }
         input_dict['init_type'] = 'actor display label'
         constants.actor_creation_manager.create_interface_element(input_dict)
+
+def settlement_interface():
+    '''
+    Description:
+        Initializes the settlement interface as part of the tile tabbed collection
+    Input:
+        None
+    Output:
+        None
+    '''
+    status.settlement_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'parent_collection': status.tile_tabbed_collection,
+        'member_config': {'tabbed': True, 'button_image_id': 'buttons/crew_train_button.png', 'identifier': 'settlement'},
+        'description': 'settlement panel'
+    })
+    settlement_info_display_labels = [
+        'settlement', 'slums', 'resource building', 'building efficiency', 'building work crews', 'current building work crew'
+    ]
+    for current_actor_label_type in settlement_info_display_labels:
+        if current_actor_label_type == 'settlement':
+            x_displacement = 0
+        elif current_actor_label_type == 'current building work crew':
+            x_displacement = 75
+        elif current_actor_label_type in ['building efficiency', 'building work crews']:
+            x_displacement = 50
+        else:
+            x_displacement = 25
+        input_dict = {
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
+            'image_id': 'misc/default_label.png', #'misc/underline.png',
+            'actor_label_type': current_actor_label_type,
+            'actor_type': 'tile',
+            'parent_collection': status.settlement_collection,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
+        }
+
+        if current_actor_label_type == 'building efficiency':
+            input_dict['init_type'] = 'building efficiency label'
+            input_dict['building_type'] = 'resource'
+            constants.actor_creation_manager.create_interface_element(input_dict)
+        elif current_actor_label_type == 'building work crews':
+            input_dict['init_type'] = 'building work crews label'
+            input_dict['building_type'] = 'resource'
+            constants.actor_creation_manager.create_interface_element(input_dict)
+        elif current_actor_label_type == 'current building work crew':
+            input_dict['init_type'] = 'list item label'
+            input_dict['list_type'] = 'resource building'
+            for i in range(0, 3):
+                input_dict['list_index'] = i
+                constants.actor_creation_manager.create_interface_element(input_dict)
+        else:
+            input_dict['init_type'] = 'actor display label'
+            constants.actor_creation_manager.create_interface_element(input_dict)
 
 def unit_organization_interface():
     '''

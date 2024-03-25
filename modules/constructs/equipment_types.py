@@ -89,7 +89,7 @@ def transfer(item_type: str, amount, source_type: str):
                     source = status.displayed_mob
                     destination = status.displayed_tile
                 if item_type == 'each':
-                    for item in source.inventory:
+                    for item in source.inventory.copy():
                         amount = source.inventory[item]
                         if destination.get_inventory_remaining(amount) < 0 and destination == status.displayed_mob:
                             amount = destination.get_inventory_remaining()

@@ -221,6 +221,8 @@ class actor():
             None
         '''
         self.inventory[commodity] = new_value
+        if new_value <= 0:
+            del self.inventory[commodity]
 
     def get_held_commodities(self, ignore_consumer_goods = False):
         '''

@@ -429,6 +429,9 @@ class actor_display_label(label):
                 input_dict['image_id'] = 'buttons/use_equipment_button.png'
                 self.add_attached_button(input_dict)
 
+        elif self.actor_label_type == 'settlement':
+            self.message_start = 'Settlement: '
+
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -685,11 +688,11 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'resource building':
                 if (not new_actor.grid.is_abstract_grid) and new_actor.cell.visible and new_actor.cell.has_building('resource'):
-                    self.set_label('Resource building: ' + new_actor.cell.get_building('resource').name)
+                    self.set_label(new_actor.cell.get_building('resource').name.capitalize())
 
             elif self.actor_label_type == 'village':
                 if new_actor.cell.visible and new_actor.cell.has_building('village') and new_actor.cell.visible:
-                    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
+                    self.set_label(new_actor.cell.get_building('village').name + ' village')
 
             elif self.actor_label_type == 'movement':
                 if self.actor.is_pmob:
@@ -857,6 +860,12 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'inventory_quantity':
                 self.set_label(self.message_start + str(new_actor.actor.get_inventory(new_actor.current_item)))
+
+            elif self.actor_label_type == 'settlement':
+                if new_actor.cell.settlement:
+                    self.set_label(self.message_start + str(new_actor.cell.settlement.name))
+                else:
+                    self.set_label(self.message_start + ' n/a')
 
         elif self.actor_label_type == 'tooltip':
             return #do not set text for tooltip label

@@ -2256,11 +2256,14 @@ class tab_button(button):
                     Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'linked_element': Member collection of tabbed collection that this button is associated with
+                'identifier': Description of type of tab button, like 'settlement' or 'inventory'
         Output:
             None
         '''
         input_dict['button_type'] = 'tab'
         self.linked_element = input_dict['linked_element']
+        self.linked_element.linked_tab_button = self
+        self.identifier = input_dict['identifier']
         super().__init__(input_dict)
 
     def can_show(self, skip_parent_collection=False):
@@ -2272,11 +2275,34 @@ class tab_button(button):
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
+        return_value = super().can_show(skip_parent_collection=skip_parent_collection)
+        if return_value:
+            if self.identifier == 'settlement':
+                return_value = bool(status.displayed_tile.cell.settlement)
+            elif self.identifier == 'inventory':
+                if self.linked_element == status.tile_inventory_collection:
+                    return_value = status.displayed_tile.inventory or status.displayed_tile.inventory_capacity > 0 or status.displayed_tile.infinite_inventory_capacity
+                else:
+                    return_value = status.displayed_mob.inventory_capacity > 0
+            elif self.identifier == 'reorganization':
+                return_value = status.displayed_mob.is_pmob
+
         if self.linked_element == self.parent_collection.parent_collection.current_tabbed_member:
+            if return_value:
+                self.showing_outline = True
+            else:
+                self.showing_outline = False
+                self.parent_collection.parent_collection.current_tabbed_member = None
+                for tabbed_member in self.parent_collection.parent_collection.tabbed_members:
+                    if tabbed_member != self.linked_element and tabbed_member.linked_tab_button.can_show():
+                        self.parent_collection.parent_collection.current_tabbed_member = tabbed_member
+        elif return_value and self.parent_collection.parent_collection.current_tabbed_member == None:
+            self.on_click()
             self.showing_outline = True
         else:
             self.showing_outline = False
-        return(super().can_show(skip_parent_collection=skip_parent_collection))
+
+        return(return_value)
 
 class reorganize_unit_button(button):
     '''
