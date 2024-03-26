@@ -1604,10 +1604,11 @@ def settlement_interface():
         'description': 'settlement panel'
     })
     settlement_info_display_labels = [
-        'settlement', 'slums', 'resource building', 'building efficiency', 'building work crews', 'current building work crew'
+        'settlement', 'port', 'train_station', 'trading_post', 'mission', 'resource building', 'building efficiency', 'building work crews',
+            'current building work crew', 'fort', 'slums'
     ]
     for current_actor_label_type in settlement_info_display_labels:
-        if current_actor_label_type == 'settlement':
+        if current_actor_label_type in ['settlement', 'trading_post', 'mission']:
             x_displacement = 0
         elif current_actor_label_type == 'current building work crew':
             x_displacement = 75
@@ -1618,7 +1619,7 @@ def settlement_interface():
         input_dict = {
             'minimum_width': scaling.scale_width(10),
             'height': scaling.scale_height(30),
-            'image_id': 'misc/default_label.png', #'misc/underline.png',
+            'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
             'parent_collection': status.settlement_collection,
