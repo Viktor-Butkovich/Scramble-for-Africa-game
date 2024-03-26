@@ -1086,6 +1086,15 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'tab':
             tabbed_collection = self.parent_collection.parent_collection
             tabbed_collection.current_tabbed_member = self.linked_element
+            if self.identifier == 'inventory':
+                if tabbed_collection == status.mob_tabbed_collection:
+                    alternate_collection = status.tile_tabbed_collection
+                else:
+                    alternate_collection = status.mob_tabbed_collection
+                for linked_tab in alternate_collection.tabbed_members:
+                    linked_tab_button = linked_tab.linked_tab_button
+                    if linked_tab_button.identifier == 'inventory':
+                        linked_tab_button.parent_collection.parent_collection.current_tabbed_member = linked_tab_button.linked_element
 
     def on_rmb_release(self):
         '''
