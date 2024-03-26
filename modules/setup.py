@@ -1604,8 +1604,8 @@ def settlement_interface():
         'description': 'settlement panel'
     })
     settlement_info_display_labels = [
-        'settlement', 'port', 'train_station', 'trading_post', 'mission', 'resource building', 'building efficiency', 'building work crews',
-            'current building work crew', 'fort', 'slums'
+        'settlement', 'port', 'train_station', 'resource building', 'building efficiency', 'building work crews',
+            'current building work crew', 'fort', 'slums', 'trading_post', 'mission'
     ]
     for current_actor_label_type in settlement_info_display_labels:
         if current_actor_label_type in ['settlement', 'trading_post', 'mission']:

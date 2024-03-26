@@ -455,11 +455,8 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'labor broker':
             actor_utility.update_descriptions('village workers')
             self.set_tooltip(['Uses a local labor broker to find and hire a unit of African workers from a nearby village',
-                              'The worker\'s initial recruitment cost varies with the chosen village\'s distance and aggressiveness, and even unexplored villages may be chosen',
-                              'Automatically finds the cheapest available worker'] +
-                              constants.list_descriptions['village workers'] +
-                             ['Can only be done at a port',
-                              'Requires all movement points, at least 1'])
+                              'The worker\'s recruitment cost depends on the distance and aggressiveness of the chosen village'
+            ])
             
         elif self.button_type == 'hire slums worker':
             actor_utility.update_descriptions('slums workers')

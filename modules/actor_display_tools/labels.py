@@ -56,11 +56,6 @@ class actor_display_label(label):
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
 
-            input_dict['init_type'] = 'labor broker button'
-            input_dict['image_id'] = 'buttons/labor_broker_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
-
             input_dict['init_type'] = 'embark vehicle button'
             input_dict['image_id'] = 'buttons/embark_ship_button.png'
             input_dict['keybind_id'] = pygame.K_b
@@ -228,7 +223,7 @@ class actor_display_label(label):
             input_dict['init_type'] = 'hire african workers button'
             input_dict['image_id'] = african_workers_image_id_list
             input_dict['hire_source_type'] = 'village'
-            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5)
             self.add_attached_button(input_dict)
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
@@ -278,7 +273,7 @@ class actor_display_label(label):
                 input_dict['init_type'] = 'recruit workers button'
                 input_dict['worker_type'] = worker_type
                 input_dict['image_id'] = current_image_id_list
-                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5)
                 self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'minister':
@@ -363,12 +358,30 @@ class actor_display_label(label):
             african_workers_image_id_list.append(right_worker_dict)
             input_dict['init_type'] = 'hire african workers button'
             input_dict['image_id'] = african_workers_image_id_list
-            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5)
             input_dict['hire_source_type'] = 'slums'
             self.add_attached_button(input_dict)
 
         elif self.actor_label_type in constants.building_types:
             self.message_start = ''
+            if self.actor_label_type == 'port':
+                input_dict['init_type'] = 'labor broker button'
+                african_workers_image_id_list = ['buttons/default_button_alt.png']
+                left_worker_dict = {
+                    'image_id': 'mobs/African workers/default.png',
+                    'size': 0.8,
+                    'x_offset': -0.2,
+                    'y_offset': 0,
+                    'level': 1
+                }
+                african_workers_image_id_list.append(left_worker_dict)
+
+                right_worker_dict = left_worker_dict.copy()
+                right_worker_dict['x_offset'] *= -1
+                african_workers_image_id_list.append(right_worker_dict)
+                input_dict['image_id'] = african_workers_image_id_list
+                input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5) 
+                self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '

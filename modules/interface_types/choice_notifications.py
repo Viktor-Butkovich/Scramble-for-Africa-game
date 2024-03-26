@@ -236,22 +236,17 @@ class recruitment_choice_button(choice_button):
             status.displayed_tile.cell.get_building('slums').recruit_worker()
 
         elif self.recruitment_type == 'African worker labor broker':
-            recruiter = status.displayed_mob
+            input_dict = {
+                'select_on_creation': True,
+                'coordinates': (status.displayed_tile.cell.x, status.displayed_tile.cell.y),
+                'grids': [status.displayed_tile.cell.grid, status.displayed_tile.cell.grid.mini_grid],
+                'modes': status.displayed_tile.cell.grid.modes
+            }
             input_dict.update(status.worker_types['African'].generate_input_dict())
-            input_dict['coordinates'] = (recruiter.x, recruiter.y)
-            input_dict['grids'] = recruiter.grids
-            input_dict['modes'] = status.displayed_tile.cell.grid.modes
             constants.money_tracker.change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African') #adds 1 worker to the pool
             worker = constants.actor_creation_manager.create(False, input_dict)
-
-            if recruiter.is_vehicle:
-                recruiter.set_movement_points(0)
-                worker.crew_vehicle(recruiter)
-            else:
-                recruiter.set_movement_points(0)
-                constants.actor_creation_manager.create_group(worker, recruiter)
 
         else:
             input_dict['coordinates'] = (0, 0)

@@ -1007,23 +1007,6 @@ class labor_broker_button(button):
         input_dict['button_type'] = 'labor broker'
         super().__init__(input_dict)
 
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_mob = status.displayed_mob
-            if displayed_mob.is_officer and displayed_mob.officer_type != 'evangelist':
-                return(True)
-            elif displayed_mob.is_vehicle and not (displayed_mob.can_swim_ocean or displayed_mob.has_crew):
-                return(True)
-        return(False)
-
     def on_click(self):
         '''
         Description:
@@ -1034,29 +1017,18 @@ class labor_broker_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            current_mob = status.displayed_mob
-            if status.strategic_map_grid in current_mob.grids:
-                if current_mob.images[0].current_cell.has_intact_building('port'):
-                    cost_info_list = self.get_cost()
-                    if not cost_info_list == 'none':
-                        if current_mob.movement_points >= 1:
-                            if constants.money_tracker.get() >= cost_info_list[1]:
-                                if minister_utility.positions_filled():
-                                    if current_mob.sentry_mode:
-                                        current_mob.set_sentry_mode(False)
-                                    choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
-                                        'source_type': 'labor broker', 'village': cost_info_list[0]}
-                                    constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
-                            else:
-                                text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
-                        else:
-                            text_utility.print_to_screen('Using a labor broker requires all remaining movement points, at least 1.')
-                    else:
-                        text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
+            cost_info_list = self.get_cost()
+            if cost_info_list != 'none':
+                if constants.money_tracker.get() >= cost_info_list[1]:
+                    if minister_utility.positions_filled():
+                        constants.actor_creation_manager.display_recruitment_choice_notification({
+                            'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png',
+                                'type': 'recruitment', 'source_type': 'labor broker', 'village': cost_info_list[0]
+                        }, 'African workers')
                 else:
-                    text_utility.print_to_screen('A labor broker can only be used at a port.')
+                    text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
             else:
-                text_utility.print_to_screen('A labor broker can only be used at a port.')
+                text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
         else:
             text_utility.print_to_screen('You are busy and cannot use a labor broker.')
 
@@ -1074,7 +1046,7 @@ class labor_broker_button(button):
         for current_village in status.village_list:
             if current_village.population > 0:
                 distance = int(utility.find_object_distance(current_village, status.displayed_mob))
-                cost = (5 * current_village.aggressiveness) + distance
+                cost = (2 * current_village.aggressiveness) + distance
                 if cost < lowest_cost or lowest_cost_village == 'none':
                     lowest_cost_village = current_village
                     lowest_cost = cost

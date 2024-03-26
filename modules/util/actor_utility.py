@@ -126,28 +126,19 @@ def update_descriptions(target = 'all'):
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
         
         elif current_target.endswith(' workers'):
-            worker_name = current_target.replace('slums ', 'African ').replace('village ', 'African ')
+            worker_name = current_target.replace('slums ', 'African ').replace('labor broker ', 'African ').replace('village ', 'African ')
             worker_type = worker_name.split(' ')[0] # 'African' for 'African workers', 'European' for 'European workers', etc.
 
             if worker_type != 'slave':
                 text_list.append(worker_name.capitalize() + ' have a varying upkeep, currently ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
             else:
                 text_list.append(worker_name.capitalize() + ' have a constant upkeep of ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
-
-            text_list.append('Officers and vehicles require an attached unit of workers to perform most actions.')
-
-            if worker_type != 'slave':
-                text_list.append('Each unit of ' + worker_name + ' hired may increase the upkeep of all ' + worker_name + '.')
-            else:
-                text_list.append('Each unit of ' + worker_name + ' purchased may increase the purchase cost of all ' + worker_name + '.')
             
             if worker_type == 'European':
                 text_list.append(worker_name.capitalize() + ' tend to be more susceptible to attrition than African workers, but are more accustomed to modern vehicles and weaponry.')
             elif worker_type == 'Asian':
                 text_list.append(worker_name.capitalize() + ' tend to be cheaper than European workers and less accustomed to modern vehicles and weaponry, while being easier to obtain and more susceptible to attrition than African workers.')
             else:
-                if worker_type != 'slave':
-                    text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
                 text_list.append('African workers tend to be more resistant to attrition but are less accustomed to using modern vehicles and weaponry.')
             
             if worker_type == 'slave':
