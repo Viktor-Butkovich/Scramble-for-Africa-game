@@ -32,14 +32,14 @@ except Exception: #displays error message and records error message in crash log
 #   Approximately 0.1 chance per river tile, 1-2 desired per river
 # Add ambient resource production facility, settlement, and village sounds
 # Allow some inventory attrition to occur in Europe
-# Add direct attack on native villages action
-# Add cannibals
-# Replace resource production facility images
+# Replace placeholder images
 # Add equipment (canoes)
 # Add cosmetic flag to minister screen
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
 # Give 1/36 chance for off-tile exploration to grant veteran status (1/6 chance of doing minister roll, promote on 6)
-# Add lore mission trophy screen
 # Add river sources, with bonuses for discovery
+# Add direct attack on native villages action
+# Add cannibals
+# Add lore mission trophy screen
