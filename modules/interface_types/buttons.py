@@ -772,12 +772,13 @@ class button(interface_elements.interface_element):
                                     current_mob.eject_passengers()
                                     last_moved = None
                                     for current_passenger in passengers:
-                                        if current_passenger.can_move(x_change, y_change, can_print=True):
+                                        if (not status.displayed_notification) and current_passenger.can_move(x_change, y_change, can_print=True):
                                             current_passenger.move(x_change, y_change)
                                             last_moved = current_passenger
-                                    for current_passenger in passengers:
-                                        if (current_passenger.x, current_passenger.y) == (current_mob.x, current_mob.y): # Re-embark any units that couldn't move
-                                            current_passenger.embark_vehicle(current_mob)
+                                    if not status.displayed_notification: # If attacking, don't reembark
+                                        for current_passenger in passengers:
+                                            if (current_passenger.x, current_passenger.y) == (current_mob.x, current_mob.y): # Re-embark any units that couldn't move
+                                                current_passenger.embark_vehicle(current_mob)
                                     if last_moved:
                                         last_moved.select()
                                     flags.show_selection_outlines = True
