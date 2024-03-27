@@ -26,10 +26,10 @@ except Exception: #displays error message and records error message in crash log
 #
 #   new SFA features:
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
-#Allow ship moving through series of ports adjacent to the river
-#   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
-#   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river
 # Add cataracts
+#   Steamboats treat cataracts like land
+#   Other units treat cataracts as river water where canoes do not function
+#   Approximately 0.1 chance per river tile, 1-2 desired per river
 # Add ambient resource production facility, settlement, and village sounds
 # Allow some inventory attrition to occur in Europe
 # Add direct attack on native villages action
@@ -44,3 +44,4 @@ except Exception: #displays error message and records error message in crash log
 #   into npmobs
 # Give 1/36 chance for off-tile exploration to grant veteran status (1/6 chance of doing minister roll, promote on 6)
 # Add lore mission trophy screen
+# Add river sources, with bonuses for discovery

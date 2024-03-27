@@ -130,6 +130,7 @@ class building(actor):
             tooltip_text.append('Lets ' + str(self.scale) + ' attached work crews each attempt to produce ' + str(self.efficiency) + ' units of ' + self.resource_type + ' each turn')
         elif self.building_type == 'port':
             tooltip_text.append('Allows ships to enter this tile')
+            tooltip_text.append('Steamboats and steamships can move between ports, but steamships can never move beyond coastal ports')
         elif self.building_type == 'infrastructure':
             if self.is_bridge:
                 tooltip_text.append('Allows movement across the bridge')

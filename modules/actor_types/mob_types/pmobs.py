@@ -613,7 +613,7 @@ class pmob(mob):
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                             passed = False
                             if destination_type == 'land':
-                                if self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'):
+                                if self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and (self.can_swim_river or future_cell.y <= 1)): # Allow ships on land if port is built and either coastal port or able to move in rivers
                                     passed = True
                             elif destination_type == 'water':
                                 if destination_type == 'water':
@@ -633,7 +633,7 @@ class pmob(mob):
                                                         text_utility.print_to_screen('This unit cannot move through rivers.')
                                                 return(False)
                                     
-                                if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
+                                if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0:
                                     if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari or (self.can_explore and not future_cell.visible): #non-battalion units can't move into enemies
                                         return(True)
                                     else:
@@ -647,7 +647,10 @@ class pmob(mob):
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 if can_print:
-                                    text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.')
+                                    if future_cell.has_intact_building('port'):
+                                        text_utility.print_to_screen('Steamships can not move between ports on land.')
+                                    else:
+                                        text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.')
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 if can_print:
