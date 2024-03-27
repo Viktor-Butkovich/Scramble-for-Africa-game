@@ -20,6 +20,7 @@ class actor():
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grid': grid value - grid in which this tile can appear
                 'modes': string list value - Game modes during which this actor's images can appear
+                'inventory': dictionary value - This actor's initial items carried, with an integer value corresponding to amount of each item type 
         Output:
             None
         '''
@@ -38,11 +39,12 @@ class actor():
             self.grid = self.grids[0]
             self.set_name('placeholder')
         self.set_coordinates(self.x, self.y)
-        self.has_inventory = False
+
+        self.tooltip_text = []
+
         self.infinite_inventory_capacity = False
         self.inventory_capacity = 0
-        self.tooltip_text = []
-        self.inventory = {}
+        self.inventory = input_dict.get('inventory', {})
 
     def to_save_dict(self):
         '''
@@ -57,7 +59,7 @@ class actor():
                 'modes': string list value - Game modes during which this actor's images can appear
                 'grid_type': string value - String matching the status key of this actor's primary grid, allowing loaded object to start in that grid
                 'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
+                'inventory': dictionary value - This actor's items carried, with an integer value corresponding to amount of each item type
         '''
         save_dict = {}
         init_type = ''
@@ -89,19 +91,13 @@ class actor():
         elif self.actor_type == 'building':
             init_type = self.building_type
         save_dict['init_type'] = init_type
-        
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['modes'] = self.modes
         for grid_type in constants.grid_types_list:
             if getattr(status, grid_type) == self.grid:
                 save_dict['grid_type'] = grid_type
         save_dict['name'] = self.name
-        saved_inventory = {}
-        if self.has_inventory: #only save inventory if not empty
-            for current_commodity in constants.commodity_types:
-               if self.inventory[current_commodity] > 0:
-                   saved_inventory[current_commodity] = self.inventory[current_commodity]
-        save_dict['inventory'] = saved_inventory
+        save_dict['inventory'] = self.inventory
         return(save_dict)
             
     def set_image(self, new_image):
@@ -123,39 +119,6 @@ class actor():
             if status.displayed_tile == self:
                 actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
 
-    def load_inventory(self, inventory_dict):
-        '''
-        Description:
-            Sets this actor's inventory to a dictionary with a string key for each commodity type and an int value for how much of that commodity is held, matching the inventory of the original saved actor
-        Input:
-            string/int dictionary inventory_dict: Dictionary with string keys for each commodity type saved and int values for how much of that commodity is held. No entries required for commodities with 0 units
-        Output:
-            None
-        '''
-        for current_commodity in constants.commodity_types:
-            if current_commodity in inventory_dict:
-                self.set_inventory(current_commodity, inventory_dict[current_commodity])
-            else:
-                self.set_inventory(current_commodity, 0)
-        #if self.actor_type == 'mob' and self.is_pmob and self.inventory_capacity >= 9:
-        #    self.default_interface_tab = 'inventory'
-
-    def inventory_setup(self):
-        '''
-        Description:
-            Sets this actor's inventory to a dictionary with a string key for each commodity type and an int value initially set to 0 representing the amount of the commodity held
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.inventory = {}
-        for current_commodity in constants.commodity_types:
-            if constants.effect_manager.effect_active('infinite_commodities') and self.name == 'Europe':
-                self.inventory[current_commodity] = 10
-            else:
-                self.inventory[current_commodity] = 0
-
     def drop_inventory(self):
         '''
         Description:
@@ -165,9 +128,14 @@ class actor():
         Output:
             None
         '''
-        for current_commodity in self.get_held_commodities(): #current_commodity in constants.commodity_types:
-            self.images[0].current_cell.tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
+        for current_commodity in self.get_held_commodities():
+            status.displayed_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
             self.set_inventory(current_commodity, 0)
+        if self.actor_type == 'mob' and self.is_pmob:
+            for current_equipment in self.equipment:
+                if self.equipment[current_equipment]:
+                    status.displayed_tile.change_inventory(current_equipment, 1)
+            self.equipment = {}
 
     def get_inventory_remaining(self, possible_amount_added = 0):
         '''
@@ -178,6 +146,8 @@ class actor():
         Output:
             int: Amount of space remaining in inventory after possible_amount_added is added
         '''
+        if self.infinite_inventory_capacity:
+            return(100)
         num_commodities = possible_amount_added #if not 0, will show how much inventory will be remaining after an inventory change
         for current_commodity in self.get_held_commodities():
             num_commodities += self.get_inventory(current_commodity)
@@ -206,15 +176,12 @@ class actor():
         Output:
             int: Number of commodities of the inputted type held by this actor
         '''
-        if self.has_inventory:
-            return(self.inventory[commodity])
-        else:
-            return(0)
+        return(self.inventory.get(commodity, 0))
 
     def check_inventory(self, index):
         '''
         Description:
-            Returns the type of item at the inputted index of this actor's inventory
+            Returns the type of item at the inputted index of this actor's inventory, for display purposes
             Results in access time of O(# inventory types held), rather than O(1) that would be allowed by maintaining an inventory array. For ease of development, it
                 has been determined that slightly slower inventory access is desirable over just having an inventory array (making it harder to count number of items in 
                 a category) or the possible bugs that could be introduced by trying to maintain both
@@ -225,7 +192,7 @@ class actor():
         '''
         current_index: int = 0
         for item_type in self.inventory:
-            current_index += self.inventory[item_type]
+            current_index += self.inventory.get(item_type, 0)
             # If holding 1 coffee, increment index by 1, now to current_index=1
             if current_index > index: # Since index 1 > inputted index 0, return 'coffee'
                 return(item_type)
@@ -241,8 +208,7 @@ class actor():
         Output:
             None
         '''
-        if self.has_inventory:
-            self.inventory[commodity] += change
+        self.set_inventory(commodity, self.inventory.get(commodity, 0) + change)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -254,8 +220,9 @@ class actor():
         Output:
             None
         '''
-        if self.has_inventory:
-            self.inventory[commodity] = new_value
+        self.inventory[commodity] = new_value
+        if new_value <= 0:
+            del self.inventory[commodity]
 
     def get_held_commodities(self, ignore_consumer_goods = False):
         '''
@@ -266,15 +233,12 @@ class actor():
         Output:
             string list: Types of commodities held by this actor
         '''
-        if self.has_inventory:
-            held_commodities = []
-            for current_commodity in constants.commodity_types:
-                if self.get_inventory(current_commodity) > 0:
-                    if not (current_commodity == 'consumer goods' and ignore_consumer_goods):
-                        held_commodities.append(current_commodity)
-            return(held_commodities)
-        else:
-            return([])
+        held_commodities = []
+        for current_commodity in self.inventory:
+            if not (ignore_consumer_goods and current_commodity == 'consumer goods'):
+                if self.inventory[current_commodity] > 0:
+                    held_commodities.append(current_commodity)
+        return(held_commodities)
 
     def manage_inventory_attrition(self):
         '''
@@ -335,7 +299,7 @@ class actor():
                 amounts_lost_list.append(amount_lost)
                 self.change_inventory(current_commodity, -1 * amount_lost)
                 if stealing:
-                    value_stolen += (constants.commodity_prices[current_commodity] * amount_lost)
+                    value_stolen += (constants.item_prices[current_commodity] * amount_lost)
                     for i in range(amount_lost):
                         if random.randrange(1, 7) <= 1: #1/6 chance
                             market_utility.change_price(current_commodity, -1)
@@ -549,3 +513,17 @@ class actor():
             None
         '''
         self.set_image(self.get_image_id_list())
+
+    def set_inventory_capacity(self, new_value):
+        '''
+        Description:
+            Sets this unit's inventory capacity, updating info displays as needed
+        Input:
+            int new_value: New inventory capacity value
+        Output:
+            None
+        '''
+        self.inventory_capacity = new_value
+        if new_value != 0:
+            if hasattr(status, 'displayed_' + self.actor_type) and getattr(status, 'displayed_' + self.actor_type) == self: # Updates info display for changed capacity
+                actor_utility.calibrate_actor_info_display(getattr(status, self.actor_type + '_info_display'), self)

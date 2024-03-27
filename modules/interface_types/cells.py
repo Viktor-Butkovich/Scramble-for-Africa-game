@@ -80,13 +80,7 @@ class cell():
         save_dict['terrain'] = self.terrain
         save_dict['terrain_variant'] = self.terrain_variant
         save_dict['resource'] = self.resource
-
-        saved_inventory = {}
-        if self.tile.has_inventory: #only save inventory if not empty
-            for current_commodity in constants.commodity_types:
-               if self.tile.inventory[current_commodity] > 0:
-                   saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
-        save_dict['inventory'] = saved_inventory
+        save_dict['inventory'] = self.tile.inventory
         
         if self.resource == 'natives':
             save_dict['village_name'] = self.village.name
@@ -415,6 +409,21 @@ class cell():
             if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
+
+    def get_vehicles(self, vehicle_type, is_worker = False):
+        '''
+        Description:
+            Returns each crewed vehicle of the inputted type in this cell, or 'none' if none are present
+        Input:
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+        Output:
+            string/vehicle: Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
+        '''
+        return_list = []
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
+                return_list.append(current_mob)
+        return(return_list) 
 
     def has_uncrewed_vehicle(self, vehicle_type):
         '''

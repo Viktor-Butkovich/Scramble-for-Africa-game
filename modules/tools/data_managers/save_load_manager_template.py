@@ -45,7 +45,7 @@ class save_load_manager_template():
         self.copied_constants.append('fear')
         self.copied_constants.append('current_game_mode')
         self.copied_constants.append('sold_commodities')
-        self.copied_constants.append('commodity_prices')
+        self.copied_constants.append('item_prices')
         self.copied_constants.append('recruitment_costs')
         self.copied_constants.append('num_wandering_workers')
         self.copied_constants.append('slave_traders_strength')
@@ -54,6 +54,8 @@ class save_load_manager_template():
 
         self.copied_statuses = []
         self.copied_statuses.append('current_country_name')
+        self.copied_statuses.append('previous_production_report')
+        self.copied_statuses.append('previous_sales_report')
         self.copied_statuses.append('previous_financial_report')
         self.copied_statuses.append('minister_appointment_tutorial_completed')
         self.copied_statuses.append('exit_minister_screen_tutorial_completed')
@@ -84,7 +86,7 @@ class save_load_manager_template():
         game_transitions.set_game_mode('ministers')
 
         for current_commodity in constants.commodity_types:
-            if not current_commodity == 'consumer goods':
+            if current_commodity != 'consumer goods':
                 price = round((random.randrange(1, 7) + random.randrange(1, 7))/2)
                 increase = 0
                 if current_commodity == 'gold':
@@ -124,7 +126,7 @@ class save_load_manager_template():
         constants.fear_tracker.set(1)
 
         for i in range(1, random.randrange(5, 8)):
-            turn_management_utility.manage_villages()
+            turn_management_utility.manage_villages(verbose=False)
             turn_management_utility.manage_warriors()
             actor_utility.spawn_beast()
         

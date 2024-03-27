@@ -47,6 +47,7 @@ def start_player_turn(first_turn = False):
     Output:
         None
     '''
+    status.previous_production_report, status.previous_sales_report, status.previous_financial_report = (None, None, None)
     text_utility.print_to_screen('')
     text_utility.print_to_screen('Turn ' + str(constants.turn + 1))
     if not first_turn:
@@ -88,7 +89,6 @@ def start_player_turn(first_turn = False):
         status.displayed_mob.select()
     else:
         actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
-       
 
 def reset_mobs(mob_type):
     '''
@@ -135,7 +135,10 @@ def manage_attrition():
     for current_pmob in status.pmob_list:
         current_pmob.manage_inventory_attrition()
 
-    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list(), [status.slave_traders_grid.cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
+    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list()]
+    for current_grid in status.grid_list:
+        if current_grid.grid_type in constants.abstract_grid_type_list:
+            terrain_cell_lists.append([current_grid.cell_list[0][0]])
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
@@ -151,11 +154,14 @@ def remove_excess_inventory():
     Output:
         None
     '''
-    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list(), [status.slave_traders_grid.cell_list[0][0]], [status.europe_grid.cell_list[0][0]]]
+    terrain_cell_lists = [status.strategic_map_grid.get_flat_cell_list()]
+    for current_grid in status.grid_list:
+        if current_grid.grid_type in constants.abstract_grid_type_list:
+            terrain_cell_lists.append([current_grid.cell_list[0][0]])
     for cell_list in terrain_cell_lists:
         for current_cell in cell_list:
             current_tile = current_cell.tile
-            if len(current_tile.get_held_commodities()) > 0:
+            if current_tile.inventory:
                 current_tile.remove_excess_inventory()
 
 def manage_production():
@@ -205,7 +211,8 @@ def manage_production_report(expected_production):
                         expected_production[max_commodity] = status.current_ministers['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
             text += max_commodity.capitalize() + ': ' + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
-        production_minister.display_message(text)       
+        status.previous_production_report = text
+        production_minister.display_message(text)
 
 def manage_upkeep():
     '''
@@ -469,7 +476,7 @@ def manage_warriors():
     for current_village in status.village_list:
         current_village.manage_warriors()
 
-def manage_villages():
+def manage_villages(verbose: bool = True):
     '''
     Description:
         Controls the aggressiveness and population changes of villages and native warrior spawning/despawning
@@ -488,11 +495,12 @@ def manage_villages():
             elif roll >= 5: #5-6
                 current_village.change_aggressiveness(1)
             if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
-                text = 'The previously pacified village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
-                constants.notification_manager.display_notification({
-                    'message': text,
-                    'zoom_destination': current_village.cell.tile,
-                })
+                if verbose: # Should not display this message when simulating turns before the start of the game
+                    text = 'The previously pacified village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
+                    constants.notification_manager.display_notification({
+                        'message': text,
+                        'zoom_destination': current_village.cell.tile,
+                    })
         if random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6:
             previous_population = current_village.population
             current_village.change_population(1)
@@ -651,7 +659,6 @@ def game_end_check():
         None
     '''
     if constants.money < 0:
-        flags.game_over = True
         text = ''
         text += 'Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER'
         constants.notification_manager.display_notification({
@@ -678,7 +685,7 @@ def manage_commodity_sales():
     for current_commodity in constants.commodity_types:
         if sold_commodities[current_commodity] > 0:
             any_sold = True
-            sell_price = constants.commodity_prices[current_commodity]
+            sell_price = constants.item_prices[current_commodity]
             expected_revenue = sold_commodities[current_commodity] * sell_price
             expected_revenue = status.current_ministers['Prosecutor'].estimate_expected(expected_revenue, False)
             actual_revenue = 0
@@ -690,7 +697,7 @@ def manage_commodity_sales():
                     individual_sell_price -= 1
                 if individual_sell_price < 1:
                     individual_sell_price = 1
-                reported_revenue += individual_sell_price#constants.money_tracker.change(individual_sell_price, 'commodity sales')
+                reported_revenue += individual_sell_price
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
                     market_utility.change_price(current_commodity, -1)
@@ -701,6 +708,7 @@ def manage_commodity_sales():
     
     if any_sold:
         trade_minister.display_message(text)
+        status.previous_sales_report = text
     if money_stolen > 0:
         trade_minister.steal_money(money_stolen, 'sold_commodities')
 
@@ -719,3 +727,54 @@ def manage_lore():
     if status.current_lore_mission == None:
         if (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2) or constants.effect_manager.effect_active('instant_lore_mission'):
             constants.actor_creation_manager.create_lore_mission(False, {})
+
+def end_turn_warnings():
+    '''
+    Description:
+        Displays any warnings for player to see before ending turn - can cancel end turn based on any of these
+    Input:
+        None
+    Output:
+        None
+    '''
+    for current_minister in status.minister_list: # Warn for firing minister
+        if current_minister.just_removed and current_minister.current_position == 'none':
+            text = 'Warning: if you do not reappoint ' + current_minister.name + ' by the end of the turn, he will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
+            current_minister.display_message(text)
+
+    for current_cell in status.strategic_map_grid.get_flat_cell_list(): # Warn for insufficient warehouses
+        if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
+            text = 'Warning: the warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
+            text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
+            constants.notification_manager.display_notification({
+                'message': text,
+                'zoom_destination': current_cell.tile,
+            })
+    for current_grid in status.grid_list:
+        if current_grid.is_abstract_grid:
+            current_cell = current_grid.cell_list[0][0]
+            if current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity and not current_cell.tile.infinite_inventory_capacity:
+                text = 'Warning: the warehouses in ' + current_grid.cell_list[0][0].tile.name + ' are not sufficient to hold the commodities stored there. /n /n'
+                text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
+                constants.notification_manager.display_notification({
+                    'message': text,
+                    'zoom_destination': current_cell.tile,
+                })
+
+    for grid_type in constants.abstract_grid_type_list: # Warn for leaving units behind in non-Europe grids
+        if grid_type != 'europe_grid':
+            current_cell = getattr(status, grid_type).find_cell(0, 0)
+            num_leaving, num_reserve = (00, 0) # Vehicles leaving, and vehicles staying behind, respectively
+            for current_mob in current_cell.contained_mobs:
+                if current_mob.end_turn_destination != 'none' and current_mob.is_vehicle:
+                    num_leaving += 1
+                elif current_mob.is_vehicle and current_mob.has_crew:
+                    num_reserve += 1
+            num_stranded = len(current_cell.contained_mobs) - (num_leaving + num_reserve) # Number of non-vehicles left behind
+            grid_name = grid_type[:-5].replace('_', ' ').capitalize() # slave_traders_grid -> Slave traders
+            if num_leaving > 0 and num_stranded > 0 and num_reserve == 0: # If at least 1 vehicle leaving grid and at least 1 unit left behind, give warning
+                text = 'Warning: at least 1 unit is being left behind in ' + grid_name + ' and will not be able to leave without another ship. /n /n'
+                constants.notification_manager.display_notification({
+                    'message': text,
+                    'zoom_destination': current_cell.tile
+                })

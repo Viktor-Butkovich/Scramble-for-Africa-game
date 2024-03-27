@@ -44,21 +44,21 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.hosted_images = []
         if self.show_terrain:
             self.cell.tile = self
-            self.image_dict['hidden'] = 'scenery/paper_hidden.png'
+            self.image_dict['hidden'] = 'terrains/paper_hidden.png'
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
-            self.has_inventory = True
-            self.inventory_setup()
-            if self.cell.grid.from_save: #load in saved inventory from cell
-                self.load_inventory(self.cell.save_dict['inventory'])
+            if self.cell.grid.from_save:
+                self.inventory = self.cell.save_dict['inventory']
+
         elif self.grid.grid_type in constants.abstract_grid_type_list:
             self.cell.tile = self
             self.terrain = 'none'
+            if self.cell.grid.from_save:
+                self.inventory = self.cell.save_dict['inventory']
             if self.grid.grid_type == 'europe_grid': # Europe should be able to hold commodities despite not being terrain
-                self.has_inventory = True
                 self.infinite_inventory_capacity = True
-                self.inventory_setup()
-                if self.cell.grid.from_save: #load in saved inventory from cell
-                    self.load_inventory(self.cell.save_dict['inventory'])
+                if constants.effect_manager.effect_active('infinite_commodities'):
+                    for current_commodity in constants.commodity_types:
+                        self.inventory[current_commodity] = 10
         else:
             self.terrain = 'none'
         self.update_tooltip()
@@ -153,7 +153,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.has_inventory and not self.infinite_inventory_capacity:
+        if not self.infinite_inventory_capacity:
             inventory_used = self.get_inventory_used()
             amount_to_remove = inventory_used - self.inventory_capacity
             if amount_to_remove > 0:
@@ -164,24 +164,6 @@ class tile(actor): #to do: make terrain tiles a subclass
                     if self.get_inventory(commodity_removed) > 0:
                         self.change_inventory(commodity_removed, -1)
                         amount_removed += 1
-        
-    def change_inventory(self, commodity, change):
-        '''
-        Description:
-            Changes the number of commodities of a certain type held by this tile. Also ensures that the tile info display is updated correctly
-        Input:
-            string commodity: Type of commodity to change the inventory of
-            int change: Amount of commodities of the inputted type to add. Removes commodities of the inputted type if negative
-        Output:
-            None
-        '''
-        if self.has_inventory:
-            self.inventory[commodity] += change
-            if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
-                self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
-            if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
-                actor_utility.select_interface_tab(status.tile_tabbed_collection, status.tile_inventory_collection)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -193,12 +175,12 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.has_inventory:
-            self.inventory[commodity] = new_value
-            if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
-                self.get_equivalent_tile.inventory[commodity] = new_value
-            if status.displayed_tile == self or status.displayed_tile == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
+        super().set_inventory(commodity, new_value)
+        equivalent_tile = self.get_equivalent_tile()
+        if self.grid.attached_grid != 'none': #only get equivalent if there is an attached grid
+            equivalent_tile.inventory[commodity] = new_value
+        if status.displayed_tile in [self, equivalent_tile]:
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self)
 
     def get_main_grid_coordinates(self):
         '''
@@ -372,9 +354,9 @@ class tile(actor): #to do: make terrain tiles a subclass
                     base_word = 'ocean_' + new_terrain
                 else:
                     base_word = 'river_' + new_terrain
-            self.image_dict['default'] = 'scenery/terrain/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
+            self.image_dict['default'] = 'terrains/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
         elif new_terrain == 'none':
-            self.image_dict['default'] = 'scenery/hidden.png'
+            self.image_dict['default'] = 'terrains/hidden.png'
         if update_image_bundle:
             self.update_image_bundle() #self.image.set_image('default')
 

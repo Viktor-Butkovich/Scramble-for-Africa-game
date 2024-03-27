@@ -53,17 +53,24 @@ class construction(action.action):
         '''
         initial_input_dict = super().button_setup(initial_input_dict)
         if self.building_type == 'resource':
-            initial_input_dict['image_id'] = constants.resource_building_button_dict[self.attached_resource]
+            displayed_resource = self.attached_resource
+            if displayed_resource == 'none':
+                displayed_resource = 'consumer goods'
+            initial_input_dict['image_id'] = [
+                'buttons/default_button_alt2.png',
+                {'image_id': 'items/' + displayed_resource + '.png'},
+                {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
+            ]
         elif self.building_type == 'infrastructure':
             initial_input_dict['image_id'] = 'buildings/buttons/road.png'
         elif self.building_type == 'train':
             initial_input_dict['image_id'] = [
-                'mobs/default/button.png',
+                'buttons/default_button_alt.png',
                 {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
             ]
         elif self.building_type == 'steamboat':
             initial_input_dict['image_id'] = [
-                'mobs/default/button.png', 
+                'buttons/default_button_alt.png', 
                 {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
             ]
         else:
@@ -175,9 +182,9 @@ class construction(action.action):
             if self.roll_result >= self.current_min_success:
                 if self.building_type == 'mission':
                     if status.current_country.religion == 'protestant':
-                        sound_id = 'onward christian soldiers'
+                        sound_id = 'effects/onward_christian_soldiers'
                     elif status.current_country.religion == 'catholic':
-                        sound_id = 'ave maria'
+                        sound_id = 'effects/ave_maria'
                     audio.append({'sound_id': sound_id, 'dampen_music': True})
         return(audio)
 
@@ -231,7 +238,14 @@ class construction(action.action):
                 else:
                     self.attached_resource = 'none'
                     self.building_name = 'resource production facility'
-                self.button.image.set_image(constants.resource_building_button_dict[self.attached_resource])
+                displayed_resource = self.attached_resource
+                if displayed_resource == 'none':
+                    displayed_resource = 'consumer goods'
+                self.button.image.set_image([
+                    'buttons/default_button_alt2.png',
+                    {'image_id': 'items/' + displayed_resource + '.png'},
+                    {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2}
+                ])
 
         elif self.building_type == 'infrastructure':
             cell = status.displayed_mob.images[0].current_cell
@@ -358,7 +372,6 @@ class construction(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }

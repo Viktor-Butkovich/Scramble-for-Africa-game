@@ -83,7 +83,7 @@ class slave_capture(action.action):
         if subject in ['success', 'critical_success']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['mobs/default/button.png',
+                    ['buttons/default_button_alt.png',
                         actor_utility.generate_unit_component_image_id('mobs/slave workers/default.png', 'left', to_front=True), 
                         actor_utility.generate_unit_component_image_id('mobs/slave workers/default.png', 'right', to_front=True)
                     ],
@@ -163,9 +163,9 @@ class slave_capture(action.action):
         '''
         audio =  super().generate_audio(subject)
         if subject == 'roll_started':
-            audio.append('gunfire')
+            audio.append('effects/gunfire')
         elif subject == 'initial':
-            audio.append('bolt_action_1')
+            audio.append('effects/bolt_action_1')
         return(audio)
 
     def can_show(self):
@@ -220,9 +220,8 @@ class slave_capture(action.action):
                     'message': 'Capture slaves'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
-                    'tooltip': ['Do nothing'],
-                    'message': 'Do nothing'
+                    'tooltip': ['Cancel'],
+                    'message': 'Cancel'
                     }
                 ],
             })

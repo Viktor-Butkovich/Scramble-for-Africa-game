@@ -131,9 +131,8 @@ class active_investigation(action.campaign):
                     'message': 'Start investigation'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
-                    'tooltip': ['Do nothing'],
-                    'message': 'Do nothing'
+                    'tooltip': ['Cancel'],
+                    'message': 'Cancel'
                     }
                 ],
             })

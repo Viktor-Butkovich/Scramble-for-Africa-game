@@ -229,3 +229,14 @@ class notification_manager_template():
                 else:
                     channel = constants.sound_manager.play_sound(sound_file, volume=volume)
         return(new_notification)
+
+    def clear_notification_queue(self):
+        '''
+        Description:
+            Clears the notification queue
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.notification_queue = []

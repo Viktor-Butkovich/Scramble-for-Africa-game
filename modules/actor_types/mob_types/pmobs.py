@@ -22,7 +22,7 @@ class pmob(mob):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
@@ -35,6 +35,8 @@ class pmob(mob):
                 'base_automatic_route': int tuple list value - Required if from save, list of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - Required if from save, list of the coordinates and string commands this unit will execute, changes as the route is executed
+                'inventory': dictionary value - This actor's initial items carried, with an integer value corresponding to amount of each item type 
+                'equipment': dictionary value - This actor's initial items equipped, with a boolean value corresponding to whether each type of equipment is equipped
         Output:
             None
         '''
@@ -44,6 +46,7 @@ class pmob(mob):
         status.pmob_list.append(self)
         self.is_pmob = True
         self.set_controlling_minister_type('none')
+        self.equipment = input_dict.get('equipment', {})
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
@@ -90,6 +93,7 @@ class pmob(mob):
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - List of the coordinates and string commands this unit will execute, changes as the route is executed
                 'automatically_replace': boolean value  Whether this unit or any of its components should be replaced automatically in the event of attrition
+                'equipment': dictionary value - This actor's items equipped, with a boolean value corresponding to whether each type of equipment is equipped
         '''
         save_dict = super().to_save_dict()
         if self.end_turn_destination == 'none':
@@ -105,6 +109,7 @@ class pmob(mob):
         save_dict['base_automatic_route'] = self.base_automatic_route
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
         save_dict['automatically_replace'] = self.automatically_replace
+        save_dict['equipment'] = self.equipment
         return(save_dict)
 
     def clear_attached_cell_icons(self):
@@ -281,28 +286,6 @@ class pmob(mob):
         self.in_progress_automatic_route = []
         if self == status.displayed_mob:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
-
-    def selection_sound(self):
-        '''
-        Description:
-            Plays a sound when this unit is selected, with a varying sound based on this unit's type
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.is_officer or self.is_group or self.is_vehicle:
-            if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
-                constants.sound_manager.play_sound('bolt_action_2')
-            if status.current_country.name == 'France':
-                possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
-            elif status.current_country.name == 'Germany':
-                possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
-            else:
-                possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
-                if self.is_vehicle and self.vehicle_type == 'ship':
-                    possible_sounds.append('voices/steady she goes')
-            constants.sound_manager.play_sound(random.choice(possible_sounds))
 
     def set_automatically_replace(self, new_value):
         '''
@@ -524,21 +507,6 @@ class pmob(mob):
                 if not equivalent_tile == 'none':
                     equivalent_tile.draw_destination_outline()
 
-    def ministers_appointed(self):
-        '''
-        Description:
-            Returns whether all ministers are appointed to do an action, otherwise prints an error message
-        Input:
-            None
-        Output:
-            boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
-        '''
-        if minister_utility.positions_filled():
-            return(True)
-        else:
-            game_transitions.force_minister_appointment()
-            return(False)
-
     def set_controlling_minister_type(self, new_type):
         '''
         Description:
@@ -579,13 +547,9 @@ class pmob(mob):
         Output:
             None
         '''
-        if not self.end_turn_destination == 'none':
-            if self.grids[0] in self.end_turn_destination.grids: #if on same grid
-                nothing = 0 #do once queued movement is added
-            else: #if on different grid
-                if self.can_travel():
-                    self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
-                    self.manage_inventory_attrition() #do an inventory check when crossing ocean, using the destination's terrain
+        if self.end_turn_destination != 'none' and self.can_travel():
+            self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
+            self.manage_inventory_attrition() #do an inventory check when crossing ocean, using the destination's terrain
             self.end_turn_destination = 'none'
     
     def can_travel(self): #if can move between Europe, Africa, etc.
@@ -599,22 +563,6 @@ class pmob(mob):
         '''
         return(False) #different for subclasses
 
-    def change_inventory(self, commodity, change):
-        '''
-        Description:
-            Changes the number of commodities of a certain type held by this mob. Also ensures that the mob info display is updated correctly
-        Input:
-            string commodity: Type of commodity to change the inventory of
-            int change: Amount of commodities of the inputted type to add. Removes commodities of the inputted type if negative
-        Output:
-            None
-        '''
-        if self.has_inventory:
-            self.inventory[commodity] += change
-            if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
-                actor_utility.select_interface_tab(status.mob_tabbed_collection, status.mob_inventory_collection)
-
     def set_inventory(self, commodity, new_value):
         '''
         Description:
@@ -625,10 +573,9 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.has_inventory:
-            self.inventory[commodity] = new_value
-            if status.displayed_mob == self:
-                actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
+        super().set_inventory(commodity, new_value)
+        if status.displayed_mob == self:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def fire(self):
         '''
@@ -666,7 +613,7 @@ class pmob(mob):
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                             passed = False
                             if destination_type == 'land':
-                                if self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'):
+                                if self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and (self.can_swim_river or future_cell.y <= 1)): # Allow ships on land if port is built and either coastal port or able to move in rivers
                                     passed = True
                             elif destination_type == 'water':
                                 if destination_type == 'water':
@@ -686,7 +633,7 @@ class pmob(mob):
                                                         text_utility.print_to_screen('This unit cannot move through rivers.')
                                                 return(False)
                                     
-                                if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
+                                if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0:
                                     if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari or (self.can_explore and not future_cell.visible): #non-battalion units can't move into enemies
                                         return(True)
                                     else:
@@ -700,7 +647,10 @@ class pmob(mob):
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 if can_print:
-                                    text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.')
+                                    if future_cell.has_intact_building('port'):
+                                        text_utility.print_to_screen('Steamships can not move between ports on land.')
+                                    else:
+                                        text_utility.print_to_screen('You cannot move on land with this unit unless there is a port.')
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 if can_print:
@@ -755,17 +705,17 @@ class pmob(mob):
                     vehicle.change_inventory(current_commodity, 1)
                 else:
                     self.images[0].current_cell.tile.change_inventory(current_commodity, 1)
+            self.inventory = {}
         self.hide_images()
         self.remove_from_turn_queue()
         vehicle.contained_mobs.append(self)
-        self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             vehicle.select()
         if not flags.loading_save:
-            constants.sound_manager.play_sound('footsteps')
+            self.movement_sound()
         self.clear_automatic_route()
 
     def disembark_vehicle(self, vehicle, focus = True):
@@ -787,7 +737,7 @@ class pmob(mob):
             current_image.add_to_cell()
         if vehicle.vehicle_type == 'ship' and self.images[0].current_cell.grid == status.strategic_map_grid and self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
-        if self.can_trade and self.has_inventory: #if caravan
+        if self.can_trade and self.inventory_capacity > 0: #if caravan
             consumer_goods_present = vehicle.get_inventory('consumer goods')
             if consumer_goods_present > 0:
                 consumer_goods_transferred = consumer_goods_present
@@ -801,7 +751,7 @@ class pmob(mob):
         if focus:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, None, override_exempt=True)
             self.select()
-            constants.sound_manager.play_sound('footsteps')
+            self.movement_sound()
 
     def get_worker(self) -> 'pmob':
         '''

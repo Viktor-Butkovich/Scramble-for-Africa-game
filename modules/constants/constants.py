@@ -157,7 +157,7 @@ transaction_descriptions: Dict[str, str] = {
     'subsidies': 'subsidies',
     'trial_compensation': 'trial compensation',
     'fabricated_evidence': 'fabricated evidence',
-    'consumer_goods': 'consumer goods',
+    'items': 'Europe items',
     'unit_recruitment': 'unit recruitment',
     'attrition_replacements': 'attrition replacements',
     'misc_revenue': 'misc',
@@ -178,8 +178,6 @@ color_dict: Dict[str, tuple[int, int, int]] = {
     'bright green': (0, 255, 0),
     'green': (0, 200, 0),
     'dark green': (0, 150, 0),
-    'green': (0, 200, 0),
-    'dark green': (0, 150, 0),
     'bright blue': (0, 0, 255),
     'blue': (0, 0, 200),
     'dark blue': (0, 0, 150),
@@ -187,7 +185,10 @@ color_dict: Dict[str, tuple[int, int, int]] = {
     'brown': (85, 53, 22),
     'blonde': (188, 175, 123),
     'purple': (127, 0, 170),
-    'transparent': (1, 1, 1)
+    'transparent': (1, 1, 1),
+    'green_icon': (15, 154, 54),
+    'yellow_icon': (255, 242, 0),
+    'red_icon': (231, 0, 46)
 }
 
 green_screen_colors: List[tuple[int, int, int]] = [
@@ -248,7 +249,7 @@ terrain_build_cost_multiplier_dict: Dict[str, int] = {
 
 commodity_types: List[str] = ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
 collectable_resources: List[str] = ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber']
-commodity_prices: Dict[str, int] = {}
+item_prices: Dict[str, int] = {}
 sold_commodities: Dict[str, int] = {}
 commodities_produced: Dict[str, int] = {}
 attempted_commodities: List[str] = []
@@ -262,18 +263,6 @@ resource_building_dict: Dict[str, str] = {
     'iron': 'buildings/mine.png',
     'ivory': 'buildings/camp.png',
     'rubber': 'buildings/plantation.png',
-}
-resource_building_button_dict: Dict[str, str] = {
-    'coffee': 'scenery/resources/production/coffee.png',
-    'copper': 'scenery/resources/production/copper.png',
-    'diamond': 'scenery/resources/production/diamond.png',
-    'exotic wood': 'scenery/resources/production/exotic wood.png',
-    'fruit': 'scenery/resources/production/fruit.png',
-    'gold': 'scenery/resources/production/gold.png',
-    'iron': 'scenery/resources/production/iron.png',
-    'ivory': 'scenery/resources/production/ivory.png',
-    'rubber': 'scenery/resources/production/rubber.png',
-    'none': 'scenery/resources/production/none.png',
 }
 
 weighted_backgrounds: List[str] = []

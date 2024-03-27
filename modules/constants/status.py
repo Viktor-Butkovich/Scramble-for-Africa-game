@@ -5,6 +5,7 @@ from modules.actor_types.mobs import mob
 from modules.constructs.ministers import minister
 from modules.constructs.countries import country
 from modules.constructs.worker_types import worker_type
+from modules.constructs.equipment_types import equipment_type
 from modules.constructs.images import image, free_image
 from modules.interface_types.interface_elements import interface_collection, tabbed_collection, ordered_collection
 from modules.interface_types.inventory_interface import inventory_grid
@@ -61,6 +62,7 @@ minister_list: List[minister] = []
 available_minister_list: List[minister] = []
 country_list: List[country] = []
 worker_types: Dict[str, worker_type] = {}
+equipment_types: Dict[str, equipment_type] = {}
 flag_icon_list: List[button] = []
 grid_list: List[grid] = []
 text_list: List[str] = []
@@ -112,14 +114,17 @@ reorganize_unit_left_button: button = None
 reorganize_unit_right_button: button = None
 free_unit_slaves_button: button = None
 cursor_image: pygame.image = None
+next_boarded_vehicle: pmob = None
+text_box_destination: callable = None
 
 current_instructions_page: instructions_page = None
 current_country: country = None
 current_country_name: str = None
 current_lore_mission: lore_mission = None
-ongoing_action_type: str = None
 current_ministers: Dict[str, minister] = {}
 lore_types_effects_dict: Dict[str, effect] = {}
+previous_production_report: str = None
+previous_sales_report: str = None
 previous_financial_report: str = None
 transaction_history: Dict[str, float] = {}
 

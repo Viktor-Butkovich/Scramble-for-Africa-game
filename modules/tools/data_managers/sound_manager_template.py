@@ -32,6 +32,28 @@ class sound_manager_template():
         self.previous_state = 'none'
         self.previous_song = 'none'
 
+    def busy(self):
+        '''
+        Description:
+            Returns whether the Pygame mixer is currently busy
+        Input:
+            None
+        Output:
+            bool: Returns whether the Pygame mixer is currently busy
+        '''
+        return(pygame.mixer.get_busy())
+
+    def fadeout(self, ms=500):
+        '''
+        Description:
+            Fades out all active sound channels over the inputted number of milliseconds
+        Input:
+            None
+        Output:
+            None
+        '''
+        pygame.mixer.fadeout(ms)
+
     def play_sound(self, file_name, volume = 0.3):
         '''
         Description:

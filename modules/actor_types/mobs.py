@@ -23,7 +23,7 @@ class mob(actor):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
@@ -233,7 +233,7 @@ class mob(actor):
         Input:
             None
         Output:
-            int: Returns this unit's combst strength
+            int: Returns this unit's combat strength
         '''
         #A unit with 0 combat strength cannot fight
         #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
@@ -248,6 +248,8 @@ class mob(actor):
         base = self.get_combat_modifier()
         result = base + 3
         if self.veteran:
+            result += 1
+        if self.is_pmob and self.equipment.get('Maxim gun', False):
             result += 1
         if self.is_officer or (self.is_vehicle and self.crew == 'none'):
             result = 0
@@ -606,7 +608,7 @@ class mob(actor):
         else:
             tooltip_list.append('Movement points: ???')
         
-        tooltip_list.append('Combat strength: ' + str(self.get_combat_strength()))    
+        tooltip_list.append('Combat strength: ' + str(self.get_combat_strength()))
         if self.disorganized:
             if self.is_npmob and self.npmob_type == 'beast':
                 tooltip_list.append('This unit is currently injured, giving a combat penalty until its next turn')
@@ -616,10 +618,10 @@ class mob(actor):
         if not self.end_turn_destination == 'none':
             if self.end_turn_destination.cell.grid == status.strategic_map_grid:
                 tooltip_list.append('This unit has been issued an order to travel to (' + str(self.end_turn_destination.cell.x) + ', ' + str(self.end_turn_destination.cell.y) + ') in Africa at the end of the turn')
-            elif self.end_turn_destination.cell.grid == status.europe_grid:
-                tooltip_list.append('This unit has been issued an order to travel to Europe at the end of the turn')
             elif self.end_turn_destination.cell.grid == status.slave_traders_grid:
                 tooltip_list.append('This unit has been issued an order to travel to the slave traders at the end of the turn')
+            else:
+                tooltip_list.append('This unit has been issued an order to travel to ' + self.end_turn_destination.cell.grid.grid_type[:-5].capitalize() + ' at the end of the turn')
                 
         if self.is_npmob and self.npmob_type == 'beast':
             tooltip_list.append('This beast tends to live in ' + self.preferred_terrains[0] + ', ' + self.preferred_terrains[1] + ', and ' + self.preferred_terrains[2] + ' terrain ')
@@ -677,6 +679,7 @@ class mob(actor):
         '''
         if self.is_pmob:
             self.death_sound(death_type)
+        self.drop_inventory()
         self.remove_complete()
 
     def death_sound(self, death_type: str = 'violent'):
@@ -741,6 +744,63 @@ class mob(actor):
             else:
                 return(False)
 
+    def selection_sound(self):
+        '''
+        Description:
+            Plays a sound when this unit is selected, with a varying sound based on this unit's type
+        Input:
+            None
+        Output:
+            None
+        '''
+        possible_sounds = []
+        if self.is_pmob:
+            if self.is_vehicle: # Overlaps with voices
+                if self.vehicle_type == 'train':
+                    constants.sound_manager.play_sound('effects/train_horn')
+                else:
+                    constants.sound_manager.play_sound('effects/foghorn')
+
+            if self.is_officer or self.is_group or self.is_vehicle:
+                if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
+                    constants.sound_manager.play_sound('effects/bolt_action_2')
+                if status.current_country.name == 'France':
+                    possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
+                elif status.current_country.name == 'Germany':
+                    possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
+                else:
+                    possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
+                    if self.is_vehicle and self.vehicle_type == 'ship':
+                        possible_sounds.append('voices/steady she goes')
+        if possible_sounds:
+            constants.sound_manager.play_sound(random.choice(possible_sounds))
+
+    def movement_sound(self):
+        '''
+        Description:
+            Plays a sound when this unit moves or embarks/disembarks a vehicle, with a varying sound based on this unit's type
+        Input:
+            None
+        Output:
+            None
+        '''
+        if constants.sound_manager.busy():
+            constants.sound_manager.fadeout(500)
+        possible_sounds = []
+        if self.is_pmob or self.visible():
+            if self.is_vehicle:
+                if self.vehicle_type == 'train':
+                    possible_sounds.append('effects/train_moving')
+                else:
+                    constants.sound_manager.play_sound('effects/ocean_splashing')
+                    possible_sounds.append('effects/ship_propeller')
+            elif self.images[0].current_cell != 'none' and self.images[0].current_cell.terrain == 'water':
+                possible_sounds.append('effects/river_splashing')
+            else:
+                possible_sounds.append('effects/footsteps')
+        if possible_sounds:
+            constants.sound_manager.play_sound(random.choice(possible_sounds))
+
     def move(self, x_change, y_change):
         '''
         Description:
@@ -765,10 +825,7 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
 
-        if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-            constants.sound_manager.play_sound('water')
-        else:
-            constants.sound_manager.play_sound('footsteps')
+        self.movement_sound()
 
         if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle): #test this logic
             previous_infrastructure = previous_cell.get_intact_building('infrastructure')

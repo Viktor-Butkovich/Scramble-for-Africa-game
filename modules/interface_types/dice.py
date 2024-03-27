@@ -146,11 +146,11 @@ class die(button):
         dice_list = status.dice_list
         if self == dice_list[0]: #only 1 die at a time makes noise
             if len(dice_list) == 1:
-                constants.sound_manager.play_sound('dice_1')
+                constants.sound_manager.play_sound('effects/dice_1')
             elif len(dice_list) == 2:
-                constants.sound_manager.play_sound('dice_2')
+                constants.sound_manager.play_sound('effects/dice_2')
             else:
-                constants.sound_manager.play_sound('dice_3')
+                constants.sound_manager.play_sound('effects/dice_3')
                 
     def roll(self):
         '''

@@ -638,6 +638,7 @@ class tabbed_collection(interface_collection):
                 'init_type': 'tab button',
                 'parent_collection': self.tabs_collection,
                 'image_id': member_config['button_image_id'],
+                'identifier': member_config.get('identifier', None),
                 'linked_element': new_member
             })
             self.tabbed_members.append(new_member)

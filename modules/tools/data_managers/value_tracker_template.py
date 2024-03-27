@@ -126,9 +126,9 @@ class money_tracker_template(value_tracker_template):
         self.transaction_history[change_type] += value_change
         if not value_change == 0:
             if abs(value_change) < 15:
-                constants.sound_manager.play_sound('coins_1')
+                constants.sound_manager.play_sound('effects/coins_1')
             else:
-                constants.sound_manager.play_sound('coins_2')
+                constants.sound_manager.play_sound('effects/coins_2')
         super().change(value_change)
 
     def set(self, new_value):

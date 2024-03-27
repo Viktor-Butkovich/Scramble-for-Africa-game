@@ -21,7 +21,7 @@ class group(pmob):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this group's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
@@ -45,11 +45,10 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        for current_commodity in constants.commodity_types: #merges individual inventory to group inventory and clears individual inventory
-            self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
-            self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
-        self.worker.inventory_setup()
-        self.officer.inventory_setup()
+        for current_mob in [self.worker, self.officer]: # Merges individual inventory to group inventory and clears individual inventory
+            for current_commodity in current_mob.inventory:
+                self.change_inventory(current_commodity, current_mob.get_inventory(current_commodity))
+                current_mob.set_inventory(current_commodity, 0)
         self.set_group_type('none')
         self.update_image_bundle()
         if not from_save:
@@ -222,6 +221,7 @@ class group(pmob):
         Output:
             None
         '''
+        self.drop_inventory()
         self.officer.fire()
         self.worker.fire()
         self.remove_complete()
@@ -306,8 +306,7 @@ class group(pmob):
         Output:
             None
         '''
-        if self.has_inventory:
-            self.drop_inventory()
+        self.drop_inventory()
         self.worker.leave_group(self)
 
         movement_ratio_remaining = self.movement_points / self.max_movement_points

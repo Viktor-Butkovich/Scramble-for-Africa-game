@@ -1,6 +1,6 @@
 #Contains functionality for generic actions
 
-from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility
+from ..util import main_loop_utility, text_utility, actor_utility, dice_utility, action_utility, utility, minister_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -101,7 +101,7 @@ class action():
         elif constants.money < self.get_price():
             text_utility.print_to_screen('You do not have the ' + str(self.get_price()) + ' money needed for a ' + self.name + '.')
             return(False)
-        elif self.actor_type == 'mob' and not (unit.ministers_appointed()):
+        elif self.actor_type == 'mob' and not minister_utility.positions_filled():
             return(False)
         if self.actor_type == 'mob' and unit.sentry_mode:
             unit.set_sentry_mode(False)
@@ -214,7 +214,7 @@ class action():
         audio = []
         if subject == 'roll_finished':
             if self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
-                audio.append('trumpet_1')
+                audio.append('effects/trumpet')
         return(audio)
 
     def generate_current_roll_modifier(self):
@@ -272,8 +272,6 @@ class action():
             })
             return(False)
         else:
-            flags.ongoing_action = True
-            status.ongoing_action_type = self.action_type
             return(True)
 
     def process_payment(self):
@@ -413,7 +411,6 @@ class action():
         if self.actor_type == 'mob' and self.roll_result >= self.current_min_crit_success and not self.current_unit.veteran:
             self.current_unit.promote()
             status.displayed_mob.select()
-        action_utility.cancel_ongoing_actions()
 
 class campaign(action):
     '''

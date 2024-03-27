@@ -138,7 +138,7 @@ class worker_type():
         Description:
             Makes any updates required when worker first recruited (not on load)
         Input:
-            boolean purchased=None: Whether this worker was purchased, only required for slave workers
+            boolean purchased=True: Whether this worker was purchased, only required for slave workers
         Output:
             None
         '''
@@ -168,6 +168,14 @@ class worker_type():
                 constants.evil_tracker.change(6)
 
     def on_fire(self, wander=False):
+        '''
+        Description:
+            Makes any updates required when worker fired
+        Input:
+            boolean wander=False: Whether this worker will wander after being fired
+        Output:
+            None
+        '''
         if not self.adjective in ['religious', 'slave']:
             market_utility.attempt_worker_upkeep_change('decrease', self.adjective)
 

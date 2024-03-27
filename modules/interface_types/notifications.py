@@ -1,6 +1,5 @@
 #Contains functionality for notifications
 
-import time
 from .labels import multi_line_label
 from ..util import actor_utility
 import modules.constants.constants as constants
@@ -20,7 +19,7 @@ class notification(multi_line_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'message': string value - Default text for this label, with lines separated by /n
                 'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
@@ -30,14 +29,20 @@ class notification(multi_line_label):
             None
         '''
         status.displayed_notification = self
+        self.can_remove = True
+        if input_dict.get('extra_parameters', False):
+            self.can_remove = input_dict['extra_parameters'].get('can_remove', True)
         super().__init__(input_dict)
         self.in_notification = True
         self.is_action_notification = False
         self.notification_dice = 0 #by default, do not show any dice when notification shown
-        constants.sound_manager.play_sound('opening_letter')
+        constants.sound_manager.play_sound('effects/opening_letter')
         self.notification_type = input_dict['notification_type']
         if input_dict.get('on_reveal', None):
-            input_dict['on_reveal']()
+            if type(input_dict['on_reveal']) == tuple: # If given tuple, call function in 1st index with list of arguments in 2nd index
+                input_dict['on_reveal'][0](*input_dict['on_reveal'][1])
+            else:
+                input_dict['on_reveal']()
         self.on_remove = input_dict.get('on_remove', None)
 
     def format_message(self):
@@ -50,7 +55,8 @@ class notification(multi_line_label):
             None
         '''
         super().format_message()
-        self.message.append('Click to remove this notification.')
+        if self.can_remove:
+            self.message.append('Click to remove this notification.')
                     
     def update_tooltip(self):
         '''
@@ -61,7 +67,10 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        self.set_tooltip(['Click to remove this notification'])
+        if self.can_remove:
+            self.set_tooltip(['Click to remove this notification'])
+        else:
+            self.set_tooltip(self.message)
 
     def on_click(self):
         '''
@@ -72,11 +81,12 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        if self.has_parent_collection:
-            self.parent_collection.remove_recursive(complete=False)
-        else:
-            self.remove()
-        constants.notification_manager.handle_next_notification()
+        if self.can_remove:
+            if self.has_parent_collection:
+                self.parent_collection.remove_recursive(complete=False)
+            else:
+                self.remove()
+            constants.notification_manager.handle_next_notification()
 
     def remove(self):
         '''
@@ -108,7 +118,7 @@ class zoom_notification(notification):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'message': string value - Default text for this label, with lines separated by /n
                 'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 

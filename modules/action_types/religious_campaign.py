@@ -92,7 +92,7 @@ class religious_campaign(action.campaign):
         if subject in ['success', 'critical_success']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['mobs/default/button.png',
+                    ['buttons/default_button_alt.png',
                         actor_utility.generate_unit_component_image_id('mobs/church volunteers/default.png', 'left', to_front=True), 
                         actor_utility.generate_unit_component_image_id('mobs/church volunteers/default.png', 'right', to_front=True)
                     ],
@@ -114,9 +114,9 @@ class religious_campaign(action.campaign):
         if subject == 'roll_finished':
             if self.roll_result >= self.current_min_success:
                 if status.current_country.religion == 'protestant':
-                    sound_id = 'onward christian soldiers'
+                    sound_id = 'effects/onward_christian_soldiers'
                 elif status.current_country.religion == 'catholic':
-                    sound_id = 'ave maria'
+                    sound_id = 'effects/ave_maria'
                 audio.append({'sound_id': sound_id, 'dampen_music': True})
         return(audio)
 
@@ -168,7 +168,6 @@ class religious_campaign(action.campaign):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }

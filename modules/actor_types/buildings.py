@@ -21,7 +21,7 @@ class building(actor):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'building_type': string value - Type of building, like 'port'
@@ -35,7 +35,6 @@ class building(actor):
         self.damaged = False
         super().__init__(from_save, input_dict)
         self.default_inventory_capacity = 0
-        self.inventory_capacity = 0
         no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
         self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
         if input_dict['building_type'] == 'warehouses':
@@ -62,7 +61,7 @@ class building(actor):
             })
         self.cell.tile.set_name(self.cell.tile.name)
 
-        self.set_inventory_capacity(self.default_inventory_capacity)
+        self.set_building_inventory_capacity(self.default_inventory_capacity)
         if constants.effect_manager.effect_active('damaged_buildings'):
             if self.can_damage():
                 self.set_damaged(True, True)
@@ -131,6 +130,7 @@ class building(actor):
             tooltip_text.append('Lets ' + str(self.scale) + ' attached work crews each attempt to produce ' + str(self.efficiency) + ' units of ' + self.resource_type + ' each turn')
         elif self.building_type == 'port':
             tooltip_text.append('Allows ships to enter this tile')
+            tooltip_text.append('Steamboats and steamships can move between ports, but steamships can never move beyond coastal ports')
         elif self.building_type == 'infrastructure':
             if self.is_bridge:
                 tooltip_text.append('Allows movement across the bridge')
@@ -196,9 +196,9 @@ class building(actor):
         if self.building_type == 'infrastructure':
             actor_utility.update_roads()
         if self.damaged:
-            self.set_inventory_capacity(0)
+            self.set_building_inventory_capacity(0)
         else:
-            self.set_inventory_capacity(self.default_inventory_capacity)
+            self.set_building_inventory_capacity(self.default_inventory_capacity)
         if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
             self.cell.get_building('warehouses').set_damaged(new_value)
         self.cell.tile.update_image_bundle()
@@ -213,9 +213,9 @@ class building(actor):
             None
         '''
         self.default_inventory_capacity = new_value
-        self.set_inventory_capacity(new_value)
+        self.set_building_inventory_capacity(new_value)
     
-    def set_inventory_capacity(self, new_value):
+    def set_building_inventory_capacity(self, new_value):
         '''
         Description:
             Sets a new current inventory capacity for a building. A building's inventory capacity may change when it is upgraded, damaged, or repaired
@@ -241,13 +241,7 @@ class building(actor):
         Output:
             None
         '''
-        current_index = 0
-        if current_index == 0:
-            self.cell.tile.inventory_capacity -= previous_value
-            self.cell.tile.inventory_capacity += new_value
-        else:
-            self.cell.tile.inventory_capacity = self.cell.tile.inventory_capacity
-        current_index += 1
+        self.cell.tile.set_inventory_capacity(self.cell.tile.inventory_capacity + new_value - previous_value)
             
     def touching_mouse(self):
         '''
@@ -314,7 +308,7 @@ class infrastructure_building(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'infrastructure_type': string value - Type of infrastructure, like 'road' or 'railroad'
@@ -444,7 +438,7 @@ class trading_post(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
@@ -492,7 +486,7 @@ class fort(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
@@ -517,7 +511,7 @@ class train_station(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
@@ -542,7 +536,7 @@ class port(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
@@ -569,7 +563,7 @@ class warehouses(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
@@ -658,7 +652,7 @@ class resource_building(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
@@ -869,7 +863,7 @@ class slums(building):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this building's name
                 'building_type': string value - Type of building, like 'port'

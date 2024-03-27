@@ -22,7 +22,7 @@ class actor_display_label(label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_label_type': string value - Type of actor information shown
@@ -55,11 +55,6 @@ class actor_display_label(label):
         }
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-
-            input_dict['init_type'] = 'labor broker button'
-            input_dict['image_id'] = 'buttons/labor_broker_button.png'
-            input_dict['keybind_id'] = pygame.K_t
-            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'embark vehicle button'
             input_dict['image_id'] = 'buttons/embark_ship_button.png'
@@ -101,8 +96,8 @@ class actor_display_label(label):
             input_dict['button_type'] = 'draw automatic route'
             self.add_attached_button(input_dict)
 
-            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
-            input_dict['button_type'] = 'follow automatic route'
+            input_dict['image_id'] = 'buttons/execute_single_movement_route_button.png'
+            input_dict['button_type'] = 'execute automatic route'
             self.add_attached_button(input_dict)
 
             for action_type in status.actions:
@@ -212,7 +207,7 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
-            african_workers_image_id_list = ['mobs/default/button.png']
+            african_workers_image_id_list = ['buttons/default_button_alt.png']
             left_worker_dict = {
                 'image_id': 'mobs/African workers/default.png',
                 'size': 0.8,
@@ -228,16 +223,37 @@ class actor_display_label(label):
             input_dict['init_type'] = 'hire african workers button'
             input_dict['image_id'] = african_workers_image_id_list
             input_dict['hire_source_type'] = 'village'
-            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5)
             self.add_attached_button(input_dict)
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+            input_dict['width'], input_dict['height'] = (m_size, m_size)
+            if self.actor_label_type == 'tile inventory capacity':
+                input_dict['init_type'] = 'pick up each commodity button'
+                input_dict['image_id'] = 'buttons/commodity_pick_up_each_button.png'
+                self.add_attached_button(input_dict)
+
+                input_dict['init_type'] = 'sell each commodity button'
+                input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
+                self.add_attached_button(input_dict)
+
+            else:
+                input_dict['init_type'] = 'drop each commodity button'
+                input_dict['image_id'] = 'buttons/commodity_drop_each_button.png'
+                self.add_attached_button(input_dict)
+
+            if self.actor_label_type == 'mob inventory capacity':
+                input_dict['init_type'] = 'remove equipment button'
+                for equipment_type in status.equipment_types:
+                    input_dict['equipment_type'] = equipment_type
+                    input_dict['image_id'] = ['buttons/default_button.png', 'misc/green_circle.png', 'items/' + equipment_type + '.png']
+                    self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
             for worker_type in ['slave', 'Asian']:
-                current_image_id_list = ['mobs/default/button.png']
+                current_image_id_list = ['buttons/default_button_alt.png']
                 left_worker_dict = {
                     'image_id': 'mobs/' + worker_type + ' workers/default.png',
                     'size': 0.8,
@@ -257,7 +273,7 @@ class actor_display_label(label):
                 input_dict['init_type'] = 'recruit workers button'
                 input_dict['worker_type'] = worker_type
                 input_dict['image_id'] = current_image_id_list
-                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5)
                 self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'minister':
@@ -327,7 +343,7 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
-            african_workers_image_id_list = ['mobs/default/button.png']
+            african_workers_image_id_list = ['buttons/default_button_alt.png']
             left_worker_dict = {
                 'image_id': 'mobs/African workers/default.png',
                 'size': 0.8,
@@ -342,9 +358,30 @@ class actor_display_label(label):
             african_workers_image_id_list.append(right_worker_dict)
             input_dict['init_type'] = 'hire african workers button'
             input_dict['image_id'] = african_workers_image_id_list
-            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5)
             input_dict['hire_source_type'] = 'slums'
             self.add_attached_button(input_dict)
+
+        elif self.actor_label_type in constants.building_types:
+            self.message_start = ''
+            if self.actor_label_type == 'port':
+                input_dict['init_type'] = 'labor broker button'
+                african_workers_image_id_list = ['buttons/default_button_alt.png']
+                left_worker_dict = {
+                    'image_id': 'mobs/African workers/default.png',
+                    'size': 0.8,
+                    'x_offset': -0.2,
+                    'y_offset': 0,
+                    'level': 1
+                }
+                african_workers_image_id_list.append(left_worker_dict)
+
+                right_worker_dict = left_worker_dict.copy()
+                right_worker_dict['x_offset'] *= -1
+                african_workers_image_id_list.append(right_worker_dict)
+                input_dict['image_id'] = african_workers_image_id_list
+                input_dict['width'], input_dict['height'] = (m_size + 5, m_size + 5) 
+                self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
@@ -360,7 +397,6 @@ class actor_display_label(label):
         
         elif self.actor_label_type == 'inventory_quantity':
             self.message_start = 'Quantity: '
-
             if self.actor_type == 'mob':
                 input_dict['init_type'] = 'anonymous button'
                 input_dict['image_id'] = 'buttons/commodity_drop_button.png'
@@ -379,7 +415,6 @@ class actor_display_label(label):
 
             elif self.actor_type == 'tile':
                 original_input_dict = input_dict.copy()
-
                 input_dict['init_type'] = 'anonymous button'
                 input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
                 input_dict['button_type'] = {
@@ -395,6 +430,8 @@ class actor_display_label(label):
                 }
                 self.add_attached_button(input_dict)
 
+                # Add pick up each button to inventory capacity label - if has at least 1 inventory capacity, show button that drops/picks up each type of item at once
+
                 input_dict = original_input_dict
                 input_dict['init_type'] = 'sell commodity button'
                 input_dict['image_id'] = 'buttons/commodity_sell_button.png'
@@ -403,6 +440,16 @@ class actor_display_label(label):
                 input_dict['init_type'] = 'sell all commodity button'
                 input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
                 self.add_attached_button(input_dict)
+
+                input_dict['init_type'] = 'use equipment button'
+                input_dict['image_id'] = 'buttons/use_equipment_button.png'
+                self.add_attached_button(input_dict)
+
+        elif self.actor_label_type == 'settlement':
+            self.message_start = 'Settlement: '
+            input_dict['init_type'] = 'rename settlement button'
+            input_dict['image_id'] = 'buttons/rename.png'
+            self.add_attached_button(input_dict)
 
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
@@ -587,12 +634,21 @@ class actor_display_label(label):
             tooltip_text.append('Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work')
             tooltip_text.append('Slums can form around ports, train stations, and resource production facilities')
             self.set_tooltip(tooltip_text)
-            
+
+        elif self.actor_label_type in constants.building_types + ['resource building']:
+            if self.actor != 'none':
+                label_type = self.actor_label_type
+                if label_type == 'resource building':
+                    label_type = 'resource'
+                current_building = self.actor.cell.get_building(label_type)
+                current_building.update_tooltip()
+                self.set_tooltip(current_building.tooltip_text)
+
         elif self.actor_label_type == 'combat_strength':
             tooltip_text = [self.message]
             tooltip_text.append('Combat strength is an estimation of a unit\'s likelihood to win combat based on its experience and unit type')
             tooltip_text.append('When attacked, the defending side will automatically choose its strongest unit to fight')
-            if not self.actor == 'none':
+            if self.actor != 'none':
                 modifier = self.actor.get_combat_modifier()
                 if modifier >= 0:
                     sign = '+'
@@ -660,11 +716,11 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'resource building':
                 if (not new_actor.grid.is_abstract_grid) and new_actor.cell.visible and new_actor.cell.has_building('resource'):
-                    self.set_label('Resource building: ' + new_actor.cell.get_building('resource').name)
+                    self.set_label(new_actor.cell.get_building('resource').name.capitalize())
 
             elif self.actor_label_type == 'village':
                 if new_actor.cell.visible and new_actor.cell.has_building('village') and new_actor.cell.visible:
-                    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
+                    self.set_label(new_actor.cell.get_building('village').name + ' village')
 
             elif self.actor_label_type == 'movement':
                 if self.actor.is_pmob:
@@ -821,6 +877,11 @@ class actor_display_label(label):
             elif self.actor_label_type == 'slums':
                 if self.actor.cell.has_building('slums'):
                     self.set_label(self.message_start + str(self.actor.cell.get_building('slums').available_workers))
+
+            elif self.actor_label_type in constants.building_types:
+                if self.actor.cell.has_building(self.actor_label_type):
+                    self.set_label(self.message_start + self.actor.cell.get_building(self.actor_label_type).name.capitalize())
+
             elif self.actor_label_type == 'canoes':
                 self.set_label('Equipped with canoes to move along rivers')
             
@@ -832,6 +893,12 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'inventory_quantity':
                 self.set_label(self.message_start + str(new_actor.actor.get_inventory(new_actor.current_item)))
+
+            elif self.actor_label_type == 'settlement':
+                if new_actor.cell.settlement:
+                    self.set_label(self.message_start + str(new_actor.cell.settlement.name))
+                else:
+                    self.set_label(self.message_start + ' n/a')
 
         elif self.actor_label_type == 'tooltip':
             return #do not set text for tooltip label
@@ -864,7 +931,9 @@ class actor_display_label(label):
             return(False)
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
-        elif self.actor_label_type == 'slums' and not self.actor.cell.has_building('slums'):
+        elif self.actor_label_type in constants.building_types and not self.actor.cell.has_building(self.actor_label_type):
+            return(False)
+        elif self.actor_label_type == 'settlement' and not self.actor.cell.settlement:
             return(False)
         elif self.actor_label_type == 'minister' and not self.actor.is_pmob:
             return(False)
@@ -905,7 +974,7 @@ class list_item_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_label_type': string value - Type of actor information shown
@@ -961,7 +1030,7 @@ class actor_tooltip_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
@@ -1007,7 +1076,7 @@ class building_work_crews_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
@@ -1068,7 +1137,7 @@ class building_efficiency_label(actor_display_label):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'

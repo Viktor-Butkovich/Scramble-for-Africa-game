@@ -385,7 +385,7 @@ class grid(interface_elements.interface_element):
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = random.choice(possible_terrains)
-        terrain_variant = random.randrange(0, constants.terrain_variant_dict[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(terrain, 1)) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
         self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         counter = 0        
         while not counter == worm_length:           
@@ -400,7 +400,7 @@ class grid(interface_elements.interface_element):
                     current_y = current_y - 1
                 elif direction == 4:
                     current_x = current_x - 1
-                terrain_variant = random.randrange(0, constants.terrain_variant_dict[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(terrain, 1)) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
                 self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):

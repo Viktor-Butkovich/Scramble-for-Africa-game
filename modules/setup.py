@@ -13,6 +13,7 @@ import modules.util.game_transitions as game_transitions
 import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
 import modules.constructs.worker_types as worker_types
+import modules.constructs.equipment_types as equipment_types
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
@@ -196,6 +197,24 @@ def worker_types_config():
                                 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
 
+class equipment_types_config():
+    '''
+    Description:
+        Defines equipment type templates
+    Input:
+        None
+    Output:
+        None
+    '''
+    equipment_types.equipment_type({
+        'equipment_type': 'Maxim gun',
+        'requirement': 'is_battalion',
+        'description': [
+            'A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls',
+            'Can only be equipped by battalions'
+        ]
+    })
+
 def terrains():
     '''
     Description:
@@ -207,7 +226,7 @@ def terrains():
     '''
     for current_terrain in (constants.terrain_list + ['ocean_water', 'river_water']):
         current_index = 0
-        while os.path.exists('graphics/scenery/terrain/' + current_terrain + '_' + str(current_index) + '.png'):
+        while os.path.exists('graphics/terrains/' + current_terrain + '_' + str(current_index) + '.png'):
             current_index += 1
         current_index -= 1 #back up from index that didn't work
         constants.terrain_variant_dict[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
@@ -262,11 +281,14 @@ def commodities():
         None
     '''
     for current_commodity in constants.commodity_types:
-        constants.commodity_prices[current_commodity] = 0
+        constants.item_prices[current_commodity] = 0
         constants.sold_commodities[current_commodity] = 0
 
     for current_commodity in constants.collectable_resources:
         constants.commodities_produced[current_commodity] = 0
+
+    for current_equipment in status.equipment_types:
+        constants.item_prices[current_equipment] = status.equipment_types[current_equipment].price
 
 def def_ministers():
     '''
@@ -545,7 +567,7 @@ def value_trackers():
         'height': scaling.scale_height(30),
         'modes': ['strategic', 'europe', 'ministers', 'trial'],
         'image_id': 'buttons/instructions.png',
-        'init_type': 'show previous financial report button'
+        'init_type': 'show previous reports button'
     })
     
     constants.evil_tracker = value_tracker_template.value_tracker_template('evil', 0, 0, 100)
@@ -672,40 +694,6 @@ def buttons():
     input_dict['init_type'] = 'load game button'
     load_game_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
-    button_start_x = 750 #x position of leftmost button
-    button_separation = 60 #x separation between each button
-    current_button_number = 0 #tracks current button to move each one farther right
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20),
-        'width': scaling.scale_width(50),
-        'height': scaling.scale_height(50),
-        'modes': ['strategic'],
-        'keybind_id': pygame.K_a,
-        'image_id': 'buttons/left_button.png',
-        'init_type': 'move left button'
-    }
-    left_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-    current_button_number += 1
-
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
-    input_dict['keybind_id'] = pygame.K_s
-    input_dict['image_id'] = 'buttons/down_button.png'
-    input_dict['init_type'] = 'move down button'
-    down_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80)
-    input_dict['keybind_id'] = pygame.K_w
-    input_dict['image_id'] = 'buttons/up_button.png'
-    input_dict['init_type'] = 'move up button'
-    up_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-    current_button_number += 1
-
-    input_dict['coordinates'] = scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20)
-    input_dict['keybind_id'] = pygame.K_d
-    input_dict['image_id'] = 'buttons/right_button.png'
-    input_dict['init_type'] = 'move right button'
-    right_arrow_button = constants.actor_creation_manager.create_interface_element(input_dict)
-
     input_dict = {
         'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height - 125),
         'width': scaling.scale_width(50),
@@ -744,7 +732,7 @@ def buttons():
     input_dict['modes'] = ['strategic']
     del input_dict['keybind_id']
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
-    input_dict['init_type'] = 'free all button'
+    input_dict['init_type'] = 'confirm free all button'
     free_all_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
     lhs_menu_collection.add_member(free_all_slaves_button)
 
@@ -770,34 +758,44 @@ def buttons():
 def europe_screen():
     '''
     Description:
-        Initializes static interface of Europe screen
+        Initializes static interface of Europe screen - purchase buttons for units and items, 8 per column
     Input:
         None
     Output:
         None
     '''
-    #Europe screen buttons setup
-    #max of 8 in column
-    buy_button_y = 0#140
-    input_dict = {
-        'width': scaling.scale_width(100),
-        'height': scaling.scale_height(100),
+    europe_purchase_buttons = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(1500, 20),
+        'width': 10,
+        'height': 10,
         'modes': ['europe'],
-        'init_type': 'recruitment button'
-    }
-    for recruitment_index, recruitment_type in enumerate(constants.recruitment_types):
-        input_dict['coordinates'] = scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)))
-        input_dict['recruitment_type'] = recruitment_type
-        new_recruitment_button = constants.actor_creation_manager.create_interface_element(input_dict)
-
-    new_consumer_goods_buy_button = constants.actor_creation_manager.create_interface_element({
-        'coordinates': scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8))),
-        'width': scaling.scale_width(100),
-        'height': scaling.scale_height(100),
-        'modes': ['europe'],
-        'init_type': 'buy commodity button',
-        'commodity_type': 'consumer goods'
+        'init_type': 'ordered collection',
+        'separation': scaling.scale_height(20),
+        'reversed': True,
+        'second_dimension_increment': scaling.scale_width(125),
+        'direction': 'vertical'
     })
+
+    for recruitment_index, recruitment_type in enumerate(constants.recruitment_types): # Creates recruitment button for each officer type, workers, and steamship
+        constants.actor_creation_manager.create_interface_element({
+            'width': scaling.scale_width(100),
+            'height': scaling.scale_height(100),
+            'init_type': 'recruitment button',
+            'parent_collection': europe_purchase_buttons,
+            'recruitment_type': recruitment_type,
+            'member_config': {'second_dimension_coordinate': -1 * (recruitment_index // 8)}
+        })
+
+    for item_type in ['consumer goods', 'Maxim gun']: # Creates purchase button for items from Europe
+        constants.actor_creation_manager.create_interface_element({
+            'width': scaling.scale_width(100),
+            'height': scaling.scale_height(100),
+            'init_type': 'buy item button',
+            'parent_collection': europe_purchase_buttons,
+            'item_type': item_type,
+            'member_config': {'second_dimension_coordinate': -1 * (recruitment_index // 8)} # Re-uses recruitment index from previous loop
+        })
+        recruitment_index += 1
 
 def ministers_screen():
     '''
@@ -1135,10 +1133,58 @@ def mob_interface():
         'member_config': {'order_exempt': True}
     }
     fire_unit_button = constants.actor_creation_manager.create_interface_element(input_dict)
-    
+
     input_dict['image_id'] = 'buttons/free_slaves_button.png'
     input_dict['init_type'] = 'free unit slaves button'
     status.free_unit_slaves_button = constants.actor_creation_manager.create_interface_element(input_dict)
+
+    left_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(200, -105),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_a,
+        'image_id': 'buttons/left_button.png',
+        'init_type': 'move left button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+    down_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(245, -105),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_s,
+        'image_id': 'buttons/down_button.png',
+        'init_type': 'move down button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+
+    up_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(245, -60),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_w,
+        'image_id': 'buttons/up_button.png',
+        'init_type': 'move up button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+
+    right_arrow_button = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(290, -105),
+        'width': scaling.scale_width(40),
+        'height': scaling.scale_height(40),
+        'modes': ['strategic', 'europe'],
+        'keybind_id': pygame.K_d,
+        'image_id': 'buttons/right_button.png',
+        'init_type': 'move right button',
+        'parent_collection': status.mob_info_display,
+        'member_config': {'order_exempt': True}
+    })
+
 
 
     #mob info labels setup
@@ -1265,14 +1311,11 @@ def tile_interface():
     })
 
     #tile info labels setup
-    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
-                                'resource building', 'building efficiency', 'building work crews', 'current building work crew',
-                                'village', 'native population', 'native available workers', 'native aggressiveness',
-                                'slave_traders_strength']
+    tile_info_display_labels = [
+        'coordinates', 'terrain', 'resource', 'village', 'native population', 'native available workers', 'native aggressiveness', 'slave_traders_strength'
+    ]
     for current_actor_label_type in tile_info_display_labels:
-        if current_actor_label_type == 'current building work crew':
-            x_displacement = 50
-        elif current_actor_label_type in ['building efficiency', 'building work crews', 'native population', 'native available workers', 'native aggressiveness']:
+        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             x_displacement = 25
         else:
             x_displacement = 0
@@ -1285,25 +1328,12 @@ def tile_interface():
             'parent_collection': status.tile_info_display,
             'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
         }
-        if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
-            input_dict['init_type'] = 'actor display label'
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type == 'building efficiency':
-            input_dict['init_type'] = 'building efficiency label'
-            input_dict['building_type'] = 'resource'
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type == 'building work crews':
-            input_dict['init_type'] = 'building work crews label'
-            input_dict['building_type'] = 'resource'
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type == 'current building work crew':
-            input_dict['init_type'] = 'list item label'
-            input_dict['list_type'] = 'resource building'
-            for i in range(0, 3):
-                input_dict['list_index'] = i
-                constants.actor_creation_manager.create_interface_element(input_dict)
-        elif current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
+
+        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = current_actor_label_type + ' label'
+            constants.actor_creation_manager.create_interface_element(input_dict)
+        else:
+            input_dict['init_type'] = 'actor display label'
             constants.actor_creation_manager.create_interface_element(input_dict)
 
     tab_collection_relative_coordinates = (450, -30)
@@ -1348,7 +1378,7 @@ def inventory_interface():
     }
     for current_index in range(len(constants.commodity_types)): #commodity prices in Europe
         input_dict['coordinates'] = scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index))
-        input_dict['image_id'] = 'scenery/resources/large/' + constants.commodity_types[current_index] + '.png'
+        input_dict['image_id'] = ['misc/green_circle.png', 'items/' + constants.commodity_types[current_index] + '.png']
         input_dict['commodity'] = constants.commodity_types[current_index]
         new_commodity_button = constants.actor_creation_manager.create_interface_element(input_dict)
 
@@ -1357,14 +1387,14 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.mob_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/consumer goods.png', 'size': 0.75}], 'identifier': 'inventory'},
         'description': 'unit inventory panel'
     })
 
     input_dict = {
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
-        'image_id': 'misc/default_label.png', #'misc/underline.png',
+        'image_id': 'misc/default_label.png',
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',
@@ -1449,7 +1479,7 @@ def inventory_interface():
         'height': scaling.scale_height(30),
         'init_type': 'ordered collection',
         'parent_collection': status.tile_tabbed_collection,
-        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
+        'member_config': {'tabbed': True, 'button_image_id': ['buttons/default_button_alt2.png', {'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/consumer goods.png', 'size': 0.75}], 'identifier': 'inventory'},
         'description': 'tile inventory panel'
     })
 
@@ -1554,6 +1584,65 @@ def inventory_interface():
         }
         input_dict['init_type'] = 'actor display label'
         constants.actor_creation_manager.create_interface_element(input_dict)
+
+def settlement_interface():
+    '''
+    Description:
+        Initializes the settlement interface as part of the tile tabbed collection
+    Input:
+        None
+    Output:
+        None
+    '''
+    status.settlement_collection = constants.actor_creation_manager.create_interface_element({
+        'coordinates': scaling.scale_coordinates(0, 0),
+        'width': scaling.scale_width(10),
+        'height': scaling.scale_height(30),
+        'init_type': 'ordered collection',
+        'parent_collection': status.tile_tabbed_collection,
+        'member_config': {'tabbed': True, 'button_image_id': 'buttons/crew_train_button.png', 'identifier': 'settlement'},
+        'description': 'settlement panel'
+    })
+    settlement_info_display_labels = [
+        'settlement', 'port', 'train_station', 'resource building', 'building efficiency', 'building work crews',
+            'current building work crew', 'fort', 'slums', 'trading_post', 'mission'
+    ]
+    for current_actor_label_type in settlement_info_display_labels:
+        if current_actor_label_type in ['settlement', 'trading_post', 'mission']:
+            x_displacement = 0
+        elif current_actor_label_type == 'current building work crew':
+            x_displacement = 75
+        elif current_actor_label_type in ['building efficiency', 'building work crews']:
+            x_displacement = 50
+        else:
+            x_displacement = 25
+        input_dict = {
+            'minimum_width': scaling.scale_width(10),
+            'height': scaling.scale_height(30),
+            'image_id': 'misc/default_label.png',
+            'actor_label_type': current_actor_label_type,
+            'actor_type': 'tile',
+            'parent_collection': status.settlement_collection,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement)}
+        }
+
+        if current_actor_label_type == 'building efficiency':
+            input_dict['init_type'] = 'building efficiency label'
+            input_dict['building_type'] = 'resource'
+            constants.actor_creation_manager.create_interface_element(input_dict)
+        elif current_actor_label_type == 'building work crews':
+            input_dict['init_type'] = 'building work crews label'
+            input_dict['building_type'] = 'resource'
+            constants.actor_creation_manager.create_interface_element(input_dict)
+        elif current_actor_label_type == 'current building work crew':
+            input_dict['init_type'] = 'list item label'
+            input_dict['list_type'] = 'resource building'
+            for i in range(0, 3):
+                input_dict['list_index'] = i
+                constants.actor_creation_manager.create_interface_element(input_dict)
+        else:
+            input_dict['init_type'] = 'actor display label'
+            constants.actor_creation_manager.create_interface_element(input_dict)
 
 def unit_organization_interface():
     '''

@@ -52,7 +52,7 @@ class trade(action.action):
         Output:
             float: Returns the amount paid
         '''
-        return(constants.commodity_prices['consumer goods'])
+        return(constants.item_prices['consumer goods'])
 
     def button_setup(self, initial_input_dict):
         '''
@@ -87,7 +87,7 @@ class trade(action.action):
             text += '/n'
             if subject == 'success':
                 self.commodity = random.choice(constants.collectable_resources)
-                text += 'The merchant managed to buy a unit of ' + self.commodity + ' (currently worth ' + str(constants.commodity_prices[self.commodity]) + ' money). /n /n'
+                text += 'The merchant managed to buy a unit of ' + self.commodity + ' (currently worth ' + str(constants.item_prices[self.commodity]) + ' money). /n /n'
             else:
                 text += 'The merchant bought items that turned out to be worthless. /n /n'
             if (self.current_village.population != self.current_village.available_workers) and random.randrange(1, 7) >= 4: #half chance of getting worker
@@ -113,8 +113,10 @@ class trade(action.action):
         if subject in ['success', 'critical_success', 'failure', 'critical_failure']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['scenery/resources/consumer goods.png',
-                     {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                    [
+                        {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                        {'image_id': 'items/consumer goods.png', 'size': 0.75},
+                        {'image_id': 'misc/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'left', 'centered': True}}
@@ -122,8 +124,10 @@ class trade(action.action):
         if subject in ['success', 'critical_success']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['scenery/resources/' + self.commodity + '.png',
-                     {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                    [
+                        {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                        {'image_id': 'items/' + self.commodity + '.png', 'size': 0.75},
+                        {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'leftmost', 'centered': True}}
@@ -131,7 +135,7 @@ class trade(action.action):
         if subject in ['success', 'critical_success', 'failure', 'critical_failure'] and self.attracted_worker:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['mobs/default/button.png',
+                    ['buttons/default_button_alt.png',
                         actor_utility.generate_unit_component_image_id('mobs/African workers/default.png', 'left', to_front=True), 
                         actor_utility.generate_unit_component_image_id('mobs/African workers/default.png', 'right', to_front=True)
                     ],
@@ -159,7 +163,6 @@ class trade(action.action):
                     'message': 'Start ' + self.name
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop ' + self.name
                     }
@@ -183,17 +186,13 @@ class trade(action.action):
             self.current_village.change_available_workers(1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African')
         self.trades_remaining -= 1
-        flags.ongoing_action = True
-        status.ongoing_action_type = 'rumor_search'
         if self.trades_remaining == 0:
             constants.notification_manager.display_notification({
-                'message': 'The villagers are not willing to trade any more with this caravan this turn. /n /n',
-                'on_remove': action_utility.cancel_ongoing_actions
+                'message': 'The villagers are not willing to trade any more with this caravan this turn. /n /n'
             })
         elif self.current_unit.get_inventory('consumer goods') == 0:
             constants.notification_manager.display_notification({
-                'message': 'The caravan does not have any more consumer goods to sell. /n /n',
-                'on_remove': action_utility.cancel_ongoing_actions
+                'message': 'The caravan does not have any more consumer goods to sell. /n /n'
             })
         else:
             self.start(self.current_unit)

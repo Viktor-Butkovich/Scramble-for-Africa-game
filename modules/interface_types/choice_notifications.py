@@ -20,7 +20,7 @@ class choice_notification(action_notifications.action_notification):
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'message': string value - Default text for this label, with lines separated by /n
                 'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
@@ -55,7 +55,6 @@ class choice_notification(action_notifications.action_notification):
                 'notification': self,
                 'init_type': init_type
             }))
-        flags.making_choice = True
 
     def on_click(self, choice_button_override=False):
         '''
@@ -91,7 +90,6 @@ class choice_notification(action_notifications.action_notification):
         Output:
             None
         '''
-        flags.making_choice = False
         super().remove()
         for current_choice_button in self.choice_buttons:
             current_choice_button.remove_complete()
@@ -115,7 +113,7 @@ class choice_button(buttons.button):
                 'button_type': string value - Determines the function of this button, like 'end turn'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'notification': choice_notification value: notification to which this choice button is attached
         Output:
@@ -143,7 +141,7 @@ class choice_button(buttons.button):
             self.message = 'Exit game'
 
         elif input_dict['button_type'] == 'none':
-            self.message = 'Do nothing'
+            self.message = 'Cancel'
     
         else:
             self.message = input_dict['button_type'].capitalize()
@@ -202,7 +200,7 @@ class choice_button(buttons.button):
             self.set_tooltip(['Exits the game without saving'])
 
         elif self.button_type == 'none':
-            self.set_tooltip(['Do nothing'])
+            self.set_tooltip(['Cancel'])
             
         else:
             self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']
@@ -238,22 +236,17 @@ class recruitment_choice_button(choice_button):
             status.displayed_tile.cell.get_building('slums').recruit_worker()
 
         elif self.recruitment_type == 'African worker labor broker':
-            recruiter = status.displayed_mob
+            input_dict = {
+                'select_on_creation': True,
+                'coordinates': (status.displayed_tile.cell.x, status.displayed_tile.cell.y),
+                'grids': [status.displayed_tile.cell.grid, status.displayed_tile.cell.grid.mini_grid],
+                'modes': status.displayed_tile.cell.grid.modes
+            }
             input_dict.update(status.worker_types['African'].generate_input_dict())
-            input_dict['coordinates'] = (recruiter.x, recruiter.y)
-            input_dict['grids'] = recruiter.grids
-            input_dict['modes'] = status.displayed_tile.cell.grid.modes
             constants.money_tracker.change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
             market_utility.attempt_worker_upkeep_change('decrease', 'African') #adds 1 worker to the pool
             worker = constants.actor_creation_manager.create(False, input_dict)
-
-            if recruiter.is_vehicle:
-                recruiter.set_movement_points(0)
-                worker.crew_vehicle(recruiter)
-            else:
-                recruiter.set_movement_points(0)
-                constants.actor_creation_manager.create_group(worker, recruiter)
 
         else:
             input_dict['coordinates'] = (0, 0)

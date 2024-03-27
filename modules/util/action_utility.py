@@ -5,18 +5,6 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
-def cancel_ongoing_actions():
-    '''
-    Description:
-        Cancels any ongoing actions and frees the player to take other actions
-    Input:
-        None
-    Output:
-        None
-    '''
-    flags.ongoing_action = False
-    status.ongoing_action_type = None
-
 def generate_die_input_dict(coordinates, final_result, action, override_input_dict=None):
     '''
     Description:

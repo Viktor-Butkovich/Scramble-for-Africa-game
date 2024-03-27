@@ -1,7 +1,7 @@
 #Contains functionality for settlements
 
 import random
-from ..util import utility
+from ..util import utility, actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
@@ -43,6 +43,19 @@ class settlement():
         self.cell.tile.set_name(self.name)
         status.actor_list.append(self)
         status.settlement_list.append(self)
+
+    def rename(self, new_name: str):
+        '''
+        Description:
+            Sets a new name for this settlement
+        Input:
+            string new_name: New name for this settlement
+        Output:
+            None
+        '''
+        self.name = new_name
+        status.displayed_tile.set_name(self.name)
+        actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
 
     def remove_complete(self):
         '''

@@ -177,8 +177,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.cycle_available_ministers_button(input_dict)
                 elif base == 'commodity':
                     new_element = buttons.commodity_button(input_dict)
-                elif base == 'show previous financial report':
-                    new_element = buttons.show_previous_financial_report_button(input_dict)
+                elif base == 'show previous reports':
+                    new_element = buttons.show_previous_reports_button(input_dict)
                 elif base == 'tab':
                     new_element = buttons.tab_button(input_dict)
                 elif base == 'reorganize unit':
@@ -191,6 +191,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.action_button(input_dict)
                 elif base == 'scroll':
                     new_element = buttons.scroll_button(input_dict)
+                elif base == 'remove equipment':
+                    new_element = buttons.remove_equipment_button(input_dict)
 
                 #instructions buttons
                 elif base == 'instructions':
@@ -209,8 +211,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 #europe_transactions buttons
                 elif base == 'recruitment':
                     new_element = europe_transactions.recruitment_button(input_dict)
-                elif base == 'buy commodity':
-                    new_element = europe_transactions.buy_commodity_button(input_dict)
+                elif base == 'buy item':
+                    new_element = europe_transactions.buy_item_button(input_dict)
 
                 #actor_display_buttons buttons
                 elif base == 'embark all passengers':

@@ -1,5 +1,6 @@
 from ...util import text_utility
 import modules.constants.constants as constants
+import modules.constants.status as status
 import modules.constants.flags as flags
 
 class input_manager_template():
@@ -19,7 +20,7 @@ class input_manager_template():
         self.taking_input = False
         self.old_taking_input = self.taking_input
         self.stored_input = ''
-        self.send_input_to = ''
+        self.send_input_to: callable = None
         
     def check_for_input(self):
         '''
@@ -35,20 +36,22 @@ class input_manager_template():
         else:
             return(False)
         
-    def start_receiving_input(self, solicitant, message):
+    def start_receiving_input(self, solicitant: callable, prompt: str = None):
         '''
         Description:
             Displays the prompt for the user to enter input and prepares to receive input and send it to the part of the program requesting input
         Input:
-            string solicitant: Represents the part of the program to send input to
-            string message: Prompt given to the player to enter input
+            callable solicitant: Function to call with message as input
+            string prompt: Prompt given to the player to enter input
         Output:
             None
         '''
-        text_utility.print_to_screen(message)
+        text_utility.print_to_screen(prompt)
+        constants.notification_manager.display_notification({'message': prompt, 'extra_parameters': {'can_remove': False}})
         self.send_input_to = solicitant
         self.taking_input = True
-        
+        flags.typing = True
+
     def update_input(self):
         '''
         Description:
@@ -69,8 +72,7 @@ class input_manager_template():
         Output:
             None
         '''
-        if self.send_input_to == 'do something':
-            if received_input == 'done':
-                flags.crashed = True
-            else:
-                text_utility.print_to_screen('I didn\'t understand that.')
+        self.send_input_to(received_input)
+        self.taking_input = False
+        flags.typing = True
+        status.displayed_notification.remove()

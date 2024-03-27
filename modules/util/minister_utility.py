@@ -2,6 +2,7 @@
 
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.util.game_transitions as game_transitions
 
 def check_corruption(minister_type):
     '''
@@ -120,4 +121,6 @@ def positions_filled():
     for current_position in constants.minister_types:
         if status.current_ministers[current_position] == None:
             completed = False
+    if not completed:
+        game_transitions.force_minister_appointment()
     return(completed)

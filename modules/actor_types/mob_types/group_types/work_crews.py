@@ -20,7 +20,7 @@ class work_crew(group):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this group's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
@@ -109,7 +109,7 @@ class work_crew(group):
                                 'zoom_destination': building.cell.tile,
                             })
                     else:
-                        value_stolen += constants.commodity_prices[building.resource_type]
+                        value_stolen += constants.item_prices[building.resource_type]
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
                 if random.randrange(1, 7) <= 1: #1/6 chance

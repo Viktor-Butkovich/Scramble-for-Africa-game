@@ -25,7 +25,7 @@ class embark_all_passengers_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -98,7 +98,7 @@ class disembark_all_passengers_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -169,7 +169,7 @@ class enable_sentry_mode_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -232,7 +232,7 @@ class disable_sentry_mode_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -292,7 +292,7 @@ class enable_automatic_replacement_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'target_type': string value - Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
         Output:
@@ -367,7 +367,7 @@ class disable_automatic_replacement_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'target_type': string value - Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
         Output:
@@ -442,7 +442,7 @@ class end_unit_turn_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -501,7 +501,7 @@ class remove_work_crew_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
                 'building_type': Type of building to remove workers from, like 'resource building'
@@ -559,7 +559,7 @@ class disembark_vehicle_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
         Output:
@@ -633,7 +633,7 @@ class embark_vehicle_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'vehicle_type': string value - Type of vehicle this button embarks, like 'train' or 'ship'
         Output:
@@ -678,26 +678,74 @@ class embark_vehicle_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            displayed_mob = status.displayed_mob
-            if displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
-                vehicle = displayed_mob.images[0].current_cell.get_vehicle(self.vehicle_type)
-                rider = displayed_mob
+            if status.displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
+                rider = status.displayed_mob
+                vehicles = rider.images[0].current_cell.get_vehicles(self.vehicle_type)
                 can_embark = True
-                if vehicle.vehicle_type == 'train':
-                    if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                if vehicles[0].vehicle_type == 'train':
+                    if vehicles[0].images[0].current_cell.contained_buildings['train_station'] == 'none':
                         text_utility.print_to_screen('A train can only pick up passengers at a train station.')
                         can_embark = False
                 if can_embark:
-                    if rider.sentry_mode:
-                        rider.set_sentry_mode(False)
-                    if vehicle.sentry_mode:
-                        vehicle.set_sentry_mode(False)
-                    rider.embark_vehicle(vehicle)
-                    constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                    rider.set_sentry_mode(False)
+                    if len(vehicles) > 1:
+                        vehicles[0].select()
+                        for vehicle in vehicles:
+                            constants.notification_manager.display_notification({
+                                'message': 'There are ' + str(len(vehicles)) + ' possible vehicles to embark - click next until you find the vehicle you would like to embark. /n /n',
+                                'choices': [
+                                    {
+                                    'on_click': (self.finish_embark_vehicle, [rider, vehicle]),
+                                    'tooltip': ['Embarks this vehicle'],
+                                    'message': 'Embark'
+                                    },
+                                    {
+                                    'on_click': (self.skip_embark_vehicle, [rider, vehicles, vehicles.index(vehicle)]),
+                                    'tooltip': ['Cycles to the next possible vehicle'],
+                                    'message': 'Next vehicle'
+                                    }
+                                ],
+                            })
+                    else:
+                        vehicle = vehicles[0]
+                        if vehicle.sentry_mode:
+                            vehicle.set_sentry_mode(False)
+                        rider.embark_vehicle(vehicle)
+                        constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
             else:
                 text_utility.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.')
         else:
             text_utility.print_to_screen('You are busy and cannot embark a ' + self.vehicle_type + '.')
+
+    def finish_embark_vehicle(self, rider, vehicle):
+        '''
+        Description:
+            Selects a vehicle to embark when multiple vehicle options are available, called by choice notification
+        Input:
+            pmob rider: Unit embarking vehicle
+            vehicle vehicle: Vehicle to embark
+        Output:
+            None
+        '''
+        constants.notification_manager.clear_notification_queue() # Skip remaining embark notifications
+        vehicle.set_sentry_mode(False)
+        rider.embark_vehicle(vehicle)
+        constants.sound_manager.play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+
+    def skip_embark_vehicle(self, rider, vehicles, index):
+        '''
+        Description:
+            Selects the next possible vehicle to embark when multiple vehicle options are available, called by choice notification
+        Input:
+            pmob rider: Unit embarking vehicle
+            vehicle vehicle: Vehicle to embark
+        Output:
+            None
+        '''
+        if index == len(vehicles) - 1:
+            rider.select()
+        else:
+            vehicles[index + 1].select()
 
 class cycle_passengers_button(button):
     '''
@@ -717,7 +765,7 @@ class cycle_passengers_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -780,7 +828,7 @@ class cycle_work_crews_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
         Output:
@@ -849,7 +897,7 @@ class work_crew_to_building_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'building_type': string value - Type of buliding this button attaches workers to, like 'resource building'
         Output:
@@ -951,30 +999,13 @@ class labor_broker_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
         '''
         input_dict['button_type'] = 'labor broker'
         super().__init__(input_dict)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
-        '''
-        if super().can_show(skip_parent_collection=skip_parent_collection):
-            displayed_mob = status.displayed_mob
-            if displayed_mob.is_officer and displayed_mob.officer_type != 'evangelist':
-                return(True)
-            elif displayed_mob.is_vehicle and not (displayed_mob.can_swim_ocean or displayed_mob.has_crew):
-                return(True)
-        return(False)
 
     def on_click(self):
         '''
@@ -986,29 +1017,18 @@ class labor_broker_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            current_mob = status.displayed_mob
-            if status.strategic_map_grid in current_mob.grids:
-                if current_mob.images[0].current_cell.has_intact_building('port'):
-                    cost_info_list = self.get_cost()
-                    if not cost_info_list == 'none':
-                        if current_mob.movement_points >= 1:
-                            if constants.money_tracker.get() >= cost_info_list[1]:
-                                if current_mob.ministers_appointed():
-                                    if current_mob.sentry_mode:
-                                        current_mob.set_sentry_mode(False)
-                                    choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
-                                        'source_type': 'labor broker', 'village': cost_info_list[0]}
-                                    constants.actor_creation_manager.display_recruitment_choice_notification(choice_info_dict, 'African workers')
-                            else:
-                                text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
-                        else:
-                            text_utility.print_to_screen('Using a labor broker requires all remaining movement points, at least 1.')
-                    else:
-                        text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
+            cost_info_list = self.get_cost()
+            if cost_info_list != 'none':
+                if constants.money_tracker.get() >= cost_info_list[1]:
+                    if minister_utility.positions_filled():
+                        constants.actor_creation_manager.display_recruitment_choice_notification({
+                            'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png',
+                                'type': 'recruitment', 'source_type': 'labor broker', 'village': cost_info_list[0]
+                        }, 'African workers')
                 else:
-                    text_utility.print_to_screen('A labor broker can only be used at a port.')
+                    text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
             else:
-                text_utility.print_to_screen('A labor broker can only be used at a port.')
+                text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
         else:
             text_utility.print_to_screen('You are busy and cannot use a labor broker.')
 
@@ -1026,7 +1046,7 @@ class labor_broker_button(button):
         for current_village in status.village_list:
             if current_village.population > 0:
                 distance = int(utility.find_object_distance(current_village, status.displayed_mob))
-                cost = (5 * current_village.aggressiveness) + distance
+                cost = (2 * current_village.aggressiveness) + distance
                 if cost < lowest_cost or lowest_cost_village == 'none':
                     lowest_cost_village = current_village
                     lowest_cost = cost
@@ -1053,7 +1073,7 @@ class switch_theatre_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -1291,8 +1311,6 @@ class to_trial_button(button):
                         minister_utility.trial_setup(defense, prosecution) #sets up defense and prosecution displays
                     else:
                         text_utility.print_to_screen('There are currently no available appointees to replace this minister in the event of a successful trial.')
-                else:
-                    game_transitions.force_minister_appointment()
             else:
                 text_utility.print_to_screen('You do not have the ' + str(constants.action_prices['trial']) + ' money needed to start a trial.')
         else:
@@ -1449,7 +1467,7 @@ class hire_african_workers_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'hire_source_type': string value - Type of location workers are hired from, like 'village' or 'slums'
         Output:
@@ -1520,7 +1538,7 @@ class recruit_workers_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'worker_type': str value - Type of workers this button recruits, like 'slave' or 'Asian'
         Output:
@@ -1580,13 +1598,13 @@ class automatic_route_button(button):
                 'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
                 'width': int value - pixel width of this element
                 'height': int value - pixel height of this element
-                'button_type': string value - Determines the function of this button, like 'clear automatic route', 'follow automatic route', or 'draw automatic route'
+                'button_type': string value - Determines the function of this button, like 'clear automatic route', 'execute automatic route', or 'draw automatic route'
                 'modes': string list value - Game modes during which this element can appear
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
@@ -1596,7 +1614,7 @@ class automatic_route_button(button):
     def can_show(self, skip_parent_collection=False):
         '''
         Description:
-            Returns whether this button should be drawn. All automatic route buttons can only appear if the selected unit is porters or a crewed vehicle. Additionally, clear and follow automatic route buttons require that an automatic
+            Returns whether this button should be drawn. All automatic route buttons can only appear if the selected unit is porters or a crewed vehicle. Additionally, clear and execute automatic route buttons require that an automatic
                 route already exists
         Input:
             None
@@ -1606,7 +1624,7 @@ class automatic_route_button(button):
         if super().can_show(skip_parent_collection=skip_parent_collection):
             attached_mob = status.displayed_mob
             if attached_mob.inventory_capacity > 0 and (not (attached_mob.is_group and attached_mob.can_trade)) and (not (attached_mob.is_vehicle and attached_mob.crew == 'none')):
-                if self.button_type in ['clear automatic route', 'follow automatic route']:
+                if self.button_type in ['clear automatic route', 'execute automatic route']:
                     if len(attached_mob.base_automatic_route) > 0:
                         return(True)
                 else:
@@ -1617,7 +1635,7 @@ class automatic_route_button(button):
         '''
         Description:
             Does a certain action when clicked or when corresponding key is pressed, depending on button_type. Clear automatic route buttons remove the selected unit's automatic route. Draw automatic route buttons enter the route
-            drawing mode, in which the player can click on consecutive tiles to add them to the route. Follow automatic route buttons command the selected unit to execute its in-progress automatic route, stopping when it cannot
+            drawing mode, in which the player can click on consecutive tiles to add them to the route. Execute automatic route buttons command the selected unit to execute its in-progress automatic route, stopping when it cannot
             continue the route for any reason
         Input:
             None
@@ -1638,7 +1656,7 @@ class automatic_route_button(button):
                     attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
                     flags.drawing_automatic_route = True
                     
-                elif self.button_type == 'follow automatic route':
+                elif self.button_type == 'execute automatic route':
                     if attached_mob.can_follow_automatic_route():
                         attached_mob.follow_automatic_route()
                         attached_mob.remove_from_turn_queue()
@@ -1648,7 +1666,7 @@ class automatic_route_button(button):
             else:
                 text_utility.print_to_screen('You can only create movement routes in Africa.')
         else:
-            if self.button_type == 'follow automatic route':
+            if self.button_type == 'execute automatic route':
                 text_utility.print_to_screen('You are busy and cannot move this unit.')
             else:
                 text_utility.print_to_screen('You are busy and cannot modify this unit\'s movement route.')

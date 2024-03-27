@@ -21,7 +21,7 @@ class npmob(mob):
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
@@ -290,11 +290,7 @@ class npmob(mob):
         if not (self.npmob_type == 'beast' and self.hidden):
             for current_image in self.images:
                 current_image.add_to_cell()
-            if self.visible():
-                if self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-                    constants.sound_manager.play_sound('water')
-                else:
-                    constants.sound_manager.play_sound('footsteps')
+            self.movement_sound()
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)

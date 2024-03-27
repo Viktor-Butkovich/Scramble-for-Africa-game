@@ -126,28 +126,19 @@ def update_descriptions(target = 'all'):
                 text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
         
         elif current_target.endswith(' workers'):
-            worker_name = current_target.replace('slums ', 'African ').replace('village ', 'African ')
+            worker_name = current_target.replace('slums ', 'African ').replace('labor broker ', 'African ').replace('village ', 'African ')
             worker_type = worker_name.split(' ')[0] # 'African' for 'African workers', 'European' for 'European workers', etc.
 
             if worker_type != 'slave':
                 text_list.append(worker_name.capitalize() + ' have a varying upkeep, currently ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
             else:
                 text_list.append(worker_name.capitalize() + ' have a constant upkeep of ' + str(status.worker_types[worker_type].upkeep) + ' money each turn.')
-
-            text_list.append('Officers and vehicles require an attached unit of workers to perform most actions.')
-
-            if worker_type != 'slave':
-                text_list.append('Each unit of ' + worker_name + ' hired may increase the upkeep of all ' + worker_name + '.')
-            else:
-                text_list.append('Each unit of ' + worker_name + ' purchased may increase the purchase cost of all ' + worker_name + '.')
             
             if worker_type == 'European':
                 text_list.append(worker_name.capitalize() + ' tend to be more susceptible to attrition than African workers, but are more accustomed to modern vehicles and weaponry.')
             elif worker_type == 'Asian':
                 text_list.append(worker_name.capitalize() + ' tend to be cheaper than European workers and less accustomed to modern vehicles and weaponry, while being easier to obtain and more susceptible to attrition than African workers.')
             else:
-                if worker_type != 'slave':
-                    text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
                 text_list.append('African workers tend to be more resistant to attrition but are less accustomed to using modern vehicles and weaponry.')
             
             if worker_type == 'slave':
@@ -431,35 +422,23 @@ def generate_resource_icon(tile):
     Output:
         string/list: Returns string or list image id for tile's resource icon
     '''
-    small = False
-    for building_type in constants.building_types:
-        if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
-            small = True
     if tile.cell.resource == 'natives':
         attached_village = tile.cell.get_building('village')
-        if attached_village.population == 0: #0
-            key = '0'
-        elif attached_village.population <= 3: #1-3
-            key = '1'
-        elif attached_village.population <= 6: #4-6
-            key = '2'
-        else: #7-10
-            key = '3'
-        if attached_village.aggressiveness <= 3: #1-3
-            key += '1'
-        elif attached_village.aggressiveness <= 6: #4-6
-            key += '2'
-        else: #7-10
-            key += '3'
-        if small:
-            image_id = 'scenery/resources/natives/small/' + key + '.png'
+        if attached_village.aggressiveness <= 3:
+            aggressiveness_color = constants.color_dict['green_icon']
+        elif attached_village.aggressiveness <= 6:
+            aggressiveness_color = constants.color_dict['yellow_icon']
         else:
-            image_id = 'scenery/resources/natives/' + key + '.png'
+            aggressiveness_color = constants.color_dict['red_icon']
+        population_key = str((attached_village.population + 2) // 3) # 0 for 0, 1 for 1-3, 2 for 4-6, 3 for 7-9
+        image_id = [{'image_id': 'misc/circle.png', 'green_screen': aggressiveness_color, 'size': 0.75}, {'image_id': 'terrains/features/natives/' + population_key + '.png'}]
     else:
-        if small:
-            image_id = 'scenery/resources/small/' + tile.cell.resource + '.png'
-        else:
-            image_id = 'scenery/resources/' + tile.cell.resource + '.png'
+        image_id = [{'image_id': 'misc/green_circle.png', 'size': 0.75}, {'image_id': 'items/' + tile.cell.resource + '.png', 'size': 0.75}]
+
+    if bool(tile.cell.get_buildings()): # Make small icon if tile has any buildings
+        for current_image in image_id: # To make small icon, make each component of image smaller and shift to bottom left corner
+            current_image.update({'x_offset': -0.33, 'y_offset': -0.33})
+            current_image['size'] = current_image.get('size', 1.0) * 0.45
     return(image_id)
 
 def get_image_variants(base_path, keyword = 'default'):

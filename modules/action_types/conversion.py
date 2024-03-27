@@ -132,9 +132,9 @@ class conversion(action.action):
         if subject == 'roll_finished':
             if self.roll_result >= self.current_min_success:
                 if status.current_country.religion == 'protestant':
-                    sound_id = 'onward christian soldiers'
+                    sound_id = 'effects/onward_christian_soldiers'
                 elif status.current_country.religion == 'catholic':
-                    sound_id = 'ave maria'
+                    sound_id = 'effects/ave_maria'
                 audio.append({'sound_id': sound_id, 'dampen_music': True})
         return(audio)
 
@@ -192,7 +192,6 @@ class conversion(action.action):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }

@@ -90,8 +90,8 @@ class advertising_campaign(action.campaign):
             increase = 1
             if self.roll_result >= 6:
                 increase += 1
-            advertised_original_price = constants.commodity_prices[self.target_commodity]
-            unadvertised_original_price = constants.commodity_prices[self.target_unadvertised_commodity]
+            advertised_original_price = constants.item_prices[self.target_commodity]
+            unadvertised_original_price = constants.item_prices[self.target_unadvertised_commodity]
             unadvertised_final_price = unadvertised_original_price - increase
             if unadvertised_final_price < 1:
                 unadvertised_final_price = 1
@@ -122,16 +122,20 @@ class advertising_campaign(action.campaign):
         if subject in ['success', 'critical_success']:
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['scenery/resources/' + self.target_unadvertised_commodity + '.png',
-                     {'image_id': 'scenery/resources/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                    [
+                        {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                        {'image_id': 'items/' + self.target_unadvertised_commodity + '.png', 'size': 0.75},
+                        {'image_id': 'misc/minus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'left', 'centered': True}}
             ))
             return_list.append(
                 action_utility.generate_free_image_input_dict(
-                    ['scenery/resources/' + self.target_commodity + '.png',
-                     {'image_id': 'scenery/resources/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
+                    [
+                        {'image_id': 'misc/green_circle.png', 'size': 0.75},
+                        {'image_id': 'items/' + self.target_commodity + '.png', 'size': 0.75},
+                        {'image_id': 'misc/plus.png', 'size': 0.5, 'x_offset': 0.3, 'y_offset': 0.2},
                     ],
                     200,
                     override_input_dict={'member_config': {'order_x_offset': scaling.scale_width(-75), 'second_dimension_alignment': 'leftmost', 'centered': True}}
@@ -198,7 +202,7 @@ class advertising_campaign(action.campaign):
         flags.choosing_advertised_commodity = False
         self.target_commodity = commodity
         self.target_unadvertised_commodity = random.choice(constants.commodity_types)
-        while self.target_unadvertised_commodity == 'consumer goods' or self.target_unadvertised_commodity == self.target_commodity or constants.commodity_prices[self.target_unadvertised_commodity] == 1:
+        while (not self.target_unadvertised_commodity in constants.collectable_resources) or self.target_unadvertised_commodity == self.target_commodity or constants.item_prices[self.target_unadvertised_commodity] == 1:
             self.target_unadvertised_commodity = random.choice(constants.commodity_types)
 
         if super().start(unit):
@@ -211,7 +215,6 @@ class advertising_campaign(action.campaign):
                     'message': 'Start campaign'
                     },
                     {
-                    'on_click': (action_utility.cancel_ongoing_actions, []),
                     'tooltip': ['Stop ' + self.name],
                     'message': 'Stop campaign'
                     }
