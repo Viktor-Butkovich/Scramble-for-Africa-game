@@ -26,10 +26,6 @@ except Exception: #displays error message and records error message in crash log
 #
 #   new SFA features:
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
-# look into a procedure that prompts for text input and prevents any other actions to get things like port names, with some level of input validation
-#      would need to modify text box to capture the output for a particular purpose, with a standard listen/receive function
-#       when an object uses listen, it starts the typing process and captures the output when typing is cancelled or entered
-#       the text box should call the receive function of the current listener
 #Allow ship moving through series of ports adjacent to the river
 #   would allow moving past it. Units with canoes can move through with 4 movement points (maybe same as without canoes) - implement as generic terrain
 #   feature that could be ported over approximately 0.1 chance per river tile, 1-2 desired per river

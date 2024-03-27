@@ -447,6 +447,9 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'settlement':
             self.message_start = 'Settlement: '
+            input_dict['init_type'] = 'rename settlement button'
+            input_dict['image_id'] = 'buttons/rename.png'
+            self.add_attached_button(input_dict)
 
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '

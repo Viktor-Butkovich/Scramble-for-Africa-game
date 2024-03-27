@@ -468,6 +468,9 @@ class button(interface_elements.interface_element):
             self.set_tooltip(['Recruits a unit of ' + self.worker_type + ' workers for ' + str(status.worker_types[self.worker_type].recruitment_cost) + ' money'] +
                                 constants.list_descriptions[self.worker_type + ' workers'])
 
+        elif self.button_type == 'rename settlement':
+            self.set_tooltip(['Displays a typing prompt to rename this settlement'])
+
         elif self.button_type == 'show previous reports':
             self.set_tooltip(['Displays the previous turn\'s production, sales, and financial reports'])
 
@@ -847,10 +850,6 @@ class button(interface_elements.interface_element):
                         transportation_minister.display_message('There were no units with designated movement routes. /n /n')
             else:
                 text_utility.print_to_screen('You are busy and cannot move units.')
-                
-
-        elif self.button_type == 'do something':
-            text_utility.get_input('do something', 'Placeholder do something message')
 
         elif self.button_type == 'attack':
             self.battalion.clear_attached_cell_icons()
@@ -1095,6 +1094,9 @@ class button(interface_elements.interface_element):
                     linked_tab_button = linked_tab.linked_tab_button
                     if linked_tab_button.identifier == 'inventory':
                         linked_tab_button.parent_collection.parent_collection.current_tabbed_member = linked_tab_button.linked_element
+
+        elif self.button_type == 'rename settlement':
+            constants.input_manager.start_receiving_input(status.displayed_tile.cell.settlement.rename, prompt='Type new settlement name: ')
 
     def on_rmb_release(self):
         '''

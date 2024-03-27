@@ -50,9 +50,6 @@ def main_loop():
                             flags.r_ctrl = True
                         case pygame.K_LCTRL:
                             flags.l_ctrl = True
-                        case pygame.K_ESCAPE:
-                            flags.typing = False
-                            constants.message = ''
                         case pygame.K_SPACE:
                             if flags.typing:
                                 constants.message += ' '
@@ -87,14 +84,12 @@ def main_loop():
                         case pygame.K_RETURN:
                             if flags.typing:
                                 if constants.input_manager.taking_input:
-                                    constants.input_manager.taking_input = False
-                                    text_utility.print_to_screen('Response: ' + constants.message)
+                                    constants.input_manager.receive_input(constants.message)
+                                    text_utility.print_to_screen(constants.message)
                                 else:
                                     text_utility.print_to_screen(constants.message)
                                 flags.typing = False
                                 constants.message = ''
-                            else:
-                                flags.typing = True
 
                 case constants.music_endevent:
                     constants.sound_manager.song_done()

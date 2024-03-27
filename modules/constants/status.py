@@ -115,6 +115,7 @@ reorganize_unit_right_button: button = None
 free_unit_slaves_button: button = None
 cursor_image: pygame.image = None
 next_boarded_vehicle: pmob = None
+text_box_destination: callable = None
 
 current_instructions_page: instructions_page = None
 current_country: country = None

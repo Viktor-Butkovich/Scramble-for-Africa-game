@@ -29,6 +29,9 @@ class notification(multi_line_label):
             None
         '''
         status.displayed_notification = self
+        self.can_remove = True
+        if input_dict.get('extra_parameters', False):
+            self.can_remove = input_dict['extra_parameters'].get('can_remove', True)
         super().__init__(input_dict)
         self.in_notification = True
         self.is_action_notification = False
@@ -52,7 +55,8 @@ class notification(multi_line_label):
             None
         '''
         super().format_message()
-        self.message.append('Click to remove this notification.')
+        if self.can_remove:
+            self.message.append('Click to remove this notification.')
                     
     def update_tooltip(self):
         '''
@@ -63,7 +67,10 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        self.set_tooltip(['Click to remove this notification'])
+        if self.can_remove:
+            self.set_tooltip(['Click to remove this notification'])
+        else:
+            self.set_tooltip(self.message)
 
     def on_click(self):
         '''
@@ -74,11 +81,12 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        if self.has_parent_collection:
-            self.parent_collection.remove_recursive(complete=False)
-        else:
-            self.remove()
-        constants.notification_manager.handle_next_notification()
+        if self.can_remove:
+            if self.has_parent_collection:
+                self.parent_collection.remove_recursive(complete=False)
+            else:
+                self.remove()
+            constants.notification_manager.handle_next_notification()
 
     def remove(self):
         '''

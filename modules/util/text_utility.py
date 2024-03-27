@@ -4,18 +4,6 @@ import pygame
 import modules.constants.constants as constants
 import modules.constants.status as status
 
-def get_input(solicitant, message):
-    '''
-    Description:
-        Tells the input manager to displays the prompt for the user to enter input and prepare to receive input and send it to the part of the program requesting input
-    Input:
-        string solicitant: Represents the part of the program to send input to
-        string message: Prompt given to the player to enter input
-    Output:
-        None
-    '''
-    constants.input_manager.start_receiving_input(solicitant, message)
-
 def text(message, font):
     '''
     Description:
