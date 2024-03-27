@@ -758,13 +758,35 @@ class button(interface_elements.interface_element):
                     current_mob = status.displayed_mob
                     if current_mob:
                         if constants.current_game_mode == 'strategic':
-                            if current_mob.can_move(x_change, y_change):
+                            if current_mob.can_move(x_change, y_change, can_print=False):
                                 current_mob.move(x_change, y_change)
                                 flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
                                 current_mob.clear_automatic_route()
+
+                            elif current_mob.is_vehicle: # If moving into unreachable land, have each passenger attempt to move
+                                if current_mob.contained_mobs:
+                                    passengers = current_mob.contained_mobs.copy()
+                                    current_mob.eject_passengers()
+                                    last_moved = None
+                                    for current_passenger in passengers:
+                                        if current_passenger.can_move(x_change, y_change, can_print=True):
+                                            current_passenger.move(x_change, y_change)
+                                            last_moved = current_passenger
+                                    for current_passenger in passengers:
+                                        if (current_passenger.x, current_passenger.y) == (current_mob.x, current_mob.y): # Re-embark any units that couldn't move
+                                            current_passenger.embark_vehicle(current_mob)
+                                    if last_moved:
+                                        last_moved.select()
+                                    flags.show_selection_outlines = True
+                                    constants.last_selection_outline_switch = constants.current_time
+                                else:
+                                    text_utility.print_to_screen('This vehicle has no passengers to move')
+
+                            else:
+                                current_mob.can_move(x_change, y_change, can_print=True)
                         else:
                             text_utility.print_to_screen('You cannot move while in the European HQ screen.')
                     else:
