@@ -37,7 +37,6 @@ class expedition(group):
         '''
         super().__init__(from_save, input_dict)
         self.can_explore = True
-        self.set_has_canoes(True)
         self.set_group_type('expedition')
         self.resolve_off_tile_exploration()
 

@@ -32,7 +32,6 @@ except Exception: #displays error message and records error message in crash log
 #   Approximately 0.1 chance per river tile, 1-2 desired per river
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
-# Add equipment (canoes)
 # Add cosmetic flag to minister screen
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 #   Add achievement to main menu

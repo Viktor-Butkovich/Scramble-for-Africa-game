@@ -951,7 +951,7 @@ class button(interface_elements.interface_element):
                     equipment = status.equipment_types[self.attached_label.actor.current_item]
                     if equipment.check_requirement(status.displayed_mob):
                         if not status.displayed_mob.equipment.get(equipment.equipment_type, False):
-                            status.displayed_mob.equipment[equipment.equipment_type] = True
+                            equipment.equip(status.displayed_mob)
                             status.displayed_tile.change_inventory(equipment.equipment_type, -1)
                             actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
                             actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
@@ -971,7 +971,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'remove equipment':
             if main_loop_utility.action_possible():
-                del status.displayed_mob.equipment[self.equipment_type]
+                status.equipment_types[self.equipment_type].unequip(status.displayed_mob)
                 status.displayed_tile.change_inventory(self.equipment_type, 1)
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
             else:
@@ -1100,9 +1100,7 @@ class button(interface_elements.interface_element):
                 self.parent_collection.set_origin(self.parent_collection.parent_collection.x + self.parent_collection.original_offsets[0], 
                                                   self.parent_collection.parent_collection.y + self.parent_collection.original_offsets[1])
             for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
-                #if hasattr(member, 'original_coordinates'):
                 if hasattr(member, 'original_offsets'):
-                    #member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
                     member.set_origin(member.parent_collection.x + member.original_offsets[0], member.parent_collection.y + member.original_offsets[1])
 
         elif self.button_type == 'tab':
@@ -2315,7 +2313,7 @@ class tab_button(button):
                 if self.linked_element == status.tile_inventory_collection:
                     return_value = status.displayed_tile.inventory or status.displayed_tile.inventory_capacity > 0 or status.displayed_tile.infinite_inventory_capacity
                 else:
-                    return_value = status.displayed_mob.inventory_capacity > 0
+                    return_value = status.displayed_mob.inventory_capacity > 0 or (status.displayed_mob.is_pmob and status.displayed_mob.equipment)
 
             elif self.identifier == 'reorganization':
                 return_value = status.displayed_mob.is_pmob

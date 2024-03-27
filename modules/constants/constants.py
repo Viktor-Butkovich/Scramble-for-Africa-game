@@ -157,7 +157,7 @@ transaction_descriptions: Dict[str, str] = {
     'subsidies': 'subsidies',
     'trial_compensation': 'trial compensation',
     'fabricated_evidence': 'fabricated evidence',
-    'items': 'Europe items',
+    'items': 'item purchases',
     'unit_recruitment': 'unit recruitment',
     'attrition_replacements': 'attrition replacements',
     'misc_revenue': 'misc',

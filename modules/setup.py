@@ -18,7 +18,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
     exploration, construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade, slave_capture, \
-    active_investigation, track_beasts, trial
+    active_investigation, track_beasts, trial, canoe_purchase
 
 def setup(*args):
     '''
@@ -214,6 +214,14 @@ class equipment_types_config():
             'Can only be equipped by battalions'
         ]
     })
+    equipment_types.equipment_type({
+        'equipment_type': 'canoes',
+        'requirement': ['is_safari', 'can_explore'],
+        'description': [
+            'Canoes allow units to travel through river water for 1 movement point, except for cataracts',
+            'Can only be equipped by expeditions and safaris'
+        ]
+    })
 
 def terrains():
     '''
@@ -263,6 +271,7 @@ def actions():
     active_investigation.active_investigation()
     track_beasts.track_beasts()
     trial.trial()
+    canoe_purchase.canoe_purchase()
 
     for action_type in status.actions:
         if status.actions[action_type].placement_type == 'free':
@@ -1185,8 +1194,6 @@ def mob_interface():
         'member_config': {'order_exempt': True}
     })
 
-
-
     #mob info labels setup
     mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew',
                                'passengers', 'current passenger'] #order of mob info display labels
@@ -1207,7 +1214,7 @@ def mob_interface():
             'parent_collection': status.mob_info_display,
             'member_config': {'order_x_offset': x_displacement}
         }
-        if not current_actor_label_type == 'current passenger':
+        if current_actor_label_type != 'current passenger':
             input_dict['init_type'] = 'actor display label'
             constants.actor_creation_manager.create_interface_element(input_dict)
         else:

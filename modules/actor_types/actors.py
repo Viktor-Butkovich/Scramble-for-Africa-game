@@ -132,9 +132,10 @@ class actor():
             status.displayed_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
             self.set_inventory(current_commodity, 0)
         if self.actor_type == 'mob' and self.is_pmob:
-            for current_equipment in self.equipment:
+            for current_equipment in self.equipment.copy():
                 if self.equipment[current_equipment]:
                     status.displayed_tile.change_inventory(current_equipment, 1)
+                    status.equipment_types[current_equipment].unequip(self)
             self.equipment = {}
 
     def get_inventory_remaining(self, possible_amount_added = 0):

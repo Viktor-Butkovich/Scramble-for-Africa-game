@@ -46,7 +46,10 @@ class pmob(mob):
         status.pmob_list.append(self)
         self.is_pmob = True
         self.set_controlling_minister_type('none')
-        self.equipment = input_dict.get('equipment', {})
+        self.equipment = {}
+        for current_equipment in input_dict.get('equipment', {}):
+            if input_dict.get('equipment', {}).get(current_equipment, False):
+                status.equipment_types[current_equipment].equip(self)
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']

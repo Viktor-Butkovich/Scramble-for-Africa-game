@@ -30,6 +30,32 @@ class equipment_type():
         self.price: float = input_dict.get('price', 5.0)
         self.requirement: str = input_dict.get('requirement', None)
 
+    def equip(self, unit):
+        '''
+        Description:
+            Orders the inputted unit to equip this type of item, assuming it does not have one equipped
+        Input:
+            pmob unit: Unit to equip item to
+        Output:
+            None
+        '''
+        unit.equipment[self.equipment_type] = True
+        if self.equipment_type == 'canoes':
+            unit.set_has_canoes(True)
+
+    def unequip(self, unit):
+        '''
+        Description:
+            Orders the inputted unit to unequip this type of item, assuming it has one equipped
+        Input:
+            pmob unit: Unit to unequip item from
+        Output:
+            None
+        '''
+        del unit.equipment[self.equipment_type]
+        if self.equipment_type == 'canoes':
+            unit.set_has_canoes(False)
+
     def check_requirement(self, unit):
         '''
         Description:
@@ -39,7 +65,13 @@ class equipment_type():
         Output:
             bool: Returns whether the inputted unit fulfills the requirements to equip this item
         '''
-        return(self.requirement and hasattr(unit, self.requirement) and getattr(unit, self.requirement))
+        if type(self.requirement) == str:
+            return(self.requirement and hasattr(unit, self.requirement) and getattr(unit, self.requirement))
+        elif self.requirement: # Treat list of requirements as a chained or condition
+            for current_requirement in self.requirement:
+                if hasattr(unit, current_requirement) and getattr(unit, current_requirement):
+                    return(True)
+        return(False)
 
 def transfer(item_type: str, amount, source_type: str):
     '''
