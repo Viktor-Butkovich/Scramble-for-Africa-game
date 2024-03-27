@@ -31,7 +31,6 @@ except Exception: #displays error message and records error message in crash log
 #   Other units treat cataracts as river water where canoes do not function
 #   Approximately 0.1 chance per river tile, 1-2 desired per river
 # Add ambient resource production facility, settlement, and village sounds
-# Allow some inventory attrition to occur in Europe
 # Replace placeholder images
 # Add equipment (canoes)
 # Add cosmetic flag to minister screen
