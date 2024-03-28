@@ -336,6 +336,9 @@ class pmob(mob):
             None
         '''
         old_value = self.sentry_mode
+        if self.is_group:
+            self.officer.set_sentry_mode(new_value)
+            self.worker.set_sentry_mode(new_value)
         if not old_value == new_value:
             self.sentry_mode = new_value
             self.update_image_bundle()
@@ -344,7 +347,7 @@ class pmob(mob):
                 if status.displayed_mob == self:
                     actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with sentry icon
             else:
-                if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
+                if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none') and not (self.in_vehicle or self.in_group or self.in_building):
                     self.add_to_turn_queue()
             if self == status.displayed_mob:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)

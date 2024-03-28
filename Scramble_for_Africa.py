@@ -41,3 +41,5 @@ except Exception: #displays error message and records error message in crash log
 # Add direct attack on native villages action
 # Add cannibals
 # Add lore mission trophy screen
+# Change Maxim guns to apply to all combat-related actions (combat, attack village, suppress slave trade), but also decreases movement points by 1
+# Change minister respawn rate - should not be stuck at 2 available for several turns

@@ -362,7 +362,7 @@ class actor_display_label(label):
             input_dict['hire_source_type'] = 'slums'
             self.add_attached_button(input_dict)
 
-        elif self.actor_label_type in constants.building_types:
+        elif self.actor_label_type in constants.building_types and self.actor_label_type != 'resource':
             self.message_start = ''
             if self.actor_label_type == 'port':
                 input_dict['init_type'] = 'labor broker button'
@@ -487,14 +487,14 @@ class actor_display_label(label):
         Output:
             None
         '''
-        if self.actor_label_type in ['building work crew', 'current passenger']:
+        if self.actor_label_type in ['current building work crew', 'current passenger']:
             if len(self.attached_list) > self.list_index:
                 self.attached_list[self.list_index].update_tooltip()
                 tooltip_text = self.attached_list[self.list_index].tooltip_text
                 self.set_tooltip(tooltip_text)
             else:
                 super().update_tooltip()
-                
+
         elif self.actor_label_type == 'passengers':
             if (not self.actor == 'none'):
                 if self.actor.has_crew:
@@ -635,7 +635,7 @@ class actor_display_label(label):
             tooltip_text.append('Slums can form around ports, train stations, and resource production facilities')
             self.set_tooltip(tooltip_text)
 
-        elif self.actor_label_type in constants.building_types + ['resource building']:
+        elif self.actor_label_type in constants.building_types + ['resource building'] and self.actor_label_type != 'resource':
             if self.actor != 'none':
                 label_type = self.actor_label_type
                 if label_type == 'resource building':
@@ -709,7 +709,7 @@ class actor_display_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
                 elif new_actor.cell.visible:
-                    if not (new_actor.cell.has_building('resource') or new_actor.cell.has_building('village')): #if no building built, show resource: name
+                    if not new_actor.cell.has_building('village'):
                         self.set_label(self.message_start + new_actor.cell.resource)
                 else:
                     self.set_label(self.message_start + 'unknown')
@@ -757,7 +757,7 @@ class actor_display_label(label):
                 if not self.actor.is_pmob:
                     self.set_label('You do not control this unit')
                             
-            elif self.actor_label_type == 'current building work crew': # or self.actor_label_type == 'building list item':
+            elif self.actor_label_type == 'current building work crew':
                 if self.list_type == 'resource building':
                     if new_actor.cell.has_building('resource'):
                         self.attached_building = new_actor.cell.get_building('resource')
@@ -919,7 +919,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor == 'none':
             return(False)
-        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or (not self.actor.cell.visible) or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
+        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or (not self.actor.cell.visible) or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and self.actor.cell.has_building('village'))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
             return(False)
         elif self.actor_label_type == 'resource building' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('resource'))):
             return(False)
@@ -931,7 +931,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
-        elif self.actor_label_type in constants.building_types and not self.actor.cell.has_building(self.actor_label_type):
+        elif self.actor_label_type in constants.building_types and self.actor_label_type != 'resource' and not self.actor.cell.has_building(self.actor_label_type):
             return(False)
         elif self.actor_label_type == 'settlement' and not self.actor.cell.settlement:
             return(False)
@@ -980,7 +980,7 @@ class list_item_label(actor_display_label):
                 'actor_label_type': string value - Type of actor information shown
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'list_index': int value - Index to determine item of list reflected
-                'list_type': string value - Type of list associated with, like 'resource building' along with label type of 'building work crew' to show work crews attached to a resource 
+                'list_type': string value - Type of list associated with, like 'resource building' along with label type of 'current building work crew' to show work crews attached to a resource 
                     building
         Output:
             None

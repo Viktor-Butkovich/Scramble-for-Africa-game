@@ -818,7 +818,7 @@ class button(interface_elements.interface_element):
                     for current_unit_type in unit_types:
                         moved_units[current_unit_type] = 0
                         attempted_units[current_unit_type] = 0
-                    
+                    last_moved = None
                     for current_pmob in status.pmob_list:
                         if len(current_pmob.base_automatic_route) > 0:
                             if current_pmob.is_vehicle:
@@ -835,9 +835,11 @@ class button(interface_elements.interface_element):
                             progressed = current_pmob.follow_automatic_route()
                             if progressed:
                                 moved_units[unit_type] += 1
+                                last_moved = current_pmob
                             current_pmob.remove_from_turn_queue()
-                    actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob) #updates mob info display if automatic route changed anything
-
+                    if last_moved:
+                        last_moved.select() #updates mob info display if automatic route changed anything
+                    #actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob) 
                     types_moved = 0
                     text = ''
                     for current_unit_type in unit_types:

@@ -47,7 +47,7 @@ class input_manager_template():
             None
         '''
         text_utility.print_to_screen(prompt)
-        constants.notification_manager.display_notification({'message': prompt, 'extra_parameters': {'can_remove': False}})
+        constants.notification_manager.display_notification({'message': prompt + '/n /n(Type in red text box in lower left, press enter when done)', 'extra_parameters': {'can_remove': False}})
         self.send_input_to = solicitant
         self.taking_input = True
         flags.typing = True
