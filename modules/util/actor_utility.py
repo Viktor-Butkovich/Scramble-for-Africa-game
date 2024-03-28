@@ -88,12 +88,12 @@ def update_descriptions(target = 'all'):
             if current_target == 'explorer':
                 first_line += '.'
                 text_list.append(first_line)
-                text_list.append('When combined with workers, an explorer becomes an expedition unit that can explore new tiles and move swiftly along rivers with canoes.')
+                text_list.append('When combined with workers, an explorer becomes an expedition unit that can explore new tiles, and acquire canoes to move swiftly along rivers.')
                 
             elif current_target == 'hunter':
                 first_line += '.'
                 text_list.append(first_line)
-                text_list.append('When combined with workers, a hunter becomes a safari unit that can attack and more easily detect and defend against beasts and move swiftly along rivers with canoes.')
+                text_list.append('When combined with workers, a hunter becomes a safari unit that can kill beasts, and acquire canoes to move swiftly along rivers.')
                 
             elif current_target == 'engineer':
                 first_line += '.'
