@@ -28,7 +28,7 @@ except Exception: #displays error message and records error message in crash log
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # Add cataracts
 #   Steamboats treat cataracts like land
-#   Other units treat cataracts as river water where canoes do not function
+#   Other units treat cataracts as river water where canoes do not functionl
 #   Approximately 0.1 chance per river tile, 1-2 desired per river
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
@@ -43,3 +43,4 @@ except Exception: #displays error message and records error message in crash log
 # Add lore mission trophy screen
 # Change Maxim guns to apply to all combat-related actions (combat, attack village, suppress slave trade), but also decreases movement points by 1
 # Change minister respawn rate - should not be stuck at 2 available for several turns
+# Replace construction buttons with generated

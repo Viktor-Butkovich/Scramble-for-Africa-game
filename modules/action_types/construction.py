@@ -130,7 +130,8 @@ class construction(action.action):
 
         if status.displayed_mob and status.strategic_map_grid in status.displayed_mob.grids:
             terrain = status.displayed_mob.images[0].current_cell.terrain
-            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(constants.terrain_build_cost_multiplier_dict[terrain]) + ' when built in ' + terrain + ' terrain')
+            if not self.building_type in ['train', 'steamboat']:
+                message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(constants.terrain_build_cost_multiplier_dict[terrain]) + ' when built in ' + terrain + ' terrain')
         return(message)
 
     def generate_notification_text(self, subject):
@@ -400,7 +401,7 @@ class construction(action.action):
                 if self.current_unit.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
                     self.current_unit.images[0].current_cell.get_building(self.building_type).remove_complete()
             if self.building_type == 'resource':
-                input_dict['image'] = constants.resource_building_dict[self.attached_resource]
+                input_dict['image'] = 'buildings/' + constants.resource_building_dict[self.attached_resource] + '.png'
                 input_dict['resource_type'] = self.attached_resource
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'

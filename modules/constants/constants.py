@@ -254,15 +254,15 @@ sold_commodities: Dict[str, int] = {}
 commodities_produced: Dict[str, int] = {}
 attempted_commodities: List[str] = []
 resource_building_dict: Dict[str, str] = {
-    'coffee': 'buildings/plantation.png',
-    'copper': 'buildings/mine.png',
-    'diamond': 'buildings/mine.png',
-    'exotic wood': 'buildings/plantation.png',
-    'fruit': 'buildings/plantation.png',
-    'gold': 'buildings/mine.png',
-    'iron': 'buildings/mine.png',
-    'ivory': 'buildings/camp.png',
-    'rubber': 'buildings/plantation.png',
+    'coffee': 'plantation',
+    'copper': 'mine',
+    'diamond': 'mine',
+    'exotic wood': 'plantation',
+    'fruit': 'plantation',
+    'gold': 'mine',
+    'iron': 'mine',
+    'ivory': 'camp',
+    'rubber': 'plantation',
 }
 
 weighted_backgrounds: List[str] = []

@@ -35,10 +35,8 @@ class building(actor):
         self.damaged = False
         super().__init__(from_save, input_dict)
         self.default_inventory_capacity = 0
-        no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
-        self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
-        if input_dict['building_type'] == 'warehouses':
-            self.image_dict['damaged'] = self.image_dict['default']
+        self.image_id = input_dict['image']
+        self.image_dict = {'default': input_dict['image']}
         self.cell = self.grids[0].find_cell(self.x, self.y)
         status.building_list.append(self)
         self.set_name(input_dict['name'])
@@ -82,8 +80,8 @@ class building(actor):
         '''
         save_dict = super().to_save_dict()
         save_dict['building_type'] = self.building_type
-        save_dict['contained_work_crews'] = [] #list of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
-        save_dict['image'] = self.image_dict['intact']
+        save_dict['contained_work_crews'] = [] # List of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
+        save_dict['image'] = self.image_dict['default']
         save_dict['damaged'] = self.damaged
         for current_work_crew in self.contained_work_crews:
             save_dict['contained_work_crews'].append(current_work_crew.to_save_dict())
@@ -288,11 +286,27 @@ class building(actor):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list(override_values)
-        if self.damaged:
-            image_id_list.remove(self.image_dict['default'])
-            image_id_list.append(self.image_dict['damaged'])
-        return(image_id_list)
+        image_id = {'image_id': self.image_dict['default']}
+        relative_coordinates = {
+            'fort': (-1, 1),
+            'trading_post': (0, 1),
+            'mission': (1, 1),
+            'train_station': (0, -1),
+            'port': (1, -1)
+        }.get(self.building_type, (0, 0))
+        if relative_coordinates == (0, 0):
+            modifiers = {}
+        else: # If not centered, make smaller and move to one of 6 top/bottom slots
+            modifiers =  {'size': 0.75 * 0.45, 'x_offset': relative_coordinates[0] * 0.33, 'y_offset': relative_coordinates[1] * 0.33}
+        image_id.update(modifiers)
+        return_list = [image_id]
+        if self.building_type == 'train_station':
+            return_list.append({'image_id': 'buildings/infrastructure/down_railroad.png'})
+        if self.damaged and self.building_type != 'warehouses':
+            damaged_id = {'image_id': 'buildings/damaged.png'}
+            damaged_id.update(modifiers)
+            return_list.append(damaged_id)
+        return(return_list)
 
 class infrastructure_building(building):
     '''
@@ -899,14 +913,14 @@ class slums(building):
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
         image_id_list = super().get_image_id_list(override_values)
-        image_id_list.remove(self.image_dict['default'])
         if self.available_workers <= 2:
-            image_id = self.size_image_dict['small']
+            image_id_list[0]['image_id'] = self.size_image_dict['small']
         elif self.available_workers <= 5:
-            image_id = self.size_image_dict['medium']
+            image_id_list[0]['image_id'] = self.size_image_dict['medium']
         else:
-            image_id = self.size_image_dict['large']
-        image_id_list.append({'image_id': image_id, 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -1})
+            image_id_list[0]['image_id'] = self.size_image_dict['large']
+        for current_image_id in image_id_list:
+            current_image_id.update({'level': -1})
         return(image_id_list)
 
     def can_damage(self):
