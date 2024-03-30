@@ -623,7 +623,7 @@ def buttons():
         'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height),
         'width': 10,
         'height': 10,
-        'modes': ['strategic', 'europe', 'ministers'],
+        'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'init_type': 'ordered collection',
         'member_config': {'order_exempt': True},
         'separation': 5
@@ -633,7 +633,7 @@ def buttons():
         'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 50),
         'width': 10,
         'height': 10,
-        'modes': ['strategic', 'europe', 'ministers'],
+        'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'init_type': 'ordered collection',
         'member_config': {'order_exempt': True},
         'separation': 5,
@@ -653,6 +653,7 @@ def buttons():
     input_dict['modes'] = ['new_game_setup']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     new_game_setup_to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(new_game_setup_to_main_menu_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
