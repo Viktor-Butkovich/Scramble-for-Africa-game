@@ -28,8 +28,8 @@ except Exception: #displays error message and records error message in crash log
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # Add cataracts
 #   Steamboats treat cataracts like land
-#   Other units treat cataracts as river water where canoes do not functionl
-#   Approximately 0.1 chance per river tile, 1-2 desired per river
+#   Other units treat cataracts as river water where canoes do not function, can still build bridges
+#   Approximately 1/12 chance (if any of 3 2D6 rolls is 2) per river tile, 1-2 desired per river
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 # Add cosmetic flag to minister screen
@@ -40,7 +40,12 @@ except Exception: #displays error message and records error message in crash log
 # Add river sources, with bonuses for discovery
 # Add direct attack on native villages action
 # Add cannibals
-# Add lore mission trophy screen
+# Add lore mission trophy screen/notification
 # Change Maxim guns to apply to all combat-related actions (combat, attack village, suppress slave trade), but also decreases movement points by 1
 # Change minister respawn rate - should not be stuck at 2 available for several turns
 # Replace construction buttons with generated
+# Add settlement label for infrastructure
+# Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads
+# Change movement sound to land sound if on bridge
+# Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn
+# Have labels for each minister skill, only show if not unknown, somehow show which one is the current ability, if appointed

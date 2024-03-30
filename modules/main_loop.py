@@ -84,12 +84,15 @@ def main_loop():
                         case pygame.K_RETURN:
                             if flags.typing:
                                 if constants.input_manager.taking_input:
-                                    constants.input_manager.receive_input(constants.message)
-                                    text_utility.print_to_screen(constants.message)
+                                    if constants.message:
+                                        constants.input_manager.receive_input(constants.message)
+                                        text_utility.print_to_screen(constants.message)
+                                        constants.message = ''
+                                        flags.typing = False
                                 else:
                                     text_utility.print_to_screen(constants.message)
-                                flags.typing = False
-                                constants.message = ''
+                                    constants.message = ''
+                                    flags.typing = False
 
                 case constants.music_endevent:
                     constants.sound_manager.song_done()

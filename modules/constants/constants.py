@@ -131,8 +131,9 @@ building_prices: Dict[str, int] = {
     'resource': 10,
     'road': 5,
     'railroad': 15,
-    'road_bridge': 50,
-    'railroad_bridge': 150,
+    #'ferry': 50,
+    'road_bridge': 50, #100
+    'railroad_bridge': 150, #300
     'port': 15,
     'train_station': 10,
     'trading_post': 5,
@@ -189,6 +190,15 @@ color_dict: Dict[str, tuple[int, int, int]] = {
     'green_icon': (15, 154, 54),
     'yellow_icon': (255, 242, 0),
     'red_icon': (231, 0, 46)
+}
+
+quality_colors: Dict[str, tuple[int, int, int]] = {
+    1: (137, 137, 137),
+    2: (255, 255, 255),
+    3: (0, 230, 41),
+    4: (41, 168, 255),
+    5: (201, 98, 255),
+    6: (255, 157, 77)
 }
 
 green_screen_colors: List[tuple[int, int, int]] = [

@@ -401,7 +401,7 @@ class construction(action.action):
                 if self.current_unit.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
                     self.current_unit.images[0].current_cell.get_building(self.building_type).remove_complete()
             if self.building_type == 'resource':
-                input_dict['image'] = 'buildings/' + constants.resource_building_dict[self.attached_resource] + '.png'
+                input_dict['image'] = 'buildings/resource_building.png'
                 input_dict['resource_type'] = self.attached_resource
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'
