@@ -42,6 +42,7 @@ class equipment_type():
         unit.equipment[self.equipment_type] = True
         if self.equipment_type == 'canoes':
             unit.set_has_canoes(True)
+            unit.update_canoes()
 
     def unequip(self, unit):
         '''
@@ -55,6 +56,7 @@ class equipment_type():
         del unit.equipment[self.equipment_type]
         if self.equipment_type == 'canoes':
             unit.set_has_canoes(False)
+            unit.update_canoes()
 
     def check_requirement(self, unit):
         '''

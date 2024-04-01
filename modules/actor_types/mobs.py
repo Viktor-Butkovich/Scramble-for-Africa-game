@@ -343,9 +343,7 @@ class mob(actor):
             if self.is_pmob:
                 local_infrastructure = local_cell.get_intact_building('infrastructure')
                 adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
-                #if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-                #    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
-                if local_cell.has_walking_connection(adjacent_cell): 
+                if local_cell.has_walking_connection(adjacent_cell):
                     if not (local_infrastructure == 'none' or adjacent_infrastructure == 'none'): #if both have infrastructure and connected by land or bridge, use discount
                         cost = cost / 2
                     #otherwise, use default cost but not full no canoe penalty cost
@@ -795,7 +793,11 @@ class mob(actor):
                     constants.sound_manager.play_sound('effects/ocean_splashing')
                     possible_sounds.append('effects/ship_propeller')
             elif self.images[0].current_cell != 'none' and self.images[0].current_cell.terrain == 'water':
-                possible_sounds.append('effects/river_splashing')
+                local_infrastructure =  self.images[0].current_cell.get_intact_building('infrastructure')
+                if local_infrastructure != 'none' and local_infrastructure.is_bridge and not self.can_swim_river: # If walking on bridge
+                    possible_sounds.append('effects/footsteps')
+                else:
+                    possible_sounds.append('effects/river_splashing')
             else:
                 possible_sounds.append('effects/footsteps')
         if possible_sounds:
@@ -895,13 +897,12 @@ class mob(actor):
         self.can_swim = self.has_canoes
         self.can_swim_ocean = False
         self.can_swim_river = self.has_canoes
-        if new_canoes:
-            self.update_canoes()
 
     def update_canoes(self):
         '''
         Description:
-            If this unit is visible to the player, updates its image to include canoes or not depending on if the unit is in river water
+            If this unit is visible to the player, updates its image to include canoes or not depending on if the unit is in river water - needs to be separately
+                called after set has canoes
         Input:
             None
         Output:
