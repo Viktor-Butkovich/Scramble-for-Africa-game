@@ -464,7 +464,7 @@ class minister():
             result = num_sides
         return(result)
 
-    def no_corruption_roll(self, num_sides, roll_type = 'none'):
+    def no_corruption_roll(self, num_sides: int = 6, roll_type: str = 'none'):
         '''
         Description:
             Rolls and returns the result of a die with the inputted number of sides, modifying the result based on skill with the assumption that corruption has already failed to occur or otherwise does not allow for corruption

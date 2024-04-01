@@ -74,8 +74,6 @@ class expedition(group):
             status.actions['exploration'].on_click(self, on_click_info_dict={'x_change': x_change, 'y_change': y_change, 'direction': direction})
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
-            #if self.images[0].current_cell != 'none': #if not in vehicle
-            #    self.resolve_off_tile_exploration()
 
     def calibrate_sub_mob_positions(self):
         '''
@@ -116,6 +114,7 @@ class expedition(group):
             current_cell = self.vehicle.images[0].current_cell
         else:
             current_cell = self.images[0].current_cell
+        promoted = self.veteran
         for current_direction in ['up', 'down', 'left', 'right']:
             target_cell = current_cell.adjacent_cells[current_direction]
             if target_cell and not target_cell.visible:
@@ -136,10 +135,17 @@ class expedition(group):
 
                     if public_opinion_increase > 0: #Royal/National/Imperial
                         text += 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
-                    
+                    on_reveal, audio = (None, None)
+                    if (not promoted) and random.randrange(1, 7) == 6 and self.controlling_minister.no_corruption_roll() == 6:
+                        text += 'The explorer is now a veteran and will be more successful in future ventures. /n /n'
+                        on_reveal = self.promote
+                        audio = 'effects/trumpet'
+                        promoted = True
                     constants.notification_manager.display_notification({
                         'message': text + 'Click to remove this notification. /n /n',
                         'notification_type': 'off_tile_exploration',
+                        'on_reveal': on_reveal,
+                        'audio': audio,
                         'extra_parameters': {
                             'cell': target_cell,
                             'reveal_cell': True,

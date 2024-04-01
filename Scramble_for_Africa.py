@@ -36,7 +36,6 @@ except Exception: #displays error message and records error message in crash log
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
-# Give 1/36 chance for off-tile exploration to grant veteran status (1/6 chance of doing minister roll, promote on 6)
 # Add river sources, with bonuses for discovery
 # Add direct attack on native villages action
 # Add cannibals
