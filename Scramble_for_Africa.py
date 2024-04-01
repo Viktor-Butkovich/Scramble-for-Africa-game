@@ -44,7 +44,6 @@ except Exception: #displays error message and records error message in crash log
 # Change Maxim guns to apply to all combat-related actions (combat, attack village, suppress slave trade), but also decreases movement points by 1
 # Change minister respawn rate - should not be stuck at 2 available for several turns
 # Replace construction buttons with generated
-# Add settlement label for infrastructure
 # Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads
 # Change movement sound to land sound if on bridge
 # Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn

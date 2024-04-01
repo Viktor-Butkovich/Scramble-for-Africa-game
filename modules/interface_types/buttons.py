@@ -2309,7 +2309,7 @@ class tab_button(button):
         return_value = super().can_show(skip_parent_collection=skip_parent_collection)
         if return_value:
             if self.identifier == 'settlement':
-                return_value = bool(status.displayed_tile.cell.settlement or status.displayed_tile.cell.has_building('trading_post') or status.displayed_tile.cell.has_building('mission'))
+                return_value = bool(status.displayed_tile.cell.settlement or status.displayed_tile.cell.has_building('trading_post') or status.displayed_tile.cell.has_building('mission') or status.displayed_tile.cell.has_building('infrastructure'))
 
             elif self.identifier == 'inventory':
                 if self.linked_element == status.tile_inventory_collection:

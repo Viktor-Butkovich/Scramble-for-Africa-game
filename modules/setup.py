@@ -1613,10 +1613,10 @@ def settlement_interface():
     })
     settlement_info_display_labels = [
         'settlement', 'port', 'train_station', 'resource building', 'building efficiency', 'building work crews',
-            'current building work crew', 'fort', 'slums', 'trading_post', 'mission'
+            'current building work crew', 'fort', 'slums', 'trading_post', 'mission', 'infrastructure'
     ]
     for current_actor_label_type in settlement_info_display_labels:
-        if current_actor_label_type in ['settlement', 'trading_post', 'mission']:
+        if current_actor_label_type in ['settlement', 'trading_post', 'mission', 'infrastructure']: # Left align any top-level buildings
             x_displacement = 0
         elif current_actor_label_type == 'current building work crew':
             x_displacement = 75
