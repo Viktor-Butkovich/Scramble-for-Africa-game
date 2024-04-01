@@ -614,7 +614,7 @@ def manage_ministers():
             current_minister.appoint('none')
         current_minister.remove()
 
-    if (len(status.minister_list) <= constants.minister_limit - 2 and random.randrange(1, 7) == 1) or len(status.minister_list) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
+    if (len(status.minister_list) <= constants.minister_limit - 2 and random.randrange(1, 7) >= 4) or len(status.minister_list) <= 10: # Chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(status.minister_list) < constants.minister_limit:
             constants.actor_creation_manager.create_minister(False, {})
         constants.notification_manager.display_notification({
