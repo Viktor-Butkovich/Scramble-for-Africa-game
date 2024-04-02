@@ -28,7 +28,7 @@ class sound_manager_template():
         }
         for adjective in ['british', 'french', 'german', 'belgian', 'italian', 'portuguese']:
             self.default_music_dict['europe'] += [(adjective + '/' + current_song)[:-4] for current_song in os.listdir('sounds/music/' + adjective)]
-            #add music for each country into rotation
+            # Add music for each country into rotation
         self.previous_state = 'none'
         self.previous_song = 'none'
 

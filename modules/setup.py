@@ -395,7 +395,7 @@ def def_countries():
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier')
+    german_country_effect = effects.effect('german_country_modifier', 'combat_plus_modifier')
     status.Germany = countries.country({
         'name': 'Germany',
         'adjective': 'german',
@@ -463,7 +463,7 @@ def def_countries():
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier')
+    italian_country_effect = effects.effect('italian_country_modifier', 'combat_minus_modifier')
     status.Italy = countries.country({
         'name': 'Italy',
         'adjective': 'italian',
@@ -502,7 +502,7 @@ def lore():
     '''
     status.lore_types_effects_dict['zoology'] = effects.effect('zoology_completion_effect', 'hunting_plus_modifier')
     status.lore_types_effects_dict['botany'] = effects.effect('botany_completion_effect', 'health_attrition_plus_modifier')
-    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'attack_plus_modifier')
+    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'combat_plus_modifier')
     status.lore_types_effects_dict['anthropology'] = effects.effect('anthropology_completion_effect', 'conversion_plus_modifier')
     status.lore_types_effects_dict['paleontology'] = effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier')
     status.lore_types_effects_dict['theology'] = effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier')

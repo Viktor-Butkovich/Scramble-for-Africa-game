@@ -281,7 +281,7 @@ class combat(action.action):
             roll_modifier = self.opponent.get_combat_modifier()
         else:
             roll_modifier = super().generate_current_roll_modifier()
-            roll_modifier += int(self.current_unit.equipment.get('Maxim gun', False)) * random.randrange(0, 2) # positive modifier if Maxim gun equipped
+            roll_modifier += int(self.current_unit.equipment.get('Maxim gun', False)) * random.randrange(0, 2) # Positive modifier if Maxim gun equipped
             roll_modifier += self.current_unit.get_combat_modifier(opponent=self.opponent, include_tile=True)
         return(roll_modifier)
 
@@ -453,8 +453,6 @@ class combat(action.action):
         self.opponent_roll_modifier = self.generate_current_roll_modifier(opponent=True)
         if not self.defending:
             action_type = self.action_type
-            if action_type == 'combat':
-                action_type = 'attack'
             minister_rolls = self.current_unit.controlling_minister.attack_roll_to_list( #minister rolls need to be made with enemy roll in mind, as corrupt result needs to be inconclusive
                 self.current_roll_modifier,
                 self.opponent_roll_modifier,
@@ -464,6 +462,7 @@ class combat(action.action):
             )
             results = minister_rolls
         elif (self.current_unit.is_safari and self.opponent.npmob_type == 'beast') or (self.current_unit.is_battalion and self.opponent.npmob_type != 'beast'):
+            # 'combat' modifiers don't apply on defense because no roll type is specified in no_corruption_roll
             results = [random.randrange(1, 7), self.current_unit.controlling_minister.no_corruption_roll(6), self.current_unit.controlling_minister.no_corruption_roll(6)]
         else:
             results = [random.randrange(1, 7), random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units

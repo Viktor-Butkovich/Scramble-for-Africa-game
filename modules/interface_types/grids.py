@@ -87,10 +87,9 @@ class grid(interface_elements.interface_element):
         if constants.effect_manager.effect_active('enable_oceans'):
             constants.terrain_list.append('water')
         for i in range(num_worms):
-            self.make_random_terrain_worm(round(area/24), round(area/12), constants.terrain_list)
-        #if constants.effect_manager.effect_active('enable_oceans'):
-        #    for i in range(num_worms // 6): #range(num_worms / 3):
-        #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
+            min_length = round(area / 24)
+            max_length = round(area / 12)
+            self.make_random_terrain_worm(min_length, max_length, constants.terrain_list)
         if not constants.effect_manager.effect_active('enable_oceans'):
             for row in self.cell_list:
                 terrain_variant = random.randrange(0, constants.terrain_variant_dict['ocean_water'])
@@ -109,6 +108,17 @@ class grid(interface_elements.interface_element):
         
             for start_x in start_x_list:
                 self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
+
+        for cell in self.get_flat_cell_list():
+            if cell.terrain == 'none':
+                for neighbor in random.sample(cell.adjacent_list, len(cell.adjacent_list)):
+                    if neighbor.terrain != 'none':
+                        terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(neighbor.terrain, 1)) # Randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                        cell.set_terrain(neighbor.terrain, terrain_variant)
+                if cell.terrain == 'none':
+                    terrain = random.choice(constants.terrain_list)
+                    terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(terrain, 1))
+                    cell.set_terrain(terrain, terrain_variant)
 
     def draw(self):
         '''

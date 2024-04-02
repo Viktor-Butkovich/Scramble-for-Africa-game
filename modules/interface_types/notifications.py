@@ -72,7 +72,7 @@ class notification(multi_line_label):
         else:
             self.set_tooltip(self.message)
 
-    def on_click(self):
+    def on_click(self, override_can_remove = False):
         '''
         Description:
             Controls this notification's behavior when clicked. By default, notifications are removed when clicked
@@ -81,7 +81,7 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        if self.can_remove:
+        if self.can_remove or override_can_remove:
             if self.has_parent_collection:
                 self.parent_collection.remove_recursive(complete=False)
             else:
@@ -104,8 +104,7 @@ class notification(multi_line_label):
             else:
                 self.on_remove()
         super().remove()
-        if status.displayed_notification == self:
-            status.displayed_notification = None
+        status.displayed_notification = None
 
 class zoom_notification(notification):
     '''

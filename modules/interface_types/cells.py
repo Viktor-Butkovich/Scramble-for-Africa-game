@@ -42,7 +42,6 @@ class cell():
         self.settlement = None
         self.terrain = 'none'
         self.terrain_variant = 0
-        self.set_terrain('savannah')
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        

@@ -504,7 +504,7 @@ def manage_villages(verbose: bool = True):
         if random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6:
             previous_population = current_village.population
             current_village.change_population(1)
-            if previous_population <= 0 and current_village.cell.visible:
+            if previous_population <= 0 and current_village.cell.visible and constants.current_game_mode in current_village.cell.grid.modes:
                 text = 'The previously abandonded village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') is now being re-settled. /n /n'
                 constants.notification_manager.display_notification({
                     'message': text,

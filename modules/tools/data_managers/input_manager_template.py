@@ -75,4 +75,4 @@ class input_manager_template():
         self.send_input_to(received_input)
         self.taking_input = False
         flags.typing = True
-        status.displayed_notification.remove()
+        status.displayed_notification.on_click(override_can_remove=True)

@@ -773,7 +773,7 @@ class mob(actor):
         if possible_sounds:
             constants.sound_manager.play_sound(random.choice(possible_sounds))
 
-    def movement_sound(self):
+    def movement_sound(self, allow_fadeout = True):
         '''
         Description:
             Plays a sound when this unit moves or embarks/disembarks a vehicle, with a varying sound based on this unit's type
@@ -782,11 +782,11 @@ class mob(actor):
         Output:
             None
         '''
-        if constants.sound_manager.busy():
-            constants.sound_manager.fadeout(500)
         possible_sounds = []
         if self.is_pmob or self.visible():
             if self.is_vehicle:
+                if allow_fadeout and constants.sound_manager.busy():
+                    constants.sound_manager.fadeout(400)
                 if self.vehicle_type == 'train':
                     possible_sounds.append('effects/train_moving')
                 else:

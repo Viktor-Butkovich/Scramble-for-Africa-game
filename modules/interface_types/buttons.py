@@ -1119,7 +1119,11 @@ class button(interface_elements.interface_element):
                         linked_tab_button.parent_collection.parent_collection.current_tabbed_member = linked_tab_button.linked_element
 
         elif self.button_type == 'rename settlement':
-            constants.input_manager.start_receiving_input(status.displayed_tile.cell.settlement.rename, prompt='Type new settlement name: ')
+            if main_loop_utility.action_possible():
+                constants.input_manager.start_receiving_input(status.displayed_tile.cell.settlement.rename, prompt='Type new settlement name: ')
+            else:
+                text_utility.print_to_screen('You are busy and cannot rename this settlement.')
+            
 
     def on_rmb_release(self):
         '''
