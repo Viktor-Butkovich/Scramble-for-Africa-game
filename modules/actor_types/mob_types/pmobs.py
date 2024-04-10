@@ -423,7 +423,7 @@ class pmob(mob):
         Output:
             None
         '''
-        constants.evil_tracker.change(3)
+        constants.evil_tracker.change(1)
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()

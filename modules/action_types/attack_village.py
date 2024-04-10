@@ -65,7 +65,7 @@ class attack_village(action.action):
         return(['Attempts to attack a village\'s population for ' + str(self.get_price()) + ' money',
                 'Can only be done in a village',
                 'If successful, kills 1-3 of the village\'s population',
-                'Regardless of success, this may increase the village\'s aggressiveness and/or decrease public opinion',
+                'This may decrease public opinion and/or drastically change the village\'s aggressiveness in either direction'
                 'Has higher success chance and lower risk when aggressiveness is low',
                 'Costs all remaining movement points, at least 1'
         ])
@@ -94,18 +94,25 @@ class attack_village(action.action):
             text += 'The battalion tries to kill the natives. /n /n'
 
         elif subject in ['success', 'failure']:
+            self.aggressiveness_increase = 0
             if subject == 'success':
+                constants.evil_tracker.change(10)
                 self.population_decrease = min(random.randrange(1, 4), self.current_village.population)
                 text += 'The battalion successfully killed ' + str(self.population_decrease) + ' of the village\'s population. /n /n'
+
+                if self.current_village.population > self.population_decrease:
+                    if random.randrange(1, 7) >= 4:
+                        self.aggressiveness_increase = min(9 - self.current_village.aggressiveness, random.randrange(2, 5))
+                        if self.aggressiveness_increase != 0:
+                            text += 'The natives of this village have grown vengeful torwards the invaders, increasing their aggressiveness by ' + str(self.aggressiveness_increase) + '. /n /n'
+                    else:
+                        self.aggressiveness_increase = -1 * min(self.current_village.aggressiveness - 1, random.randrange(2, 5))
+                        if self.aggressiveness_increase != 0:
+                            text += 'Targeting subversive elements while sparing collaborators has left the remaining population most agreeable, decreasing their aggressiveness by ' + str(-1 * self.aggressiveness_increase) + '. /n /n'
             else:
                 self.population_decrease = 0
                 text += 'The battalion failed to kill a substantial portion of the village\'s inhabitants. /n /n'
             
-            if self.current_village.population > self.population_decrease and self.current_village.aggressiveness < 9 and random.randrange(1, 7) >= 4:
-                self.aggressiveness_increase = 1
-                text += 'The natives of this village have grown vengeful torwards the invaders, increasing their aggressiveness by 1. /n /n'
-            else:
-                self.aggressiveness_increase = 0
             self.public_relations_change = -1 * random.randrange(0, 3)
             if abs(self.public_relations_change) > 0: #reports could be based on the orders even be given - can occur even if corruption occurred
                 text += 'Rumors of your company\'s brutal treatment of the natives reaches Europe, decreasing public opinion by ' + str(-1 * self.public_relations_change) + '. /n /n'

@@ -116,16 +116,15 @@ class slave_capture(action.action):
             text += 'The battalion tries to capture the natives as slaves. /n /n'
 
         elif subject in ['success', 'failure']:
+            self.aggressiveness_increase = 0
             if subject == 'success':
                 text += 'The battalion successfully captured enough slaves to compose a slave workers unit. /n /n'
+                if self.current_village.population > 1 and self.current_village.aggressiveness < 9 and random.randrange(1, 7) >= 4:
+                    self.aggressiveness_increase = 1
+                    text += 'The natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n /n'
             else:
                 text += 'A majority of the natives managed to evade capture. /n /n'
-            
-            if self.current_village.population > 1 and self.current_village.aggressiveness < 9 and random.randrange(1, 7) >= 4:
-                self.aggressiveness_increase = 1
-                text += 'The natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n /n'
-            else:
-                self.aggressiveness_increase = 0
+
             self.public_relations_change = -1 * random.randrange(0, 3)
             if abs(self.public_relations_change) > 0: #reports could be based on the orders even be given - can occur even if corruption occurred
                 text += 'Rumors of your company\'s brutal treatment of the natives reaches Europe, decreasing public opinion by ' + str(-1 * self.public_relations_change) + '. /n /n'

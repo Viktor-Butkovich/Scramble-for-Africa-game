@@ -1030,7 +1030,7 @@ class minister():
         elif event == 'fired':
             multiplier = random.randrange(8, 13) / 10.0 #0.8-1.2
             public_opinion_change = -10 * self.status_number * multiplier #4-6 for lowborn, 32-48 for very high
-            constants.evil_tracker.change(2)
+            constants.evil_tracker.change(1)
             text += 'From: ' + self.name + ' /n /n'
             intro_options = ['How far our empire has fallen... ',
                              'You have made a very foolish decision in firing me. ',

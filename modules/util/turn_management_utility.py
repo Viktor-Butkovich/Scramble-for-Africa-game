@@ -267,7 +267,7 @@ def manage_public_opinion():
     elif current_public_opinion > 50:
         constants.public_opinion_tracker.change(-1)
         text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1))
-    constants.evil_tracker.change(-1)
+    constants.evil_tracker.change(-2)
     if constants.effect_manager.effect_active('show_evil'):
         print('Evil number: ' + str(constants.evil))
     if constants.effect_manager.effect_active('show_fear'):

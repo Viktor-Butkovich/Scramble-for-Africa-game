@@ -154,7 +154,7 @@ class group(pmob):
         Output:
             None
         '''
-        constants.evil_tracker.change(2)
+        constants.evil_tracker.change(1)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle
