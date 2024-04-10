@@ -37,7 +37,6 @@ except Exception: #displays error message and records error message in crash log
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
 # Add river sources, with bonuses for discovery
-# Add direct attack on native villages action
 # Add cannibals
 # Add lore mission trophy screen/notification
 # Change Maxim guns to apply to all combat-related actions (combat, attack village, suppress slave trade), but also decreases movement points by 1

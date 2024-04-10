@@ -121,7 +121,7 @@ class slave_capture(action.action):
             else:
                 text += 'A majority of the natives managed to evade capture. /n /n'
             
-            if self.current_village.population > 1 and random.randrange(1, 7) >= 4:
+            if self.current_village.population > 1 and self.current_village.aggressiveness < 9 and random.randrange(1, 7) >= 4:
                 self.aggressiveness_increase = 1
                 text += 'The natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n /n'
             else:

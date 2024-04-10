@@ -18,7 +18,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
     exploration, construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade, slave_capture, \
-    active_investigation, track_beasts, trial, canoe_purchase
+    active_investigation, track_beasts, trial, canoe_purchase, attack_village
 
 def setup(*args):
     '''
@@ -268,6 +268,7 @@ def actions():
     willing_to_trade.willing_to_trade()
     trade.trade()
     slave_capture.slave_capture()
+    attack_village.attack_village()
     active_investigation.active_investigation()
     track_beasts.track_beasts()
     trial.trial()
