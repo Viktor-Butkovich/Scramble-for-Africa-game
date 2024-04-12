@@ -229,6 +229,21 @@ class action():
         '''
         return(0)
 
+    def random_unit_modifier(self):
+        '''
+        Description:
+            Calculates and returns the current secret roll modifier for this action - each of these is only applied half the time, and as rolls occur
+        Input:
+            None
+        Output:
+            int: Returns the current roll modifier
+        '''
+        total_modifier = 0
+        if self.actor_type != 'prosecutor':
+            for equipment_type in self.current_unit.equipment:
+                total_modifier += status.equipment_types[equipment_type].apply_modifier(self.action_type)
+        return(total_modifier)
+
     def pre_start(self, unit):
         '''
         Description:
@@ -238,6 +253,10 @@ class action():
         Output:
             none
         '''
+        if self.actor_type == 'prosecutor':
+            self.current_unit = status.current_ministers['Prosecutor']
+        else:
+            self.current_unit = unit
         self.current_roll_modifier = self.generate_current_roll_modifier()
         self.current_min_success = 4 #default_min_success
         self.current_max_crit_fail = 1 #default_max_crit_fail
@@ -251,10 +270,6 @@ class action():
             self.current_max_crit_fail = 0
         if not self.allow_critical_successes:
             self.current_min_crit_success = 7
-        if self.actor_type == 'prosecutor':
-            self.current_unit = status.current_ministers['Prosecutor']
-        else:
-            self.current_unit = unit
 
     def start(self, unit):
         '''
@@ -329,6 +344,8 @@ class action():
             results = self.current_unit.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, self.action_type, num_dice)
         else:
             results = self.current_unit.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, self.action_type, num_dice)
+        results = [max(min(current_result + self.random_unit_modifier(), 6), 1) for current_result in results] # Adds unit-specific modifiers
+
         self.roll_lists = self.generate_roll_lists(results)
 
         self.roll_result = 0

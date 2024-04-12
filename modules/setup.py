@@ -209,6 +209,10 @@ class equipment_types_config():
     equipment_types.equipment_type({
         'equipment_type': 'Maxim gun',
         'requirement': 'is_battalion',
+        'effects': {
+            'positive_modifiers': ['combat', 'attack_village', 'suppress_slave_trade'],
+            'max_movement_points': -1
+        },
         'description': [
             'A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls',
             'Can only be equipped by battalions'

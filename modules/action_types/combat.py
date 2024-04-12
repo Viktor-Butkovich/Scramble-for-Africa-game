@@ -281,7 +281,6 @@ class combat(action.action):
             roll_modifier = self.opponent.get_combat_modifier()
         else:
             roll_modifier = super().generate_current_roll_modifier()
-            roll_modifier += int(self.current_unit.equipment.get('Maxim gun', False)) * random.randrange(0, 2) # Positive modifier if Maxim gun equipped
             roll_modifier += self.current_unit.get_combat_modifier(opponent=self.opponent, include_tile=True)
         return(roll_modifier)
 
@@ -462,22 +461,24 @@ class combat(action.action):
             )
             results = minister_rolls
         elif (self.current_unit.is_safari and self.opponent.npmob_type == 'beast') or (self.current_unit.is_battalion and self.opponent.npmob_type != 'beast'):
-            # 'combat' modifiers don't apply on defense because no roll type is specified in no_corruption_roll
-            results = [random.randrange(1, 7), self.current_unit.controlling_minister.no_corruption_roll(6), self.current_unit.controlling_minister.no_corruption_roll(6)]
+            # Minister/country 'combat' modifiers don't apply on defense because no roll type is specified in no_corruption_roll, while unit modifiers do apply on defense
+            #   Defense is a more spontaneous action that should only rely on what is immediately on-site, but this could be modified in the future
+            results = [random.randrange(1, 7)] + [self.current_unit.controlling_minister.no_corruption_roll(6) for i in range(num_dice)]
         else:
-            results = [random.randrange(1, 7), random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
+            results = [random.randrange(1, 7)] + [random.randrange(1, 7) for i in range(num_dice)] #civilian ministers don't get to roll for combat with their units
+        for index, current_result in enumerate(results):
+            if index > 0: # If not enemy roll
+                results[index] = max(min(current_result + self.random_unit_modifier(), 6), 1) # Adds unit-specific modifiers
 
         if constants.effect_manager.effect_active('ministry_of_magic'):
-            results = [1, 6, 6]
+            results = [1] + [6 for i in range(num_dice)]
         elif constants.effect_manager.effect_active('nine_mortal_men'):
-            results = [6, 1, 1]
+            results = [6] + [1 for i in range(num_dice)]
         
-        self.opponent_roll_result = results.pop(0) #first minister roll is for enemies
+        self.opponent_roll_result = results.pop(0) # Enemy roll is index 0
         roll_types = (self.name.capitalize() + ' roll', 'second')
-        for index in range(min(len(results), num_dice)):
-            result = results[index]
-            roll_type = roll_types[index]
-            self.roll_lists.append(dice_utility.combat_roll_to_list(6, roll_type, result, self.current_roll_modifier))
+        for index in range(num_dice):
+            self.roll_lists.append(dice_utility.combat_roll_to_list(6, roll_types[index], results[index], self.current_roll_modifier))
 
         attached_interface_elements = []
         attached_interface_elements = self.generate_attached_interface_elements('dice')
