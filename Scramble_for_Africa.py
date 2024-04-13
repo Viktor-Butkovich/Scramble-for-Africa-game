@@ -41,4 +41,3 @@ except Exception: #displays error message and records error message in crash log
 # Add lore mission trophy screen/notification
 # Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads
 # Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn
-# Have labels for each minister skill, only show if not unknown, somehow show which one is the current ability, if appointed

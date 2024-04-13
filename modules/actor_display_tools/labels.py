@@ -613,7 +613,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'loyalty':
             tooltip_text = [self.message]
             self.set_tooltip(tooltip_text)
-            
+
         elif self.actor_label_type == 'building work crews':
             tooltip_text = []
             tooltip_text.append('Increase work crew capacity by upgrading the building\'s scale with a construction gang')
@@ -864,7 +864,10 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'loyalty':
                 self.set_label(self.message_start + new_actor.apparent_corruption_description)
-            
+
+            elif self.actor_label_type in constants.skill_types:
+                self.set_label(self.actor_label_type.capitalize() + ': ' + self.actor.apparent_skill_descriptions[constants.type_minister_dict[self.actor_label_type]])
+
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)
 
@@ -929,7 +932,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type in ['workers', 'officer'] and not self.actor.is_group:
             return(False)
-        elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
+        elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): # Do not show mobs that are attached to another unit/building
             return(False)
         elif self.actor_label_type in constants.building_types and self.actor_label_type != 'resource' and not self.actor.cell.has_building(self.actor_label_type):
             return(False)
@@ -956,6 +959,8 @@ class actor_display_label(label):
                 return(False)
             else:
                 return(result)
+        elif self.actor_label_type in constants.skill_types:
+            return(self.actor.apparent_skill_descriptions[constants.type_minister_dict[self.actor_label_type]] != 'unknown')
         else:
             return(result)
 

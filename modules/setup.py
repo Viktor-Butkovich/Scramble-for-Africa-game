@@ -1883,6 +1883,7 @@ def minister_interface():
     #minister info images setup
 
     input_dict = {
+        'coordinates': scaling.scale_coordinates(0, 0),
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png',
@@ -1890,11 +1891,17 @@ def minister_interface():
         'init_type': 'actor display label',
         'parent_collection': status.minister_info_display
     }
+
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability', 'evidence']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability'] + \
+        constants.skill_types + \
+        ['evidence']
     for current_actor_label_type in minister_info_display_labels:
-        x_displacement = 0
-        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y)
+        if current_actor_label_type in constants.skill_types:
+            x_displacement = 25
+        else:
+            x_displacement = 0
+        input_dict['member_config'] = {'order_x_offset': x_displacement}
         input_dict['actor_label_type'] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict)
     #minister info labels setup
