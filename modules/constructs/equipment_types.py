@@ -69,7 +69,7 @@ class equipment_type():
             unit.set_has_canoes(True)
             unit.update_canoes()
         if self.effects.get('max_movement_points', 0) != 0:
-            unit.set_max_movement_points(4 + self.effects['max_movement_points'], initial_setup=False)
+            unit.set_max_movement_points(4 + self.effects['max_movement_points'], initial_setup=False, allow_increase = False)
 
     def unequip(self, unit) -> None:
         '''
@@ -85,7 +85,7 @@ class equipment_type():
             unit.set_has_canoes(False)
             unit.update_canoes()
         if self.effects.get('max_movement_points', 0) != 0:
-            unit.set_max_movement_points(4, initial_setup=False)
+            unit.set_max_movement_points(4, initial_setup=False, allow_increase = False)
 
     def check_requirement(self, unit) -> bool:
         '''

@@ -249,8 +249,12 @@ class mob(actor):
         result = base + 3
         if self.veteran:
             result += 1
-        if self.is_pmob and self.equipment.get('Maxim gun', False):
-            result += 1
+        if self.is_pmob:
+            for current_equipment in self.equipment:
+                if 'combat' in status.equipment_types[current_equipment].effects.get('positive_modifiers', []):
+                    result += 1
+                elif 'combat' in status.equipment_types[current_equipment].effects.get('negative_modifiers', []):
+                    result -= 1
         if self.is_officer or (self.is_vehicle and self.crew == 'none'):
             result = 0
         return(result)
@@ -451,7 +455,7 @@ class mob(actor):
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
-    def set_max_movement_points(self, new_value, initial_setup = True):
+    def set_max_movement_points(self, new_value, initial_setup = True, allow_increase = True):
         '''
         Description:
             Sets this mob's maximum number of movement points and changes its current movement points by the amount increased or to the maximum, based on the input boolean
@@ -460,8 +464,11 @@ class mob(actor):
         Output:
             None
         '''
-        if not initial_setup:
+        increase = 0
+        if allow_increase and not initial_setup:
             increase = new_value - self.max_movement_points
+        if increase + self.movement_points > new_value: # If current movement points is above max, set current movement points to max
+            increase = new_value - self.movement_points
         self.max_movement_points = new_value
         if initial_setup:
             self.set_movement_points(new_value)

@@ -197,7 +197,7 @@ def worker_types_config():
                                 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
 
-class equipment_types_config():
+def equipment_types_config():
     '''
     Description:
         Defines equipment type templates
