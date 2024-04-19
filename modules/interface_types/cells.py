@@ -704,6 +704,7 @@ class cell():
         self.village = other_cell.village
         self.set_visibility(other_cell.visible, update_image_bundle=False)
         self.set_terrain(other_cell.terrain, other_cell.terrain_variant, update_image_bundle=False)
+        self.terrain_features = other_cell.terrain_features
         self.set_resource(other_cell.resource, update_image_bundle=False)
         #self.tile.update_image_bundle(override_image=other_cell.tile.image) #correctly copies other cell's image bundle but ends up very pixellated due to size difference
         self.tile.update_image_bundle()
