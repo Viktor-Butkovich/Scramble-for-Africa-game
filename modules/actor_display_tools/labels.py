@@ -628,6 +628,9 @@ class actor_display_label(label):
             tooltip_text.append('Each work crew attached to this building can produce up to the building efficiency in commodities each turn')
             tooltip_text.append('Increase work crew efficiency by upgrading the building\'s efficiency with a construction gang')
             self.set_tooltip(tooltip_text)
+
+        elif self.actor_label_type == 'terrain feature':
+            self.set_tooltip(status.terrain_feature_types[self.terrain_feature_type].description)
             
         elif self.actor_label_type == 'slums':
             tooltip_text = [self.message]
@@ -713,6 +716,9 @@ class actor_display_label(label):
                         self.set_label(self.message_start + new_actor.cell.resource)
                 else:
                     self.set_label(self.message_start + 'unknown')
+
+            elif self.actor_label_type == 'terrain feature':
+                self.set_label(self.terrain_feature_type.capitalize())
 
             elif self.actor_label_type == 'resource building':
                 if (not new_actor.grid.is_abstract_grid) and new_actor.cell.visible and new_actor.cell.has_building('resource'):
@@ -1201,8 +1207,42 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
         Output:
             boolean: Returns same value as superclass as long as the displayed tile is explored and has a village, otherwise returns False
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if self.actor.cell.has_building('village') and self.actor.cell.visible:
-                return(True)
-        return(False)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.actor.cell.has_building('village') and self.actor.cell.visible)
+
+class terrain_feature_label(actor_display_label):
+    '''
+    Label that shows a particular type of terrain feature, if present
+    '''
+    def __init__(self, input_dict):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
+                'terrain_feature_type': string value - Type of terrain feature associated with, like 'cataract'
+        Output:
+            None
+        '''
+        self.terrain_feature_type = input_dict['terrain_feature_type']
+        input_dict['actor_label_type'] = 'terrain feature'
+        super().__init__(input_dict)
+
+    def can_show(self, skip_parent_collection=False):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same value as superclass as long as the associated terrain feature is present
+        '''
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.actor.cell.terrain_features.get(self.terrain_feature_type, False))

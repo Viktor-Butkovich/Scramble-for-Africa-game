@@ -98,12 +98,10 @@ class grid(interface_elements.interface_element):
             valid = False
             while not valid:
                 valid = True
-                start_x_list = []
-                for i in range(num_rivers):
-                    start_x_list.append(random.randrange(0, self.coordinate_width))
+                start_x_list = [random.randrange(0, self.coordinate_width) for i in range(num_rivers)]
                 for index in range(len(start_x_list)):
                     for other_index in range(len(start_x_list)):
-                        if index != other_index and abs(start_x_list[index] - start_x_list[other_index]) < 3:
+                        if index != other_index and abs(start_x_list[index] - start_x_list[other_index]) < 3: # Invalid if any rivers too close to each other
                             valid = False
         
             for start_x in start_x_list:
@@ -119,6 +117,21 @@ class grid(interface_elements.interface_element):
                     terrain = random.choice(constants.terrain_list)
                     terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(terrain, 1))
                     cell.set_terrain(terrain, terrain_variant)
+        self.generate_terrain_features()
+
+    def generate_terrain_features(self):
+        '''
+        Description:
+            Randomly place features in each tile, based on terrain
+        Input:
+            None
+        Output:
+            None
+        '''
+        for terrain_feature_type in status.terrain_feature_types:
+            for cell in self.get_flat_cell_list():
+                if status.terrain_feature_types[terrain_feature_type].allow_place(cell):
+                    cell.terrain_features[terrain_feature_type] = True
 
     def draw(self):
         '''

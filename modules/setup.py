@@ -14,6 +14,7 @@ import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
 import modules.constructs.worker_types as worker_types
 import modules.constructs.equipment_types as equipment_types
+import modules.constructs.terrain_feature_types as terrain_feature_types
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
@@ -224,6 +225,24 @@ def equipment_types_config():
         'description': [
             'Canoes allow units to travel through river water for 1 movement point, except for cataracts',
             'Can only be equipped by expeditions and safaris'
+        ]
+    })
+
+def terrain_feature_types_config():
+    '''
+    Description:
+        Defines terrain feature type templates
+    Input:
+        None
+    Output:
+        None
+    '''
+    terrain_feature_types.terrain_feature_type({
+        'terrain_feature_type': 'cataract',
+        'requirements': {'terrain': 'water', 'min_y': 1},
+        'frequency': (1, 10),
+        'description': [
+            'placeholder'
         ]
     })
 
@@ -1325,17 +1344,17 @@ def tile_interface():
 
     #tile info labels setup
     tile_info_display_labels = [
-        'coordinates', 'terrain', 'resource', 'village', 'native population', 'native available workers', 'native aggressiveness', 'slave_traders_strength'
+        'coordinates', 'terrain', 'terrain features', 'resource', 'village', 'native population', 'native available workers', 'native aggressiveness', 'slave_traders_strength'
     ]
     for current_actor_label_type in tile_info_display_labels:
-        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
+        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness', 'terrain features']:
             x_displacement = 25
         else:
             x_displacement = 0
         input_dict = {
             'minimum_width': scaling.scale_width(10),
             'height': scaling.scale_height(30),
-            'image_id': 'misc/default_label.png', #'misc/underline.png',
+            'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
             'parent_collection': status.tile_info_display,
@@ -1345,9 +1364,15 @@ def tile_interface():
         if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = current_actor_label_type + ' label'
             constants.actor_creation_manager.create_interface_element(input_dict)
+        elif current_actor_label_type == 'terrain features':
+            input_dict['init_type'] = 'terrain feature label'
+            for terrain_feature_type in status.terrain_feature_types:
+                input_dict['terrain_feature_type'] = terrain_feature_type
+                constants.actor_creation_manager.create_interface_element(input_dict)
         else:
             input_dict['init_type'] = 'actor display label'
             constants.actor_creation_manager.create_interface_element(input_dict)
+
 
     tab_collection_relative_coordinates = (450, -30)
 

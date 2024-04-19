@@ -309,6 +309,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_labels.building_efficiency_label(input_dict)
                 elif base in ['native info', 'native population', 'native available workers', 'native aggressiveness']:
                     new_element = actor_display_labels.native_info_label(input_dict)
+                elif base == 'terrain feature':
+                    new_element = actor_display_labels.terrain_feature_label(input_dict)
 
                 else:
                     new_element = actor_display_labels.actor_display_label(input_dict)

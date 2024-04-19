@@ -1,4 +1,4 @@
-# Contains functionality for worker type templates, such as European, African, Asian, slave workers
+# Contains functionality for equipment type templates
 
 from typing import Dict, List
 import modules.constants.constants as constants

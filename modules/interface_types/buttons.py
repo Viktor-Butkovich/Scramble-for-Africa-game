@@ -1,6 +1,7 @@
 #Contains functionality for buttons
 
 import pygame
+from typing import List
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
     minister_utility
 from ..constructs import equipment_types
@@ -619,7 +620,7 @@ class button(interface_elements.interface_element):
         }
         self.keybind_name = keybind_name_dict[new_keybind]
 
-    def set_tooltip(self, tooltip_text):
+    def set_tooltip(self, tooltip_text: List[str]):
         '''
         Description:
             Sets this actor's tooltip to the inputted list, with each inputted list representing a line of the tooltip
