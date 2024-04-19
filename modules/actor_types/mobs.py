@@ -351,7 +351,7 @@ class mob(actor):
                     if not (local_infrastructure == 'none' or adjacent_infrastructure == 'none'): #if both have infrastructure and connected by land or bridge, use discount
                         cost = cost / 2
                     #otherwise, use default cost but not full no canoe penalty cost
-                elif adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #elif river w/o canoes
+                elif adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and (self.can_walk and not self.can_swim_river) or adjacent_cell.terrain_features.get('cataract', False): #elif river w/o canoes
                     cost = self.max_movement_points
 
                 if (not adjacent_cell.visible) and self.can_explore:
@@ -733,7 +733,7 @@ class mob(actor):
                                     return(False)
                                 elif future_y > 0 and (not self.can_swim_river) and self.can_walk:
                                     return(True) #can walk through river with max movement points while becoming disorganized
-                            if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
+                            if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0:
                                 return(True)
                             else:
                                 return(False)
@@ -917,7 +917,7 @@ class mob(actor):
         '''
         current_cell = self.images[0].current_cell
 
-        if current_cell != 'none' and current_cell.terrain == 'water' and self.y > 0:
+        if current_cell != 'none' and current_cell.terrain == 'water' and self.y > 0 and not current_cell.terrain_features.get('cataract', False):
             self.in_canoes = self.has_canoes
         else:
             self.in_canoes = False

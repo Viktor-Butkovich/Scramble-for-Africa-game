@@ -344,7 +344,7 @@ class vehicle(pmob):
         else:
             if can_print:
                 text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.')
-            return(False)
+        return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

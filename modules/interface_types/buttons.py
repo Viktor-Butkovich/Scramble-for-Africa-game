@@ -202,6 +202,8 @@ class button(interface_elements.interface_element):
                                             message += 'and no connecting roads'# + local_infrastructure.infrastructure_type
                                         else: 
                                             message += 'and no connecting roads'
+                                    if adjacent_cell.terrain_features.get('cataract', False):
+                                        message += 'and a cataract'
 
                                     tooltip_text.append(message)
                                     if (current_mob.can_walk and adjacent_cell.terrain == 'water' and (not current_mob.can_swim_river)) and adjacent_cell.y > 0 and not local_cell.has_walking_connection(adjacent_cell):
@@ -785,7 +787,7 @@ class button(interface_elements.interface_element):
                                     flags.show_selection_outlines = True
                                     constants.last_selection_outline_switch = constants.current_time
                                 else:
-                                    text_utility.print_to_screen('This vehicle has no passengers to move')
+                                    text_utility.print_to_screen('This vehicle has no passengers to send onto land')
 
                             else:
                                 current_mob.can_move(x_change, y_change, can_print=True)

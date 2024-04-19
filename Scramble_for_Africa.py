@@ -26,10 +26,7 @@ except Exception: #displays error message and records error message in crash log
 #
 #   new SFA features:
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
-# Add cataracts
-#   Steamboats treat cataracts like land
-#   Other units treat cataracts as river water where canoes do not function, can still build bridges
-#   Approximately 1/12 chance (if any of 3 2D6 rolls is 2) per river tile, 1-2 desired per river
+# Add cataract image
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 # Add cosmetic flag to minister screen

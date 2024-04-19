@@ -240,7 +240,7 @@ def terrain_feature_types_config():
     terrain_feature_types.terrain_feature_type({
         'terrain_feature_type': 'cataract',
         'requirements': {'terrain': 'water', 'min_y': 1},
-        'frequency': (1, 10),
+        'frequency': (1, 12),
         'description': [
             'placeholder'
         ]

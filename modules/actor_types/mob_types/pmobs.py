@@ -615,7 +615,7 @@ class pmob(mob):
                         future_cell = self.grid.find_cell(future_x, future_y)
                         if future_cell.visible or self.can_explore:
                             destination_type = 'land'
-                            if future_cell.terrain == 'water':
+                            if future_cell.terrain == 'water' and not (future_cell.terrain_features.get('cataract', False) and not self.can_walk):
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                             passed = False
                             if destination_type == 'land':

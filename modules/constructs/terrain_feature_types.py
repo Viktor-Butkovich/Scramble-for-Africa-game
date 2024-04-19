@@ -1,4 +1,4 @@
-# Contains functionality for terrain feature types
+# Contains functionality for terrain feature types - non-resource points of interest in a tile
 
 import random
 from typing import Dict, List, Tuple
@@ -28,12 +28,21 @@ class terrain_feature_type():
         self.terrain_feature_type = input_dict['terrain_feature_type']
         self.description: List[str] = input_dict.get('description', [])
         self.description: List[str] = input_dict.get('description', [])
-        self.image_id = input_dict.get('image_id', 'terrains/features/' + self.terrain_feature_type + '.png')
+        self.image_id = input_dict.get('image_id', {'image_id': 'terrains/features/' + self.terrain_feature_type + '.png', 'level': -1})
         self.requirements: Dict[str, any] = input_dict.get('requirements', {})
         self.frequency: Tuple[int, int] = input_dict.get('frequency', (1, 1))
         status.terrain_feature_types[self.terrain_feature_type] = self
 
     def allow_place(self, cell) -> bool:
+        '''
+        Description:
+            Calculates and returns whether to place one of this particular feature in the inputted cell during map generation, based on the feature's frequency and
+                requirements
+        Input:
+            cell cell: Cell to place feature in
+        Output:
+            boolean: Returns whether to place one of this particular featuer in the inputted cell
+        '''
         if random.randrange(1, self.frequency[1] + 1) <= self.frequency[0]: # For (1, 10), appear if random.randrange(1, 11) <= 1
             for requirement in self.requirements:
                 if requirement == 'terrain':
