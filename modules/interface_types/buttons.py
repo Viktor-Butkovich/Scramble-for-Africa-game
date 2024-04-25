@@ -1,6 +1,7 @@
 #Contains functionality for buttons
 
 import pygame
+from typing import List
 from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, game_transitions, \
     minister_utility
 from ..constructs import equipment_types
@@ -201,6 +202,8 @@ class button(interface_elements.interface_element):
                                             message += 'and no connecting roads'# + local_infrastructure.infrastructure_type
                                         else: 
                                             message += 'and no connecting roads'
+                                    if adjacent_cell.terrain_features.get('cataract', False):
+                                        message += 'and a cataract'
 
                                     tooltip_text.append(message)
                                     if (current_mob.can_walk and adjacent_cell.terrain == 'water' and (not current_mob.can_swim_river)) and adjacent_cell.y > 0 and not local_cell.has_walking_connection(adjacent_cell):
@@ -619,7 +622,7 @@ class button(interface_elements.interface_element):
         }
         self.keybind_name = keybind_name_dict[new_keybind]
 
-    def set_tooltip(self, tooltip_text):
+    def set_tooltip(self, tooltip_text: List[str]):
         '''
         Description:
             Sets this actor's tooltip to the inputted list, with each inputted list representing a line of the tooltip
@@ -784,7 +787,7 @@ class button(interface_elements.interface_element):
                                     flags.show_selection_outlines = True
                                     constants.last_selection_outline_switch = constants.current_time
                                 else:
-                                    text_utility.print_to_screen('This vehicle has no passengers to move')
+                                    text_utility.print_to_screen('This vehicle has no passengers to send onto land')
 
                             else:
                                 current_mob.can_move(x_change, y_change, can_print=True)
@@ -818,7 +821,7 @@ class button(interface_elements.interface_element):
                     for current_unit_type in unit_types:
                         moved_units[current_unit_type] = 0
                         attempted_units[current_unit_type] = 0
-                    
+                    last_moved = None
                     for current_pmob in status.pmob_list:
                         if len(current_pmob.base_automatic_route) > 0:
                             if current_pmob.is_vehicle:
@@ -835,9 +838,11 @@ class button(interface_elements.interface_element):
                             progressed = current_pmob.follow_automatic_route()
                             if progressed:
                                 moved_units[unit_type] += 1
+                                last_moved = current_pmob
                             current_pmob.remove_from_turn_queue()
-                    actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob) #updates mob info display if automatic route changed anything
-
+                    if last_moved:
+                        last_moved.select() #updates mob info display if automatic route changed anything
+                    #actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob) 
                     types_moved = 0
                     text = ''
                     for current_unit_type in unit_types:
@@ -951,7 +956,7 @@ class button(interface_elements.interface_element):
                     equipment = status.equipment_types[self.attached_label.actor.current_item]
                     if equipment.check_requirement(status.displayed_mob):
                         if not status.displayed_mob.equipment.get(equipment.equipment_type, False):
-                            status.displayed_mob.equipment[equipment.equipment_type] = True
+                            equipment.equip(status.displayed_mob)
                             status.displayed_tile.change_inventory(equipment.equipment_type, -1)
                             actor_utility.calibrate_actor_info_display(status.tile_info_display, status.displayed_tile)
                             actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
@@ -971,7 +976,7 @@ class button(interface_elements.interface_element):
 
         elif self.button_type == 'remove equipment':
             if main_loop_utility.action_possible():
-                del status.displayed_mob.equipment[self.equipment_type]
+                status.equipment_types[self.equipment_type].unequip(status.displayed_mob)
                 status.displayed_tile.change_inventory(self.equipment_type, 1)
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, status.displayed_mob)
             else:
@@ -1100,9 +1105,7 @@ class button(interface_elements.interface_element):
                 self.parent_collection.set_origin(self.parent_collection.parent_collection.x + self.parent_collection.original_offsets[0], 
                                                   self.parent_collection.parent_collection.y + self.parent_collection.original_offsets[1])
             for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
-                #if hasattr(member, 'original_coordinates'):
                 if hasattr(member, 'original_offsets'):
-                    #member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
                     member.set_origin(member.parent_collection.x + member.original_offsets[0], member.parent_collection.y + member.original_offsets[1])
 
         elif self.button_type == 'tab':
@@ -1119,7 +1122,11 @@ class button(interface_elements.interface_element):
                         linked_tab_button.parent_collection.parent_collection.current_tabbed_member = linked_tab_button.linked_element
 
         elif self.button_type == 'rename settlement':
-            constants.input_manager.start_receiving_input(status.displayed_tile.cell.settlement.rename, prompt='Type new settlement name: ')
+            if main_loop_utility.action_possible():
+                constants.input_manager.start_receiving_input(status.displayed_tile.cell.settlement.rename, prompt='Type new settlement name: ')
+            else:
+                text_utility.print_to_screen('You are busy and cannot rename this settlement.')
+            
 
     def on_rmb_release(self):
         '''
@@ -2309,13 +2316,13 @@ class tab_button(button):
         return_value = super().can_show(skip_parent_collection=skip_parent_collection)
         if return_value:
             if self.identifier == 'settlement':
-                return_value = bool(status.displayed_tile.cell.settlement or status.displayed_tile.cell.has_building('trading_post') or status.displayed_tile.cell.has_building('mission'))
+                return_value = bool(status.displayed_tile.cell.settlement or status.displayed_tile.cell.has_building('trading_post') or status.displayed_tile.cell.has_building('mission') or status.displayed_tile.cell.has_building('infrastructure'))
 
             elif self.identifier == 'inventory':
                 if self.linked_element == status.tile_inventory_collection:
                     return_value = status.displayed_tile.inventory or status.displayed_tile.inventory_capacity > 0 or status.displayed_tile.infinite_inventory_capacity
                 else:
-                    return_value = status.displayed_mob.inventory_capacity > 0
+                    return_value = status.displayed_mob.inventory_capacity > 0 or (status.displayed_mob.is_pmob and status.displayed_mob.equipment)
 
             elif self.identifier == 'reorganization':
                 return_value = status.displayed_mob.is_pmob

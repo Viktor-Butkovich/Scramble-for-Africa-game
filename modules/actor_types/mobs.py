@@ -249,8 +249,12 @@ class mob(actor):
         result = base + 3
         if self.veteran:
             result += 1
-        if self.is_pmob and self.equipment.get('Maxim gun', False):
-            result += 1
+        if self.is_pmob:
+            for current_equipment in self.equipment:
+                if 'combat' in status.equipment_types[current_equipment].effects.get('positive_modifiers', []):
+                    result += 1
+                elif 'combat' in status.equipment_types[current_equipment].effects.get('negative_modifiers', []):
+                    result -= 1
         if self.is_officer or (self.is_vehicle and self.crew == 'none'):
             result = 0
         return(result)
@@ -343,13 +347,11 @@ class mob(actor):
             if self.is_pmob:
                 local_infrastructure = local_cell.get_intact_building('infrastructure')
                 adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
-                #if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-                #    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
-                if local_cell.has_walking_connection(adjacent_cell): 
+                if local_cell.has_walking_connection(adjacent_cell):
                     if not (local_infrastructure == 'none' or adjacent_infrastructure == 'none'): #if both have infrastructure and connected by land or bridge, use discount
                         cost = cost / 2
                     #otherwise, use default cost but not full no canoe penalty cost
-                elif adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #elif river w/o canoes
+                elif adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and (self.can_walk and not self.can_swim_river) or adjacent_cell.terrain_features.get('cataract', False): #elif river w/o canoes
                     cost = self.max_movement_points
 
                 if (not adjacent_cell.visible) and self.can_explore:
@@ -453,7 +455,7 @@ class mob(actor):
             if status.displayed_mob == self:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
-    def set_max_movement_points(self, new_value, initial_setup = True):
+    def set_max_movement_points(self, new_value, initial_setup = True, allow_increase = True):
         '''
         Description:
             Sets this mob's maximum number of movement points and changes its current movement points by the amount increased or to the maximum, based on the input boolean
@@ -462,8 +464,11 @@ class mob(actor):
         Output:
             None
         '''
-        if not initial_setup:
+        increase = 0
+        if allow_increase and not initial_setup:
             increase = new_value - self.max_movement_points
+        if increase + self.movement_points > new_value: # If current movement points is above max, set current movement points to max
+            increase = new_value - self.movement_points
         self.max_movement_points = new_value
         if initial_setup:
             self.set_movement_points(new_value)
@@ -728,7 +733,7 @@ class mob(actor):
                                     return(False)
                                 elif future_y > 0 and (not self.can_swim_river) and self.can_walk:
                                     return(True) #can walk through river with max movement points while becoming disorganized
-                            if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
+                            if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0:
                                 return(True)
                             else:
                                 return(False)
@@ -775,7 +780,7 @@ class mob(actor):
         if possible_sounds:
             constants.sound_manager.play_sound(random.choice(possible_sounds))
 
-    def movement_sound(self):
+    def movement_sound(self, allow_fadeout = True):
         '''
         Description:
             Plays a sound when this unit moves or embarks/disembarks a vehicle, with a varying sound based on this unit's type
@@ -784,18 +789,22 @@ class mob(actor):
         Output:
             None
         '''
-        if constants.sound_manager.busy():
-            constants.sound_manager.fadeout(500)
         possible_sounds = []
         if self.is_pmob or self.visible():
             if self.is_vehicle:
+                if allow_fadeout and constants.sound_manager.busy():
+                    constants.sound_manager.fadeout(400)
                 if self.vehicle_type == 'train':
                     possible_sounds.append('effects/train_moving')
                 else:
                     constants.sound_manager.play_sound('effects/ocean_splashing')
                     possible_sounds.append('effects/ship_propeller')
             elif self.images[0].current_cell != 'none' and self.images[0].current_cell.terrain == 'water':
-                possible_sounds.append('effects/river_splashing')
+                local_infrastructure =  self.images[0].current_cell.get_intact_building('infrastructure')
+                if local_infrastructure != 'none' and local_infrastructure.is_bridge and not self.can_swim_river: # If walking on bridge
+                    possible_sounds.append('effects/footsteps')
+                else:
+                    possible_sounds.append('effects/river_splashing')
             else:
                 possible_sounds.append('effects/footsteps')
         if possible_sounds:
@@ -895,13 +904,12 @@ class mob(actor):
         self.can_swim = self.has_canoes
         self.can_swim_ocean = False
         self.can_swim_river = self.has_canoes
-        if new_canoes:
-            self.update_canoes()
 
     def update_canoes(self):
         '''
         Description:
-            If this unit is visible to the player, updates its image to include canoes or not depending on if the unit is in river water
+            If this unit is visible to the player, updates its image to include canoes or not depending on if the unit is in river water - needs to be separately
+                called after set has canoes
         Input:
             None
         Output:
@@ -909,7 +917,7 @@ class mob(actor):
         '''
         current_cell = self.images[0].current_cell
 
-        if current_cell != 'none' and current_cell.terrain == 'water' and self.y > 0:
+        if current_cell != 'none' and current_cell.terrain == 'water' and self.y > 0 and not current_cell.terrain_features.get('cataract', False):
             self.in_canoes = self.has_canoes
         else:
             self.in_canoes = False

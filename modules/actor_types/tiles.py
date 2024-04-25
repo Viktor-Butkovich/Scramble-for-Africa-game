@@ -253,6 +253,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         else:
             if self.cell.visible or force_visibility: #force visibility shows full tile even if tile is not yet visible
                 image_id_list.append({'image_id': self.image_dict['default'], 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -9})
+                image_id_list += [status.terrain_feature_types[terrain_feature].image_id for terrain_feature in self.cell.terrain_features]
                 if self.cell.resource != 'none':
                     resource_icon = actor_utility.generate_resource_icon(self)
                     if type(resource_icon) == str:
@@ -358,7 +359,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         elif new_terrain == 'none':
             self.image_dict['default'] = 'terrains/hidden.png'
         if update_image_bundle:
-            self.update_image_bundle() #self.image.set_image('default')
+            self.update_image_bundle()
 
     def update_tooltip(self):
         '''
@@ -376,7 +377,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             tooltip_message.append('Coordinates: (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + ')')
             if self.cell.visible:
                 if self.cell.terrain == 'water':
-                    if coordinates[1] == 0: #current_y == 0:
+                    if coordinates[1] == 0:
                         tooltip_message.append('This is an ocean water tile')
                     else:
                         tooltip_message.append('This is a river water tile')
@@ -386,6 +387,8 @@ class tile(actor): #to do: make terrain tiles a subclass
                     tooltip_message += self.cell.village.get_tooltip()
                 elif not self.cell.resource == 'none': #if not village but other resource present, show resource
                     tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource')
+                for terrain_feature in self.cell.terrain_features:
+                    tooltip_message.append('This tile has a ' + terrain_feature)
             else:
                 tooltip_message .append('This tile has not been explored')
             if status.current_lore_mission:

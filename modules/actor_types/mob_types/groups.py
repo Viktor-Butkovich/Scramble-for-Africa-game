@@ -154,7 +154,7 @@ class group(pmob):
         Output:
             None
         '''
-        constants.evil_tracker.change(2)
+        constants.evil_tracker.change(1)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle
@@ -279,6 +279,8 @@ class group(pmob):
         self.officer.update_image_bundle()
         if status.displayed_mob == self:
             actor_utility.calibrate_actor_info_display(status.mob_info_display, self) # Updates actor info display with veteran icon
+        elif self.in_vehicle and status.displayed_mob == self.vehicle:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self.vehicle)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

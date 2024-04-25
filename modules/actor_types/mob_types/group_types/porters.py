@@ -47,5 +47,5 @@ class porters(group):
         Output:
             None
         '''
-        self.set_max_movement_points(6, False)
+        self.set_max_movement_points(6, initial_setup=False)
         super().promote()

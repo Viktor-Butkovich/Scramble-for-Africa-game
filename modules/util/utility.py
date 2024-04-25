@@ -86,7 +86,7 @@ def generate_article(word):
         string: Returns 'an' if the inputed word starts with a vowel, otherwise returns 'a'
     '''
     vowels = ['a', 'e', 'i', 'o', 'u']
-    plural_exceptions = ['hills']
+    plural_exceptions = ['hills', 'genius', 'brainless', 'treacherous']
     a_an_exceptions = ['European', 'unit']
     if word[-1] == 's' and (not word in plural_exceptions):
         return('')

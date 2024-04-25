@@ -329,7 +329,7 @@ def manage_lmb_down(clicked_button):
                                     stopping = True
                             if not stopping:
                                 status.displayed_mob.end_turn_destination = target_cell.tile
-                                status.displayed_mob.movement_sound()
+                                status.displayed_mob.movement_sound(allow_fadeout=False)
                                 flags.show_selection_outlines = True
                                 constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately once destination is chosen
                                 status.displayed_mob.remove_from_turn_queue()

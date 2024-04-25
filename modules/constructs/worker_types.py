@@ -156,7 +156,7 @@ class worker_type():
                 else:
                     text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.')
                 market_utility.attempt_slave_recruitment_cost_change('increase')
-                constants.evil_tracker.change(6)
+                constants.evil_tracker.change(5)
                 actor_utility.set_slave_traders_strength(constants.slave_traders_strength + 1)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
@@ -165,7 +165,7 @@ class worker_type():
                 resulting_public_opinion = constants.public_opinion_tracker.get()
                 if not resulting_public_opinion == current_public_opinion:
                     text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.')
-                constants.evil_tracker.change(6)
+                constants.evil_tracker.change(5)
 
     def on_fire(self, wander=False):
         '''

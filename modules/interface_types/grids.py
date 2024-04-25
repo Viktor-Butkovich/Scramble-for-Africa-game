@@ -87,10 +87,9 @@ class grid(interface_elements.interface_element):
         if constants.effect_manager.effect_active('enable_oceans'):
             constants.terrain_list.append('water')
         for i in range(num_worms):
-            self.make_random_terrain_worm(round(area/24), round(area/12), constants.terrain_list)
-        #if constants.effect_manager.effect_active('enable_oceans'):
-        #    for i in range(num_worms // 6): #range(num_worms / 3):
-        #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
+            min_length = round(area / 24)
+            max_length = round(area / 12)
+            self.make_random_terrain_worm(min_length, max_length, constants.terrain_list)
         if not constants.effect_manager.effect_active('enable_oceans'):
             for row in self.cell_list:
                 terrain_variant = random.randrange(0, constants.terrain_variant_dict['ocean_water'])
@@ -99,16 +98,40 @@ class grid(interface_elements.interface_element):
             valid = False
             while not valid:
                 valid = True
-                start_x_list = []
-                for i in range(num_rivers):
-                    start_x_list.append(random.randrange(0, self.coordinate_width))
+                start_x_list = [random.randrange(0, self.coordinate_width) for i in range(num_rivers)]
                 for index in range(len(start_x_list)):
                     for other_index in range(len(start_x_list)):
-                        if index != other_index and abs(start_x_list[index] - start_x_list[other_index]) < 3:
+                        if index != other_index and abs(start_x_list[index] - start_x_list[other_index]) < 3: # Invalid if any rivers too close to each other
                             valid = False
         
             for start_x in start_x_list:
                 self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
+
+        for cell in self.get_flat_cell_list():
+            if cell.terrain == 'none':
+                for neighbor in random.sample(cell.adjacent_list, len(cell.adjacent_list)):
+                    if neighbor.terrain != 'none':
+                        terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(neighbor.terrain, 1)) # Randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                        cell.set_terrain(neighbor.terrain, terrain_variant)
+                if cell.terrain == 'none':
+                    terrain = random.choice(constants.terrain_list)
+                    terrain_variant = random.randrange(0, constants.terrain_variant_dict.get(terrain, 1))
+                    cell.set_terrain(terrain, terrain_variant)
+        self.generate_terrain_features()
+
+    def generate_terrain_features(self):
+        '''
+        Description:
+            Randomly place features in each tile, based on terrain
+        Input:
+            None
+        Output:
+            None
+        '''
+        for terrain_feature_type in status.terrain_feature_types:
+            for cell in self.get_flat_cell_list():
+                if status.terrain_feature_types[terrain_feature_type].allow_place(cell):
+                    cell.terrain_features[terrain_feature_type] = True
 
     def draw(self):
         '''

@@ -14,11 +14,12 @@ import modules.constructs.fonts as fonts
 import modules.constructs.countries as countries
 import modules.constructs.worker_types as worker_types
 import modules.constructs.equipment_types as equipment_types
+import modules.constructs.terrain_feature_types as terrain_feature_types
 import modules.tools.effects as effects
 from modules.tools.data_managers import notification_manager_template, value_tracker_template
 from modules.action_types import public_relations_campaign, religious_campaign, suppress_slave_trade, advertising_campaign, conversion, combat, \
     exploration, construction, upgrade, repair, loan_search, rumor_search, artifact_search, trade, willing_to_trade, slave_capture, \
-    active_investigation, track_beasts, trial
+    active_investigation, track_beasts, trial, canoe_purchase, attack_village
 
 def setup(*args):
     '''
@@ -197,7 +198,7 @@ def worker_types_config():
                                 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
     })
 
-class equipment_types_config():
+def equipment_types_config():
     '''
     Description:
         Defines equipment type templates
@@ -209,9 +210,42 @@ class equipment_types_config():
     equipment_types.equipment_type({
         'equipment_type': 'Maxim gun',
         'requirement': 'is_battalion',
+        'effects': {
+            'positive_modifiers': ['combat', 'attack_village', 'suppress_slave_trade'],
+            'max_movement_points': -1
+        },
         'description': [
             'A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls',
             'Can only be equipped by battalions'
+        ]
+    })
+    equipment_types.equipment_type({
+        'equipment_type': 'canoes',
+        'requirement': ['is_safari', 'can_explore'],
+        'description': [
+            'Canoes allow units to travel through river water for 1 movement point, except for cataracts',
+            'Can only be equipped by expeditions and safaris'
+        ]
+    })
+
+def terrain_feature_types_config():
+    '''
+    Description:
+        Defines terrain feature type templates
+    Input:
+        None
+    Output:
+        None
+    '''
+    terrain_feature_types.terrain_feature_type({
+        'terrain_feature_type': 'cataract',
+        'requirements': {'terrain': 'water', 'min_y': 1},
+        'frequency': (1, 12),
+        'description': [
+            'A cataract, or waterfall, slows most movement through this section of the river',
+            'Canoes can not traverse cataracts, but canoe units can spend their whole turn moving into a cataract in the same way that non-canoe units can enter rivers',
+            'Steamboats can not traverse cataracts, but can circumvent them with a series of adjacent ports',
+            'Other units treat cataracts as usual river water'
         ]
     })
 
@@ -260,9 +294,11 @@ def actions():
     willing_to_trade.willing_to_trade()
     trade.trade()
     slave_capture.slave_capture()
+    attack_village.attack_village()
     active_investigation.active_investigation()
     track_beasts.track_beasts()
     trial.trial()
+    canoe_purchase.canoe_purchase()
 
     for action_type in status.actions:
         if status.actions[action_type].placement_type == 'free':
@@ -386,7 +422,7 @@ def def_countries():
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier')
+    german_country_effect = effects.effect('german_country_modifier', 'combat_plus_modifier')
     status.Germany = countries.country({
         'name': 'Germany',
         'adjective': 'german',
@@ -454,7 +490,7 @@ def def_countries():
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier')
+    italian_country_effect = effects.effect('italian_country_modifier', 'combat_minus_modifier')
     status.Italy = countries.country({
         'name': 'Italy',
         'adjective': 'italian',
@@ -493,7 +529,7 @@ def lore():
     '''
     status.lore_types_effects_dict['zoology'] = effects.effect('zoology_completion_effect', 'hunting_plus_modifier')
     status.lore_types_effects_dict['botany'] = effects.effect('botany_completion_effect', 'health_attrition_plus_modifier')
-    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'attack_plus_modifier')
+    status.lore_types_effects_dict['archaeology'] = effects.effect('archaeology_completion_effect', 'combat_plus_modifier')
     status.lore_types_effects_dict['anthropology'] = effects.effect('anthropology_completion_effect', 'conversion_plus_modifier')
     status.lore_types_effects_dict['paleontology'] = effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier')
     status.lore_types_effects_dict['theology'] = effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier')
@@ -614,7 +650,7 @@ def buttons():
         'coordinates': scaling.scale_coordinates(constants.default_display_width - 50, constants.default_display_height),
         'width': 10,
         'height': 10,
-        'modes': ['strategic', 'europe', 'ministers'],
+        'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'init_type': 'ordered collection',
         'member_config': {'order_exempt': True},
         'separation': 5
@@ -624,7 +660,7 @@ def buttons():
         'coordinates': scaling.scale_coordinates(0, constants.default_display_height - 50),
         'width': 10,
         'height': 10,
-        'modes': ['strategic', 'europe', 'ministers'],
+        'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'init_type': 'ordered collection',
         'member_config': {'order_exempt': True},
         'separation': 5,
@@ -644,6 +680,7 @@ def buttons():
     input_dict['modes'] = ['new_game_setup']
     input_dict['keybind_id'] = pygame.K_ESCAPE
     new_game_setup_to_main_menu_button = constants.actor_creation_manager.create_interface_element(input_dict)
+    lhs_menu_collection.add_member(new_game_setup_to_main_menu_button)
 
     input_dict['coordinates'] = scaling.scale_coordinates(0, constants.default_display_height - 50)
     input_dict['modes'] = ['strategic', 'europe']
@@ -1185,8 +1222,6 @@ def mob_interface():
         'member_config': {'order_exempt': True}
     })
 
-
-
     #mob info labels setup
     mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew',
                                'passengers', 'current passenger'] #order of mob info display labels
@@ -1207,7 +1242,7 @@ def mob_interface():
             'parent_collection': status.mob_info_display,
             'member_config': {'order_x_offset': x_displacement}
         }
-        if not current_actor_label_type == 'current passenger':
+        if current_actor_label_type != 'current passenger':
             input_dict['init_type'] = 'actor display label'
             constants.actor_creation_manager.create_interface_element(input_dict)
         else:
@@ -1312,17 +1347,17 @@ def tile_interface():
 
     #tile info labels setup
     tile_info_display_labels = [
-        'coordinates', 'terrain', 'resource', 'village', 'native population', 'native available workers', 'native aggressiveness', 'slave_traders_strength'
+        'coordinates', 'terrain', 'terrain features', 'resource', 'village', 'native population', 'native available workers', 'native aggressiveness', 'slave_traders_strength'
     ]
     for current_actor_label_type in tile_info_display_labels:
-        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
+        if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness', 'terrain features']:
             x_displacement = 25
         else:
             x_displacement = 0
         input_dict = {
             'minimum_width': scaling.scale_width(10),
             'height': scaling.scale_height(30),
-            'image_id': 'misc/default_label.png', #'misc/underline.png',
+            'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
             'parent_collection': status.tile_info_display,
@@ -1332,9 +1367,15 @@ def tile_interface():
         if current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = current_actor_label_type + ' label'
             constants.actor_creation_manager.create_interface_element(input_dict)
+        elif current_actor_label_type == 'terrain features':
+            input_dict['init_type'] = 'terrain feature label'
+            for terrain_feature_type in status.terrain_feature_types:
+                input_dict['terrain_feature_type'] = terrain_feature_type
+                constants.actor_creation_manager.create_interface_element(input_dict)
         else:
             input_dict['init_type'] = 'actor display label'
             constants.actor_creation_manager.create_interface_element(input_dict)
+
 
     tab_collection_relative_coordinates = (450, -30)
 
@@ -1605,10 +1646,10 @@ def settlement_interface():
     })
     settlement_info_display_labels = [
         'settlement', 'port', 'train_station', 'resource building', 'building efficiency', 'building work crews',
-            'current building work crew', 'fort', 'slums', 'trading_post', 'mission'
+            'current building work crew', 'fort', 'slums', 'trading_post', 'mission', 'infrastructure'
     ]
     for current_actor_label_type in settlement_info_display_labels:
-        if current_actor_label_type in ['settlement', 'trading_post', 'mission']:
+        if current_actor_label_type in ['settlement', 'trading_post', 'mission', 'infrastructure']: # Left align any top-level buildings
             x_displacement = 0
         elif current_actor_label_type == 'current building work crew':
             x_displacement = 75
@@ -1870,6 +1911,7 @@ def minister_interface():
     #minister info images setup
 
     input_dict = {
+        'coordinates': scaling.scale_coordinates(0, 0),
         'minimum_width': scaling.scale_width(10),
         'height': scaling.scale_height(30),
         'image_id': 'misc/default_label.png',
@@ -1877,11 +1919,17 @@ def minister_interface():
         'init_type': 'actor display label',
         'parent_collection': status.minister_info_display
     }
+
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability', 'evidence']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability'] + \
+        constants.skill_types + \
+        ['evidence']
     for current_actor_label_type in minister_info_display_labels:
-        x_displacement = 0
-        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y)
+        if current_actor_label_type in constants.skill_types:
+            x_displacement = 25
+        else:
+            x_displacement = 0
+        input_dict['member_config'] = {'order_x_offset': x_displacement}
         input_dict['actor_label_type'] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict)
     #minister info labels setup

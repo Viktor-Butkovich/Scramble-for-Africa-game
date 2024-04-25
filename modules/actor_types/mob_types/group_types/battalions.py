@@ -149,7 +149,6 @@ class safari(battalion):
         super().__init__(from_save, input_dict)    
         self.is_battalion = False
         self.is_safari = True
-        self.set_has_canoes(True)
         self.battalion_type = 'none'
         self.set_group_type('safari')
         if not from_save:

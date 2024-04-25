@@ -35,10 +35,8 @@ class building(actor):
         self.damaged = False
         super().__init__(from_save, input_dict)
         self.default_inventory_capacity = 0
-        no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
-        self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
-        if input_dict['building_type'] == 'warehouses':
-            self.image_dict['damaged'] = self.image_dict['default']
+        self.image_id = input_dict['image']
+        self.image_dict = {'default': input_dict['image']}
         self.cell = self.grids[0].find_cell(self.x, self.y)
         status.building_list.append(self)
         self.set_name(input_dict['name'])
@@ -82,8 +80,8 @@ class building(actor):
         '''
         save_dict = super().to_save_dict()
         save_dict['building_type'] = self.building_type
-        save_dict['contained_work_crews'] = [] #list of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
-        save_dict['image'] = self.image_dict['intact']
+        save_dict['contained_work_crews'] = [] # List of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
+        save_dict['image'] = self.image_dict['default']
         save_dict['damaged'] = self.damaged
         for current_work_crew in self.contained_work_crews:
             save_dict['contained_work_crews'].append(current_work_crew.to_save_dict())
@@ -288,11 +286,52 @@ class building(actor):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list(override_values)
-        if self.damaged:
-            image_id_list.remove(self.image_dict['default'])
-            image_id_list.append(self.image_dict['damaged'])
-        return(image_id_list)
+        image_id = {'image_id': self.image_dict['default']}
+        relative_coordinates = {
+            'fort': (-1, 1),
+            'trading_post': (0, 1),
+            'mission': (1, 1),
+            'train_station': (0, -1),
+            'port': (1, -1)
+        }.get(self.building_type, (0, 0))
+        if relative_coordinates == (0, 0):
+            modifiers = {}
+        else: # If not centered, make smaller and move to one of 6 top/bottom slots
+            modifiers =  {'size': 0.75 * 0.45, 'x_offset': relative_coordinates[0] * 0.33, 'y_offset': relative_coordinates[1] * 0.33}
+        image_id.update(modifiers)
+        return_list = [image_id]
+        if self.building_type == 'resource':
+            return_list[0]['green_screen'] = constants.quality_colors[self.efficiency] # Set box to quality color based on efficiency
+            return_list[0]['size'] = 0.6
+            return_list[0]['level'] = image_id.get('level', 0) + 1
+            for scale in range(1, self.scale + 1):
+                scale_coordinates = { # Place mine/camp/plantation icons in following order for each scale
+                    1: (0, 1), # top center
+                    2: (-1, -1), # bottom left
+                    3: (1, -1), # bottom right
+                    4: (0, -1), # bottom center
+                    5: (-1, 1), # top left
+                    6: (1, 1) # top right
+                }
+                if scale > len(self.contained_work_crews):
+                    resource_image_id = 'buildings/' + constants.resource_building_dict[self.resource_type] + '_no_work_crew.png'
+                else:
+                    resource_image_id = 'buildings/' + constants.resource_building_dict[self.resource_type] + '.png'
+                return_list.append({
+                    'image_id': resource_image_id,
+                    'size': return_list[0]['size'],
+                    'level': return_list[0]['level'],
+                    'x_offset': 0.12 * scale_coordinates[scale][0],
+                    'y_offset': -0.07 + 0.07 * scale_coordinates[scale][1]
+                })
+                
+        if self.building_type == 'train_station':
+            return_list.append({'image_id': 'buildings/infrastructure/down_railroad.png'})
+        if self.damaged and self.building_type != 'warehouses':
+            damaged_id = {'image_id': 'buildings/damaged.png', 'level': 3}
+            damaged_id.update(modifiers)
+            return_list.append(damaged_id)
+        return(return_list)
 
 class infrastructure_building(building):
     '''
@@ -408,6 +447,7 @@ class infrastructure_building(building):
         '''
         image_id_list = super().get_image_id_list(override_values)
         if self.cell.terrain != 'water':
+            connected_road, connected_railroad = (False, False)
             for direction in ['up', 'down', 'left', 'right']:
                 adjacent_cell = self.cell.adjacent_cells[direction]
                 if adjacent_cell:
@@ -416,12 +456,21 @@ class infrastructure_building(building):
                     if adjacent_cell_infrastructure != 'none':
                         if adjacent_cell_infrastructure.is_railroad and own_tile_infrastructure.is_railroad:
                             image_id_list.append(self.connection_image_dict[direction + '_railroad'])
-                            if self.image_dict['default'] in image_id_list:
-                                image_id_list.remove(self.image_dict['default'])
                         else:
                             image_id_list.append(self.connection_image_dict[direction + '_road'])
-                            if own_tile_infrastructure.is_road and self.image_dict['default'] in image_id_list:
-                                image_id_list.remove(self.image_dict['default'])
+                        if adjacent_cell_infrastructure.is_road:
+                            connected_road = True
+                        elif adjacent_cell_infrastructure.is_railroad:
+                            connected_railroad = True
+            if self.is_road and (connected_road or connected_railroad):
+                image_id_list.pop(0)
+            elif self.is_railroad and connected_railroad:
+                image_id_list.pop(0)
+        for index, current_image in enumerate(image_id_list):
+            if type(current_image) == str:
+                image_id_list[index] = {'image_id': current_image, 'level': -1}
+            else:
+                current_image['level'] = -1
         return(image_id_list)
 
 class trading_post(building):
@@ -665,17 +714,12 @@ class resource_building(building):
         '''
         self.resource_type = input_dict['resource_type']
         input_dict['building_type'] = 'resource'
-        self.scale = 1
-        self.efficiency = 1
-        self.num_upgrades = 0
+        self.scale = input_dict.get('scale', 1)
+        self.efficiency = input_dict.get('efficiency', 1)
+        self.num_upgrades = self.scale + self.efficiency - 2
         self.ejected_work_crews = []
         super().__init__(from_save, input_dict)
         status.resource_building_list.append(self)
-        if from_save:
-            while self.scale < input_dict['scale']:
-                self.upgrade('scale')
-            while self.efficiency < input_dict['efficiency']:
-                self.upgrade('efficiency')
 
     def to_save_dict(self):
         '''
@@ -820,7 +864,10 @@ class resource_building(building):
         Output:
             None
         '''
-        return(constants.base_upgrade_price * (2 ** self.num_upgrades)) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
+        if constants.effect_manager.effect_active('free_upgrades'):
+            return(0)
+        else:
+            return(constants.base_upgrade_price * (2 ** self.num_upgrades)) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 
     def get_build_cost(self):
         '''
@@ -899,14 +946,14 @@ class slums(building):
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
         image_id_list = super().get_image_id_list(override_values)
-        image_id_list.remove(self.image_dict['default'])
         if self.available_workers <= 2:
-            image_id = self.size_image_dict['small']
+            image_id_list[0]['image_id'] = self.size_image_dict['small']
         elif self.available_workers <= 5:
-            image_id = self.size_image_dict['medium']
+            image_id_list[0]['image_id'] = self.size_image_dict['medium']
         else:
-            image_id = self.size_image_dict['large']
-        image_id_list.append({'image_id': image_id, 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -1})
+            image_id_list[0]['image_id'] = self.size_image_dict['large']
+        for current_image_id in image_id_list:
+            current_image_id.update({'level': -2})
         return(image_id_list)
 
     def can_damage(self):

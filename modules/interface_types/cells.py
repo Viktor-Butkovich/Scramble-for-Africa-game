@@ -2,6 +2,7 @@
 
 import pygame
 import random
+from typing import Dict
 from ..util import actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -25,33 +26,33 @@ class cell():
         Output:
             None
         '''
-        self.move_priority = 99
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+        self.x: int = x
+        self.y: int = y
+        self.width: int = width
+        self.height: int = height
         self.grid = grid
-        self.color = color
+        self.color: tuple[int, int, int] = color
         self.pixel_x, self.pixel_y = self.grid.convert_coordinates((self.x, self.y))
-        self.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height) #(left, top, width, height)
-        self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
+        self.Rect: pygame.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height) #(left, top, width, height)
+        self.corners = [(self.Rect.left, self.Rect.top), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
         self.grid.cell_list[x][y] = self
         self.tile = 'none'
         self.resource = 'none'
         self.village = 'none'
         self.settlement = None
         self.terrain = 'none'
-        self.terrain_variant = 0
-        self.set_terrain('savannah')
-        self.contained_mobs = []
+        self.terrain_features: Dict[str, bool] = {}
+        self.terrain_variant: int = 0
+        self.contained_mobs: list = []
         self.reset_buildings()
-        self.adjacent_cells = {'up': None, 'down': None, 'right': None, 'left': None}        
+        self.adjacent_cells: Dict[str, cell] = {'up': None, 'down': None, 'right': None, 'left': None}        
         if save_dict != 'none': #if from save
-            self.save_dict = save_dict
+            self.save_dict: dict = save_dict
             if constants.effect_manager.effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
             self.terrain_variant = save_dict['terrain_variant']
+            self.terrain_features = save_dict['terrain_features']
         else: #if creating new map
             self.set_visibility(constants.effect_manager.effect_active('remove_fog_of_war'))
             
@@ -67,6 +68,7 @@ class cell():
                 'visible': boolean value - Whether this cell is visible or not
                 'terrain': string value - Terrain type of this cell and its tile, like 'swamp'
                 'terrain_variant': int value - Variant number to use for image file path, like mountain_0
+                'terrain feature': string/boolean dictionary value - Dictionary containing a True entry for each terrain feature type in this cell
                 'resource': string value - Resource type of this cell and its tile, like 'exotic wood'
                 'inventory': string/string dictionary value - Version of the inventory dictionary of this cell's tile only containing commodity types with 1+ units held
                 'village_name': Only saved if resource is natives, name of this cell's village
@@ -79,6 +81,7 @@ class cell():
         save_dict['visible'] = self.visible
         save_dict['terrain'] = self.terrain
         save_dict['terrain_variant'] = self.terrain_variant
+        save_dict['terrain_features'] = self.terrain_features
         save_dict['resource'] = self.resource
         save_dict['inventory'] = self.tile.inventory
         
@@ -701,6 +704,7 @@ class cell():
         self.village = other_cell.village
         self.set_visibility(other_cell.visible, update_image_bundle=False)
         self.set_terrain(other_cell.terrain, other_cell.terrain_variant, update_image_bundle=False)
+        self.terrain_features = other_cell.terrain_features
         self.set_resource(other_cell.resource, update_image_bundle=False)
         #self.tile.update_image_bundle(override_image=other_cell.tile.image) #correctly copies other cell's image bundle but ends up very pixellated due to size difference
         self.tile.update_image_bundle()

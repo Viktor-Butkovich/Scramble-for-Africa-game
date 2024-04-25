@@ -132,9 +132,10 @@ class actor():
             status.displayed_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
             self.set_inventory(current_commodity, 0)
         if self.actor_type == 'mob' and self.is_pmob:
-            for current_equipment in self.equipment:
+            for current_equipment in self.equipment.copy():
                 if self.equipment[current_equipment]:
                     status.displayed_tile.change_inventory(current_equipment, 1)
+                    status.equipment_types[current_equipment].unequip(self)
             self.equipment = {}
 
     def get_inventory_remaining(self, possible_amount_added = 0):
@@ -250,7 +251,7 @@ class actor():
             None
         '''
         if self.get_inventory_used() > 0:
-            if random.randrange(1, 7) <= 1 or constants.effect_manager.effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
+            if random.randrange(1, 7) <= 2 or constants.effect_manager.effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
                 transportation_minister = status.current_ministers[constants.type_minister_dict['transportation']]
                 if self.actor_type == 'tile':
                     current_cell = self.cell
@@ -259,7 +260,6 @@ class actor():
                         current_cell = self.images[0].current_cell
                     else:
                         return() #only surface-level mobs can have inventories and need to roll for attrition
-
                 if (random.randrange(1, 7) <= 2 and transportation_minister.check_corruption()): #1/18 chance of corruption check to take commodities - 1/36 chance for most corrupt to steal
                     self.trigger_inventory_attrition(transportation_minister, True)
                     return()

@@ -267,7 +267,7 @@ def manage_public_opinion():
     elif current_public_opinion > 50:
         constants.public_opinion_tracker.change(-1)
         text_utility.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1))
-    constants.evil_tracker.change(-1)
+    constants.evil_tracker.change(-2)
     if constants.effect_manager.effect_active('show_evil'):
         print('Evil number: ' + str(constants.evil))
     if constants.effect_manager.effect_active('show_fear'):
@@ -504,7 +504,7 @@ def manage_villages(verbose: bool = True):
         if random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6:
             previous_population = current_village.population
             current_village.change_population(1)
-            if previous_population <= 0 and current_village.cell.visible:
+            if previous_population <= 0 and current_village.cell.visible and constants.current_game_mode in current_village.cell.grid.modes:
                 text = 'The previously abandonded village of ' + current_village.name + ' at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') is now being re-settled. /n /n'
                 constants.notification_manager.display_notification({
                     'message': text,
@@ -614,7 +614,7 @@ def manage_ministers():
             current_minister.appoint('none')
         current_minister.remove()
 
-    if (len(status.minister_list) <= constants.minister_limit - 2 and random.randrange(1, 7) == 1) or len(status.minister_list) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
+    if (len(status.minister_list) <= constants.minister_limit - 2 and random.randrange(1, 7) >= 4) or len(status.minister_list) <= 10: # Chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(status.minister_list) < constants.minister_limit:
             constants.actor_creation_manager.create_minister(False, {})
         constants.notification_manager.display_notification({

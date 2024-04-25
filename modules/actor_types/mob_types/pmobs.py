@@ -46,7 +46,10 @@ class pmob(mob):
         status.pmob_list.append(self)
         self.is_pmob = True
         self.set_controlling_minister_type('none')
-        self.equipment = input_dict.get('equipment', {})
+        self.equipment = {}
+        for current_equipment in input_dict.get('equipment', {}):
+            if input_dict.get('equipment', {}).get(current_equipment, False):
+                status.equipment_types[current_equipment].equip(self)
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
@@ -333,6 +336,9 @@ class pmob(mob):
             None
         '''
         old_value = self.sentry_mode
+        if self.is_group:
+            self.officer.set_sentry_mode(new_value)
+            self.worker.set_sentry_mode(new_value)
         if not old_value == new_value:
             self.sentry_mode = new_value
             self.update_image_bundle()
@@ -341,7 +347,7 @@ class pmob(mob):
                 if status.displayed_mob == self:
                     actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates actor info display with sentry icon
             else:
-                if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
+                if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none') and not (self.in_vehicle or self.in_group or self.in_building):
                     self.add_to_turn_queue()
             if self == status.displayed_mob:
                 actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
@@ -417,7 +423,7 @@ class pmob(mob):
         Output:
             None
         '''
-        constants.evil_tracker.change(3)
+        constants.evil_tracker.change(1)
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
                 text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
@@ -609,7 +615,7 @@ class pmob(mob):
                         future_cell = self.grid.find_cell(future_x, future_y)
                         if future_cell.visible or self.can_explore:
                             destination_type = 'land'
-                            if future_cell.terrain == 'water':
+                            if future_cell.terrain == 'water' and not (future_cell.terrain_features.get('cataract', False) and not self.can_walk):
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                             passed = False
                             if destination_type == 'land':

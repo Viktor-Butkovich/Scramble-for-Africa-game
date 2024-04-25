@@ -47,6 +47,7 @@ class native_warriors(npmob):
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
             self.second_image_variant = random.randrange(0, len(self.image_variants))
         self.set_has_canoes(True)
+        self.update_canoes()
 
     def attack_on_spawn(self):
         '''

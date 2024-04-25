@@ -25,6 +25,11 @@ class village():
             None
         '''
         self.attached_warriors = []
+        self.cell = input_dict['cell']
+        self.x = self.cell.x
+        self.y = self.cell.y
+        self.tiles = [] #added in set_resource for tiles
+
         if not from_save:
             self.set_initial_population()
             self.set_initial_aggressiveness()
@@ -42,10 +47,7 @@ class village():
                 constants.actor_creation_manager.create(True, current_save_dict)
         if constants.effect_manager.effect_active('infinite_village_workers'):
             self.available_workers = self.population
-        self.cell = input_dict['cell']
-        self.x = self.cell.x
-        self.y = self.cell.y
-        self.tiles = [] #added in set_resource for tiles
+
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
             status.village_list.append(self) #have more permanent fix later
             if not self.cell.settlement:
@@ -195,10 +197,7 @@ class village():
                 self.aggressiveness += 1
                 if roll == 6:
                     remaining_rolls += 1
-            if self.aggressiveness < 1:
-                self.set_aggressiveness(1)
-            elif self.aggressiveness > 9:
-                self.set_aggressiveness(9)
+            self.set_aggressiveness(self.aggressiveness)
 
     def set_aggressiveness(self, new_aggressiveness):
         '''
@@ -209,12 +208,11 @@ class village():
         Output:
             None
         '''
-        
-        if new_aggressiveness > 9:
-            new_aggressiveness = 0
-        elif new_aggressiveness < 1:
-            new_aggressiveness = 1
-        self.aggressiveness = new_aggressiveness
+        self.aggressiveness = min(max(new_aggressiveness, 1), 9)
+        if self.tiles:
+            self.tiles[0].update_image_bundle()
+        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed aggressiveness value
+            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
 
     def get_tooltip(self):
         '''
@@ -338,11 +336,4 @@ class village():
         Output:
             None
         '''
-        self.aggressiveness += change
-        if self.aggressiveness > 9:
-            self.set_aggressiveness(9)
-        elif self.aggressiveness < 1:
-            self.set_aggressiveness(1)
-        self.tiles[0].update_image_bundle()
-        if self.cell.tile == status.displayed_tile: #if being displayed, change displayed aggressiveness value
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, self.cell.tile)
+        self.set_aggressiveness(self.aggressiveness + change)

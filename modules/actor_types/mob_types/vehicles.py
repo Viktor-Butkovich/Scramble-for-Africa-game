@@ -173,7 +173,7 @@ class vehicle(pmob):
         Output:
             None
         '''
-        constants.evil_tracker.change(3)
+        constants.evil_tracker.change(1)
         text = 'The ' + crew.name + ' crewing the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
         if crew.automatically_replace:
             text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found. /n /n'
@@ -344,7 +344,7 @@ class vehicle(pmob):
         else:
             if can_print:
                 text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.')
-            return(False)
+        return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

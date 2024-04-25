@@ -99,13 +99,13 @@ class country:
             return('Bonus for construction')
         elif self.country_effect.effect_type == 'conversion_plus_modifier':
             return('Bonus when converting natives')
-        elif self.country_effect.effect_type == 'attack_plus_modifier':
+        elif self.country_effect.effect_type == 'combat_plus_modifier':
             return('Bonus when attacking natives')
         elif self.country_effect.effect_type == 'slave_capture_plus_modifier':
             return('Bonus when capturing slaves')
         elif self.country_effect.effect_type == 'no_slave_trade_penalty':
             return('No slave trade penalty')
-        elif self.country_effect.effect_type == 'attack_minus_modifier':
+        elif self.country_effect.effect_type == 'combat_minus_modifier':
             return('Penalty when attacking natives')
 
 
