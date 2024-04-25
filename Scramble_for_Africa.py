@@ -26,7 +26,6 @@ except Exception: #displays error message and records error message in crash log
 #
 #   new SFA features:
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
-# Add cataract image
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 # Add cosmetic flag to minister screen
