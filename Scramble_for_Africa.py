@@ -28,11 +28,12 @@ except Exception: #displays error message and records error message in crash log
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
+#   Especially for Maxim gun
 # Add cosmetic flag to minister screen
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
-# Add river sources, with bonuses for discovery
+# Add discovery bonuses to river sources
 # Add cannibals
 # Add lore mission trophy screen/notification
 # Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads

@@ -249,6 +249,25 @@ def terrain_feature_types_config():
         ]
     })
 
+    terrain_feature_types.terrain_feature_type({
+        'terrain_feature_type': 'river mouth',
+        'image_id': 'misc/empty.png',
+        'description': [
+            'This river will lead inland for some distance, eventually stopping at its source',
+            'Rivers are much easier to explore - an expedition on a river automatically explores all adjacent tiles',
+            'Discovering the source of a river is much sought after, and will result in rewards from your country\'s Geographical Society'
+        ]
+    })
+
+    terrain_feature_types.terrain_feature_type({
+        'terrain_feature_type': 'river source',
+        'image_id': 'misc/empty.png',
+        'description': [
+            'This is a river\'s point of origin, which has been sought after by explorers for hundreds of years',
+            'Your country\'s Geographical Sociey will grant rewards for any river sources discovered'
+        ]
+    })
+
 def terrains():
     '''
     Description:

@@ -6,7 +6,7 @@ import itertools
 import json
 from typing import Dict
 from . import cells, interface_elements
-from ..util import actor_utility, utility, scaling
+from ..util import actor_utility, utility, scaling, village_name_generator
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -131,7 +131,7 @@ class grid(interface_elements.interface_element):
         for terrain_feature_type in status.terrain_feature_types:
             for cell in self.get_flat_cell_list():
                 if status.terrain_feature_types[terrain_feature_type].allow_place(cell):
-                    cell.terrain_features[terrain_feature_type] = True
+                    cell.terrain_features[terrain_feature_type] = {'feature_type': terrain_feature_type}
 
     def draw(self):
         '''
@@ -447,18 +447,22 @@ class grid(interface_elements.interface_element):
             water_type = 'ocean_water'
         else:
             water_type = 'river_water'
-        #self.find_cell(current_x, current_y).set_terrain(terrain)
         terrain_variant = random.randrange(0, constants.terrain_variant_dict[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
         self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
-        #self.find_cell(current_x, current_y).set_terrain(terrain)
-        counter = 0        
-        while not counter == worm_length:           
+        river_name = village_name_generator.create_village_name()
+        river_mouth = None
+        last_cell = None
+        counter = 0
+        while counter < worm_length:
             counter = counter + 1
             direction = random.randrange(1, 7) #1 3 5 6 north, 2 east, 4 west
             if direction == 1 or direction == 5 or direction == 6:
                 direction = 3 #turns extras and south to north
             if not (((current_x == self.coordinate_width - 1) and direction == 2) or ((current_x == 0) and direction == 4) or ((current_y == self.coordinate_height - 1) and direction == 3) or ((current_y == 0) and direction == 1)):
                 if direction == 3:
+                    if current_y == 1 and not river_mouth:
+                        river_mouth = self.find_cell(current_x, current_y)
+                        river_mouth.terrain_features['river mouth'] = {'feature_type': 'river mouth', 'image_id': river_name + ' River'} 
                     current_y = current_y + 1
                 elif direction == 2:
                     current_x = current_x + 1
@@ -469,9 +473,11 @@ class grid(interface_elements.interface_element):
                     water_type = 'ocean_water'
                 else:
                     water_type = 'river_water'
-                #self.find_cell(current_x, current_y).set_terrain(terrain)
                 terrain_variant = random.randrange(0, constants.terrain_variant_dict[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
-                self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
+                last_cell = self.find_cell(current_x, current_y)
+                last_cell.set_terrain(terrain, terrain_variant)
+        if last_cell:
+            last_cell.terrain_features['river source'] = {'feature_type': 'river mouth', 'image_id': 'Source of ' + river_name} 
 
     def touching_mouse(self):
         '''
