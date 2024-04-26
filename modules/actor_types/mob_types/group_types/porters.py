@@ -1,16 +1,18 @@
-#Contains functionality for porters
+# Contains functionality for porters
 
 from ..groups import group
 from ....util import actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
+
 class porters(group):
-    '''
+    """
     A group with a driver officer that can hold commodities
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -31,21 +33,21 @@ class porters(group):
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
         Output:
             None
-        '''
+        """
         super().__init__(from_save, input_dict)
-        self.number = 2 #porters is plural
+        self.number = 2  # porters is plural
         self.set_inventory_capacity(9)
-        self.set_group_type('porters')
+        self.set_group_type("porters")
 
     def promote(self):
-        '''
+        """
         Description:
-            Promotes this group's officer to a veteran after performing various actions particularly well, improving the capabilities of groups the officer is attached to in the future. 
+            Promotes this group's officer to a veteran after performing various actions particularly well, improving the capabilities of groups the officer is attached to in the future.
                 Creates a veteran star icon that follows this group and its officer. Also increases the current and maximum movement points of this unit
         Input:
             None
         Output:
             None
-        '''
+        """
         self.set_max_movement_points(6, initial_setup=False)
         super().promote()

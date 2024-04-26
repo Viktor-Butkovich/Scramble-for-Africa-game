@@ -1,4 +1,4 @@
-#Contains functionality for expeditions
+# Contains functionality for expeditions
 
 import random
 from ..groups import group
@@ -7,12 +7,14 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
+
 class expedition(group):
-    '''
+    """
     A group with an explorer officer that is able to explore and move on water
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -34,14 +36,14 @@ class expedition(group):
                 'canoes_image': string value - File path to the image used by this object when it is in a river
         Output:
             None
-        '''
+        """
         super().__init__(from_save, input_dict)
         self.can_explore = True
-        self.set_group_type('expedition')
+        self.set_group_type("expedition")
         self.resolve_off_tile_exploration()
 
     def move(self, x_change, y_change):
-        '''
+        """
         Description:
             Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship. Also allows exploration when moving into unexplored areas. Attempting an exploration starts the
                 exploration process, which requires various dice rolls to succeed and can also result in the death of the expedition or the promotion of its explorer. A successful exploration uncovers the area and units to move into it
@@ -51,111 +53,167 @@ class expedition(group):
             int y_change: How many cells are moved upward in the movement
         Output:
             None
-        '''
+        """
         flags.show_selection_outlines = True
         flags.show_minimap_outlines = True
         constants.last_selection_outline_switch = constants.current_time
-        
+
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0
         if x_change > 0:
-            direction = 'east'
+            direction = "east"
         elif x_change < 0:
-            direction = 'west'
+            direction = "west"
         elif y_change > 0:
-            direction = 'north'
+            direction = "north"
         elif y_change < 0:
-            direction = 'south'
+            direction = "south"
         else:
-            direction = 'none'
+            direction = "none"
         future_cell = self.grid.find_cell(future_x, future_y)
-        if future_cell.visible == False: #if moving to unexplored area, try to explore it
-            status.actions['exploration'].on_click(self, on_click_info_dict={'x_change': x_change, 'y_change': y_change, 'direction': direction})
-        else: #if moving to explored area, move normally
+        if (
+            future_cell.visible == False
+        ):  # if moving to unexplored area, try to explore it
+            status.actions["exploration"].on_click(
+                self,
+                on_click_info_dict={
+                    "x_change": x_change,
+                    "y_change": y_change,
+                    "direction": direction,
+                },
+            )
+        else:  # if moving to explored area, move normally
             super().move(x_change, y_change)
 
     def calibrate_sub_mob_positions(self):
-        '''
+        """
         Description:
             Updates the positions of this mob's submobs (mobs inside of a building or other mob that are not able to be independently viewed or selected) to match this mob
         Input:
             None
         Output:
             None
-        '''
+        """
         super().calibrate_sub_mob_positions()
         self.resolve_off_tile_exploration()
 
     def disembark_vehicle(self, vehicle):
-        '''
+        """
         Description:
             Shows this mob and disembarks it from the inputted vehicle after being a passenger. Also automatically explores nearby tiles when applicable, as if this expedition had moved
         Input:
             vehicle vehicle: vehicle that this mob disembarks from
         Output:
             None
-        '''
+        """
         super().disembark_vehicle(vehicle)
         self.resolve_off_tile_exploration()
 
     def resolve_off_tile_exploration(self):
-        '''
+        """
         Description:
             Whenever an expedition arrives in a tile for any reason, they automatically discover any adjacent water tiles. Additionally, when standing on water, they automatically discover all adjacent tiles
         Input:
             None
         Output:
             None
-        '''
-        self.current_action_type = 'exploration' #used in action notification to tell whether off tile notification should explore tile or not
-        cardinal_directions = {'up': 'north', 'down': 'south', 'right': 'east', 'left': 'west'}
+        """
+        self.current_action_type = "exploration"  # used in action notification to tell whether off tile notification should explore tile or not
+        cardinal_directions = {
+            "up": "north",
+            "down": "south",
+            "right": "east",
+            "left": "west",
+        }
         if self.in_vehicle:
             current_cell = self.vehicle.images[0].current_cell
         else:
             current_cell = self.images[0].current_cell
         promoted = self.veteran
-        for current_direction in ['up', 'down', 'left', 'right']:
+        for current_direction in ["up", "down", "left", "right"]:
             target_cell = current_cell.adjacent_cells[current_direction]
             if target_cell and not target_cell.visible:
-                if current_cell.terrain == 'water' or target_cell.terrain == 'water': #if on water, discover all adjacent undiscovered tiles. Also, discover all adjacent water tiles, regardless of if currently on water
-                    if current_cell.terrain == 'water':
-                        text = 'From the water, the expedition has discovered a '
-                    elif target_cell.terrain == 'water':
-                        text = 'The expedition has discovered a '
+                if (
+                    current_cell.terrain == "water" or target_cell.terrain == "water"
+                ):  # if on water, discover all adjacent undiscovered tiles. Also, discover all adjacent water tiles, regardless of if currently on water
+                    if current_cell.terrain == "water":
+                        text = "From the water, the expedition has discovered a "
+                    elif target_cell.terrain == "water":
+                        text = "The expedition has discovered a "
                     public_opinion_increase = random.randrange(0, 3)
                     money_increase = 0
-                    if not target_cell.resource == 'none':
-                        if target_cell.resource == 'natives':
-                            text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + ' that contains the village of ' + target_cell.village.name + '. /n /n'
+                    if not target_cell.resource == "none":
+                        if target_cell.resource == "natives":
+                            text += (
+                                target_cell.terrain.upper()
+                                + " tile to the "
+                                + cardinal_directions[current_direction]
+                                + " that contains the village of "
+                                + target_cell.village.name
+                                + ". /n /n"
+                            )
                         else:
-                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource (currently worth ' + str(constants.item_prices[target_cell.resource]) + ' money each) to the ' + cardinal_directions[current_direction] + '. /n /n'
+                            text += (
+                                target_cell.terrain.upper()
+                                + " tile with a "
+                                + target_cell.resource.upper()
+                                + " resource (currently worth "
+                                + str(constants.item_prices[target_cell.resource])
+                                + " money each) to the "
+                                + cardinal_directions[current_direction]
+                                + ". /n /n"
+                            )
                         public_opinion_increase += 3
                     else:
-                        text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
+                        text += (
+                            target_cell.terrain.upper()
+                            + " tile to the "
+                            + cardinal_directions[current_direction]
+                            + ". /n /n"
+                        )
 
-                    if target_cell.terrain_features.get('river source', False):
+                    if target_cell.terrain_features.get("river source", False):
                         money_increase = random.randrange(40, 61)
-                        text += 'This is the source of the ' + target_cell.terrain_features['river source']['river_name'] + ' river, which has been long sought after by explorers - you are granted a reward of ' + str(money_increase) + ' money for this discovery. /n /n'
+                        text += (
+                            "This is the source of the "
+                            + target_cell.terrain_features["river source"]["river_name"]
+                            + " river, which has been long sought after by explorers - you are granted a reward of "
+                            + str(money_increase)
+                            + " money for this discovery. /n /n"
+                        )
                         public_opinion_increase += random.randrange(10, 31)
 
-                    if public_opinion_increase > 0: #Royal/National/Imperial
-                        text += 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
+                    if public_opinion_increase > 0:  # Royal/National/Imperial
+                        text += (
+                            "The "
+                            + status.current_country.government_type_adjective.capitalize()
+                            + " Geographical Society is pleased with these findings, increasing your public opinion by "
+                            + str(public_opinion_increase)
+                            + ". /n /n"
+                        )
                     on_reveal, audio = (None, None)
-                    if (not promoted) and random.randrange(1, 7) == 6 and self.controlling_minister.no_corruption_roll() == 6:
-                        text += 'The explorer is now a veteran and will be more successful in future ventures. /n /n'
+                    if (
+                        (not promoted)
+                        and random.randrange(1, 7) == 6
+                        and self.controlling_minister.no_corruption_roll() == 6
+                    ):
+                        text += "The explorer is now a veteran and will be more successful in future ventures. /n /n"
                         on_reveal = self.promote
-                        audio = 'effects/trumpet'
+                        audio = "effects/trumpet"
                         promoted = True
-                    constants.notification_manager.display_notification({
-                        'message': text + 'Click to remove this notification. /n /n',
-                        'notification_type': 'off_tile_exploration',
-                        'on_reveal': on_reveal,
-                        'audio': audio,
-                        'extra_parameters': {
-                            'cell': target_cell,
-                            'reveal_cell': True,
-                            'public_opinion_increase': public_opinion_increase,
-                            'money_increase': money_increase
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": text
+                            + "Click to remove this notification. /n /n",
+                            "notification_type": "off_tile_exploration",
+                            "on_reveal": on_reveal,
+                            "audio": audio,
+                            "extra_parameters": {
+                                "cell": target_cell,
+                                "reveal_cell": True,
+                                "public_opinion_increase": public_opinion_increase,
+                                "money_increase": money_increase,
+                            },
                         }
-                    })
+                    )

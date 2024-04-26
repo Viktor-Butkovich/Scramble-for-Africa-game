@@ -1,4 +1,4 @@
-#Contains functionality for caravans
+# Contains functionality for caravans
 
 import random
 import math
@@ -8,12 +8,14 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
+
 class caravan(group):
-    '''
+    """
     A group with a merchant officer that is able to establish trading posts and trade with native villages
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -34,8 +36,8 @@ class caravan(group):
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
         Output:
             None
-        '''
+        """
         super().__init__(from_save, input_dict)
         self.can_trade = True
         self.set_inventory_capacity(9)
-        self.set_group_type('caravan')
+        self.set_group_type("caravan")
