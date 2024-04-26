@@ -207,6 +207,7 @@ class off_tile_exploration_notification(action_notification):
         cell = input_dict['extra_parameters']['cell']
         reveal_cell = input_dict['extra_parameters'].get('reveal_cell', True)
         public_opinion_increase = input_dict['extra_parameters'].get('public_opinion_increase', 0)
+        money_increase = input_dict['extra_parameters'].get('money_increase', 0)
 
         if (not 'attached_interface_elements' in input_dict) or not input_dict['attached_interface_elements']:
             input_dict['attached_interface_elements'] = []
@@ -223,6 +224,7 @@ class off_tile_exploration_notification(action_notification):
         if reveal_cell:
             cell.set_visibility(True)
         constants.public_opinion_tracker.change(public_opinion_increase)
+        constants.money_tracker.change(money_increase)
         status.minimap_grid.calibrate(cell.x, cell.y)
         super().__init__(input_dict)
 

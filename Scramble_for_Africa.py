@@ -33,7 +33,6 @@ except Exception: #displays error message and records error message in crash log
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
-# Add discovery bonuses to river sources
 # Add cannibals
 # Add lore mission trophy screen/notification
 # Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads

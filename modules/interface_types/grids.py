@@ -462,7 +462,8 @@ class grid(interface_elements.interface_element):
                 if direction == 3:
                     if current_y == 1 and not river_mouth:
                         river_mouth = self.find_cell(current_x, current_y)
-                        river_mouth.terrain_features['river mouth'] = {'feature_type': 'river mouth', 'image_id': river_name + ' River'} 
+                        river_mouth.terrain_features['river mouth'] = {'feature_type': 'river mouth', 'name': river_name + ' River', 'name_icon': True}
+                        river_mouth.terrain_features['river mouth']['image_id'] = river_mouth.terrain_features['river mouth']['name']
                     current_y = current_y + 1
                 elif direction == 2:
                     current_x = current_x + 1
@@ -477,7 +478,8 @@ class grid(interface_elements.interface_element):
                 last_cell = self.find_cell(current_x, current_y)
                 last_cell.set_terrain(terrain, terrain_variant)
         if last_cell:
-            last_cell.terrain_features['river source'] = {'feature_type': 'river mouth', 'image_id': 'Source of ' + river_name} 
+            last_cell.terrain_features['river source'] = {'feature_type': 'river mouth', 'name': river_name + ' River Source', 'river_name': river_name, 'name_icon': True}
+            last_cell.terrain_features['river source']['image_id'] = last_cell.terrain_features['river source']['name']
 
     def touching_mouse(self):
         '''

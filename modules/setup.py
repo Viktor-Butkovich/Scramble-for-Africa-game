@@ -244,7 +244,7 @@ def terrain_feature_types_config():
         'description': [
             'A cataract, or waterfall, slows most movement through this section of the river',
             'Canoes can not traverse cataracts, but canoe units can spend their whole turn moving into a cataract in the same way that non-canoe units can enter rivers',
-            'Steamboats can not traverse cataracts, but can circumvent them with a series of adjacent ports',
+            'Steamboats can not traverse cataracts, but can circumvent them through a series of adjacent ports',
             'Other units treat cataracts as usual river water'
         ]
     })

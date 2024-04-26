@@ -1017,18 +1017,21 @@ class labor_broker_button(button):
             None
         '''
         if main_loop_utility.action_possible():
-            cost_info_list = self.get_cost()
-            if cost_info_list != 'none':
-                if constants.money_tracker.get() >= cost_info_list[1]:
-                    if minister_utility.positions_filled():
-                        constants.actor_creation_manager.display_recruitment_choice_notification({
-                            'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png',
-                                'type': 'recruitment', 'source_type': 'labor broker', 'village': cost_info_list[0]
-                        }, 'African workers')
+            if status.displayed_tile.cell.has_intact_building('port'):
+                cost_info_list = self.get_cost()
+                if cost_info_list != 'none':
+                    if constants.money_tracker.get() >= cost_info_list[1]:
+                        if minister_utility.positions_filled():
+                            constants.actor_creation_manager.display_recruitment_choice_notification({
+                                'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png',
+                                    'type': 'recruitment', 'source_type': 'labor broker', 'village': cost_info_list[0]
+                            }, 'African workers')
+                    else:
+                        text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
                 else:
-                    text_utility.print_to_screen('You cannot afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ')
+                    text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
             else:
-                text_utility.print_to_screen('There are no eligible villages to recruit workers from.')
+                text_utility.print_to_screen('This port is damaged and cannot use a labor broker.')
         else:
             text_utility.print_to_screen('You are busy and cannot use a labor broker.')
 
@@ -1045,7 +1048,7 @@ class labor_broker_button(button):
         lowest_cost = 0
         for current_village in status.village_list:
             if current_village.population > 0:
-                distance = int(utility.find_object_distance(current_village, status.displayed_mob))
+                distance = int(utility.find_object_distance(current_village, status.displayed_tile))
                 cost = (2 * current_village.aggressiveness) + distance
                 if cost < lowest_cost or lowest_cost_village == 'none':
                     lowest_cost_village = current_village

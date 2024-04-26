@@ -63,6 +63,10 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.terrain = 'none'
         self.update_tooltip()
         self.update_image_bundle()
+        if self.name == 'default': # Set tile name to that of any terrain features, if applicable
+            for terrain_feature in self.cell.terrain_features:
+                if self.cell.terrain_features[terrain_feature].get('name', False):
+                    self.set_name(self.cell.terrain_features[terrain_feature]['name'])
 
     def set_name(self, new_name):
         '''
@@ -81,7 +85,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             y_offset = -0.75
             has_building = False
             for building_type in constants.building_types:
-                if self.cell.has_building(building_type): #if any building present, shift name up to not cover them
+                if self.cell.has_building(building_type) and building_type != 'infrastructure': #if any building present, shift name up to not cover them
                     has_building = True
                     break
             if has_building:

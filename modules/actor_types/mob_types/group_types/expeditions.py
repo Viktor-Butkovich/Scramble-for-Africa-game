@@ -124,6 +124,7 @@ class expedition(group):
                     elif target_cell.terrain == 'water':
                         text = 'The expedition has discovered a '
                     public_opinion_increase = random.randrange(0, 3)
+                    money_increase = 0
                     if not target_cell.resource == 'none':
                         if target_cell.resource == 'natives':
                             text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + ' that contains the village of ' + target_cell.village.name + '. /n /n'
@@ -132,6 +133,11 @@ class expedition(group):
                         public_opinion_increase += 3
                     else:
                         text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
+
+                    if target_cell.terrain_features.get('river source', False):
+                        money_increase = random.randrange(40, 61)
+                        text += 'This is the source of the ' + target_cell.terrain_features['river source']['river_name'] + ' river, which has been long sought after by explorers - you are granted a reward of ' + str(money_increase) + ' money for this discovery. /n /n'
+                        public_opinion_increase += random.randrange(10, 31)
 
                     if public_opinion_increase > 0: #Royal/National/Imperial
                         text += 'The ' + status.current_country.government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
@@ -149,6 +155,7 @@ class expedition(group):
                         'extra_parameters': {
                             'cell': target_cell,
                             'reveal_cell': True,
-                            'public_opinion_increase': public_opinion_increase
+                            'public_opinion_increase': public_opinion_increase,
+                            'money_increase': money_increase
                         }
                     })
