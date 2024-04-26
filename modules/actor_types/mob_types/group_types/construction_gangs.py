@@ -1,16 +1,18 @@
-#Contains functionality for construction gangs
+# Contains functionality for construction gangs
 
 from ..groups import group
 from ....util import actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
+
 class construction_gang(group):
-    '''
+    """
     A group with an engineer officer that is able to construct/upgrade buildings and trains
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -31,9 +33,11 @@ class construction_gang(group):
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
         Output:
             None
-        '''
+        """
         super().__init__(from_save, input_dict)
         self.can_construct = True
-        self.set_group_type('construction_gang')
+        self.set_group_type("construction_gang")
         if not from_save:
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for can_construct changing
+            actor_utility.calibrate_actor_info_display(
+                status.mob_info_display, self
+            )  # updates mob info display list to account for can_construct changing

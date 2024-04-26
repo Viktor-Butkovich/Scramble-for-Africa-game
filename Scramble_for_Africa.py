@@ -1,16 +1,39 @@
-#Runs setup and main loop on program start
+# Runs setup and main loop on program start
 
 import modules.main_loop as main_loop
 from modules.setup import *
 
 try:
-    setup(debug_tools, misc, worker_types_config, equipment_types_config, terrain_feature_types_config, terrains, commodities, def_ministers, def_countries, transactions, actions, lore,
-          value_trackers, buttons, europe_screen, ministers_screen, trial_screen, new_game_setup_screen, mob_interface, tile_interface, unit_organization_interface,
-          settlement_interface, inventory_interface, minister_interface, country_interface
+    setup(
+        debug_tools,
+        misc,
+        worker_types_config,
+        equipment_types_config,
+        terrain_feature_types_config,
+        terrains,
+        commodities,
+        def_ministers,
+        def_countries,
+        transactions,
+        actions,
+        lore,
+        value_trackers,
+        buttons,
+        europe_screen,
+        ministers_screen,
+        trial_screen,
+        new_game_setup_screen,
+        mob_interface,
+        tile_interface,
+        unit_organization_interface,
+        settlement_interface,
+        inventory_interface,
+        minister_interface,
+        country_interface,
     )
     main_loop.main_loop()
 
-except Exception: #displays error message and records error message in crash log file
+except Exception:  # displays error message and records error message in crash log file
     manage_crash(Exception)
 
 # tasks:
@@ -28,11 +51,11 @@ except Exception: #displays error message and records error message in crash log
 # look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
+#   Especially for Maxim gun
 # Add cosmetic flag to minister screen
 # Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
-# Add river sources, with bonuses for discovery
 # Add cannibals
 # Add lore mission trophy screen/notification
 # Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads

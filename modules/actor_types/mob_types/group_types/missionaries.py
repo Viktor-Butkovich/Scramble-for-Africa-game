@@ -1,16 +1,18 @@
-#Contains functionality for missionaries
+# Contains functionality for missionaries
 
 from ..groups import group
 from ....util import actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
+
 class missionaries(group):
-    '''
+    """
     A group with an evangelist officer and church volunteer workers that can build churches and convert native villages
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -31,10 +33,12 @@ class missionaries(group):
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
         Output:
             None
-        '''
+        """
         super().__init__(from_save, input_dict)
-        self.number = 2 #missionaries is plural
+        self.number = 2  # missionaries is plural
         self.can_convert = True
-        self.set_group_type('missionaries')
+        self.set_group_type("missionaries")
         if not from_save:
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates mob info display list to account for new missionary actions
+            actor_utility.calibrate_actor_info_display(
+                status.mob_info_display, self
+            )  # updates mob info display list to account for new missionary actions

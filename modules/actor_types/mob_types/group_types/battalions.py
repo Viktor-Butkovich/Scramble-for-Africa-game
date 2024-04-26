@@ -1,4 +1,4 @@
-#Contains functionality for battalions
+# Contains functionality for battalions
 
 from ..groups import group
 from ....util import actor_utility
@@ -6,12 +6,14 @@ import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
 
+
 class battalion(group):
-    '''
+    """
     A group with a major officer that can attack non-beast enemies
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -32,20 +34,22 @@ class battalion(group):
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
         Output:
             None
-        '''
+        """
         super().__init__(from_save, input_dict)
         self.is_battalion = True
-        if self.worker.worker_type == 'European':
-            self.battalion_type = 'imperial'
+        if self.worker.worker_type == "European":
+            self.battalion_type = "imperial"
         else:
-            self.battalion_type = 'colonial'
-        self.set_group_type('battalion')
+            self.battalion_type = "colonial"
+        self.set_group_type("battalion")
         if not from_save:
             self.set_disorganized(True)
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(
+                status.mob_info_display, self
+            )  # updates label to show new combat strength
 
-    def get_movement_cost(self, x_change, y_change, post_attack = False):
-        '''
+    def get_movement_cost(self, x_change, y_change, post_attack=False):
+        """
         Description:
             Returns the cost in movement points of moving by the inputted amounts. Only works when one inputted amount is 0 and the other is 1 or -1, with 0 and -1 representing moving 1 cell downward
         Input:
@@ -55,41 +59,49 @@ class battalion(group):
                 enough movement points to move there normally
         Output:
             double: How many movement points would be spent by moving by the inputted amount
-        '''
+        """
         cost = self.movement_cost
         if not (self.is_npmob and not self.visible()):
             local_cell = self.images[0].current_cell
         else:
             local_cell = self.grids[0].find_cell(self.x, self.y)
 
-        direction = 'none'
+        direction = "none"
         if x_change < 0:
-            direction = 'left'
+            direction = "left"
         elif x_change > 0:
-            direction = 'right'
+            direction = "right"
         elif y_change > 0:
-            direction = 'up'
+            direction = "up"
         elif y_change < 0:
-            direction = 'down'
+            direction = "down"
         elif x_change == 0 and y_change == 0:
-            direction = 'none'
-            
-        if direction == 'none':
+            direction = "none"
+
+        if direction == "none":
             adjacent_cell = local_cell
         else:
             adjacent_cell = local_cell.adjacent_cells[direction]
-            
+
         if adjacent_cell:
-            if (not post_attack) and self.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking non-beast
+            if (
+                (not post_attack)
+                and self.is_battalion
+                and not adjacent_cell.get_best_combatant("npmob") == "none"
+            ):  # if battalion attacking non-beast
                 cost = 1
-            elif (not post_attack) and self.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none': #if safari attacking beast
+            elif (
+                (not post_attack)
+                and self.is_safari
+                and not adjacent_cell.get_best_combatant("npmob", "beast") == "none"
+            ):  # if safari attacking beast
                 cost = 1
             else:
                 cost = super().get_movement_cost(x_change, y_change)
-        return(cost)
+        return cost
 
-    def move(self, x_change, y_change, attack_confirmed = False):
-        '''
+    def move(self, x_change, y_change, attack_confirmed=False):
+        """
         Description:
             Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship. If moving into a cell with an npmob, asks for a confirmation to attack instead of moving. If the attack
                 is confirmed, move is called again to cause a combat to start
@@ -99,33 +111,41 @@ class battalion(group):
             boolean attack_confirmed = False: Whether an attack has already been confirmed. If an attack has been confirmed, a move into the target cell will occur and a combat will start
         Output:
             None
-        '''
+        """
         flags.show_selection_outlines = True
         flags.show_minimap_outlines = True
-        constants.last_selection_outline_switch = constants.current_time #outlines should be shown immediately when selected
-        if not status.actions['combat'].on_click(
+        constants.last_selection_outline_switch = (
+            constants.current_time
+        )  # outlines should be shown immediately when selected
+        if not status.actions["combat"].on_click(
             self,
             on_click_info_dict={
-                'x_change': x_change,
-                'y_change': y_change,
-                'attack_confirmed': attack_confirmed
-            }
-        ): #if destination empty or attack already confirmed, move in
+                "x_change": x_change,
+                "y_change": y_change,
+                "attack_confirmed": attack_confirmed,
+            },
+        ):  # if destination empty or attack already confirmed, move in
             initial_movement_points = self.movement_points
             if attack_confirmed:
                 original_disorganized = self.disorganized
             super().move(x_change, y_change)
             if attack_confirmed:
-                self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
+                self.set_disorganized(
+                    original_disorganized
+                )  # cancel effect from moving into river until after combat
             if attack_confirmed:
-                self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
+                self.set_movement_points(
+                    initial_movement_points
+                )  # gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
+
 
 class safari(battalion):
-    '''
+    """
     A group with a hunter officer that can track down and attack beast enemies
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -145,11 +165,13 @@ class safari(battalion):
                 'canoes_image': string value - File path tothe image used by this object when it is in a river
         Output:
             None
-        '''
-        super().__init__(from_save, input_dict)    
+        """
+        super().__init__(from_save, input_dict)
         self.is_battalion = False
         self.is_safari = True
-        self.battalion_type = 'none'
-        self.set_group_type('safari')
+        self.battalion_type = "none"
+        self.set_group_type("safari")
         if not from_save:
-            actor_utility.calibrate_actor_info_display(status.mob_info_display, self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(
+                status.mob_info_display, self
+            )  # updates label to show new combat strength

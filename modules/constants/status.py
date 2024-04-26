@@ -8,7 +8,11 @@ from modules.constructs.worker_types import worker_type
 from modules.constructs.equipment_types import equipment_type
 from modules.constructs.terrain_feature_types import terrain_feature_type
 from modules.constructs.images import image, free_image
-from modules.interface_types.interface_elements import interface_collection, tabbed_collection, ordered_collection
+from modules.interface_types.interface_elements import (
+    interface_collection,
+    tabbed_collection,
+    ordered_collection,
+)
 from modules.interface_types.inventory_interface import inventory_grid
 from modules.interface_types.grids import grid, mini_grid, abstract_grid
 from modules.interface_types.panels import safe_click_panel

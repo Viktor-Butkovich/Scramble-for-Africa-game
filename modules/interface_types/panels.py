@@ -1,15 +1,17 @@
-#Contains functionality for panels
+# Contains functionality for panels
 
 from .buttons import button
 import modules.constants.constants as constants
 import modules.constants.status as status
 
+
 class panel(button):
-    '''
+    """
     A button that does nothing when clicked and has an optional tooltip
-    '''
+    """
+
     def __init__(self, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -25,81 +27,88 @@ class panel(button):
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
         Output:
             None
-        '''
-        input_dict['button_type'] = 'panel'
+        """
+        input_dict["button_type"] = "panel"
         super().__init__(input_dict)
 
     def on_click(self):
-        '''
+        """
         Description:
             Panels have no on_click behavior, but, since they aren't whiteespace, they don't prevent units from being deselected
         Input:
             None
         Output:
             string: Returns 'none' to designate that this click did nothing - still prevents units from deselected but also allows other buttons to be clicked
-        '''
-        return('none')
+        """
+        return "none"
 
     def update_tooltip(self):
-        '''
+        """
         Description:
             Panels have no tooltips
         Input:
             None
         Output:
             None
-        '''
+        """
         return
 
     def set_tooltip(self):
-        '''
+        """
         Description:
             Panels have no tooltips
         Input:
             None
         Output:
             None
-        '''
+        """
         return
-    
+
     def can_show_tooltip(self):
-        '''
+        """
         Description:
             Panels have no tooltips
         Input:
             None
         Output:
             None
-        '''
-        return(False)
+        """
+        return False
 
     def draw(self):
-        '''
+        """
         Description:
             Draws this panel, ignoring outlines from the panel being clicked
         Input:
             None
         Output:
             None
-        '''
+        """
         if self.showing:
             super().draw(allow_show_outline=False)
 
+
 class safe_click_panel(panel):
-    '''
+    """
     Panel that prevents selected units/ministers/countries from being deselected when its area is clicked
-    '''
+    """
+
     def can_show(self):
-        '''
+        """
         Description:
             Returns whether this panel should be drawn - it is drawn when a unit/minister/country is selected
         Input:
             None
         Output:
             boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
-        '''
+        """
         if super().can_show():
-            for parameter in ['displayed_mob', 'displayed_tile', 'displayed_minister', 'displayed_country']:
+            for parameter in [
+                "displayed_mob",
+                "displayed_tile",
+                "displayed_minister",
+                "displayed_country",
+            ]:
                 if getattr(status, parameter):
-                    return(True)
-        return(False)
+                    return True
+        return False

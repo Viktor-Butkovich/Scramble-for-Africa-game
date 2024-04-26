@@ -1,4 +1,4 @@
-#Contains functionality for wild beasts
+# Contains functionality for wild beasts
 
 import random
 from ..npmobs import npmob
@@ -6,12 +6,14 @@ from ....util import utility
 import modules.constants.constants as constants
 import modules.constants.status as status
 
+
 class beast(npmob):
-    '''
+    """
     Beasts that wander the map hidden, prefer certain terrains, attack/demoralize nearby units, and can be tracked down by a safari
-    '''
+    """
+
     def __init__(self, from_save, input_dict):
-        '''
+        """
         Description:
             Initializes this object
         Input:
@@ -31,33 +33,33 @@ class beast(npmob):
                 'hidden': boolean value - Whether this beast is currently hidden
         Output:
             None
-        '''
+        """
         self.hidden = False
         status.beast_list.append(self)
-        self.animal_type = input_dict['animal_type']
-        self.adjective = input_dict['adjective']
-        if self.adjective == 'king':
-            input_dict['name'] = self.animal_type + ' ' + self.adjective
+        self.animal_type = input_dict["animal_type"]
+        self.adjective = input_dict["adjective"]
+        if self.adjective == "king":
+            input_dict["name"] = self.animal_type + " " + self.adjective
         else:
-            input_dict['name'] = self.adjective + ' ' + self.animal_type
+            input_dict["name"] = self.adjective + " " + self.animal_type
         super().__init__(from_save, input_dict)
-        
-        self.npmob_type = 'beast'
+
+        self.npmob_type = "beast"
         self.hostile = True
         self.preferred_terrains = constants.animal_terrain_dict[self.animal_type]
         if from_save:
-            self.set_hidden(input_dict['hidden'], True)
+            self.set_hidden(input_dict["hidden"], True)
         else:
             self.set_hidden(True, True)
             self.set_max_movement_points(4)
-            
-        if constants.effect_manager.effect_active('reveal_beasts'):
+
+        if constants.effect_manager.effect_active("reveal_beasts"):
             self.set_hidden(False, True)
-            
+
         self.just_revealed = False
 
     def get_movement_cost(self, x_change, y_change):
-        '''
+        """
         Description:
             Returns the cost in movement points of moving by the inputted amounts. Unlike most mobs, beasts ignore terrain movement penalties and use their default movement cost regardless of terrain moved to
         Input:
@@ -65,11 +67,11 @@ class beast(npmob):
             int y_change: How many cells would be moved upward in the hypothetical movement
         Output:
             double: How many movement points would be spent by moving by the inputted amount
-        '''
-        return(self.movement_cost) #beasts ignore terrain penalties
+        """
+        return self.movement_cost  # beasts ignore terrain penalties
 
     def to_save_dict(self):
-        '''
+        """
         Description:
             Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
         Input:
@@ -81,33 +83,37 @@ class beast(npmob):
                 'preferred_terrains': string list value - List of the terrains that this beast can enter
                 'animal-type': string value - Type of beast, like 'lion'
                 'adjective': string value - Descriptor for beast, like 'man-eating'
-        '''
+        """
         save_dict = super().to_save_dict()
-        save_dict['hidden'] = self.hidden
-        save_dict['preferred_terrains'] = self.preferred_terrains
-        save_dict['animal_type'] = self.animal_type
-        save_dict['adjective'] = self.adjective
-        return(save_dict) 
+        save_dict["hidden"] = self.hidden
+        save_dict["preferred_terrains"] = self.preferred_terrains
+        save_dict["animal_type"] = self.animal_type
+        save_dict["adjective"] = self.adjective
+        return save_dict
 
     def find_closest_target(self):
-        '''
+        """
         Description:
-            Finds and returns an adjacent cell to move to. A beast will only move to cells of its, will tend to move torwards nearby pmobs, and may choose to stay in its current tile 
+            Finds and returns an adjacent cell to move to. A beast will only move to cells of its, will tend to move torwards nearby pmobs, and may choose to stay in its current tile
         Input:
             None
         Output:
             cell: Returns a cell to move to
-        '''
+        """
         target_list = []
         current_cell = self.grids[0].find_cell(self.x, self.y)
         possible_cells = current_cell.adjacent_list + [current_cell]
-        if random.randrange(1, 7) >= 3 and not constants.effect_manager.effect_active('nine_mortal_men'): #1/3 chance of moving to pmob if present, 2/3 chance of moving randomly, possibly torward pmob but not necessarily
+        if random.randrange(1, 7) >= 3 and not constants.effect_manager.effect_active(
+            "nine_mortal_men"
+        ):  # 1/3 chance of moving to pmob if present, 2/3 chance of moving randomly, possibly torward pmob but not necessarily
             ignoring_pmobs = True
         else:
             ignoring_pmobs = False
         enemy_found = False
         for current_cell in possible_cells:
-            if not (current_cell.y == 0 and self.can_swim and not self.can_swim_ocean): #cancel if trying to go into ocean and can't swim in ocean
+            if not (
+                current_cell.y == 0 and self.can_swim and not self.can_swim_ocean
+            ):  # cancel if trying to go into ocean and can't swim in ocean
                 if current_cell.terrain in self.preferred_terrains:
                     if not enemy_found:
                         if current_cell.has_pmob() and not ignoring_pmobs:
@@ -120,10 +126,10 @@ class beast(npmob):
                             target_list.append(current_cell)
         if len(target_list) == 0:
             target_list.append(self.images[0].current_cell)
-        return(random.choice(target_list))
+        return random.choice(target_list)
 
     def end_turn_move(self):
-        '''
+        """
         Description:
             Moves this npmob at the end of the turn and schedules this npmob to start combat if any pmobs are encountered. Unlike other npmobs, only focuses on adjacent tiles and remains hidden until reaching a pmob. An npmob
                 will use end_turn_move each time it moves during the enemy turn, which may happen multiple times depending on distance moved
@@ -131,7 +137,7 @@ class beast(npmob):
             None
         Output:
             None
-        ''' 
+        """
         self.just_revealed = False
         self.set_hidden(True)
         super().end_turn_move()
@@ -139,63 +145,63 @@ class beast(npmob):
             self.set_hidden(False)
 
     def retreat(self):
-        '''
+        """
         Description:
             Causes a free movement to the last cell this unit moved from, following a failed attack. Also hides the beast after it retreats
         Input:
             None
         Output:
             None
-        '''
+        """
         if not self.just_revealed:
             self.set_hidden(True)
         super().retreat()
 
-    def set_hidden(self, new_hidden, on_load = False):
-        '''
+    def set_hidden(self, new_hidden, on_load=False):
+        """
         Description:
             Sets this beast's new hidden status. A hidden beast can move around the map as usual and cannot be attacked until revealed. A beast reveals itself as it attacks (hiding itself afterward) and can be revealed by a safari
-                beasts nearby 
-        '''
+                beasts nearby
+        """
         self.hidden = new_hidden
         if new_hidden:
             self.hide_images()
         else:
             self.show_images()
             if not on_load:
-                constants.sound_manager.play_sound('beasts/' + self.animal_type, 0.6)
+                constants.sound_manager.play_sound("beasts/" + self.animal_type, 0.6)
 
     def check_despawn(self):
-        '''
+        """
         Description:
             Gives each beast warrior a 1/36 chance of despawning at the end of the turn
         Input:
             None
         Output:
             None
-        '''
+        """
         if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
             self.remove_complete()
 
     def remove(self):
-        '''
+        """
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program
         Input:
             None
         Output:
             None
-        '''
+        """
         super().remove()
         status.beast_list = utility.remove_from_list(status.beast_list, self)
 
     def damage_buildings(self):
-        '''
+        """
         Description:
             While most npmobs would damagee all undefended buildings in this cell after combat if no possible combatants, like workers or soldiers, remain, beasts ignore buildings
         Input:
             None
         Output:
             None
-        '''
+        """
         return
