@@ -41,6 +41,7 @@ from modules.action_types import (
     track_beasts,
     trial,
     canoe_purchase,
+    canoe_construction,
     attack_village,
 )
 
@@ -428,6 +429,7 @@ def actions():
     track_beasts.track_beasts()
     trial.trial()
     canoe_purchase.canoe_purchase()
+    canoe_construction.canoe_consruction()
 
     for action_type in status.actions:
         if status.actions[action_type].placement_type == "free":

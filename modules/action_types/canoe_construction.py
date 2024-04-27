@@ -8,9 +8,9 @@ import modules.constants.status as status
 import modules.constants.flags as flags
 
 
-class canoe_purchase(action.action):
+class canoe_consruction(action.action):
     """
-    Action for expedition/safari at a village to purchase canoes
+    Action for expedition/safari to build canoes
     """
 
     def initial_setup(self):
@@ -23,9 +23,9 @@ class canoe_purchase(action.action):
             None
         """
         super().initial_setup()
-        constants.transaction_descriptions[self.action_type] = "canoe purchases"
-        self.name = "canoe purchase"
-        self.aggressiveness_modifier = 0
+        constants.transaction_descriptions[self.action_type] = "canoe construction"
+        self.name = "canoe construction"
+        self.allow_critical_failures = False
 
     def button_setup(self, initial_input_dict):
         """
@@ -38,11 +38,12 @@ class canoe_purchase(action.action):
             None
         """
         initial_input_dict = super().button_setup(initial_input_dict)
-        initial_input_dict["keybind_id"] = pygame.K_c
+        initial_input_dict["keybind_id"] = pygame.K_v
         initial_input_dict["image_id"] = [
             "buttons/default_button.png",
             "misc/green_circle.png",
             "items/canoes.png",
+            "misc/repair_hammer.png",
         ]
         return initial_input_dict
 
@@ -56,10 +57,10 @@ class canoe_purchase(action.action):
             None
         """
         return [
-            f"Attempts to purchase canoes from this village for {constants.action_prices[self.action_type]} money",
-            "Can only be done in a village by an expedition or safari",
-            "If successful, purchases and equips canoes for this unit",
-            "Easier than building canoes if in a friendly village or if using non-African workers",
+            f"Attempts to build canoes for {constants.action_prices[self.action_type]} money",
+            "If successful, builds and equips canoes for this unit",
+            "African workers can build canoes more easily",
+            "Easier than buying canoes from an aggressive village",
             "Costs all remaining movement points, at least 1",
         ]
 
@@ -74,25 +75,22 @@ class canoe_purchase(action.action):
         """
         text = super().generate_notification_text(subject)
         if subject == "confirmation":
-            text = "Are you sure you want to attempt to purchase canoes? If successful, this unit will be equipped with canoes. /n /n"
+            text = "Are you sure you want to attempt to build canoes? If successful, this unit will be equipped with canoes. /n /n"
             text += f"The {self.name} will cost {constants.action_prices[self.action_type]} money. /n /n"
-            if self.aggressiveness_modifier < 0:
-                text += "The villagers are hostile and unlikely to cooperate. /n /n"
-            elif self.aggressiveness_modifier > 0:
-                text += "The villagers are friendly and likely to provide canoes. /n /n"
+            if self.current_unit.worker.worker_type in ["African", "slave"]:
+                text += "The African workers have some familiarity with canoes and can build them more easily. /n /n"
             else:
-                text += "The villagers are wary but may cooperate with sufficient persuasion. /n /n"
+                text += "The workers do not have familiarity with canoes and will have difficulty building them. /n /n"
         elif subject == "initial":
             text += (
-                f"The {status.displayed_mob.group_type} tries to purchase canoes. /n /n"
+                f"The {status.displayed_mob.group_type} tries to build canoes. /n /n"
             )
         elif subject == "success":
-            text += "The villagers were successfully persuaded to sell canoes. /n /n"
+            text += (
+                f"The {status.displayed_mob.group_type} successfuly built canoes. /n /n"
+            )
         elif subject == "failure":
-            text += f"The {status.displayed_mob.group_type} failed to make any fruitful transactions. /n /n"
-        elif subject == "critical_failure":
-            text += self.generate_notification_text("failure")
-            text += f"Angered by the {status.displayed_mob.group_type}'s offer, the native attack the expedition. /n /n"
+            text += f"The {status.displayed_mob.group_type} failed to make any functional canoes. /n /n"
         elif subject == "critical_success":
             text += self.generate_notification_text("success")
             text += f"The {status.displayed_mob.officer.name} is now a veteran and will be more successful in future ventures. /n /n"
@@ -109,12 +107,8 @@ class canoe_purchase(action.action):
             int: Returns the current flat roll modifier for this action
         """
         roll_modifier = super().generate_current_roll_modifier()
-        self.aggressiveness_modifier = (
-            status.displayed_mob.images[0]
-            .current_cell.get_building("village")
-            .get_aggressiveness_modifier()
-        )
-        roll_modifier += self.aggressiveness_modifier
+        if not self.current_unit.worker.worker_type in ["African", "slave"]:
+            roll_modifier -= 1
         return roll_modifier
 
     def can_show(self):
@@ -145,16 +139,7 @@ class canoe_purchase(action.action):
             None
         """
         if super().on_click(unit):
-            village = unit.images[0].current_cell.get_building("village")
-            if village == "none":
-                text_utility.print_to_screen(
-                    "Purchasing canoes is only possible in a village."
-                )
-            elif village.population <= 0:
-                text_utility.print_to_screen(
-                    "This village has no population, so no canoes can be purchased."
-                )
-            elif unit.equipment.get("canoes", False):
+            if unit.equipment.get("canoes", False):
                 text_utility.print_to_screen("This unit already has canoes equipped.")
             else:
                 self.start(unit)
@@ -176,8 +161,8 @@ class canoe_purchase(action.action):
                     "choices": [
                         {
                             "on_click": (self.middle, []),
-                            "tooltip": ["Start canoe purchase"],
-                            "message": "Start purchase",
+                            "tooltip": ["Start canoe construction"],
+                            "message": "Start construction",
                         },
                         {"tooltip": ["Cancel"], "message": "Cancel"},
                     ],
@@ -196,7 +181,7 @@ class canoe_purchase(action.action):
         super().complete()
         village = self.current_unit.images[0].current_cell.get_building("village")
         if self.roll_result >= self.current_min_success:
-            text = f"The villagers offer to outfit the {self.current_unit.group_type} with canoes. /n /n"
+            text = f"The {self.current_unit.group_type} successfully build functional canoes. /n /n"
             status.equipment_types["canoes"].equip(self.current_unit)
             actor_utility.select_interface_tab(
                 status.mob_tabbed_collection, status.mob_inventory_collection
@@ -206,7 +191,3 @@ class canoe_purchase(action.action):
                     "message": text + "Click to remove this notification. /n /n",
                 }
             )
-        elif self.roll_result <= self.current_max_crit_fail:
-            warrior = village.spawn_warrior()
-            warrior.show_images()
-            warrior.attack_on_spawn()
