@@ -87,7 +87,7 @@ class canoe_purchase(action.action):
                 f"The {status.displayed_mob.group_type} tries to purchase canoes. /n /n"
             )
         elif subject == "success":
-            text += "The villagers were successfully persuaded to sell canoes. /n /n"
+            text += f"The villagers were successfully persuaded to outfit the {status.displayed_mob.group_type} with canoes. /n /n"
         elif subject == "failure":
             text += f"The {status.displayed_mob.group_type} failed to make any fruitful transactions. /n /n"
         elif subject == "critical_failure":
@@ -196,15 +196,9 @@ class canoe_purchase(action.action):
         super().complete()
         village = self.current_unit.images[0].current_cell.get_building("village")
         if self.roll_result >= self.current_min_success:
-            text = f"The villagers offer to outfit the {self.current_unit.group_type} with canoes. /n /n"
             status.equipment_types["canoes"].equip(self.current_unit)
             actor_utility.select_interface_tab(
                 status.mob_tabbed_collection, status.mob_inventory_collection
-            )
-            constants.notification_manager.display_notification(
-                {
-                    "message": text + "Click to remove this notification. /n /n",
-                }
             )
         elif self.roll_result <= self.current_max_crit_fail:
             warrior = village.spawn_warrior()

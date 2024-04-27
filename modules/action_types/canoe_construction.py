@@ -181,13 +181,7 @@ class canoe_consruction(action.action):
         super().complete()
         village = self.current_unit.images[0].current_cell.get_building("village")
         if self.roll_result >= self.current_min_success:
-            text = f"The {self.current_unit.group_type} successfully build functional canoes. /n /n"
             status.equipment_types["canoes"].equip(self.current_unit)
             actor_utility.select_interface_tab(
                 status.mob_tabbed_collection, status.mob_inventory_collection
-            )
-            constants.notification_manager.display_notification(
-                {
-                    "message": text + "Click to remove this notification. /n /n",
-                }
             )

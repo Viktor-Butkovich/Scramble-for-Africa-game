@@ -396,7 +396,7 @@ class combat(action.action):
                         killed_by_natives_flavor = [
                             "Onlookers in Europe wonder how the world's greatest empire could be bested by mere savages. /n /n",
                             "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few savages and considers lowering them in the future.",
-                            "Sensationalized news stories circulate of indolent ministers sending the empire's finest to die in some jungle.",
+                            "Sensationalized news stories circulate of indolent ministers sending the empire's finest to die in distant jungles.",
                         ]
                         text += (
                             random.choice(killed_by_natives_flavor)
