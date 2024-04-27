@@ -1253,7 +1253,7 @@ class button(interface_elements.interface_element):
                                                 current_passenger.embark_vehicle(
                                                     current_mob
                                                 )
-                                    if last_moved:
+                                    if last_moved and not last_moved.in_vehicle:
                                         last_moved.select()
                                     flags.show_selection_outlines = True
                                     constants.last_selection_outline_switch = (

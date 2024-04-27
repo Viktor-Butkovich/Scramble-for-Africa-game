@@ -668,6 +668,9 @@ class boat(ship):
         self.can_swim_ocean = False
         self.can_walk = False
         self.travel_possible = False
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, None)
+            actor_utility.calibrate_actor_info_display(status.mob_info_display, self)
 
     def get_movement_cost(self, x_change, y_change):
         """

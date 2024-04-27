@@ -1056,7 +1056,7 @@ class actor_display_label(label):
                             self.set_label(
                                 "Requires a European worker crew to function"
                             )
-                        elif self.actor.vehicle_type == "train":
+                        else:
                             self.set_label(
                                 "Requires a non-slave worker crew to function"
                             )

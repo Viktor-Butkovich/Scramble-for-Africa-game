@@ -92,6 +92,7 @@ def update_descriptions(target="all"):
         targets_to_update += constants.building_types + [
             "road",
             "railroad",
+            "ferry",
             "road_bridge",
             "railroad_bridge",
         ]
@@ -266,6 +267,14 @@ def update_descriptions(target="all"):
             )
             text_list.append(
                 "It is also required for trains to move and for a train station to be built."
+            )
+
+        elif current_target == "ferry":
+            text_list.append(
+                "A ferry built on a river tile between 2 land tiles allows movement across the river."
+            )
+            text_list.append(
+                "A ferry allows moving to the ferry tile for 2 movement points, and can later be upgraded to a road bridge."
             )
 
         elif current_target == "road_bridge":

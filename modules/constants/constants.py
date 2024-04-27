@@ -266,9 +266,9 @@ building_prices: Dict[str, int] = {
     "resource": 10,
     "road": 5,
     "railroad": 15,
-    #'ferry': 50,
-    "road_bridge": 50,  # 100
-    "railroad_bridge": 150,  # 300
+    "ferry": 50,
+    "road_bridge": 100,
+    "railroad_bridge": 300,
     "port": 15,
     "train_station": 10,
     "trading_post": 5,

@@ -133,6 +133,8 @@ class construction(action.action):
                 message += [
                     "Upgrades this tile's road bridge into a railroad bridge, retaining the benefits of a road bridge"
                 ]
+            elif self.building_name == "road bridge":
+                message += ["Upgrades this tile's ferry into a road bridge"]
 
         if self.building_type == "trading_post":
             message.append("Can only be built in a village")
@@ -366,15 +368,25 @@ class construction(action.action):
             cell = status.displayed_mob.images[0].current_cell
             if not cell.has_building("infrastructure"):
                 if cell.terrain == "water" and cell.y > 0:
-                    new_name = "road bridge"
-                    new_image = "buildings/buttons/road_bridge.png"
+                    new_name = "ferry"
+                    new_image = "buildings/buttons/ferry.png"
                 else:
                     new_name = "road"
                     new_image = "buildings/buttons/road.png"
             else:
                 if cell.terrain == "water" and cell.y > 0:
-                    new_name = "railroad bridge"
-                    new_image = "buildings/buttons/railroad_bridge.png"
+                    if cell.get_building("infrastructure") == "none":
+                        new_name = "ferry"
+                        new_image = "buildings/buttons/ferry.png"
+                    elif (
+                        cell.get_building("infrastructure").infrastructure_type
+                        == "ferry"
+                    ):
+                        new_name = "road bridge"
+                        new_image = "buildings/buttons/road_bridge.png"
+                    else:
+                        new_name = "railroad bridge"
+                        new_image = "buildings/buttons/railroad_bridge.png"
                 else:
                     new_name = "railroad"
                     new_image = "buildings/buttons/railroad.png"
@@ -424,7 +436,7 @@ class construction(action.action):
                     "This building can only be built in villages."
                 )
         elif self.building_type == "infrastructure":
-            if self.building_name in ["road bridge", "railroad bridge"]:
+            if self.building_name in ["road bridge", "railroad bridge", "ferry"]:
                 current_cell = unit.images[0].current_cell
                 if (
                     current_cell.terrain == "water" and current_cell.y > 0
@@ -499,6 +511,10 @@ class construction(action.action):
                     self.building_name in ["railroad", "railroad bridge"]
                     and current_building.is_road
                 )
+                or (
+                    self.building_name == "road bridge"
+                    and not (current_building.is_road or current_building.is_railroad)
+                )
             ):
                 if self.building_type == "infrastructure":  # if railroad
                     text_utility.print_to_screen(
@@ -516,7 +532,7 @@ class construction(action.action):
                 )
             elif not (
                 current_cell.terrain != "water"
-                or self.building_name in ["road bridge", "railroad bridge"]
+                or self.building_name in ["road bridge", "railroad bridge", "ferry"]
             ):
                 text_utility.print_to_screen("This building cannot be built in water.")
             elif self.can_build(unit):
