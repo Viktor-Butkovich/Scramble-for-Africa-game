@@ -57,5 +57,4 @@ except Exception:  # displays error message and records error message in crash l
 #   Add achievement to main menu
 #   Possibly include stealing from company directly
 # Add cannibals
-# Add lore mission trophy screen/notification
 # Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn

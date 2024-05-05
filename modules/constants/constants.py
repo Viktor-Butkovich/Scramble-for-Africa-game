@@ -659,6 +659,7 @@ lore_types_effect_descriptions_dict: Dict[str, str] = {
     "theology": "chance of a positive modifier for religious campaign rolls",
 }
 completed_lore_mission_types: List[str] = []
+completed_lore_missions: Dict[str, str] = {}
 
 titles: List[str] = [
     "Duke",

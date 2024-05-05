@@ -249,6 +249,8 @@ def to_main_menu(override=False):
         status.current_country.deselect()
     for current_completed_lore_type in constants.completed_lore_mission_types:
         status.lore_types_effects_dict[current_completed_lore_type].remove()
+    constants.completed_lore_mission_types = []
+    constants.completed_lore_missions = {}
     set_game_mode("main_menu")
 
 

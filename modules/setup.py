@@ -900,6 +900,18 @@ def value_trackers():
             "init_type": "show previous reports button",
         }
     )
+    constants.actor_creation_manager.create_interface_element(
+        {
+            "coordinates": scaling.scale_coordinates(
+                270, constants.default_display_height - 65
+            ),
+            "width": scaling.scale_width(30),
+            "height": scaling.scale_height(30),
+            "modes": ["strategic", "europe", "ministers", "trial"],
+            "image_id": "buttons/execute_single_movement_route_button.png",
+            "init_type": "show lore missions button",
+        }
+    )
 
     constants.evil_tracker = value_tracker_template.value_tracker_template(
         "evil", 0, 0, 100
