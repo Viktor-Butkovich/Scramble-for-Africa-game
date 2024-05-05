@@ -12,6 +12,9 @@ from modules.tools.data_managers.actor_creation_manager_template import (
     actor_creation_manager_template,
 )
 from modules.tools.data_managers.event_manager_template import event_manager_template
+from modules.tools.data_managers.achievement_manager_template import (
+    achievement_manager_template,
+)
 from modules.tools.data_managers.effect_manager_template import effect_manager_template
 from modules.tools.data_managers.notification_manager_template import (
     notification_manager_template,
@@ -163,6 +166,9 @@ flavor_text_manager: flavor_text_manager_template = flavor_text_manager_template
 input_manager: input_manager_template = input_manager_template()
 actor_creation_manager: actor_creation_manager_template = (
     actor_creation_manager_template()
+)
+achievement_manager: achievement_manager_template = (
+    None  # requires additional setup before initialization
 )
 event_manager: event_manager_template = event_manager_template()
 effect_manager: effect_manager_template = effect_manager_template()

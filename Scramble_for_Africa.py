@@ -53,8 +53,6 @@ except Exception:  # displays error message and records error message in crash l
 # Replace placeholder images
 #   Especially for Maxim gun
 # Add cosmetic flag to minister screen
-# Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
-#   Add achievement to main menu
-#   Possibly include stealing from company directly
+# Add more victory conditions - all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
 # Add cannibals
 # Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn

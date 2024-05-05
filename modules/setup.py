@@ -19,6 +19,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import (
     notification_manager_template,
     value_tracker_template,
+    achievement_manager_template,
 )
 from modules.action_types import (
     public_relations_campaign,
@@ -187,6 +188,10 @@ def misc():
 
     constants.notification_manager = (
         notification_manager_template.notification_manager_template()
+    )
+
+    constants.achievement_manager = (
+        achievement_manager_template.achievement_manager_template()
     )
 
     status.info_displays_collection = (

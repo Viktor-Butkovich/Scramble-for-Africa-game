@@ -819,7 +819,7 @@ class tooltip_free_image(free_image):
             self.height,
         )
         self.Rect.y = self.y - self.height
-        self.tooltip_text = []
+        self.tooltip_text = input_dict.get("tooltip_text", [])
         self.update_tooltip()
 
     def set_tooltip(self, tooltip_text):
@@ -857,7 +857,7 @@ class tooltip_free_image(free_image):
         Output:
             None
         """
-        self.tooltip_text = []
+        self.set_tooltip(self.tooltip_text)
 
     def can_show_tooltip(self):
         """
