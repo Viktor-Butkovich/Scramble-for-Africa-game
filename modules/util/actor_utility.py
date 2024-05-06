@@ -487,6 +487,7 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
         status.displayed_tile = new_actor
         if new_actor:
             new_actor.select()  # plays correct music based on tile selected - slave traders/village/europe music
+        select_default_tab(status.tile_tabbed_collection, status.displayed_tile)
 
     elif info_display == status.mob_info_display:
         if new_actor != status.displayed_mob:
@@ -495,6 +496,7 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
         if new_actor and new_actor.images[0].current_cell.tile == status.displayed_tile:
             for current_same_tile_icon in status.same_tile_icon_list:
                 current_same_tile_icon.reset()
+        select_default_tab(status.mob_tabbed_collection, status.displayed_mob)
 
     elif info_display == status.country_info_display:
         status.displayed_country = new_actor
@@ -503,6 +505,32 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
     if new_actor:
         target = new_actor
     info_display.calibrate(target, override_exempt)
+
+
+def select_default_tab(tabbed_collection, displayed_actor) -> None:
+    """
+    Description:
+        Selects the default tab for the inputted tabbed collection based on the inputted displayed actor
+    Input:
+        interface_collection tabbed_collection: Tabbed collection to select tab of
+        actor displayed_actor: Mob or tile to select tab for
+    Output:
+        None
+    """
+    target_tab = None
+    if displayed_actor:
+        if tabbed_collection == status.tile_tabbed_collection:
+            if status.displayed_tile.inventory:
+                target_tab = status.tile_inventory_collection
+            elif status.displayed_tile.cell.settlement:
+                target_tab = status.settlement_collection
+        elif tabbed_collection == status.mob_tabbed_collection:
+            if status.displayed_mob.inventory or status.displayed_mob.equipment:
+                target_tab = status.mob_inventory_collection
+            else:
+                target_tab = status.mob_reorganization_collection
+    if target_tab:
+        select_interface_tab(tabbed_collection, target_tab)
 
 
 def get_migration_destinations():

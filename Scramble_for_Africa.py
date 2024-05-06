@@ -48,7 +48,6 @@ except Exception:  # displays error message and records error message in crash l
 # Performance impacts from repeated exit/load - not everything is being removed each time
 #
 #   new SFA features:
-# look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 #   Especially for Maxim gun

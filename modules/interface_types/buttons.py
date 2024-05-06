@@ -3078,6 +3078,10 @@ class commodity_button(button):
 
 
 class show_lore_missions_button(button):
+    """
+    Button that can be clicked to display report of current and completed lore missions
+    """
+
     def __init__(self, input_dict):
         """
         Description:
