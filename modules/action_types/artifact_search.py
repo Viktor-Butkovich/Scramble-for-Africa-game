@@ -264,10 +264,11 @@ class artifact_search(action.action):
         """
         if not self.lore_type in constants.completed_lore_mission_types:
             constants.completed_lore_mission_types.append(self.lore_type)
-            constants.completed_lore_missions[
-                status.current_lore_mission.name
-            ] = self.lore_type
             status.lore_types_effects_dict[self.lore_type].apply()
+        constants.completed_lore_missions[
+            status.current_lore_mission.name
+        ] = self.lore_type
+        constants.achievement_manager.check_achievements("It Belongs in a Museum")
         constants.money_tracker.change(self.prize_money, "subsidies")
         constants.public_opinion_tracker.change(self.public_opinion_increase)
         status.current_lore_mission.remove_complete()

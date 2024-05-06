@@ -1018,6 +1018,8 @@ class resource_building(building):
             self.scale += 1
         elif upgrade_type == "efficiency":
             self.efficiency += 1
+        if self.scale >= 6 and self.efficiency >= 6:
+            constants.achievement_manager.achieve("Industrialist")
         self.num_upgrades += 1
 
     def get_upgrade_cost(self):

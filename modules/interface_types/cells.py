@@ -791,6 +791,8 @@ class cell:
         self.visible = new_visibility
         if update_image_bundle and self.tile != "none":
             self.tile.update_image_bundle()
+        if new_visibility:
+            constants.achievement_manager.check_achievements("Heart of Darkness")
 
     def set_resource(self, new_resource, update_image_bundle=True):
         """
