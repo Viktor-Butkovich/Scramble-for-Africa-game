@@ -1957,28 +1957,6 @@ class automatic_route_button(button):
     Button that modifies a unit's automatic movement route, with an effect depending on the button's type
     """
 
-    def __init__(self, input_dict):
-        """
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'button_type': string value - Determines the function of this button, like 'clear automatic route', 'execute automatic route', or 'draw automatic route'
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-        Output:
-            None
-        """
-        super().__init__(input_dict)
-
     def can_show(self, skip_parent_collection=False):
         """
         Description:
@@ -2063,3 +2041,92 @@ class automatic_route_button(button):
                 text_utility.print_to_screen(
                     "You are busy and cannot modify this unit's movement route."
                 )
+
+
+class toggle_button(button):
+    """
+    Button that monitors and toggles a boolean variable on the attached actor
+    """
+
+    def __init__(self, input_dict):
+        """
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'toggle_variable': string value - Name of the variable that this button toggles
+        Output:
+            None
+        """
+        self.toggle_variable = input_dict["toggle_variable"]
+        super().__init__(input_dict)
+
+    def on_click(self):
+        """
+        Description:
+            Toggles this button's variable on the attached actor
+        Input:
+            None
+        Output:
+            None
+        """
+        setattr(
+            self.attached_label.actor,
+            self.toggle_variable,
+            not getattr(self.attached_label.actor, self.toggle_variable),
+        )
+
+    def can_show(self, skip_parent_collection=False):
+        """
+        Description:
+            Returns whether this button should be drawn. All automatic route buttons require that an automatic route already exists
+        Input:
+            None
+        Output:
+            boolean: Returns whether this button should be drawn
+        """
+        if (
+            not self.attached_label.actor in ["none", None]
+        ) and self.attached_label.actor.is_pmob:
+            self.showing_outline = getattr(
+                self.attached_label.actor, self.toggle_variable
+            )
+            if super().can_show(skip_parent_collection=skip_parent_collection):
+                if self.toggle_variable == "wait_until_full":
+                    return bool(status.displayed_mob.base_automatic_route)
+                else:
+                    return True
+        return False
+
+    def update_tooltip(self):
+        """
+        Description:
+            Sets this button's tooltip depending on the variable it toggles
+        Input:
+            None
+        Output:
+            None
+        """
+        tooltip_text = []
+        if not self.attached_label.actor in [None, "none"]:
+            if self.toggle_variable == "wait_until_full":
+                tooltip_text.append(
+                    "Toggles wait until full - waiting until there is a full load to transport/no remaining warehouse space before starting automatic route"
+                )
+                if getattr(self.attached_label.actor, self.toggle_variable):
+                    tooltip_text.append("Currently waiting until full")
+                else:
+                    tooltip_text.append(
+                        "Currently waiting until there is anything to transport"
+                    )
+        self.set_tooltip(tooltip_text)

@@ -525,10 +525,11 @@ def select_default_tab(tabbed_collection, displayed_actor) -> None:
             elif status.displayed_tile.cell.settlement:
                 target_tab = status.settlement_collection
         elif tabbed_collection == status.mob_tabbed_collection:
-            if status.displayed_mob.inventory or status.displayed_mob.equipment:
-                target_tab = status.mob_inventory_collection
-            else:
-                target_tab = status.mob_reorganization_collection
+            if status.displayed_mob.is_pmob:
+                if status.displayed_mob.inventory or status.displayed_mob.equipment:
+                    target_tab = status.mob_inventory_collection
+                else:
+                    target_tab = status.mob_reorganization_collection
     if target_tab:
         select_interface_tab(tabbed_collection, target_tab)
 

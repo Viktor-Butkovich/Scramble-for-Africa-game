@@ -84,6 +84,7 @@ class pmob(mob):
                 self.remove_from_turn_queue()
             self.base_automatic_route = input_dict["base_automatic_route"]
             self.in_progress_automatic_route = input_dict["in_progress_automatic_route"]
+            self.wait_until_full = input_dict["wait_until_full"]
         else:
             self.default_name = self.name
             self.set_max_movement_points(4)
@@ -96,6 +97,7 @@ class pmob(mob):
             self.in_progress_automatic_route = (
                 []
             )  # first item is next step, last item is current location
+            self.wait_until_full = False
             if ("select_on_creation" in input_dict) and input_dict[
                 "select_on_creation"
             ]:
@@ -141,6 +143,7 @@ class pmob(mob):
         save_dict["in_turn_queue"] = self in status.player_turn_queue
         save_dict["base_automatic_route"] = self.base_automatic_route
         save_dict["in_progress_automatic_route"] = self.in_progress_automatic_route
+        save_dict["wait_until_full"] = self.wait_until_full
         save_dict["automatically_replace"] = self.automatically_replace
         save_dict["equipment"] = self.equipment
         return save_dict
@@ -248,9 +251,20 @@ class pmob(mob):
         elif next_step == "start":
             # ignores consumer goods
             if (
-                len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0
-                or self.get_inventory_used() > 0
+                self.wait_until_full
+                and (
+                    self.images[0].current_cell.tile.get_inventory_used()
+                    >= self.inventory_capacity
+                    or self.images[0].current_cell.tile.get_inventory_remaining() <= 0
+                )
+            ) or (
+                (not self.wait_until_full)
+                and (
+                    len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0
+                    or self.get_inventory_used() > 0
+                )
             ):  # only start round trip if there is something to deliver, either from tile or in inventory already
+                # If wait until full, instead wait until full load to transport or no warehouse space left
                 if not (
                     self.is_vehicle
                     and self.vehicle_type == "train"

@@ -53,4 +53,3 @@ except Exception:  # displays error message and records error message in crash l
 #   Especially for Maxim gun
 # Add cosmetic flag to minister screen
 # Add cannibals
-# Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn
