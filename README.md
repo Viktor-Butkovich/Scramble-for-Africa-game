@@ -3,4 +3,3 @@ This game covers a variety of sensitive topics, ranging from slavery and racism 
 remember their victims. This game's primary goal is to explain the reasoning for the practices of late 1800s imperialists without attempting to justify or condone their actions.
 
 <img src="graphics/misc/title.png" alt="Title Screen">
-![Title Screen](https://github.com/Vrotki/Scramble-for-Africa-game/blob/release/graphics/misc/title.png)
