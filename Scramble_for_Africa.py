@@ -51,7 +51,6 @@ except Exception:  # displays error message and records error message in crash l
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 #   Especially for Maxim gun
-#   Add title/loading screen
 # Add cosmetic flag to minister screen
 # Add cannibals
 # Add Asia grid music

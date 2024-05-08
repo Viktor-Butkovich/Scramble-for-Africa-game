@@ -90,7 +90,8 @@ def set_game_mode(new_game_mode):
             new_game_mode == "trial" or constants.current_game_mode == "trial"
         ):  # the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
             constants.previous_game_mode = constants.current_game_mode
-        start_loading()
+        if new_game_mode == 'main_menu' or previous_game_mode == 'new_game_setup': #'main_menu' in [new_game_mode, previous_game_mode]:
+            start_loading()
         constants.current_game_mode = new_game_mode
         if new_game_mode == "strategic":
             constants.default_text_box_height = constants.font_size * 5.5

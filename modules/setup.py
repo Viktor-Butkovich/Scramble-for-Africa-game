@@ -147,7 +147,7 @@ def misc():
     status.instructions_list.append(instructions_message)
 
     status.loading_image = constants.actor_creation_manager.create_interface_element(
-        {"image_id": "misc/loading.png", "init_type": "loading image template image"}
+        {"image_id": ["misc/title.png", "misc/loading.png"], "init_type": "loading image template image"}
     )
 
     strategic_background_image = (
@@ -158,21 +158,21 @@ def misc():
                     "europe",
                     "ministers",
                     "trial",
+                    "new_game_setup",
                 ],
                 "init_type": "background image",
             }
         )
     )
 
-    title_image = (
+    title_background_image = (
         constants.actor_creation_manager.create_interface_element(
             {
                 "modes": [
                     "main_menu",
-                    "new_game_setup",
                 ],
+                "image_id": "misc/title.png",
                 "init_type": "background image",
-                "image_id": "misc/loading.png"
             }
         )
     )
