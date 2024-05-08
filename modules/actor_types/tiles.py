@@ -568,6 +568,10 @@ class tile(actor):  # to do: make terrain tiles a subclass
                 if constants.sound_manager.previous_state != "slave traders":
                     constants.event_manager.clear()
                     constants.sound_manager.play_random_music("slave traders")
+            elif self.cell.grid.grid_type == "asia_grid":
+                if constants.sound_manager.previous_state != "asia":
+                    constants.event_manager.clear()
+                    constants.sound_manager.play_random_music("asia")
             elif (
                 self.cell.village != "none"
                 and self.cell.visible

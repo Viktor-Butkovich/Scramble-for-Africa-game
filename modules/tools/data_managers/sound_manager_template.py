@@ -30,6 +30,7 @@ class sound_manager_template:
             "village neutral": ["natives/village neutral"],
             "village aggressive": ["natives/village aggressive"],
             "slave traders": ["slave traders/slave traders theme"],
+            "asia": ["asia/asia theme 1", "asia/asia theme 2"],
         }
         for adjective in [
             "british",
@@ -227,11 +228,13 @@ class sound_manager_template:
             chosen_song = "none"
         if current_state in [
             "slave traders",
+            "asia",
             "village peaceful",
             "village neutral",
             "village aggressive",
         ] or self.previous_state in [
             "slave traders",
+            "asia",
             "village peaceful",
             "village neutral",
             "village aggressive",
