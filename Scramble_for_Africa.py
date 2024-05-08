@@ -48,15 +48,7 @@ except Exception:  # displays error message and records error message in crash l
 # Performance impacts from repeated exit/load - not everything is being removed each time
 #
 #   new SFA features:
-# look into default tab modes, maybe with units with commodiy capacity going to inventory mode
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 #   Especially for Maxim gun
 # Add cosmetic flag to minister screen
-# Add victory conditions - 10,000 money, all lore missions completed, all map squares explored, improve production tile to 6/6, African worker price to 0.5
-#   Add achievement to main menu
-#   Possibly include stealing from company directly
-# Add cannibals
-# Add lore mission trophy screen/notification
-# Add ferries - like bridge but movement costs 2, does not count as infrastructure for roads
-# Add wait until full/wait until anything/wait for nothing toggle for automated routes - either a toggled button or a yes/no choice notification when route is drawn

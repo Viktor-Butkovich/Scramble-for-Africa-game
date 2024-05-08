@@ -496,7 +496,9 @@ class tile(actor):  # to do: make terrain tiles a subclass
                         + " resource"
                     )
                 for terrain_feature in self.cell.terrain_features:
-                    tooltip_message.append("This tile has a " + terrain_feature)
+                    tooltip_message.append(
+                        f"This tile has {utility.generate_article(terrain_feature, add_space=True)}{terrain_feature}"
+                    )
             else:
                 tooltip_message.append("This tile has not been explored")
             if status.current_lore_mission:
@@ -566,6 +568,10 @@ class tile(actor):  # to do: make terrain tiles a subclass
                 if constants.sound_manager.previous_state != "slave traders":
                     constants.event_manager.clear()
                     constants.sound_manager.play_random_music("slave traders")
+            elif self.cell.grid.grid_type == "asia_grid":
+                if constants.sound_manager.previous_state != "asia":
+                    constants.event_manager.clear()
+                    constants.sound_manager.play_random_music("asia")
             elif (
                 self.cell.village != "none"
                 and self.cell.visible

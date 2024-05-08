@@ -152,6 +152,8 @@ def attempt_worker_upkeep_change(change_type, worker_type):
                     + str(changed_price)
                     + "."
                 )
+            if worker_type == "African":
+                constants.achievement_manager.check_achievements("Minimum Wage")
         constants.money_label.check_for_updates()
 
 

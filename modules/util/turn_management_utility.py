@@ -107,6 +107,7 @@ def start_player_turn(first_turn=False):
         actor_utility.calibrate_actor_info_display(
             status.mob_info_display, None, override_exempt=True
         )
+    constants.achievement_manager.check_achievements("start of turn")
 
 
 def reset_mobs(mob_type):

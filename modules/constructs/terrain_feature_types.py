@@ -37,6 +37,8 @@ class terrain_feature_type:
                 "level": -1,
             },
         )
+        if type(self.image_id) == dict:
+            self.image_id["level"] = input_dict.get("level", -1)
         self.requirements: Dict[str, any] = input_dict.get("requirements", {})
         self.frequency: Tuple[int, int] = input_dict.get("frequency", None)
         status.terrain_feature_types[self.terrain_feature_type] = self
@@ -61,6 +63,9 @@ class terrain_feature_type:
                             return False
                     elif requirement == "min_y":
                         if cell.y < self.requirements[requirement]:
+                            return False
+                    elif requirement == "resource":
+                        if cell.resource != self.requirements[requirement]:
                             return False
                 return True
         return False

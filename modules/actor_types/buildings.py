@@ -164,10 +164,17 @@ class building(actor):
                     tooltip_text.append(
                         "Acts as a railroad between the tiles it connects"
                     )
-                else:
+                elif self.is_road:
                     tooltip_text.append("Acts as a road between the tiles it connects")
                     tooltip_text.append(
                         "Can be upgraded to a railroad bridge to allow trains to move through this tile"
+                    )
+                else:
+                    tooltip_text.append(
+                        "Allows walking for 2 movement points between the tiles it connects"
+                    )
+                    tooltip_text.append(
+                        "Can be upgraded to a road bridge to act as a road through this tile"
                     )
             else:
                 tooltip_text.append(
@@ -470,22 +477,30 @@ class infrastructure_building(building):
             self.is_railroad = False
             self.is_road = True
             self.is_bridge = True
+        elif self.infrastructure_type == "ferry":
+            self.is_railroad = False
+            self.is_road = False
+            self.is_bridge = True
 
         input_dict["building_type"] = "infrastructure"
-        self.connection_image_dict = {
-            "left_road": "buildings/infrastructure/left_road.png",
-            "right_road": "buildings/infrastructure/right_road.png",
-            "down_road": "buildings/infrastructure/down_road.png",
-            "up_road": "buildings/infrastructure/up_road.png",
-            "left_railroad": "buildings/infrastructure/left_railroad.png",
-            "right_railroad": "buildings/infrastructure/right_railroad.png",
-            "down_railroad": "buildings/infrastructure/down_railroad.png",
-            "up_railroad": "buildings/infrastructure/up_railroad.png",
-            "horizontal_road_bridge": "buildings/infrastructure/horizontal_road_bridge.png",
-            "vertical_road_bridge": "buildings/infrastructure/vertical_road_bridge.png",
-            "horizontal_railroad_bridge": "buildings/infrastructure/horizontal_railroad_bridge.png",
-            "vertical_railroad_bridge": "buildings/infrastructure/vertical_railroad_bridge.png",
-        }
+        self.connection_image_dict = {}
+        for infrastructure_type in ["road", "bridge"]:
+            if infrastructure_type == "road":
+                building_types = ["road", "railroad"]
+                directions = ["up", "down", "left", "right"]
+            elif infrastructure_type == "bridge":
+                building_types = ["road_bridge", "railroad_bridge", "ferry"]
+                directions = ["vertical", "horizontal"]
+            for direction in directions:
+                for building_type in building_types:
+                    self.connection_image_dict[direction + "_" + building_type] = (
+                        "buildings/infrastructure/"
+                        + direction
+                        + "_"
+                        + building_type
+                        + ".png"
+                    )
+
         super().__init__(from_save, input_dict)
         if self.is_bridge:
             up_cell = self.grids[0].find_cell(self.x, self.y + 1)
@@ -500,9 +515,13 @@ class infrastructure_building(building):
                     self.image_dict["default"] = self.connection_image_dict[
                         "vertical_road_bridge"
                     ]
-                else:
+                elif self.is_railroad:
                     self.image_dict["default"] = self.connection_image_dict[
                         "vertical_railroad_bridge"
+                    ]
+                else:
+                    self.image_dict["default"] = self.connection_image_dict[
+                        "vertical_ferry"
                     ]
             else:
                 self.connected_cells = [left_cell, right_cell]
@@ -510,9 +529,13 @@ class infrastructure_building(building):
                     self.image_dict["default"] = self.connection_image_dict[
                         "horizontal_road_bridge"
                     ]
-                else:
+                elif self.is_railroad:
                     self.image_dict["default"] = self.connection_image_dict[
                         "horizontal_railroad_bridge"
+                    ]
+                else:
+                    self.image_dict["default"] = self.connection_image_dict[
+                        "horizontal_ferry"
                     ]
         actor_utility.update_roads()
 
@@ -995,6 +1018,8 @@ class resource_building(building):
             self.scale += 1
         elif upgrade_type == "efficiency":
             self.efficiency += 1
+        if self.scale >= 6 and self.efficiency >= 6:
+            constants.achievement_manager.achieve("Industrialist")
         self.num_upgrades += 1
 
     def get_upgrade_cost(self):

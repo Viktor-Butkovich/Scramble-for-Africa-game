@@ -56,11 +56,10 @@ class canoe_purchase(action.action):
             None
         """
         return [
-            "Attempts to purchase canoes from this village for "
-            + str(constants.action_prices[self.action_type])
-            + " money",
+            f"Attempts to purchase canoes from this village for {constants.action_prices[self.action_type]} money",
             "Can only be done in a village by an expedition or safari",
             "If successful, purchases and equips canoes for this unit",
+            "Easier than building canoes if in a friendly village or if using non-African workers",
             "Costs all remaining movement points, at least 1",
         ]
 
@@ -76,13 +75,7 @@ class canoe_purchase(action.action):
         text = super().generate_notification_text(subject)
         if subject == "confirmation":
             text = "Are you sure you want to attempt to purchase canoes? If successful, this unit will be equipped with canoes. /n /n"
-            text += (
-                "The "
-                + self.name
-                + " will cost "
-                + str(constants.action_prices[self.action_type])
-                + " money. /n /n"
-            )
+            text += f"The {self.name} will cost {constants.action_prices[self.action_type]} money. /n /n"
             if self.aggressiveness_modifier < 0:
                 text += "The villagers are hostile and unlikely to cooperate. /n /n"
             elif self.aggressiveness_modifier > 0:
@@ -91,32 +84,18 @@ class canoe_purchase(action.action):
                 text += "The villagers are wary but may cooperate with sufficient persuasion. /n /n"
         elif subject == "initial":
             text += (
-                "The "
-                + status.displayed_mob.group_type
-                + " tries to purchase canoes. /n /n"
+                f"The {status.displayed_mob.group_type} tries to purchase canoes. /n /n"
             )
         elif subject == "success":
-            text += "The villagers were successfully persuaded to sell canoes. /n /n"
+            text += f"The villagers were successfully persuaded to outfit the {status.displayed_mob.group_type} with canoes. /n /n"
         elif subject == "failure":
-            text += (
-                "The "
-                + status.displayed_mob.group_type
-                + " failed to make any fruitful transactions. /n /n"
-            )
+            text += f"The {status.displayed_mob.group_type} failed to make any fruitful transactions. /n /n"
         elif subject == "critical_failure":
             text += self.generate_notification_text("failure")
-            text += (
-                "Angered by the "
-                + status.displayed_mob.group_type
-                + "'s offer, the natives attack the expedition. /n /n"
-            )
+            text += f"Angered by the {status.displayed_mob.group_type}'s offer, the native attack the expedition. /n /n"
         elif subject == "critical_success":
             text += self.generate_notification_text("success")
-            text += (
-                "The "
-                + status.displayed_mob.officer.name
-                + " is now a veteran and will be more successful in future ventures. /n /n"
-            )
+            text += f"The {status.displayed_mob.officer.name} is now a veteran and will be more successful in future ventures. /n /n"
         return text
 
     def generate_current_roll_modifier(self):
@@ -217,19 +196,9 @@ class canoe_purchase(action.action):
         super().complete()
         village = self.current_unit.images[0].current_cell.get_building("village")
         if self.roll_result >= self.current_min_success:
-            text = (
-                "The villagers offer to outfit the "
-                + self.current_unit.group_type
-                + " with canoes. /n /n"
-            )
             status.equipment_types["canoes"].equip(self.current_unit)
             actor_utility.select_interface_tab(
                 status.mob_tabbed_collection, status.mob_inventory_collection
-            )
-            constants.notification_manager.display_notification(
-                {
-                    "message": text + "Click to remove this notification. /n /n",
-                }
             )
         elif self.roll_result <= self.current_max_crit_fail:
             warrior = village.spawn_warrior()

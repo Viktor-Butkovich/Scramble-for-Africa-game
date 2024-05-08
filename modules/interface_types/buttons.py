@@ -829,6 +829,9 @@ class button(interface_elements.interface_element):
         elif self.button_type == "rename settlement":
             self.set_tooltip(["Displays a typing prompt to rename this settlement"])
 
+        elif self.button_type == "show lore missions":
+            self.set_tooltip(["Displays any completed or current lore missions"])
+
         elif self.button_type == "show previous reports":
             self.set_tooltip(
                 [
@@ -1253,7 +1256,7 @@ class button(interface_elements.interface_element):
                                                 current_passenger.embark_vehicle(
                                                     current_mob
                                                 )
-                                    if last_moved:
+                                    if last_moved and not last_moved.in_vehicle:
                                         last_moved.select()
                                     flags.show_selection_outlines = True
                                     constants.last_selection_outline_switch = (
@@ -3072,6 +3075,76 @@ class commodity_button(button):
             None
         """
         return False
+
+
+class show_lore_missions_button(button):
+    """
+    Button that can be clicked to display report of current and completed lore missions
+    """
+
+    def __init__(self, input_dict):
+        """
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['buttons/default_button_alt.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+        Output:
+            None
+        """
+        input_dict["button_type"] = "show lore missions"
+        super().__init__(input_dict)
+
+    def can_show(self, skip_parent_collection=False):
+        """
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the player has a current lore mission or has completed any, otherwise returns False
+        """
+        return super().can_show(skip_parent_collection=skip_parent_collection) and (
+            status.current_lore_mission or constants.completed_lore_missions
+        )
+
+    def on_click(self):
+        """
+        Description:
+            Controls this button's behavior when clicked. This type of button displays the previous turn's financial report again
+        Input:
+            None
+        Output:
+            None
+        """
+        if main_loop_utility.action_possible():
+            report = "Lore missions report: /n /n"
+            if status.current_lore_mission:
+                report += f"Current mission: {status.current_lore_mission.name} ({status.current_lore_mission.lore_type}) /n /n"
+            else:
+                report += "Current mission: None /n /n"
+            if constants.completed_lore_missions:
+                report += "Completed missions: /n"
+                for mission in constants.completed_lore_missions:
+                    report += (
+                        f"{mission} ({constants.completed_lore_missions[mission]}) /n"
+                    )
+            constants.notification_manager.display_notification(
+                {
+                    "message": report,
+                }
+            )
+        else:
+            text_utility.print_to_screen("You are busy and cannot view lore missions")
 
 
 class show_previous_reports_button(button):

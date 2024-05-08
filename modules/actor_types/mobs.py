@@ -378,7 +378,12 @@ class mob(actor):
                         or adjacent_infrastructure == "none"
                     ):  # if both have infrastructure and connected by land or bridge, use discount
                         cost = cost / 2
-                    # otherwise, use default cost but not full no canoe penalty cost
+                    # otherwise, use default cost but not full cost (no canoe penantly)
+                    if (
+                        adjacent_infrastructure != "none"
+                        and adjacent_infrastructure.infrastructure_type == "ferry"
+                    ):
+                        cost = 2
                 elif (
                     adjacent_cell.terrain == "water"
                     and adjacent_cell.y > 0
@@ -386,9 +391,10 @@ class mob(actor):
                     or adjacent_cell.terrain_features.get("cataract", False)
                 ):  # elif river w/o canoes
                     cost = self.max_movement_points
-
                 if (not adjacent_cell.visible) and self.can_explore:
                     cost = self.movement_cost
+            if local_cell.y == 0 and not self.can_swim_ocean:
+                cost = self.max_movement_points
         return cost
 
     def can_leave(self):
@@ -1009,6 +1015,9 @@ class mob(actor):
                 if (
                     local_infrastructure != "none"
                     and local_infrastructure.is_bridge
+                    and (
+                        local_infrastructure.is_road or local_infrastructure.is_railroad
+                    )
                     and not self.can_swim_river
                 ):  # If walking on bridge
                     possible_sounds.append("effects/footsteps")

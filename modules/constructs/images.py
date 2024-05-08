@@ -755,7 +755,8 @@ class background_image(free_image):
         Output:
             None
         """
-        input_dict["image_id"] = "misc/background.png"
+        input_dict["image_id"] = input_dict.get("image_id", "misc/background.png")
+        self.default_image_id = input_dict["image_id"]
         input_dict["coordinates"] = (0, 0)
         input_dict["width"] = constants.display_width
         input_dict["height"] = constants.display_height
@@ -777,7 +778,7 @@ class background_image(free_image):
                 if self.previous_safe_click_area_showing:
                     self.set_image(
                         [
-                            "misc/background.png",
+                            self.default_image_id,
                             {
                                 "image_id": "misc/safe_click_area.png",
                                 "override_width": status.safe_click_area.width,
@@ -786,7 +787,7 @@ class background_image(free_image):
                         ]
                     )
                 else:
-                    self.set_image("misc/background.png")
+                    self.set_image(self.default_image_id)
             return True
         return False
 
@@ -819,7 +820,7 @@ class tooltip_free_image(free_image):
             self.height,
         )
         self.Rect.y = self.y - self.height
-        self.tooltip_text = []
+        self.tooltip_text = input_dict.get("tooltip_text", [])
         self.update_tooltip()
 
     def set_tooltip(self, tooltip_text):
@@ -857,7 +858,7 @@ class tooltip_free_image(free_image):
         Output:
             None
         """
-        self.tooltip_text = []
+        self.set_tooltip(self.tooltip_text)
 
     def can_show_tooltip(self):
         """

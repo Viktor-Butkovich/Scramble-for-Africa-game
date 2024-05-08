@@ -86,6 +86,16 @@ class actor_display_label(label):
             input_dict["width"], input_dict["height"] = (m_size, m_size)
             self.add_attached_button(input_dict)
 
+            del input_dict["keybind_id"]
+            input_dict["image_id"] = [
+                "buttons/default_button_alt2.png",
+                {"image_id": "misc/green_circle.png", "size": 0.75},
+                {"image_id": "items/consumer goods.png", "size": 0.75},
+            ]
+            input_dict["init_type"] = "toggle button"
+            input_dict["toggle_variable"] = "wait_until_full"
+            self.add_attached_button(input_dict)
+
             input_dict = {
                 "coordinates": (self.x, self.y),
                 "width": m_size,
@@ -116,7 +126,6 @@ class actor_display_label(label):
                     )
                     if button_input_dict:
                         self.add_attached_button(button_input_dict)
-
         elif self.actor_label_type == "movement":
             self.message_start = "Movement points: "
 
@@ -1056,7 +1065,7 @@ class actor_display_label(label):
                             self.set_label(
                                 "Requires a European worker crew to function"
                             )
-                        elif self.actor.vehicle_type == "train":
+                        else:
                             self.set_label(
                                 "Requires a non-slave worker crew to function"
                             )

@@ -19,6 +19,7 @@ import modules.tools.effects as effects
 from modules.tools.data_managers import (
     notification_manager_template,
     value_tracker_template,
+    achievement_manager_template,
 )
 from modules.action_types import (
     public_relations_campaign,
@@ -41,6 +42,7 @@ from modules.action_types import (
     track_beasts,
     trial,
     canoe_purchase,
+    canoe_construction,
     attack_village,
 )
 
@@ -145,7 +147,10 @@ def misc():
     status.instructions_list.append(instructions_message)
 
     status.loading_image = constants.actor_creation_manager.create_interface_element(
-        {"image_id": "misc/loading.png", "init_type": "loading image template image"}
+        {
+            "image_id": ["misc/title.png", "misc/loading.png"],
+            "init_type": "loading image template image",
+        }
     )
 
     strategic_background_image = (
@@ -154,7 +159,6 @@ def misc():
                 "modes": [
                     "strategic",
                     "europe",
-                    "main_menu",
                     "ministers",
                     "trial",
                     "new_game_setup",
@@ -162,6 +166,16 @@ def misc():
                 "init_type": "background image",
             }
         )
+    )
+
+    title_background_image = constants.actor_creation_manager.create_interface_element(
+        {
+            "modes": [
+                "main_menu",
+            ],
+            "image_id": "misc/title.png",
+            "init_type": "background image",
+        }
     )
 
     status.safe_click_area = constants.actor_creation_manager.create_interface_element(
@@ -186,6 +200,10 @@ def misc():
 
     constants.notification_manager = (
         notification_manager_template.notification_manager_template()
+    )
+
+    constants.achievement_manager = (
+        achievement_manager_template.achievement_manager_template()
     )
 
     status.info_displays_collection = (
@@ -345,6 +363,19 @@ def terrain_feature_types_config():
             ],
         }
     )
+    terrain_feature_types.terrain_feature_type(
+        {
+            "terrain_feature_type": "cannibals",
+            "requirements": {"resource": "natives"},
+            "frequency": (1, 3),
+            "level": 1,  # Appears above village icon
+            "description": [
+                "Locals rumor that this village traditionally practices cannibalism",
+                "Warriors from this village will be more formidable in combat",
+                "Any successful religious conversion at yellow or lower aggressiveness will convince the villagers to abandon cannibalism",
+            ],
+        }
+    )
 
     terrain_feature_types.terrain_feature_type(
         {
@@ -428,6 +459,7 @@ def actions():
     track_beasts.track_beasts()
     trial.trial()
     canoe_purchase.canoe_purchase()
+    canoe_construction.canoe_consruction()
 
     for action_type in status.actions:
         if status.actions[action_type].placement_type == "free":
@@ -898,6 +930,18 @@ def value_trackers():
             "init_type": "show previous reports button",
         }
     )
+    constants.actor_creation_manager.create_interface_element(
+        {
+            "coordinates": scaling.scale_coordinates(
+                270, constants.default_display_height - 65
+            ),
+            "width": scaling.scale_width(30),
+            "height": scaling.scale_height(30),
+            "modes": ["strategic", "europe", "ministers", "trial"],
+            "image_id": "buttons/execute_single_movement_route_button.png",
+            "init_type": "show lore missions button",
+        }
+    )
 
     constants.evil_tracker = value_tracker_template.value_tracker_template(
         "evil", 0, 0, 100
@@ -1047,7 +1091,7 @@ def buttons():
 
     input_dict["coordinates"] = (
         input_dict["coordinates"][0],
-        scaling.scale_height(constants.default_display_height / 2 - 50),
+        scaling.scale_height(constants.default_display_height / 2 - 150),
     )
     input_dict["modes"] = ["main_menu"]
     input_dict["keybind_id"] = pygame.K_n
@@ -1059,7 +1103,7 @@ def buttons():
 
     input_dict["coordinates"] = (
         input_dict["coordinates"][0],
-        scaling.scale_height(constants.default_display_height / 2 - 300),
+        scaling.scale_height(constants.default_display_height / 2 - 400),
     )
     input_dict["modes"] = ["new_game_setup"]
     input_dict["keybind_id"] = pygame.K_n
@@ -1069,7 +1113,7 @@ def buttons():
 
     input_dict["coordinates"] = (
         input_dict["coordinates"][0],
-        scaling.scale_height(constants.default_display_height / 2 - 125),
+        scaling.scale_height(constants.default_display_height / 2 - 225),
     )
     input_dict["modes"] = ["main_menu"]
     input_dict["keybind_id"] = pygame.K_l
@@ -1908,13 +1952,13 @@ def tile_interface():
     tile_info_display_labels = [
         "coordinates",
         "terrain",
-        "terrain features",
         "resource",
         "village",
         "native population",
         "native available workers",
         "native aggressiveness",
         "slave_traders_strength",
+        "terrain features",
     ]
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type in [

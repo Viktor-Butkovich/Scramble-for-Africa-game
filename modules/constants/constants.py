@@ -12,6 +12,9 @@ from modules.tools.data_managers.actor_creation_manager_template import (
     actor_creation_manager_template,
 )
 from modules.tools.data_managers.event_manager_template import event_manager_template
+from modules.tools.data_managers.achievement_manager_template import (
+    achievement_manager_template,
+)
 from modules.tools.data_managers.effect_manager_template import effect_manager_template
 from modules.tools.data_managers.notification_manager_template import (
     notification_manager_template,
@@ -164,6 +167,9 @@ input_manager: input_manager_template = input_manager_template()
 actor_creation_manager: actor_creation_manager_template = (
     actor_creation_manager_template()
 )
+achievement_manager: achievement_manager_template = (
+    None  # requires additional setup before initialization
+)
 event_manager: event_manager_template = event_manager_template()
 effect_manager: effect_manager_template = effect_manager_template()
 notification_manager: notification_manager_template = (
@@ -266,9 +272,9 @@ building_prices: Dict[str, int] = {
     "resource": 10,
     "road": 5,
     "railroad": 15,
-    #'ferry': 50,
-    "road_bridge": 50,  # 100
-    "railroad_bridge": 150,  # 300
+    "ferry": 50,
+    "road_bridge": 100,
+    "railroad_bridge": 300,
     "port": 15,
     "train_station": 10,
     "trading_post": 5,
@@ -659,6 +665,7 @@ lore_types_effect_descriptions_dict: Dict[str, str] = {
     "theology": "chance of a positive modifier for religious campaign rolls",
 }
 completed_lore_mission_types: List[str] = []
+completed_lore_missions: Dict[str, str] = {}
 
 titles: List[str] = [
     "Duke",

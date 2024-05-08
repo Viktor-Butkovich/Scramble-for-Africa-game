@@ -178,7 +178,7 @@ class choice_button(buttons.button):
             None
         """
         super().on_click()
-        self.notification.remove_complete()
+        self.notification.on_click(choice_button_override=True)
 
     def draw(self):
         """

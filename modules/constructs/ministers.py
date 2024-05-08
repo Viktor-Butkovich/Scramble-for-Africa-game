@@ -724,7 +724,7 @@ class minister:
         return results
 
     def attack_roll_to_list(
-        self, own_modifier, enemy_modifier, value, roll_type, num_dice
+        self, own_modifier, enemy_modifier, opponent, value, roll_type, num_dice
     ):
         """
         Description:
@@ -732,6 +732,7 @@ class minister:
         Input:
             int own_modifier: Modifier added to the friendly unit's roll, used to create realistic inconclusive results when corrupt
             int enemy_modifier: Modifier added to the enemy unit's roll, used to create realistic inconclusive results when corrupt
+            npmob opponent: Enemy unit being rolled against
             double value: Amount of money being spent by company to make this roll, can be stolen
             string roll_type: Type of roll being made, used in prosector report description if minister steals money and is caught
             int num_dice: number of dice rolled by the friendly unit, not including the one die rolled by the enemy unit
@@ -768,7 +769,7 @@ class minister:
         else:  # if not corrupt, just roll with minister modifier
             for i in range(num_dice):
                 results.append(self.no_corruption_roll(6, roll_type))
-            enemy_roll = random.randrange(1, 7)
+            enemy_roll = opponent.combat_roll()
             results = [enemy_roll] + results
         self.stolen_already = False
         return results

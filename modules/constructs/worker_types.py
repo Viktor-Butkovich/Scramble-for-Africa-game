@@ -152,6 +152,8 @@ class worker_type:
         """
         if not self.adjective in ["religious", "slave"]:
             market_utility.attempt_worker_upkeep_change("increase", self.adjective)
+            if self.adjective == "African":
+                constants.achievement_manager.check_achievements("Minimum Wage")
         elif self.adjective == "slave":
             if purchased:  # as opposed to captured
                 if not constants.effect_manager.effect_active("no_slave_trade_penalty"):

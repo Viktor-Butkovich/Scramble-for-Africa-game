@@ -62,6 +62,7 @@ class save_load_manager_template:
         self.copied_constants.append("slave_traders_strength")
         self.copied_constants.append("slave_traders_natural_max_strength")
         self.copied_constants.append("completed_lore_mission_types")
+        self.copied_constants.append("completed_lore_missions")
 
         self.copied_statuses = []
         self.copied_statuses.append("current_country_name")
