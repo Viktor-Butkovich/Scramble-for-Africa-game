@@ -62,6 +62,17 @@ class npmob(mob):
         super().remove()
         status.npmob_list = utility.remove_from_list(status.npmob_list, self)
 
+    def combat_roll(self) -> int:
+        """
+        Description:
+            Calculates and returns this unit's combat roll - default of 1D6 with no modifiers
+        Input:
+            None
+        Output:
+            int: Returns this unit's combat roll
+        """
+        return random.randrange(1, 7)
+
     def visible(self):
         """
         Description:

@@ -150,7 +150,6 @@ class grid(interface_elements.interface_element):
                         0, constants.terrain_variant_dict.get(terrain, 1)
                     )
                     cell.set_terrain(terrain, terrain_variant)
-        self.generate_terrain_features()
 
     def generate_terrain_features(self):
         """
@@ -537,6 +536,7 @@ class grid(interface_elements.interface_element):
                     if (not set_resource) and terrain_number < current_resource[1]:
                         cell.set_resource(current_resource[0])
                         break
+            self.generate_terrain_features()
 
     def make_random_terrain_worm(self, min_len, max_len, possible_terrains):
         """

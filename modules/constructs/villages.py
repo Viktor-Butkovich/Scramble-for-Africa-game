@@ -57,6 +57,30 @@ class village:
             if not self.cell.settlement:
                 self.cell.tile.set_name(self.name)
 
+    def has_cannibals(self) -> bool:
+        """
+        Description:
+            Returns whether this village has cannibals
+        Input:
+            None
+        Output:
+            boolean: Returns whether this village has cannibals
+        """
+        return bool(self.cell.terrain_features.get("cannibals", False))
+
+    def remove_cannibals(self) -> None:
+        """
+        Description:
+            Removes cannibals from this village, if any
+        Input:
+            None
+        Output:
+            None
+        """
+        if self.has_cannibals():
+            del self.cell.terrain_features["cannibals"]
+            self.cell.tile.update_image_bundle()
+
     def remove_complete(self):
         """
         Description:

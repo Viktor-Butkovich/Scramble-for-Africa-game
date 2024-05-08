@@ -91,13 +91,16 @@ class conversion(action.action):
         elif subject == "initial":
             text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
         elif subject == "success":
-            text += "The missionaries have made progress in converting the natives and have reduced their aggressiveness from "
-            text += (
-                str(self.current_village.aggressiveness)
-                + " to "
-                + str(self.current_village.aggressiveness - 1)
-                + ". /n /n"
-            )
+            if self.current_village.aggressiveness > 1:
+                text += "The missionaries have made progress in converting the natives and have reduced their aggressiveness from "
+                text += (
+                    str(self.current_village.aggressiveness)
+                    + " to "
+                    + str(self.current_village.aggressiveness - 1)
+                    + ". /n /n"
+                )
+            if self.current_village.aggressiveness <= 7:
+                text += "The villagers have been persuaded to abandon their cannibalistic traditions. /n /n"
             self.public_relations_change = random.randrange(0, 2)
             if self.public_relations_change > 0:
                 text += "Working to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by "
@@ -185,7 +188,10 @@ class conversion(action.action):
                 text_utility.print_to_screen(
                     "Converting is only possible in a village."
                 )
-            elif self.current_village.aggressiveness <= 1:
+            elif (
+                self.current_village.aggressiveness <= 1
+                and not self.current_village.has_cannibals()
+            ):
                 text_utility.print_to_screen(
                     "This village already has the minimum aggressiveness and cannot be converted."
                 )
@@ -235,6 +241,8 @@ class conversion(action.action):
         if self.roll_result >= self.current_min_success:
             self.current_village.change_aggressiveness(-1)
             constants.public_opinion_tracker.change(self.public_relations_change)
+            if self.current_village.aggressiveness <= 6:
+                self.current_village.remove_cannibals()
         super().complete()
         if self.roll_result <= self.current_max_crit_fail:
             warrior = self.current_village.spawn_warrior()

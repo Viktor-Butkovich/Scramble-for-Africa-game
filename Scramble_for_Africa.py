@@ -52,5 +52,4 @@ except Exception:  # displays error message and records error message in crash l
 # Replace placeholder images
 #   Especially for Maxim gun
 # Add cosmetic flag to minister screen
-# Add cannibals
 # Add Asia grid music

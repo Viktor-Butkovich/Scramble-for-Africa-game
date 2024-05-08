@@ -51,6 +51,26 @@ class native_warriors(npmob):
         self.set_has_canoes(True)
         self.update_canoes()
 
+    def combat_roll(self) -> int:
+        """
+        Description:
+            Calculates and returns this unit's combat roll - default of 1D6 with no modifiers
+        Input:
+            None
+        Output:
+            int: Returns this unit's combat roll
+        """
+        initial_result = super().combat_roll()
+        if self.origin_village.has_cannibals():
+            initial_result_copy = initial_result
+            initial_result += random.randrange(0, 2)
+            initial_result = min(initial_result, 6)
+            if constants.effect_manager.effect_active("show_modifiers"):
+                print(
+                    f"Cannibals added {initial_result - initial_result_copy} to combat roll"
+                )
+        return initial_result
+
     def attack_on_spawn(self):
         """
         Description:

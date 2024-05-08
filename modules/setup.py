@@ -147,7 +147,10 @@ def misc():
     status.instructions_list.append(instructions_message)
 
     status.loading_image = constants.actor_creation_manager.create_interface_element(
-        {"image_id": ["misc/title.png", "misc/loading.png"], "init_type": "loading image template image"}
+        {
+            "image_id": ["misc/title.png", "misc/loading.png"],
+            "init_type": "loading image template image",
+        }
     )
 
     strategic_background_image = (
@@ -165,16 +168,14 @@ def misc():
         )
     )
 
-    title_background_image = (
-        constants.actor_creation_manager.create_interface_element(
-            {
-                "modes": [
-                    "main_menu",
-                ],
-                "image_id": "misc/title.png",
-                "init_type": "background image",
-            }
-        )
+    title_background_image = constants.actor_creation_manager.create_interface_element(
+        {
+            "modes": [
+                "main_menu",
+            ],
+            "image_id": "misc/title.png",
+            "init_type": "background image",
+        }
     )
 
     status.safe_click_area = constants.actor_creation_manager.create_interface_element(
@@ -359,6 +360,19 @@ def terrain_feature_types_config():
                 "Canoes can not traverse cataracts, but canoe units can spend their whole turn moving into a cataract in the same way that non-canoe units can enter rivers",
                 "Steamboats can not traverse cataracts, but can circumvent them through a series of adjacent ports",
                 "Other units treat cataracts as usual river water",
+            ],
+        }
+    )
+    terrain_feature_types.terrain_feature_type(
+        {
+            "terrain_feature_type": "cannibals",
+            "requirements": {"resource": "natives"},
+            "frequency": (1, 3),
+            "level": 1,  # Appears above village icon
+            "description": [
+                "Locals rumor that this village traditionally practices cannibalism",
+                "Warriors from this village will be more formidable in combat",
+                "Any successful religious conversion at yellow or lower aggressiveness will convince the villagers to abandon cannibalism",
             ],
         }
     )
@@ -1938,13 +1952,13 @@ def tile_interface():
     tile_info_display_labels = [
         "coordinates",
         "terrain",
-        "terrain features",
         "resource",
         "village",
         "native population",
         "native available workers",
         "native aggressiveness",
         "slave_traders_strength",
+        "terrain features",
     ]
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type in [

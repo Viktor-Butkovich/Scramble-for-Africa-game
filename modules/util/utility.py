@@ -83,7 +83,7 @@ def copy_list(
     return return_list
 
 
-def generate_article(word):
+def generate_article(word, add_space=False):
     """
     Description:
         Returns 'an' if the inputted word starts with a vowel or 'a' if the inputted word does not start with a vowel. In certain exception cases, the correct article will be returned regardless of the first letter. Used to correctly
@@ -93,15 +93,19 @@ def generate_article(word):
     Output:
         string: Returns 'an' if the inputed word starts with a vowel, otherwise returns 'a'
     """
+    if add_space:
+        space = " "
+    else:
+        space = ""
     vowels = ["a", "e", "i", "o", "u"]
     plural_exceptions = ["hills", "genius", "brainless", "treacherous"]
     a_an_exceptions = ["European", "unit"]
     if word[-1] == "s" and (not word in plural_exceptions):
         return ""
     elif word[0] in vowels and (not word in a_an_exceptions):
-        return "an"
+        return "an" + space
     else:
-        return "a"
+        return "a" + space
 
 
 def generate_plural(amount):

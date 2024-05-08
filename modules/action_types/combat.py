@@ -181,75 +181,20 @@ class combat(action.action):
         text = super().generate_notification_text(subject)
         if subject == "confirmation":
             if self.opponent.npmob_type == "beast":
-                text += (
-                    "Are you sure you want to spend "
-                    + str(self.get_price())
-                    + " money to hunt the "
-                )
-                text += (
-                    self.opponent.name
-                    + " to the "
-                    + self.direction
-                    + "? /n /nRegardless of the result, the rest of this unit's movement points will be consumed."
-                )
+                text += f"Are you sure you want to spend {str(self.get_price())} money to hunt the {self.opponent.name} to the {self.direction}? /n /nRegardless of the result, the rest of this unit's movement points will be consumed."
             else:
-                text += (
-                    "Are you sure you want to spend "
-                    + str(self.get_price())
-                    + " money to attack the "
-                )
-                text += (
-                    self.opponent.name
-                    + " to the "
-                    + self.direction
-                    + "? /n /nRegardless of the result, the rest of this unit's movement points will be consumed."
-                )
+                text += f"Are you sure you want to spend {str(self.get_price())} money to attack the {self.opponent.name} to the {self.direction}? /n /nRegardless of the result, the rest of this unit's movement points will be consumed."
         elif subject == "initial":
             if self.defending:
-                text += (
-                    utility.capitalize(self.opponent.name)
-                    + " "
-                    + utility.conjugate("be", self.opponent.number)
-                    + " attacking your "
-                    + self.current_unit.name
-                    + " at ("
-                    + str(self.current_unit.x)
-                    + ", "
-                    + str(self.current_unit.y)
-                    + ")."
-                )
+                text += f"{utility.capitalize(self.opponent.name)} {utility.conjugate('be', self.opponent.number)} attacking your {self.current_unit.name} at ({str(self.current_unit.x)}, {str(self.current_unit.y)})."
             else:
-                text += (
-                    "Your "
-                    + self.current_unit.name
-                    + " "
-                    + utility.conjugate("be", self.current_unit.number)
-                    + " attacking the "
-                    + self.opponent.name
-                    + " at ("
-                    + str(self.current_unit.x)
-                    + ", "
-                    + str(self.current_unit.y)
-                    + ")."
-                )
+                text += f"Your {self.current_unit.name} {utility.conjugate('be', self.current_unit.number)} attacking the {self.opponent.name} at ({str(self.current_unit.x)}, {str(self.current_unit.y)})."
 
         elif subject == "modifier_breakdown":
-            text += (
-                "The "
-                + self.current_unit.name
-                + " "
-                + utility.conjugate("attempt", self.current_unit.number)
-                + " to defeat the "
-                + self.opponent.name
-                + ". /n /n"
-            )
+            text += f"The {self.current_unit.name} {utility.conjugate('attempt', self.current_unit.number)} to defeat the {self.opponent.name}. /n /n"
 
             if self.current_unit.veteran:
-                text += (
-                    "The "
-                    + self.current_unit.officer.name
-                    + " can roll twice and pick the higher result. /n"
-                )
+                text += f"The {self.current_unit.officer.name} can roll twice and pick the higher result. /n"
 
             if self.current_unit.is_battalion:
                 if self.current_unit.battalion_type == "imperial":
@@ -262,136 +207,67 @@ class combat(action.action):
                 else:
                     text += "Your safari is not accustomed to conventional combat and will receive a -1 penalty after their roll. /n"
             else:
-                text += (
-                    "As a non-military unit, your "
-                    + self.current_unit.name
-                    + " will receive a -1 penalty after their roll. /n"
-                )
+                text += f"As a non-military unit, your {self.current_unit.name} will receive a -1 penalty after their roll. /n"
 
             if self.current_unit.disorganized:
-                text += (
-                    "The "
-                    + self.name
-                    + " "
-                    + utility.conjugate("be", self.current_unit.number)
-                    + " disorganized and will receive a -1 penalty after their roll. /n"
-                )
+                text += f"The {self.name} {utility.conjugate('be', self.current_unit.number)} disorganized and will receive a -1 penalty after their roll. /n"
             elif self.opponent.disorganized:
                 if self.opponent.npmob_type == "beast":
-                    text += (
-                        "The "
-                        + self.opponent.name
-                        + " "
-                        + utility.conjugate("be", self.opponent.number)
-                        + " injured and will receive a -1 after its roll. /n"
-                    )
+                    text += f"The {self.opponent.name} {utility.conjugate('be', self.opponent.number)} injured and will receive a -1 after its roll. /n"
                 else:
-                    text += (
-                        "The "
-                        + self.opponent.name
-                        + " "
-                        + utility.conjugate("be", self.opponent.number)
-                        + " disorganized and will receive a -1 after their roll. /n"
-                    )
+                    text += f"The {self.opponent.name} {utility.conjugate('be', self.opponent.number)} disorganized and will receive a -1 after their roll. /n"
 
             if self.opponent.npmob_type == "beast" and not self.current_unit.is_safari:
-                text += (
-                    "The "
-                    + self.current_unit.name
-                    + " "
-                    + utility.conjugate("be", self.current_unit.number)
-                    + " not trained in hunting beasts and will receive a -1 penalty after their roll. /n"
-                )
+                text += f"The {self.current_unit.name} {utility.conjugate('be', self.current_unit.number)} not trained in hunting beasts and will receive a -1 penalty after their roll. /n"
 
             if self.current_unit.images[0].current_cell.has_intact_building("fort"):
-                text += (
-                    "The fort in this tile grants your "
-                    + self.current_unit.name
-                    + " a +1 bonus after their roll. /n"
-                )
+                text += f"The fort in this tile grants your {self.current_unit.name} a +1 bonus after their roll. /n"
 
             if self.current_unit.veteran:
                 text += "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /n"
             else:
                 text += "The outcome will be based on the difference between your roll and the enemy's roll. /n /n"
         elif subject == "opponent_roll":
-            text += "The enemy rolled a " + str(self.opponent_roll_result)
+            text += f"The enemy rolled a {str(self.opponent_roll_result)}"
             if self.opponent_roll_modifier > 0:
-                text += (
-                    " + "
-                    + str(self.opponent_roll_modifier)
-                    + " = "
-                    + str(self.opponent_roll_result + self.opponent_roll_modifier)
-                )
+                text += f" + {str(self.opponent_roll_modifier)} = {str(self.opponent_roll_result + self.opponent_roll_modifier)}"
             elif self.opponent_roll_modifier < 0:
-                text += (
-                    " - "
-                    + str(self.opponent_roll_modifier * -1)
-                    + " = "
-                    + str(self.opponent_roll_result + self.opponent_roll_modifier)
-                )
+                text += f" - {str(self.opponent_roll_modifier * -1)} = {str(self.opponent_roll_result + self.opponent_roll_modifier)}"
             text += " /n"
         elif subject == "critical_failure":  # lose
             if self.defending:
                 if self.opponent.npmob_type == "beast":
                     self.public_opinion_change = random.randrange(1, 4) * -1
                     if self.current_unit.number == 1:
-                        text += (
-                            "The "
-                            + self.opponent.name
-                            + " slaughtered your "
-                            + self.current_unit.name
-                            + ". /n /n"
-                        )
+                        text += f"The {self.opponent.name} slaughtered your {self.current_unit.name}. /n /n"
                     else:
-                        text += (
-                            "The "
-                            + self.opponent.name
-                            + " slaughtered most of your "
-                            + self.current_unit.name
-                            + " and the survivors deserted, promising to never return. /n /n"
-                        )
+                        text += f"The {self.opponent.name} slaughtered most of your {self.current_unit.name} and the survivors deserted, promising to never return. /n /n"
                     killed_by_beast_flavor = [
                         "Onlookers in Europe wonder how the world's greatest empire could be bested by mere beasts. /n /n",
                         "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few wild animals.",
                         "Sensationalized news stories circulate of 'brave conquerors' aimlessly wandering the jungle at the mercy of beasts, no better than savages.",
                     ]
-                    text += (
-                        random.choice(killed_by_beast_flavor)
-                        + " Public opinion has decreased by "
-                        + str(self.public_opinion_change * -1)
-                        + ". /n /n"
-                    )
+                    text += f"{random.choice(killed_by_beast_flavor)} Public opinion has decreased by {self.public_opinion_change * -1}. /n /n"
                 else:
                     self.public_opinion_change = random.randrange(-3, 4)
                     if self.current_unit.number == 1:
-                        text += (
-                            "The "
-                            + self.opponent.name
-                            + " decisively defeated your "
-                            + self.current_unit.name
-                            + ", who was either slain or captured. /n /n"
-                        )
+                        phrase = "was "
                     else:
-                        text += (
-                            "The "
-                            + self.opponent.name
-                            + " decisively defeated your "
-                            + self.current_unit.name
-                            + ", who have all been slain or captured. /n /n"
-                        )
+                        phrase = "were all "
+                    if self.opponent.origin_village.has_cannibals():
+                        ending = "dragged off screaming"
+                    else:
+                        ending = "either slain or captured"
+
+                    text += f"The {self.opponent.name} decisively defeated your {self.current_unit.name}, who {phrase} {ending}. /n /n"
+
                     if self.public_opinion_change > 0:
                         killed_by_natives_flavor = [
                             "Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n",
                             "Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.",
                             "Sensationalized news stories circulate of ungrateful savages attempting to resist their benevolent saviors.",
                         ]
-                        text += (
-                            random.choice(killed_by_natives_flavor)
-                            + " Public opinion has increased by "
-                            + str(self.public_opinion_change)
-                            + ". /n /n"
-                        )
+                        text += f"{random.choice(killed_by_natives_flavor)} Public opinion has increased by {self.public_opinion_change}. /n /n"
                     elif self.public_opinion_change < 0:
                         killed_by_natives_flavor = [
                             "Onlookers in Europe wonder how the world's greatest empire could be bested by mere savages. /n /n",
@@ -404,25 +280,12 @@ class combat(action.action):
                             + str(self.public_opinion_change * -1)
                             + ". /n /n"
                         )
+                        text += f"{random.choice(killed_by_natives_flavor)} Public opinion has decreased by {self.public_opinion_change * -1}. /n /n"
             else:
                 if self.opponent.npmob_type == "beast":
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " were slowly picked off as they tracked the "
-                        + self.opponent.name
-                        + " to its lair. The survivors eventually fled in terror and will be vulnerable to counterattack. /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} were slowly picked off as they tracked the {self.opponent.name} to its lair. The survivors eventually fled in terror and will be vulnerable to counterattack. /n /n"
                 else:
-                    text += (
-                        "The "
-                        + self.opponent.name
-                        + " decisively routed your "
-                        + self.current_unit.name
-                        + ", who "
-                        + utility.conjugate("be", self.opponent.number)
-                        + "  scattered and will be vulnerable to counterattack. /n /n"
-                    )
+                    text += f"The {self.opponent.name} decisively routed your {self.current_unit.name}, who {utility.conjugate('be', self.opponent.number)} scattered and will be vulnerable to counterattack. /n /n"
 
         elif subject == "failure":  # draw
             if self.defending:
@@ -443,48 +306,14 @@ class combat(action.action):
                 ):  # if enemy attacked by going south
                     retreat_direction = "north"
                 if self.opponent.npmob_type == "beast":
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " managed to scare off the attacking "
-                        + self.opponent.name
-                        + ", which was seen running to the "
-                        + retreat_direction
-                        + ". /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} managed to scare off the attacking {self.opponent.name}, which was seen running to the {retreat_direction}. /n /n"
                 else:
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " managed to repel the attacking "
-                        + self.opponent.name
-                        + ", who "
-                        + utility.conjugate("be", self.opponent.number, "preterite")
-                        + " seen withdrawing to the "
-                        + retreat_direction
-                        + ". /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} managed to repel the attacking {self.opponent.name}, who {utility.conjugate('be', self.opponent.number, 'preterite')} seen withdrawing to the {retreat_direction}. /n /n"
             else:
                 if self.opponent.npmob_type == "beast":
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " failed to track the "
-                        + self.opponent.name
-                        + " to its lair and "
-                        + utility.conjugate("be", self.current_unit.number, "preterite")
-                        + " forced to withdraw. /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} failed to track the {self.opponent.name} to its lair and {utility.conjugate('be', self.current_unit.number, 'preterite')} forced to withdraw. /n /n"
                 else:
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " failed to push back the defending "
-                        + self.opponent.name
-                        + " and "
-                        + utility.conjugate("be", self.current_unit.number, "preterite")
-                        + " forced to withdraw. /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} failed to push back the defending {self.opponent.name} and {utility.conjugate('be', self.current_unit.number, 'preterite')} forced to withdraw. /n /n"
         elif subject == "success":  # win
             if self.defending:
                 if (
@@ -504,63 +333,21 @@ class combat(action.action):
                 ):  # if enemy attacked by going south
                     retreat_direction = "north"
                 if self.opponent.npmob_type == "beast":
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " injured and scared off the attacking "
-                        + self.opponent.name
-                        + ", which was seen running to the "
-                        + retreat_direction
-                        + " and will be vulnerable as it heals. /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} injured and scared off the attacking {self.opponent.name}, which was seen running to the {retreat_direction} and will be vulnerable as it heals. /n /n"
                 else:
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " decisively routed the attacking "
-                        + self.opponent.name
-                        + ", who "
-                        + utility.conjugate("be", self.opponent.number, "preterite")
-                        + " seen scattering to the "
-                        + retreat_direction
-                    )
-                    text += " and will be vulnerable to counterattack. /n /n"
+                    text += f"Your {self.current_unit.name} decisively routed the attacking {self.opponent.name}, who {utility.conjugate('be', self.opponent.number, 'preterite')} seen scattering to the {retreat_direction} and will be vulnerable to counterattack. /n /n"
             else:
                 if self.opponent.npmob_type == "beast":
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " tracked down and killed the "
-                        + self.opponent.name
-                        + ". /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} tracked down and killed the {self.opponent.name}. /n /n"
                     self.public_relations_change = random.randrange(1, 7)
-                    text += (
-                        "Sensationalized stories of your safari's exploits and the death of the "
-                        + self.opponent.name
-                        + " increase public opinion by "
-                        + str(self.public_relations_change)
-                        + ". /n /n"
-                    )
+                    text += f"Sensationalized stories of your safari's exploits and the death of the {self.opponent.name} increase public opinion by {str(self.public_relations_change)}. /n /n"
                 else:
-                    text += (
-                        "Your "
-                        + self.current_unit.name
-                        + " decisively defeated and destroyed the "
-                        + self.opponent.name
-                        + ". /n /n"
-                    )
+                    text += f"Your {self.current_unit.name} decisively defeated and destroyed the {self.opponent.name}. /n /n"
         elif (
             subject == "critical_success"
         ):  # win with a 6 and correct unit/enemy combination to promote - civilian units can't promote from defensive combat
             text += self.generate_notification_text("success")
-            text += (
-                "This "
-                + self.current_unit.name
-                + "'s "
-                + self.current_unit.officer.name
-                + " is now a veteran. /n /n"
-            )
+            text += f"This {self.current_unit.name}'s {self.current_unit.officer.name} is now a veteran. /n /n"
         return text
 
     def generate_current_roll_modifier(self, opponent=False):
@@ -781,6 +568,7 @@ class combat(action.action):
             minister_rolls = self.current_unit.controlling_minister.attack_roll_to_list(  # minister rolls need to be made with enemy roll in mind, as corrupt result needs to be inconclusive
                 self.current_roll_modifier,
                 self.opponent_roll_modifier,
+                self.opponent,
                 price,
                 action_type,
                 num_dice,
@@ -791,12 +579,12 @@ class combat(action.action):
         ):
             # Minister/country 'combat' modifiers don't apply on defense because no roll type is specified in no_corruption_roll, while unit modifiers do apply on defense
             #   Defense is a more spontaneous action that should only rely on what is immediately on-site, but this could be modified in the future
-            results = [random.randrange(1, 7)] + [
+            results = [self.opponent.combat_roll()] + [
                 self.current_unit.controlling_minister.no_corruption_roll(6)
                 for i in range(num_dice)
             ]
         else:
-            results = [random.randrange(1, 7)] + [
+            results = [self.opponent.combat_roll()] + [
                 random.randrange(1, 7) for i in range(num_dice)
             ]  # civilian ministers don't get to roll for combat with their units
         for index, current_result in enumerate(results):
