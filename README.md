@@ -1,7 +1,6 @@
 Scramble for Africa - a game simulating the European imperialist conquest of Africa
 
 <img src="graphics/misc/title.png" alt="Title Screen">
-![Title Screen](https://github.com/Vrotki/Scramble-for-Africa-game/blob/release/graphics/misc/title.png)
 
 Welcome to Scramble for Africa! Your goal as colonial governor is to bring glory to your country's name by conquering and enlightening this hostile continent, hopefully becoming fabulously rich in the process. Your work will require close cooperation with your subordinate ministers - while some will accomplish whatever you ask, many will lie, steal, and swindle their way to glory, and the rest are just plain incompetent.
 
