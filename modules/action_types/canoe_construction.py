@@ -1,4 +1,4 @@
-# Contains all functionality for finding artifact rumors
+# Contains all functionality for building canoes
 
 import pygame
 from . import action
