@@ -50,5 +50,3 @@ except Exception:  # displays error message and records error message in crash l
 #   new SFA features:
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
-#   Especially for Maxim gun
-# Add cosmetic flag to minister screen

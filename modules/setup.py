@@ -190,7 +190,6 @@ def misc():
     # safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
 
     game_transitions.set_game_mode("main_menu")
-    constants.previous_game_mode = "main_menu"  # after set game mode, both previous and current game modes should be main_menu
 
     constants.mouse_follower = (
         constants.actor_creation_manager.create_interface_element(
@@ -827,7 +826,7 @@ def value_trackers():
         constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    300, constants.default_display_height
+                    250, constants.default_display_height
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(30),
@@ -857,7 +856,7 @@ def value_trackers():
             "init_type": "value label",
             "parent_collection": value_trackers_ordered_collection,
             "member_config": {
-                "order_x_offset": scaling.scale_width(275),
+                "order_x_offset": scaling.scale_width(315),
                 "order_overlap": True,
             },
         }
@@ -887,7 +886,7 @@ def value_trackers():
         {
             "minimum_width": scaling.scale_width(10),
             "height": scaling.scale_height(30),
-            "modes": ["strategic", "europe", "ministers"],
+            "modes": ["strategic", "europe", "ministers", "trial"],
             "image_id": "misc/default_label.png",
             "value_name": "public_opinion",
             "init_type": "value label",
@@ -921,7 +920,7 @@ def value_trackers():
     constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                270, constants.default_display_height - 30
+                220, constants.default_display_height - 30
             ),
             "width": scaling.scale_width(30),
             "height": scaling.scale_height(30),
@@ -933,7 +932,7 @@ def value_trackers():
     constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                270, constants.default_display_height - 65
+                220, constants.default_display_height - 65
             ),
             "width": scaling.scale_width(30),
             "height": scaling.scale_height(30),
@@ -962,36 +961,76 @@ def buttons():
         None
     """
     # Could implement switch game mode buttons based on state machine logic for different modes
-    europe_button_width = 150
-    europe_button_height = 100
     input_dict = {
         "coordinates": scaling.scale_coordinates(0, 10),
-        "width": scaling.scale_width(europe_button_width),
-        "height": scaling.scale_height(europe_button_height),
-        "keybind_id": pygame.K_e,
+        "width": scaling.scale_width(150),
+        "height": scaling.scale_height(100),
         "image_id": "buttons/european_hq_button.png",
-        "modes": ["strategic"],
+        "modes": ["strategic", "europe"],
         "to_mode": "europe",
-        "init_type": "switch game mode button",
+        "init_type": "free image",
         "parent_collection": status.grids_collection,
     }
-    strategic_to_europe_button = (
-        constants.actor_creation_manager.create_interface_element(input_dict)
+    strategic_flag_icon = constants.actor_creation_manager.create_interface_element(
+        input_dict
     )
     status.flag_icon_list.append(
-        strategic_to_europe_button
+        strategic_flag_icon
     )  # sets button image to update to flag icon when country changes
 
-    europe_button_width = 60
-    europe_button_height = 60
-    input_dict["width"] = scaling.scale_width(europe_button_width)
-    input_dict["height"] = scaling.scale_height(europe_button_height)
-    input_dict["modes"] = ["europe"]
-    input_dict["keybind_id"] = pygame.K_ESCAPE
-    input_dict["to_mode"] = "strategic"
-    input_dict["image_id"] = "buttons/exit_european_hq_button.png"
-    europe_to_strategic_button = (
-        constants.actor_creation_manager.create_interface_element(input_dict)
+    input_dict["modes"] = ["ministers"]
+    input_dict["coordinates"] = scaling.scale_coordinates(
+        constants.default_display_width / 2 - 75, constants.default_display_height - 160
+    )
+    input_dict["parent_collection"] = "none"
+    ministers_flag_icon = constants.actor_creation_manager.create_interface_element(
+        input_dict
+    )
+    status.flag_icon_list.append(ministers_flag_icon)
+
+    input_dict = {
+        "coordinates": scaling.scale_coordinates(
+            1065, constants.default_display_height - 55
+        ),
+        "height": scaling.scale_height(50),
+        "width": scaling.scale_width(50),
+        "keybind_id": pygame.K_1,
+        "image_id": "locations/africa_button.png",
+        "modes": ["ministers", "strategic", "europe", "trial"],
+        "to_mode": "strategic",
+        "init_type": "switch game mode button",
+    }
+    to_strategic_button = constants.actor_creation_manager.create_interface_element(
+        input_dict
+    )
+
+    input_dict.update(
+        {
+            "coordinates": scaling.scale_coordinates(
+                1125, constants.default_display_height - 55
+            ),
+            "image_id": "locations/europe_button.png",
+            "to_mode": "europe",
+            "keybind_id": pygame.K_2,
+        }
+    )
+    to_europe_button = constants.actor_creation_manager.create_interface_element(
+        input_dict
+    )
+
+    input_dict.update(
+        {
+            "coordinates": scaling.scale_coordinates(
+                1185, constants.default_display_height - 55
+            ),
+            "width": scaling.scale_width(50),
+            "to_mode": "ministers",
+            "image_id": "buttons/european_hq_button.png",
+            "keybind_id": pygame.K_3,
+        }
+    )
+    to_ministers_button = constants.actor_creation_manager.create_interface_element(
+        input_dict
     )
 
     rhs_menu_collection = constants.actor_creation_manager.create_interface_element(
@@ -1001,7 +1040,7 @@ def buttons():
             ),
             "width": 10,
             "height": 10,
-            "modes": ["strategic", "europe", "ministers", "new_game_setup"],
+            "modes": ["strategic", "europe", "ministers", "trial", "new_game_setup"],
             "init_type": "ordered collection",
             "member_config": {"order_exempt": True},
             "separation": 5,
@@ -1026,10 +1065,12 @@ def buttons():
     input_dict["coordinates"] = scaling.scale_coordinates(
         constants.default_display_width - 50, constants.default_display_height - 50
     )
+    input_dict["image_id"] = "buttons/exit_european_hq_button.png"
+    input_dict["init_type"] = "switch game mode button"
     input_dict["width"] = scaling.scale_width(50)
     input_dict["height"] = scaling.scale_height(50)
-    input_dict["modes"] = ["strategic", "europe", "ministers"]
-    input_dict["keybind_id"] = "none"
+    input_dict["modes"] = ["strategic", "europe", "ministers", "trial"]
+    input_dict["keybind_id"] = pygame.K_ESCAPE
     input_dict["to_mode"] = "main_menu"
     to_main_menu_button = constants.actor_creation_manager.create_interface_element(
         input_dict
@@ -1046,33 +1087,6 @@ def buttons():
     )
     lhs_menu_collection.add_member(new_game_setup_to_main_menu_button)
 
-    input_dict["coordinates"] = scaling.scale_coordinates(
-        0, constants.default_display_height - 50
-    )
-    input_dict["modes"] = ["strategic", "europe"]
-    input_dict["keybind_id"] = pygame.K_q
-    input_dict["image_id"] = "buttons/european_hq_button.png"
-    input_dict["to_mode"] = "ministers"
-    to_ministers_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-    lhs_menu_collection.add_member(to_ministers_button)
-
-    input_dict["modes"] = ["ministers"]
-    input_dict["keybind_id"] = pygame.K_ESCAPE
-    input_dict["image_id"] = "buttons/exit_european_hq_button.png"
-    input_dict["to_mode"] = "previous"
-    from_ministers_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-    lhs_menu_collection.add_member(from_ministers_button)
-
-    input_dict["modes"] = ["trial"]
-    input_dict["to_mode"] = "ministers"
-    from_trial_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-
     input_dict = {
         "coordinates": scaling.scale_coordinates(
             round(constants.default_display_width * 0.4),
@@ -1080,7 +1094,7 @@ def buttons():
         ),
         "width": scaling.scale_width(round(constants.default_display_width * 0.2)),
         "height": scaling.scale_height(50),
-        "modes": ["strategic", "europe"],
+        "modes": ["strategic", "europe", "ministers", "trial"],
         "keybind_id": pygame.K_SPACE,
         "image_id": "buttons/end_turn_button.png",
         "init_type": "end turn button",
@@ -1129,7 +1143,7 @@ def buttons():
         ),
         "width": scaling.scale_width(50),
         "height": scaling.scale_height(50),
-        "modes": ["strategic", "europe", "ministers"],
+        "modes": ["strategic", "europe", "ministers", "trial"],
         "image_id": "buttons/save_game_button.png",
         "init_type": "save game button",
     }
@@ -1154,7 +1168,7 @@ def buttons():
         input_dict["coordinates"][0],
         scaling.scale_height(constants.default_display_height - 275),
     )
-    input_dict["modes"] = ["strategic", "europe", "ministers"]
+    input_dict["modes"] = ["strategic", "europe", "ministers", "trial"]
     input_dict["keybind_id"] = pygame.K_j
     input_dict["image_id"] = "buttons/text_box_size_button.png"
     input_dict["init_type"] = "expand text box button"
@@ -1282,7 +1296,7 @@ def ministers_screen():
     """
     # minister table setup
     table_width = 400
-    table_height = 800
+    table_height = 750
     constants.actor_creation_manager.create_interface_element(
         {
             "image_id": "misc/minister_table.png",
@@ -1313,7 +1327,7 @@ def ministers_screen():
                 {
                     "coordinates": scaling.scale_coordinates(
                         (constants.default_display_width / 2) - (table_width / 2) + 10,
-                        current_index * 200 + 95,
+                        current_index * 180 + 95,
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1329,7 +1343,7 @@ def ministers_screen():
                 - (table_width / 2)
                 - position_icon_width
                 - 10,
-                current_index * 200 + 95,
+                current_index * 180 + 95,
             )
             constants.actor_creation_manager.create_interface_element(input_dict)
 
@@ -1341,7 +1355,7 @@ def ministers_screen():
                         + (table_width / 2)
                         - position_icon_width
                         - 10,
-                        (current_index - 4) * 200 + 95,
+                        (current_index - 4) * 180 + 95,
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1358,7 +1372,7 @@ def ministers_screen():
                 - position_icon_width
                 + position_icon_width
                 + 10,
-                (current_index - 4) * 200 + 95,
+                (current_index - 4) * 180 + 95,
             )
             constants.actor_creation_manager.create_interface_element(input_dict)
 

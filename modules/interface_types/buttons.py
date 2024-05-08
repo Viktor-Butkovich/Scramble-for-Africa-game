@@ -2455,22 +2455,16 @@ class switch_game_mode_button(button):
             None
         """
         if main_loop_utility.action_possible():
-            if self.to_mode == "ministers" and "trial" in self.modes:
-                defense = status.displayed_defense
-                if defense.fabricated_evidence > 0:
-                    text = (
-                        "WARNING: Your "
-                        + str(defense.fabricated_evidence)
-                        + " piece"
-                        + utility.generate_plural(defense.fabricated_evidence)
-                        + " of fabricated evidence against "
-                        + defense.current_position
-                        + " "
-                    )
-                    text += (
-                        defense.name
-                        + " will disappear at the end of the turn if left unused. /n /n"
-                    )
+            if self.to_mode == "main_menu":
+                constants.notification_manager.display_notification(
+                    {
+                        "message": "Are you sure you want to exit to the main menu without saving? /n /n",
+                        "choices": ["confirm main menu", "none"],
+                    }
+                )
+            elif constants.current_game_mode == "trial":
+                if status.displayed_defense.fabricated_evidence > 0:
+                    text = f"WARNING: Your {status.displayed_defense.fabricated_evidence} piece{utility.generate_plural(status.displayed_defense.fabricated_evidence)} of fabricated evidence against {status.displayed_defense.current_position} {status.displayed_defense.name} will disappear at the end of the turn if left unused. /n /n"
                     constants.notification_manager.display_notification(
                         {
                             "message": text,
@@ -2484,18 +2478,10 @@ class switch_game_mode_button(button):
                         }
                     )
 
-            if self.to_mode == "main_menu":
-                constants.notification_manager.display_notification(
-                    {
-                        "message": "Are you sure you want to exit to the main menu without saving? /n /n",
-                        "choices": ["confirm main menu", "none"],
-                    }
-                )
-            elif not self.to_mode == "previous":
+            if self.to_mode != "main_menu":
                 game_transitions.set_game_mode(self.to_mode)
-            else:
-                status.exit_minister_screen_tutorial_completed = True
-                game_transitions.set_game_mode(constants.previous_game_mode)
+                if status.minister_appointment_tutorial_completed:
+                    status.exit_minister_screen_tutorial_completed = True
         else:
             text_utility.print_to_screen("You are busy and cannot switch screens.")
 
@@ -2508,14 +2494,20 @@ class switch_game_mode_button(button):
         Output:
             None
         """
-        if self.to_mode == "previous":
-            self.set_tooltip(
-                utility.copy_list(
-                    self.to_mode_tooltip_dict[constants.previous_game_mode]
-                )
-            )
-        else:
-            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
+        self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
+
+    def can_show(self, skip_parent_collection=False):
+        """
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns whether this button should be drawn
+        """
+        if self.to_mode != "main_menu":
+            self.showing_outline = constants.current_game_mode == self.to_mode
+        return super().can_show(skip_parent_collection=skip_parent_collection)
 
 
 class minister_portrait_image(button):

@@ -194,7 +194,6 @@ frames_this_second: int = 0
 last_fps_update: float = 0.0
 
 current_game_mode: str = None
-previous_game_mode: str = None
 
 loading_start_time: float = 0.0
 previous_turn_time: float = 0.0
