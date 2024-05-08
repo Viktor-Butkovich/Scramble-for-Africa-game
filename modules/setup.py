@@ -156,12 +156,23 @@ def misc():
                 "modes": [
                     "strategic",
                     "europe",
-                    "main_menu",
                     "ministers",
                     "trial",
+                ],
+                "init_type": "background image",
+            }
+        )
+    )
+
+    title_image = (
+        constants.actor_creation_manager.create_interface_element(
+            {
+                "modes": [
+                    "main_menu",
                     "new_game_setup",
                 ],
                 "init_type": "background image",
+                "image_id": "misc/loading.png"
             }
         )
     )
@@ -1066,7 +1077,7 @@ def buttons():
 
     input_dict["coordinates"] = (
         input_dict["coordinates"][0],
-        scaling.scale_height(constants.default_display_height / 2 - 50),
+        scaling.scale_height(constants.default_display_height / 2 - 150),
     )
     input_dict["modes"] = ["main_menu"]
     input_dict["keybind_id"] = pygame.K_n
@@ -1078,7 +1089,7 @@ def buttons():
 
     input_dict["coordinates"] = (
         input_dict["coordinates"][0],
-        scaling.scale_height(constants.default_display_height / 2 - 300),
+        scaling.scale_height(constants.default_display_height / 2 - 400),
     )
     input_dict["modes"] = ["new_game_setup"]
     input_dict["keybind_id"] = pygame.K_n
@@ -1088,7 +1099,7 @@ def buttons():
 
     input_dict["coordinates"] = (
         input_dict["coordinates"][0],
-        scaling.scale_height(constants.default_display_height / 2 - 125),
+        scaling.scale_height(constants.default_display_height / 2 - 225),
     )
     input_dict["modes"] = ["main_menu"]
     input_dict["keybind_id"] = pygame.K_l

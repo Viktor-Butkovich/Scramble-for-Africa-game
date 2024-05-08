@@ -755,7 +755,7 @@ class background_image(free_image):
         Output:
             None
         """
-        input_dict["image_id"] = "misc/background.png"
+        input_dict["image_id"] = input_dict.get("image_id", "misc/background.png")
         input_dict["coordinates"] = (0, 0)
         input_dict["width"] = constants.display_width
         input_dict["height"] = constants.display_height
