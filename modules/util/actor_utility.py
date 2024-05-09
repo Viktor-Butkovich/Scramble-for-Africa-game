@@ -7,6 +7,7 @@ import math
 from . import utility, text_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 
 def reset_action_prices():
@@ -487,7 +488,10 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
         status.displayed_tile = new_actor
         if new_actor:
             new_actor.select()  # plays correct music based on tile selected - slave traders/village/europe music
-        select_default_tab(status.tile_tabbed_collection, status.displayed_tile)
+        if (
+            not flags.choosing_destination
+        ):  # Don't change tabs while choosing destination
+            select_default_tab(status.tile_tabbed_collection, status.displayed_tile)
 
     elif info_display == status.mob_info_display:
         if new_actor != status.displayed_mob:
@@ -496,7 +500,10 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
         if new_actor and new_actor.images[0].current_cell.tile == status.displayed_tile:
             for current_same_tile_icon in status.same_tile_icon_list:
                 current_same_tile_icon.reset()
-        select_default_tab(status.mob_tabbed_collection, status.displayed_mob)
+        if (
+            not flags.choosing_destination
+        ):  # Don't change tabs while choosing destination
+            select_default_tab(status.mob_tabbed_collection, status.displayed_mob)
 
     elif info_display == status.country_info_display:
         status.displayed_country = new_actor

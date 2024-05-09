@@ -1,21 +1,21 @@
 # Contains functionality for global effects
 
 from ..util import utility
-import modules.constants.constants as constants
 
 
 class effect:
-    def __init__(self, effect_id, effect_type):
+    def __init__(self, effect_id, effect_type, effect_manager):
         """
         Description:
             Initializes this object
         Input:
             string effect_id: Name of effect, like 'british_country_modifier'
             string effect_type: Type of effect produced by this effect, like 'advertising_plus_modifier'
+            effect_manager_template effect_manager: Effect manager that this effect is associated with
         Output:
             None
         """
-        self.effect_manager = constants.effect_manager
+        self.effect_manager = effect_manager
         self.effect_manager.possible_effects.append(self)
 
         self.effect_id = effect_id

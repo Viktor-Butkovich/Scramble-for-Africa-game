@@ -916,7 +916,7 @@ class button(interface_elements.interface_element):
             )
 
         elif self.button_type == "generate crash":
-            self.set_tooltip(["Generates a crash to reset the crash log"])
+            self.set_tooltip(["Exits the game"])
 
         elif self.button_type == "minimize interface collection":
             if self.parent_collection.minimized:
@@ -1695,7 +1695,10 @@ class button(interface_elements.interface_element):
             constants.public_opinion_tracker.change(-1 * public_opinion_penalty)
 
         elif self.button_type == "generate crash":
-            print(1 / 0)
+            if constants.effect_manager.effect_active("enable_crash_button"):
+                print(1 / 0)
+            else:
+                flags.crashed = True
 
         elif self.button_type == "minimize interface collection":
             self.attached_collection.minimized = not self.attached_collection.minimized
@@ -1744,7 +1747,10 @@ class button(interface_elements.interface_element):
         elif self.button_type == "tab":
             tabbed_collection = self.parent_collection.parent_collection
             tabbed_collection.current_tabbed_member = self.linked_element
-            if self.identifier == "inventory":
+            if (
+                self.identifier == "inventory"
+                and constants.effect_manager.effect_active("link_inventory_tabs")
+            ):
                 if tabbed_collection == status.mob_tabbed_collection:
                     alternate_collection = status.tile_tabbed_collection
                 else:

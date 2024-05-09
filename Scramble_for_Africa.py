@@ -5,7 +5,6 @@ from modules.setup import *
 
 try:
     setup(
-        debug_tools,
         misc,
         worker_types_config,
         equipment_types_config,
@@ -51,4 +50,3 @@ except Exception:  # displays error message and records error message in crash l
 # Add ambient resource production facility, settlement, and village sounds
 # Replace placeholder images
 #   Look into train embark/disembark buttons are the only egregious ones
-#   Look into commodity interaction buttons

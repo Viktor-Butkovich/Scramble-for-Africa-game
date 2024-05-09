@@ -270,7 +270,7 @@ class actor_display_label(label):
                 self.add_attached_button(input_dict)
 
                 input_dict["init_type"] = "sell each commodity button"
-                input_dict["image_id"] = "buttons/commodity_sell_all_button.png"
+                input_dict["image_id"] = "buttons/commodity_sell_each_button.png"
                 self.add_attached_button(input_dict)
 
             else:

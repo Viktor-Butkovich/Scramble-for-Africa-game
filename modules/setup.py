@@ -3,7 +3,6 @@
 import pygame
 import os
 import logging
-import json
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -15,7 +14,6 @@ import modules.constructs.countries as countries
 import modules.constructs.worker_types as worker_types
 import modules.constructs.equipment_types as equipment_types
 import modules.constructs.terrain_feature_types as terrain_feature_types
-import modules.tools.effects as effects
 from modules.tools.data_managers import (
     notification_manager_template,
     value_tracker_template,
@@ -209,7 +207,7 @@ def misc():
         constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    0, constants.default_display_height - 205 + 125
+                    5, constants.default_display_height - 205 + 125 - 5
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(10),
@@ -564,9 +562,6 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    british_country_effect = effects.effect(
-        "british_country_modifier", "construction_plus_modifier"
-    )
 
     status.Britain = countries.country(
         {
@@ -578,7 +573,9 @@ def def_countries():
             "aristocratic_particles": False,
             "allow_double_last_names": False,
             "background_set": british_weighted_backgrounds,
-            "country_effect": british_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "british_country_modifier", "construction_plus_modifier"
+            ),
         }
     )
 
@@ -602,9 +599,7 @@ def def_countries():
         "industrialist",
         "business magnate",
     ]
-    french_country_effect = effects.effect(
-        "french_country_modifier", "conversion_plus_modifier"
-    )
+
     status.France = countries.country(
         {
             "name": "France",
@@ -615,7 +610,9 @@ def def_countries():
             "aristocratic_particles": False,
             "allow_double_last_names": True,
             "background_set": french_weighted_backgrounds,
-            "country_effect": french_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "french_country_modifier", "conversion_plus_modifier"
+            ),
             "has_aristocracy": False,
         }
     )
@@ -640,9 +637,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    german_country_effect = effects.effect(
-        "german_country_modifier", "combat_plus_modifier"
-    )
+
     status.Germany = countries.country(
         {
             "name": "Germany",
@@ -653,7 +648,9 @@ def def_countries():
             "aristocratic_particles": True,
             "allow_double_last_names": False,
             "background_set": german_weighted_backgrounds,
-            "country_effect": german_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "german_country_modifier", "combat_plus_modifier"
+            ),
         }
     )
 
@@ -677,9 +674,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    belgian_country_effect = effects.effect(
-        "belgian_country_modifier", "slave_capture_plus_modifier"
-    )
+
     status.Belgium = countries.hybrid_country(
         {
             "name": "Belgium",
@@ -687,7 +682,9 @@ def def_countries():
             "government_type_adjective": "royal",
             "religion": "catholic",
             "background_set": belgian_weighted_backgrounds,
-            "country_effect": belgian_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "belgian_country_modifier", "slave_capture_plus_modifier"
+            ),
         }
     )
 
@@ -711,9 +708,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    portuguese_country_effect = effects.effect(
-        "portuguese_country_modifier", "no_slave_trade_penalty"
-    )
+
     status.Portugal = countries.country(
         {
             "name": "Portugal",
@@ -724,7 +719,9 @@ def def_countries():
             "aristocratic_particles": False,
             "allow_double_last_names": False,
             "background_set": portuguese_weighted_backgrounds,
-            "country_effect": portuguese_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "portuguese_country_modifier", "no_slave_trade_penalty"
+            ),
         }
     )
 
@@ -748,9 +745,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    italian_country_effect = effects.effect(
-        "italian_country_modifier", "combat_minus_modifier"
-    )
+
     status.Italy = countries.country(
         {
             "name": "Italy",
@@ -761,7 +756,9 @@ def def_countries():
             "aristocratic_particles": True,
             "allow_double_last_names": False,
             "background_set": italian_weighted_backgrounds,
-            "country_effect": italian_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "italian_country_modifier", "combat_minus_modifier"
+            ),
         }
     )
 
@@ -793,22 +790,28 @@ def lore():
     Output:
         None
     """
-    status.lore_types_effects_dict["zoology"] = effects.effect(
+    status.lore_types_effects_dict["zoology"] = constants.effect_manager.create_effect(
         "zoology_completion_effect", "hunting_plus_modifier"
     )
-    status.lore_types_effects_dict["botany"] = effects.effect(
+    status.lore_types_effects_dict["botany"] = constants.effect_manager.create_effect(
         "botany_completion_effect", "health_attrition_plus_modifier"
     )
-    status.lore_types_effects_dict["archaeology"] = effects.effect(
+    status.lore_types_effects_dict[
+        "archaeology"
+    ] = constants.effect_manager.create_effect(
         "archaeology_completion_effect", "combat_plus_modifier"
     )
-    status.lore_types_effects_dict["anthropology"] = effects.effect(
+    status.lore_types_effects_dict[
+        "anthropology"
+    ] = constants.effect_manager.create_effect(
         "anthropology_completion_effect", "conversion_plus_modifier"
     )
-    status.lore_types_effects_dict["paleontology"] = effects.effect(
+    status.lore_types_effects_dict[
+        "paleontology"
+    ] = constants.effect_manager.create_effect(
         "paleontology_completion_effect", "public_relations_campaign_modifier"
     )
-    status.lore_types_effects_dict["theology"] = effects.effect(
+    status.lore_types_effects_dict["theology"] = constants.effect_manager.create_effect(
         "theology_completion_effect", "religious_campaign_plus_modifier"
     )
 
@@ -826,7 +829,7 @@ def value_trackers():
         constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    250, constants.default_display_height
+                    250, constants.default_display_height - 5
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(30),
@@ -920,7 +923,7 @@ def value_trackers():
     constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                220, constants.default_display_height - 30
+                225, constants.default_display_height - 35
             ),
             "width": scaling.scale_width(30),
             "height": scaling.scale_height(30),
@@ -932,7 +935,7 @@ def value_trackers():
     constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                220, constants.default_display_height - 65
+                225, constants.default_display_height - 70
             ),
             "width": scaling.scale_width(30),
             "height": scaling.scale_height(30),
@@ -1036,7 +1039,8 @@ def buttons():
     rhs_menu_collection = constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                constants.default_display_width - 50, constants.default_display_height
+                constants.default_display_width - 55,
+                constants.default_display_height - 5,
             ),
             "width": 10,
             "height": 10,
@@ -1050,7 +1054,7 @@ def buttons():
     lhs_menu_collection = constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                0, constants.default_display_height - 50
+                5, constants.default_display_height - 55
             ),
             "width": 10,
             "height": 10,
@@ -1090,7 +1094,7 @@ def buttons():
     input_dict = {
         "coordinates": scaling.scale_coordinates(
             round(constants.default_display_width * 0.4),
-            constants.default_display_height - 50,
+            constants.default_display_height - 55,
         ),
         "width": scaling.scale_width(round(constants.default_display_width * 0.2)),
         "height": scaling.scale_height(50),
@@ -1217,7 +1221,7 @@ def buttons():
     lhs_menu_collection.add_member(execute_movement_routes_button)
 
     input_dict["coordinates"] = scaling.scale_coordinates(
-        constants.default_display_width - 50, 0
+        constants.default_display_width - 55, constants.default_display_height - 55
     )
     input_dict["modes"] = ["main_menu"]
     input_dict["image_id"] = ["buttons/exit_european_hq_button.png"]
@@ -2039,7 +2043,7 @@ def inventory_interface():
     Output:
         None
     """
-    commodity_prices_x, commodity_prices_y = (870, 100)
+    commodity_prices_x, commodity_prices_y = (900, 100)
     commodity_prices_height = 35 + (30 * len(constants.commodity_types))
     commodity_prices_width = 200
 
@@ -2910,38 +2914,6 @@ def country_interface():
         input_dict["coordinates"] = scaling.scale_coordinates(x_displacement, 0)
         input_dict["actor_label_type"] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict)
-
-
-def debug_tools():
-    """
-    Description:
-        Initializes toggleable effects for debugging
-    Input:
-        None
-    Output:
-        None
-    """
-    # for release, official version of config file with only intended user settings
-    file = open("configuration/release_config.json")
-
-    # returns JSON object as a dictionary
-    debug_config = json.load(file)
-    # Iterating through the json list
-    for current_effect in debug_config["effects"]:
-        effects.effect("DEBUG_" + current_effect, current_effect)
-    file.close()
-
-    try:  # for testing/development, use active effects of local version of config file that is not uploaded to GitHub
-        file = open("configuration/dev_config.json")
-        active_effects_config = json.load(file)
-        file.close()
-    except:
-        active_effects_config = debug_config
-    for current_effect in active_effects_config["active_effects"]:
-        if constants.effect_manager.effect_exists(current_effect):
-            constants.effect_manager.set_effect(current_effect, True)
-        else:
-            print("Invalid effect: " + current_effect)
 
 
 def manage_crash(exception):

@@ -1,4 +1,5 @@
-import modules.constants.constants as constants
+import json
+from .. import effects
 
 
 class effect_manager_template:
@@ -17,6 +18,38 @@ class effect_manager_template:
         """
         self.possible_effects = []
         self.active_effects = []
+        file = open("configuration/release_config.json")
+
+        # returns JSON object as a dictionary
+        debug_config = json.load(file)
+        # Iterating through the json list
+        for current_effect in debug_config["effects"]:
+            self.create_effect("DEBUG_" + current_effect, current_effect)
+        file.close()
+
+        try:  # for testing/development, use active effects of local version of config file that is not uploaded to GitHub
+            file = open("configuration/dev_config.json")
+            active_effects_config = json.load(file)
+            file.close()
+        except:
+            active_effects_config = debug_config
+        for current_effect in active_effects_config["active_effects"]:
+            if self.effect_exists(current_effect):
+                self.set_effect(current_effect, True)
+            else:
+                print("Invalid effect: " + current_effect)
+
+    def create_effect(self, effect_id, effect_type) -> effects.effect:
+        """
+        Description:
+            Creates an effect with the inputted id and type
+        Input:
+            string effect_id: Name of effect, like 'british_country_modifier'
+            string effect_type: Type of effect produced by this effect, like 'construction_plus_modifier'
+        Output:
+            effect: Returns the created effect
+        """
+        return effects.effect(effect_id, effect_type, self)
 
     def __str__(self):
         """
