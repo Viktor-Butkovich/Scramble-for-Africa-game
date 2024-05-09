@@ -66,6 +66,29 @@ class grid(interface_elements.interface_element):
         else:
             self.load_cells(input_dict["cell_list"])
 
+    def create_map_image(self):
+        """
+        Description:
+            Creates and returns a map image of this grid
+        Input:
+            None
+        Output:
+            List: List of images representing this grid - approximation of very zoomed out grid
+        """
+        return_list = [{"image_id": "misc/lines.png", "level": 10}]
+        for current_cell in self.get_flat_cell_list():
+            image_id = current_cell.tile.get_image_id_list()[0]
+            if type(image_id) == dict:
+                image_id = image_id["image_id"]
+            return_list.append(
+                {
+                    "image_id": image_id,
+                    "x_offset": current_cell.x / self.coordinate_width,
+                    "y_offset": current_cell.y / self.coordinate_height,
+                }
+            )
+        return return_list
+
     def to_save_dict(self):
         """
         Description:

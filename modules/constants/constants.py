@@ -28,6 +28,7 @@ from modules.tools.mouse_followers import mouse_follower_template
 from modules.interface_types.labels import money_label_template
 from modules.constructs.fonts import font
 
+effect_manager: effect_manager_template = effect_manager_template()
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_icon(pygame.image.load("graphics/misc/SFA.png"))
@@ -73,6 +74,9 @@ key_codes: List[int] = [
     pygame.K_8,
     pygame.K_9,
     pygame.K_0,
+    pygame.K_F1,
+    pygame.K_F2,
+    pygame.K_F3,
 ]
 lowercase_key_values: List[str] = [
     "a",
@@ -156,9 +160,20 @@ default_display_width: int = (
 )
 default_display_height: int = 972
 resolution_finder = pygame.display.Info()
-display_width: float = resolution_finder.current_w - round(default_display_width / 10)
-display_height: float = resolution_finder.current_h - round(default_display_height / 10)
-game_display: pygame.Surface = pygame.display.set_mode((display_width, display_height))
+if effect_manager.effect_active("fullscreen"):
+    display_width: float = resolution_finder.current_w
+    display_height: float = resolution_finder.current_h
+    game_display: pygame.Surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+else:
+    display_width: float = resolution_finder.current_w - round(
+        default_display_width / 10
+    )
+    display_height: float = resolution_finder.current_h - round(
+        default_display_height / 10
+    )
+    game_display: pygame.Surface = pygame.display.set_mode(
+        (display_width, display_height)
+    )
 
 sound_manager: sound_manager_template = sound_manager_template()
 save_load_manager: save_load_manager_template = save_load_manager_template()
@@ -171,7 +186,6 @@ achievement_manager: achievement_manager_template = (
     None  # requires additional setup before initialization
 )
 event_manager: event_manager_template = event_manager_template()
-effect_manager: effect_manager_template = effect_manager_template()
 notification_manager: notification_manager_template = (
     None  # requires additional setup before initialization
 )
@@ -194,7 +208,6 @@ frames_this_second: int = 0
 last_fps_update: float = 0.0
 
 current_game_mode: str = None
-previous_game_mode: str = None
 
 loading_start_time: float = 0.0
 previous_turn_time: float = 0.0

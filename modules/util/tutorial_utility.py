@@ -50,7 +50,7 @@ def show_tutorial_notifications():
             }
         )
 
-        message = "Now, exit the minister screen through the button in the top left corner. You may use the same button to return here in the future to modify minister appointments and examine potential recruits. /n /n"
+        message = "Now, exit the minister screen through the Africa (1) or Europe (2) buttons in the top center right. You may use the conference room button (3) to return here in the future to modify minister appointments and examine potential recruits. /n /n"
         constants.notification_manager.display_notification(
             {
                 "message": message,

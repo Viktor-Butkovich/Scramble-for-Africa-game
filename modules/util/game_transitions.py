@@ -86,13 +86,7 @@ def set_game_mode(new_game_mode):
             constants.event_manager.clear()
             constants.sound_manager.play_random_music("main menu")
 
-        if not (
-            new_game_mode == "trial" or constants.current_game_mode == "trial"
-        ):  # the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
-            constants.previous_game_mode = constants.current_game_mode
-        if (
-            new_game_mode == "main_menu" or previous_game_mode == "new_game_setup"
-        ):  #'main_menu' in [new_game_mode, previous_game_mode]:
+        if new_game_mode == "main_menu" or previous_game_mode == "new_game_setup":
             start_loading()
         constants.current_game_mode = new_game_mode
         if new_game_mode == "strategic":
@@ -103,6 +97,9 @@ def set_game_mode(new_game_mode):
             constants.text_box_height = constants.default_text_box_height
             status.text_list = []  # clear text box when going to main menu
         elif new_game_mode == "ministers":
+            status.table_map_image.set_image(
+                status.strategic_map_grid.create_map_image()
+            )
             actor_utility.calibrate_actor_info_display(
                 status.tile_info_display, status.europe_grid.cell_list[0][0].tile
             )  # calibrate tile info to Europe

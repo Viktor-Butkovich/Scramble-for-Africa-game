@@ -558,9 +558,7 @@ class tile(actor):  # to do: make terrain tiles a subclass
         Output:
             None
         """
-        if (
-            flags.player_turn and main_loop_utility.action_possible()
-        ):  # (not flags.choosing_destination):
+        if flags.player_turn and main_loop_utility.action_possible():
             if (
                 self.cell.grid.grid_type == "slave_traders_grid"
                 and constants.slave_traders_strength > 0

@@ -54,7 +54,6 @@ class save_load_manager_template:
         self.copied_constants.append("money")
         self.copied_constants.append("evil")
         self.copied_constants.append("fear")
-        self.copied_constants.append("current_game_mode")
         self.copied_constants.append("sold_commodities")
         self.copied_constants.append("item_prices")
         self.copied_constants.append("recruitment_costs")
@@ -94,8 +93,6 @@ class save_load_manager_template:
         game_transitions.set_game_mode("strategic")
         game_transitions.create_strategic_map(from_save=False)
         status.minimap_grid.calibrate(2, 2)
-
-        game_transitions.set_game_mode("ministers")
 
         for current_commodity in constants.commodity_types:
             if current_commodity != "consumer goods":
@@ -151,6 +148,7 @@ class save_load_manager_template:
         if not constants.effect_manager.effect_active("skip_intro"):
             status.minister_appointment_tutorial_completed = False
             status.exit_minister_screen_tutorial_completed = False
+            game_transitions.set_game_mode("ministers")
             tutorial_utility.show_tutorial_notifications()
         else:
             status.minister_appointment_tutorial_completed = True
@@ -281,7 +279,7 @@ class save_load_manager_template:
                 saved_lore_mission_dicts = pickle.load(handle)
                 handle.close()
         except:
-            text_utility.print_to_screen("The " + file_path + " file does not exist.")
+            text_utility.print_to_screen("There is no " + file_path + " save file yet.")
             return ()
 
         # Load variables
@@ -340,8 +338,7 @@ class save_load_manager_template:
         status.commodity_prices_label.update_label()
 
         status.minimap_grid.calibrate(2, 2)
-        if saved_constants["current_game_mode"] != "strategic":
-            game_transitions.set_game_mode(saved_constants["current_game_mode"])
+        game_transitions.set_game_mode("strategic")
 
         for current_completed_lore_type in constants.completed_lore_mission_types:
             status.lore_types_effects_dict[current_completed_lore_type].apply()

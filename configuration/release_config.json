@@ -29,9 +29,12 @@
       "eradicate_slave_trade",
       "track_fps",
       "transparent_ministers",
-      "reset_achievements"
+      "reset_achievements",
+      "fullscreen",
+      "link_inventory_tabs",
+      "enable_crash_button"
    ],
    "active_effects": [
-
+      "fullscreen"
    ]
 }

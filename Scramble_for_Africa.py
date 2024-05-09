@@ -5,7 +5,6 @@ from modules.setup import *
 
 try:
     setup(
-        debug_tools,
         misc,
         worker_types_config,
         equipment_types_config,
@@ -46,9 +45,6 @@ except Exception:  # displays error message and records error message in crash l
 # Change game to be fullscreen by default, along with debug setting to make it windowed
 # Add autosave and multiple save slots
 # Performance impacts from repeated exit/load - not everything is being removed each time
+# Add ambient sounds
 #
 #   new SFA features:
-# Add ambient resource production facility, settlement, and village sounds
-# Replace placeholder images
-#   Especially for Maxim gun
-# Add cosmetic flag to minister screen

@@ -38,7 +38,7 @@ class achievement_manager_template:
             constants.actor_creation_manager.create_interface_element(
                 {
                     "coordinates": scaling.scale_coordinates(
-                        constants.default_display_width - 45, 100
+                        constants.default_display_width - 50, 100
                     ),
                     "width": scaling.scale_width(10),
                     "height": scaling.scale_height(30),

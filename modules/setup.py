@@ -3,7 +3,6 @@
 import pygame
 import os
 import logging
-import json
 import modules.constants.constants as constants
 import modules.constants.status as status
 import modules.constants.flags as flags
@@ -15,7 +14,6 @@ import modules.constructs.countries as countries
 import modules.constructs.worker_types as worker_types
 import modules.constructs.equipment_types as equipment_types
 import modules.constructs.terrain_feature_types as terrain_feature_types
-import modules.tools.effects as effects
 from modules.tools.data_managers import (
     notification_manager_template,
     value_tracker_template,
@@ -159,10 +157,22 @@ def misc():
                 "modes": [
                     "strategic",
                     "europe",
-                    "ministers",
                     "trial",
                     "new_game_setup",
                 ],
+                "image_id": "misc/background.png",
+                "init_type": "background image",
+            }
+        )
+    )
+
+    ministers_background_image = (
+        constants.actor_creation_manager.create_interface_element(
+            {
+                "modes": [
+                    "ministers",
+                ],
+                "image_id": "misc/ministers_background.png",
                 "init_type": "background image",
             }
         )
@@ -190,7 +200,6 @@ def misc():
     # safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
 
     game_transitions.set_game_mode("main_menu")
-    constants.previous_game_mode = "main_menu"  # after set game mode, both previous and current game modes should be main_menu
 
     constants.mouse_follower = (
         constants.actor_creation_manager.create_interface_element(
@@ -210,7 +219,7 @@ def misc():
         constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    0, constants.default_display_height - 205 + 125
+                    5, constants.default_display_height - 205 + 125 - 5
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(10),
@@ -565,9 +574,6 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    british_country_effect = effects.effect(
-        "british_country_modifier", "construction_plus_modifier"
-    )
 
     status.Britain = countries.country(
         {
@@ -579,7 +585,9 @@ def def_countries():
             "aristocratic_particles": False,
             "allow_double_last_names": False,
             "background_set": british_weighted_backgrounds,
-            "country_effect": british_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "british_country_modifier", "construction_plus_modifier"
+            ),
         }
     )
 
@@ -603,9 +611,7 @@ def def_countries():
         "industrialist",
         "business magnate",
     ]
-    french_country_effect = effects.effect(
-        "french_country_modifier", "conversion_plus_modifier"
-    )
+
     status.France = countries.country(
         {
             "name": "France",
@@ -616,7 +622,9 @@ def def_countries():
             "aristocratic_particles": False,
             "allow_double_last_names": True,
             "background_set": french_weighted_backgrounds,
-            "country_effect": french_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "french_country_modifier", "conversion_plus_modifier"
+            ),
             "has_aristocracy": False,
         }
     )
@@ -641,9 +649,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    german_country_effect = effects.effect(
-        "german_country_modifier", "combat_plus_modifier"
-    )
+
     status.Germany = countries.country(
         {
             "name": "Germany",
@@ -654,7 +660,9 @@ def def_countries():
             "aristocratic_particles": True,
             "allow_double_last_names": False,
             "background_set": german_weighted_backgrounds,
-            "country_effect": german_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "german_country_modifier", "combat_plus_modifier"
+            ),
         }
     )
 
@@ -678,9 +686,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    belgian_country_effect = effects.effect(
-        "belgian_country_modifier", "slave_capture_plus_modifier"
-    )
+
     status.Belgium = countries.hybrid_country(
         {
             "name": "Belgium",
@@ -688,7 +694,9 @@ def def_countries():
             "government_type_adjective": "royal",
             "religion": "catholic",
             "background_set": belgian_weighted_backgrounds,
-            "country_effect": belgian_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "belgian_country_modifier", "slave_capture_plus_modifier"
+            ),
         }
     )
 
@@ -712,9 +720,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    portuguese_country_effect = effects.effect(
-        "portuguese_country_modifier", "no_slave_trade_penalty"
-    )
+
     status.Portugal = countries.country(
         {
             "name": "Portugal",
@@ -725,7 +731,9 @@ def def_countries():
             "aristocratic_particles": False,
             "allow_double_last_names": False,
             "background_set": portuguese_weighted_backgrounds,
-            "country_effect": portuguese_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "portuguese_country_modifier", "no_slave_trade_penalty"
+            ),
         }
     )
 
@@ -749,9 +757,7 @@ def def_countries():
         "aristocrat",
         "royal heir",
     ]
-    italian_country_effect = effects.effect(
-        "italian_country_modifier", "combat_minus_modifier"
-    )
+
     status.Italy = countries.country(
         {
             "name": "Italy",
@@ -762,7 +768,9 @@ def def_countries():
             "aristocratic_particles": True,
             "allow_double_last_names": False,
             "background_set": italian_weighted_backgrounds,
-            "country_effect": italian_country_effect,
+            "country_effect": constants.effect_manager.create_effect(
+                "italian_country_modifier", "combat_minus_modifier"
+            ),
         }
     )
 
@@ -794,22 +802,28 @@ def lore():
     Output:
         None
     """
-    status.lore_types_effects_dict["zoology"] = effects.effect(
+    status.lore_types_effects_dict["zoology"] = constants.effect_manager.create_effect(
         "zoology_completion_effect", "hunting_plus_modifier"
     )
-    status.lore_types_effects_dict["botany"] = effects.effect(
+    status.lore_types_effects_dict["botany"] = constants.effect_manager.create_effect(
         "botany_completion_effect", "health_attrition_plus_modifier"
     )
-    status.lore_types_effects_dict["archaeology"] = effects.effect(
+    status.lore_types_effects_dict[
+        "archaeology"
+    ] = constants.effect_manager.create_effect(
         "archaeology_completion_effect", "combat_plus_modifier"
     )
-    status.lore_types_effects_dict["anthropology"] = effects.effect(
+    status.lore_types_effects_dict[
+        "anthropology"
+    ] = constants.effect_manager.create_effect(
         "anthropology_completion_effect", "conversion_plus_modifier"
     )
-    status.lore_types_effects_dict["paleontology"] = effects.effect(
+    status.lore_types_effects_dict[
+        "paleontology"
+    ] = constants.effect_manager.create_effect(
         "paleontology_completion_effect", "public_relations_campaign_modifier"
     )
-    status.lore_types_effects_dict["theology"] = effects.effect(
+    status.lore_types_effects_dict["theology"] = constants.effect_manager.create_effect(
         "theology_completion_effect", "religious_campaign_plus_modifier"
     )
 
@@ -827,7 +841,7 @@ def value_trackers():
         constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    300, constants.default_display_height
+                    250, constants.default_display_height - 5
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(30),
@@ -857,7 +871,7 @@ def value_trackers():
             "init_type": "value label",
             "parent_collection": value_trackers_ordered_collection,
             "member_config": {
-                "order_x_offset": scaling.scale_width(275),
+                "order_x_offset": scaling.scale_width(315),
                 "order_overlap": True,
             },
         }
@@ -887,7 +901,7 @@ def value_trackers():
         {
             "minimum_width": scaling.scale_width(10),
             "height": scaling.scale_height(30),
-            "modes": ["strategic", "europe", "ministers"],
+            "modes": ["strategic", "europe", "ministers", "trial"],
             "image_id": "misc/default_label.png",
             "value_name": "public_opinion",
             "init_type": "value label",
@@ -921,7 +935,7 @@ def value_trackers():
     constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                270, constants.default_display_height - 30
+                225, constants.default_display_height - 35
             ),
             "width": scaling.scale_width(30),
             "height": scaling.scale_height(30),
@@ -933,7 +947,7 @@ def value_trackers():
     constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                270, constants.default_display_height - 65
+                225, constants.default_display_height - 70
             ),
             "width": scaling.scale_width(30),
             "height": scaling.scale_height(30),
@@ -962,46 +976,87 @@ def buttons():
         None
     """
     # Could implement switch game mode buttons based on state machine logic for different modes
-    europe_button_width = 150
-    europe_button_height = 100
     input_dict = {
         "coordinates": scaling.scale_coordinates(0, 10),
-        "width": scaling.scale_width(europe_button_width),
-        "height": scaling.scale_height(europe_button_height),
-        "keybind_id": pygame.K_e,
+        "width": scaling.scale_width(150),
+        "height": scaling.scale_height(100),
         "image_id": "buttons/european_hq_button.png",
-        "modes": ["strategic"],
+        "modes": ["strategic", "europe"],
         "to_mode": "europe",
-        "init_type": "switch game mode button",
+        "init_type": "free image",
         "parent_collection": status.grids_collection,
     }
-    strategic_to_europe_button = (
-        constants.actor_creation_manager.create_interface_element(input_dict)
+    strategic_flag_icon = constants.actor_creation_manager.create_interface_element(
+        input_dict
     )
     status.flag_icon_list.append(
-        strategic_to_europe_button
+        strategic_flag_icon
     )  # sets button image to update to flag icon when country changes
 
-    europe_button_width = 60
-    europe_button_height = 60
-    input_dict["width"] = scaling.scale_width(europe_button_width)
-    input_dict["height"] = scaling.scale_height(europe_button_height)
-    input_dict["modes"] = ["europe"]
-    input_dict["keybind_id"] = pygame.K_ESCAPE
-    input_dict["to_mode"] = "strategic"
-    input_dict["image_id"] = "buttons/exit_european_hq_button.png"
-    europe_to_strategic_button = (
-        constants.actor_creation_manager.create_interface_element(input_dict)
+    input_dict["modes"] = ["ministers"]
+    input_dict["coordinates"] = scaling.scale_coordinates(
+        constants.default_display_width / 2 - 75, constants.default_display_height - 160
+    )
+    input_dict["parent_collection"] = "none"
+    ministers_flag_icon = constants.actor_creation_manager.create_interface_element(
+        input_dict
+    )
+    status.flag_icon_list.append(ministers_flag_icon)
+
+    input_dict = {
+        "coordinates": scaling.scale_coordinates(
+            1065, constants.default_display_height - 55
+        ),
+        "height": scaling.scale_height(50),
+        "width": scaling.scale_width(50),
+        "keybind_id": pygame.K_1,
+        "image_id": "locations/africa_button.png",
+        "modes": ["ministers", "strategic", "europe", "trial"],
+        "to_mode": "strategic",
+        "init_type": "switch game mode button",
+    }
+    to_strategic_button = constants.actor_creation_manager.create_interface_element(
+        input_dict
+    )
+
+    input_dict.update(
+        {
+            "coordinates": scaling.scale_coordinates(
+                1125, constants.default_display_height - 55
+            ),
+            "image_id": "locations/europe_button.png",
+            "to_mode": "europe",
+            "keybind_id": pygame.K_2,
+        }
+    )
+    to_europe_button = constants.actor_creation_manager.create_interface_element(
+        input_dict
+    )
+
+    input_dict.update(
+        {
+            "coordinates": scaling.scale_coordinates(
+                1185, constants.default_display_height - 55
+            ),
+            "width": scaling.scale_width(50),
+            "to_mode": "ministers",
+            "image_id": "buttons/european_hq_button.png",
+            "keybind_id": pygame.K_3,
+        }
+    )
+    to_ministers_button = constants.actor_creation_manager.create_interface_element(
+        input_dict
     )
 
     rhs_menu_collection = constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                constants.default_display_width - 50, constants.default_display_height
+                constants.default_display_width - 55,
+                constants.default_display_height - 5,
             ),
             "width": 10,
             "height": 10,
-            "modes": ["strategic", "europe", "ministers", "new_game_setup"],
+            "modes": ["strategic", "europe", "ministers", "trial", "new_game_setup"],
             "init_type": "ordered collection",
             "member_config": {"order_exempt": True},
             "separation": 5,
@@ -1011,7 +1066,7 @@ def buttons():
     lhs_menu_collection = constants.actor_creation_manager.create_interface_element(
         {
             "coordinates": scaling.scale_coordinates(
-                0, constants.default_display_height - 50
+                5, constants.default_display_height - 55
             ),
             "width": 10,
             "height": 10,
@@ -1026,10 +1081,12 @@ def buttons():
     input_dict["coordinates"] = scaling.scale_coordinates(
         constants.default_display_width - 50, constants.default_display_height - 50
     )
+    input_dict["image_id"] = "buttons/exit_european_hq_button.png"
+    input_dict["init_type"] = "switch game mode button"
     input_dict["width"] = scaling.scale_width(50)
     input_dict["height"] = scaling.scale_height(50)
-    input_dict["modes"] = ["strategic", "europe", "ministers"]
-    input_dict["keybind_id"] = "none"
+    input_dict["modes"] = ["strategic", "europe", "ministers", "trial"]
+    input_dict["keybind_id"] = pygame.K_ESCAPE
     input_dict["to_mode"] = "main_menu"
     to_main_menu_button = constants.actor_creation_manager.create_interface_element(
         input_dict
@@ -1046,41 +1103,14 @@ def buttons():
     )
     lhs_menu_collection.add_member(new_game_setup_to_main_menu_button)
 
-    input_dict["coordinates"] = scaling.scale_coordinates(
-        0, constants.default_display_height - 50
-    )
-    input_dict["modes"] = ["strategic", "europe"]
-    input_dict["keybind_id"] = pygame.K_q
-    input_dict["image_id"] = "buttons/european_hq_button.png"
-    input_dict["to_mode"] = "ministers"
-    to_ministers_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-    lhs_menu_collection.add_member(to_ministers_button)
-
-    input_dict["modes"] = ["ministers"]
-    input_dict["keybind_id"] = pygame.K_ESCAPE
-    input_dict["image_id"] = "buttons/exit_european_hq_button.png"
-    input_dict["to_mode"] = "previous"
-    from_ministers_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-    lhs_menu_collection.add_member(from_ministers_button)
-
-    input_dict["modes"] = ["trial"]
-    input_dict["to_mode"] = "ministers"
-    from_trial_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-
     input_dict = {
         "coordinates": scaling.scale_coordinates(
             round(constants.default_display_width * 0.4),
-            constants.default_display_height - 50,
+            constants.default_display_height - 55,
         ),
         "width": scaling.scale_width(round(constants.default_display_width * 0.2)),
         "height": scaling.scale_height(50),
-        "modes": ["strategic", "europe"],
+        "modes": ["strategic", "europe", "ministers", "trial"],
         "keybind_id": pygame.K_SPACE,
         "image_id": "buttons/end_turn_button.png",
         "init_type": "end turn button",
@@ -1129,7 +1159,7 @@ def buttons():
         ),
         "width": scaling.scale_width(50),
         "height": scaling.scale_height(50),
-        "modes": ["strategic", "europe", "ministers"],
+        "modes": ["strategic", "europe", "ministers", "trial"],
         "image_id": "buttons/save_game_button.png",
         "init_type": "save game button",
     }
@@ -1154,7 +1184,7 @@ def buttons():
         input_dict["coordinates"][0],
         scaling.scale_height(constants.default_display_height - 275),
     )
-    input_dict["modes"] = ["strategic", "europe", "ministers"]
+    input_dict["modes"] = ["strategic", "europe", "ministers", "trial"]
     input_dict["keybind_id"] = pygame.K_j
     input_dict["image_id"] = "buttons/text_box_size_button.png"
     input_dict["init_type"] = "expand text box button"
@@ -1203,7 +1233,7 @@ def buttons():
     lhs_menu_collection.add_member(execute_movement_routes_button)
 
     input_dict["coordinates"] = scaling.scale_coordinates(
-        constants.default_display_width - 50, 0
+        constants.default_display_width - 55, constants.default_display_height - 55
     )
     input_dict["modes"] = ["main_menu"]
     input_dict["image_id"] = ["buttons/exit_european_hq_button.png"]
@@ -1282,7 +1312,7 @@ def ministers_screen():
     """
     # minister table setup
     table_width = 400
-    table_height = 800
+    table_height = 750
     constants.actor_creation_manager.create_interface_element(
         {
             "image_id": "misc/minister_table.png",
@@ -1295,11 +1325,23 @@ def ministers_screen():
             "init_type": "free image",
         }
     )
-
-    position_icon_width = 125
+    status.table_map_image = constants.actor_creation_manager.create_interface_element(
+        {
+            "coordinates": scaling.scale_coordinates(
+                (constants.default_display_width / 2) - 100, 400
+            ),
+            "init_type": "free image",
+            "modes": ["ministers"],
+            "width": scaling.scale_width(200),
+            "height": scaling.scale_height(200),
+            "image_id": "misc/empty.png",
+        }
+    )
+    position_icon_width = 75
+    portrait_icon_width = 125
     input_dict = {
-        "width": scaling.scale_width(position_icon_width),
-        "height": scaling.scale_height(position_icon_width),
+        "width": scaling.scale_width(portrait_icon_width),
+        "height": scaling.scale_height(portrait_icon_width),
         "modes": ["ministers"],
         "color": "gray",
         "init_type": "minister portrait image",
@@ -1313,7 +1355,9 @@ def ministers_screen():
                 {
                     "coordinates": scaling.scale_coordinates(
                         (constants.default_display_width / 2) - (table_width / 2) + 10,
-                        current_index * 200 + 95,
+                        current_index * 180
+                        + 95
+                        + (portrait_icon_width / 2 - position_icon_width / 2),
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1327,9 +1371,9 @@ def ministers_screen():
             input_dict["coordinates"] = scaling.scale_coordinates(
                 (constants.default_display_width / 2)
                 - (table_width / 2)
-                - position_icon_width
+                - portrait_icon_width
                 - 10,
-                current_index * 200 + 95,
+                current_index * 180 + 95,
             )
             constants.actor_creation_manager.create_interface_element(input_dict)
 
@@ -1341,7 +1385,9 @@ def ministers_screen():
                         + (table_width / 2)
                         - position_icon_width
                         - 10,
-                        (current_index - 4) * 200 + 95,
+                        (current_index - 4) * 180
+                        + 95
+                        + (portrait_icon_width / 2 - position_icon_width / 2),
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1353,16 +1399,12 @@ def ministers_screen():
             )
 
             input_dict["coordinates"] = scaling.scale_coordinates(
-                (constants.default_display_width / 2)
-                + (table_width / 2)
-                - position_icon_width
-                + position_icon_width
-                + 10,
-                (current_index - 4) * 200 + 95,
+                (constants.default_display_width / 2) + (table_width / 2) + 10,
+                (current_index - 4) * 180 + 95,
             )
             constants.actor_creation_manager.create_interface_element(input_dict)
 
-    available_minister_display_x = constants.default_display_width
+    available_minister_display_x = constants.default_display_width - 205
     available_minister_display_y = 770
     cycle_input_dict = {
         "coordinates": scaling.scale_coordinates(
@@ -1382,15 +1424,15 @@ def ministers_screen():
     )
 
     for i in range(0, 5):
-        available_minister_display_y -= position_icon_width + 10
+        available_minister_display_y -= portrait_icon_width + 10
         current_portrait = constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    available_minister_display_x - position_icon_width,
+                    available_minister_display_x - portrait_icon_width,
                     available_minister_display_y,
                 ),
-                "width": scaling.scale_width(position_icon_width),
-                "height": scaling.scale_height(position_icon_width),
+                "width": scaling.scale_width(portrait_icon_width),
+                "height": scaling.scale_height(portrait_icon_width),
                 "modes": ["ministers"],
                 "init_type": "minister portrait image",
                 "color": "gray",
@@ -2025,7 +2067,7 @@ def inventory_interface():
     Output:
         None
     """
-    commodity_prices_x, commodity_prices_y = (870, 100)
+    commodity_prices_x, commodity_prices_y = (900, 100)
     commodity_prices_height = 35 + (30 * len(constants.commodity_types))
     commodity_prices_width = 200
 
@@ -2701,7 +2743,7 @@ def minister_interface():
     status.minister_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (0, minister_display_top_y),
+                "coordinates": (5, minister_display_top_y),
                 "width": 10,
                 "height": 10,
                 "modes": ["ministers"],
@@ -2817,7 +2859,7 @@ def country_interface():
     status.country_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (0, constants.mob_ordered_list_start_y),
+                "coordinates": (5, constants.mob_ordered_list_start_y),
                 "width": 10,
                 "height": 10,
                 "modes": ["new_game_setup"],
@@ -2896,38 +2938,6 @@ def country_interface():
         input_dict["coordinates"] = scaling.scale_coordinates(x_displacement, 0)
         input_dict["actor_label_type"] = current_actor_label_type
         constants.actor_creation_manager.create_interface_element(input_dict)
-
-
-def debug_tools():
-    """
-    Description:
-        Initializes toggleable effects for debugging
-    Input:
-        None
-    Output:
-        None
-    """
-    # for release, official version of config file with only intended user settings
-    file = open("configuration/release_config.json")
-
-    # returns JSON object as a dictionary
-    debug_config = json.load(file)
-    # Iterating through the json list
-    for current_effect in debug_config["effects"]:
-        effects.effect("DEBUG_" + current_effect, current_effect)
-    file.close()
-
-    try:  # for testing/development, use active effects of local version of config file that is not uploaded to GitHub
-        file = open("configuration/dev_config.json")
-        active_effects_config = json.load(file)
-        file.close()
-    except:
-        active_effects_config = debug_config
-    for current_effect in active_effects_config["active_effects"]:
-        if constants.effect_manager.effect_exists(current_effect):
-            constants.effect_manager.set_effect(current_effect, True)
-        else:
-            print("Invalid effect: " + current_effect)
 
 
 def manage_crash(exception):

@@ -1,5 +1,6 @@
 # Contains functionality for different player countries
 
+import pygame
 from ..util import actor_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -90,7 +91,10 @@ class country:
             ):
                 current_recruitment_button.calibrate(self)
         for current_flag_icon in status.flag_icon_list:
-            current_flag_icon.image.set_image(self.flag_image_id)
+            if type(current_flag_icon.image) == pygame.Surface:
+                current_flag_icon.set_image(self.flag_image_id)
+            else:
+                current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
 
     def deselect(self):
@@ -195,5 +199,8 @@ class hybrid_country(country):
             ):
                 current_recruitment_button.calibrate(self)
         for current_flag_icon in status.flag_icon_list:
-            current_flag_icon.image.set_image(self.flag_image_id)
+            if type(current_flag_icon.image) == pygame.Surface:
+                current_flag_icon.set_image(self.flag_image_id)
+            else:
+                current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
