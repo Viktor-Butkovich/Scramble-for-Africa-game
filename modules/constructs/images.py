@@ -410,7 +410,7 @@ class bundle_image:
         Output:
             double: Returns final x offset of this member image when blitted to bundle's combined surface
         """
-        if hasattr(self, "free") and self.free:  # if hasattr(self, 'override_width'):
+        if hasattr(self, "free") and self.free:
             return self.bundle.width * self.x_offset
         else:
             return (
