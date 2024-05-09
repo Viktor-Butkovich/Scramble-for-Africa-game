@@ -157,11 +157,23 @@ def misc():
                 "modes": [
                     "strategic",
                     "europe",
-                    "ministers",
                     "trial",
                     "new_game_setup",
                 ],
-                "init_type": "background image",
+                "image_id": "misc/background.png",
+                "init_type": "background image"
+            }
+        )
+    )
+
+    ministers_background_image = (
+        constants.actor_creation_manager.create_interface_element(
+            {
+                "modes": [
+                    "ministers",
+                ],
+                "image_id": "misc/ministers_background.png",
+                "init_type": "background image"
             }
         )
     )
@@ -1313,11 +1325,23 @@ def ministers_screen():
             "init_type": "free image",
         }
     )
-
-    position_icon_width = 125
+    status.table_map_image = constants.actor_creation_manager.create_interface_element(
+        {
+            "coordinates": scaling.scale_coordinates(
+                (constants.default_display_width / 2) - 100, 400
+            ),
+            "init_type": "free image",
+            "modes": ["ministers"],
+            "width": scaling.scale_width(200),
+            "height": scaling.scale_height(200),
+            "image_id": "misc/empty.png"
+        }
+    )
+    position_icon_width = 75
+    portrait_icon_width = 125
     input_dict = {
-        "width": scaling.scale_width(position_icon_width),
-        "height": scaling.scale_height(position_icon_width),
+        "width": scaling.scale_width(portrait_icon_width),
+        "height": scaling.scale_height(portrait_icon_width),
         "modes": ["ministers"],
         "color": "gray",
         "init_type": "minister portrait image",
@@ -1331,7 +1355,7 @@ def ministers_screen():
                 {
                     "coordinates": scaling.scale_coordinates(
                         (constants.default_display_width / 2) - (table_width / 2) + 10,
-                        current_index * 180 + 95,
+                        current_index * 180 + 95 + (portrait_icon_width / 2 - position_icon_width / 2),
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1345,7 +1369,7 @@ def ministers_screen():
             input_dict["coordinates"] = scaling.scale_coordinates(
                 (constants.default_display_width / 2)
                 - (table_width / 2)
-                - position_icon_width
+                - portrait_icon_width
                 - 10,
                 current_index * 180 + 95,
             )
@@ -1359,7 +1383,7 @@ def ministers_screen():
                         + (table_width / 2)
                         - position_icon_width
                         - 10,
-                        (current_index - 4) * 180 + 95,
+                        (current_index - 4) * 180 + 95 + (portrait_icon_width / 2 - position_icon_width / 2),
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1373,14 +1397,12 @@ def ministers_screen():
             input_dict["coordinates"] = scaling.scale_coordinates(
                 (constants.default_display_width / 2)
                 + (table_width / 2)
-                - position_icon_width
-                + position_icon_width
                 + 10,
                 (current_index - 4) * 180 + 95,
             )
             constants.actor_creation_manager.create_interface_element(input_dict)
 
-    available_minister_display_x = constants.default_display_width
+    available_minister_display_x = constants.default_display_width - 205
     available_minister_display_y = 770
     cycle_input_dict = {
         "coordinates": scaling.scale_coordinates(
@@ -1400,15 +1422,15 @@ def ministers_screen():
     )
 
     for i in range(0, 5):
-        available_minister_display_y -= position_icon_width + 10
+        available_minister_display_y -= portrait_icon_width + 10
         current_portrait = constants.actor_creation_manager.create_interface_element(
             {
                 "coordinates": scaling.scale_coordinates(
-                    available_minister_display_x - position_icon_width,
+                    available_minister_display_x - portrait_icon_width,
                     available_minister_display_y,
                 ),
-                "width": scaling.scale_width(position_icon_width),
-                "height": scaling.scale_height(position_icon_width),
+                "width": scaling.scale_width(portrait_icon_width),
+                "height": scaling.scale_height(portrait_icon_width),
                 "modes": ["ministers"],
                 "init_type": "minister portrait image",
                 "color": "gray",
@@ -2719,7 +2741,7 @@ def minister_interface():
     status.minister_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (0, minister_display_top_y),
+                "coordinates": (5, minister_display_top_y),
                 "width": 10,
                 "height": 10,
                 "modes": ["ministers"],
@@ -2835,7 +2857,7 @@ def country_interface():
     status.country_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (0, constants.mob_ordered_list_start_y),
+                "coordinates": (5, constants.mob_ordered_list_start_y),
                 "width": 10,
                 "height": 10,
                 "modes": ["new_game_setup"],

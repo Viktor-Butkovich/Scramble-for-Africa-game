@@ -280,7 +280,7 @@ class save_load_manager_template:
                 saved_lore_mission_dicts = pickle.load(handle)
                 handle.close()
         except:
-            text_utility.print_to_screen("The " + file_path + " file does not exist.")
+            text_utility.print_to_screen("There is no " + file_path + " save file yet.")
             return ()
 
         # Load variables
