@@ -94,8 +94,6 @@ class save_load_manager_template:
         game_transitions.create_strategic_map(from_save=False)
         status.minimap_grid.calibrate(2, 2)
 
-        game_transitions.set_game_mode("ministers")
-
         for current_commodity in constants.commodity_types:
             if current_commodity != "consumer goods":
                 price = round((random.randrange(1, 7) + random.randrange(1, 7)) / 2)
@@ -150,6 +148,7 @@ class save_load_manager_template:
         if not constants.effect_manager.effect_active("skip_intro"):
             status.minister_appointment_tutorial_completed = False
             status.exit_minister_screen_tutorial_completed = False
+            game_transitions.set_game_mode("ministers")
             tutorial_utility.show_tutorial_notifications()
         else:
             status.minister_appointment_tutorial_completed = True

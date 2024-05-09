@@ -1038,6 +1038,9 @@ class button(interface_elements.interface_element):
             pygame.K_RETURN: "enter",
             pygame.K_TAB: "tab",
             pygame.K_ESCAPE: "escape",
+            pygame.K_F1: "f1",
+            pygame.K_F2: "f2",
+            pygame.K_F3: "f3",
         }
         self.keybind_name = keybind_name_dict[new_keybind]
 

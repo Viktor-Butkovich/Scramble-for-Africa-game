@@ -74,6 +74,9 @@ key_codes: List[int] = [
     pygame.K_8,
     pygame.K_9,
     pygame.K_0,
+    pygame.K_F1,
+    pygame.K_F2,
+    pygame.K_F3,
 ]
 lowercase_key_values: List[str] = [
     "a",

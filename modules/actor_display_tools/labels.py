@@ -219,11 +219,11 @@ class actor_display_label(label):
             self.message_start = ""
             input_dict["keybind_id"] = "none"
             if self.list_index == 0:
-                input_dict["keybind_id"] = pygame.K_1
+                input_dict["keybind_id"] = pygame.K_F1
             elif self.list_index == 1:
-                input_dict["keybind_id"] = pygame.K_2
+                input_dict["keybind_id"] = pygame.K_F2
             elif self.list_index == 2:
-                input_dict["keybind_id"] = pygame.K_3
+                input_dict["keybind_id"] = pygame.K_F3
             input_dict["init_type"] = "disembark vehicle button"
             input_dict["image_id"] = "buttons/disembark_ship_button.png"
             self.add_attached_button(input_dict)

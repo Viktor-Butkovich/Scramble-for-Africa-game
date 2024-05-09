@@ -161,7 +161,7 @@ def misc():
                     "new_game_setup",
                 ],
                 "image_id": "misc/background.png",
-                "init_type": "background image"
+                "init_type": "background image",
             }
         )
     )
@@ -173,7 +173,7 @@ def misc():
                     "ministers",
                 ],
                 "image_id": "misc/ministers_background.png",
-                "init_type": "background image"
+                "init_type": "background image",
             }
         )
     )
@@ -1334,7 +1334,7 @@ def ministers_screen():
             "modes": ["ministers"],
             "width": scaling.scale_width(200),
             "height": scaling.scale_height(200),
-            "image_id": "misc/empty.png"
+            "image_id": "misc/empty.png",
         }
     )
     position_icon_width = 75
@@ -1355,7 +1355,9 @@ def ministers_screen():
                 {
                     "coordinates": scaling.scale_coordinates(
                         (constants.default_display_width / 2) - (table_width / 2) + 10,
-                        current_index * 180 + 95 + (portrait_icon_width / 2 - position_icon_width / 2),
+                        current_index * 180
+                        + 95
+                        + (portrait_icon_width / 2 - position_icon_width / 2),
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1383,7 +1385,9 @@ def ministers_screen():
                         + (table_width / 2)
                         - position_icon_width
                         - 10,
-                        (current_index - 4) * 180 + 95 + (portrait_icon_width / 2 - position_icon_width / 2),
+                        (current_index - 4) * 180
+                        + 95
+                        + (portrait_icon_width / 2 - position_icon_width / 2),
                     ),
                     "width": scaling.scale_width(position_icon_width),
                     "height": scaling.scale_height(position_icon_width),
@@ -1395,9 +1399,7 @@ def ministers_screen():
             )
 
             input_dict["coordinates"] = scaling.scale_coordinates(
-                (constants.default_display_width / 2)
-                + (table_width / 2)
-                + 10,
+                (constants.default_display_width / 2) + (table_width / 2) + 10,
                 (current_index - 4) * 180 + 95,
             )
             constants.actor_creation_manager.create_interface_element(input_dict)

@@ -97,7 +97,9 @@ def set_game_mode(new_game_mode):
             constants.text_box_height = constants.default_text_box_height
             status.text_list = []  # clear text box when going to main menu
         elif new_game_mode == "ministers":
-            status.table_map_image.set_image(status.strategic_map_grid.create_map_image())
+            status.table_map_image.set_image(
+                status.strategic_map_grid.create_map_image()
+            )
             actor_utility.calibrate_actor_info_display(
                 status.tile_info_display, status.europe_grid.cell_list[0][0].tile
             )  # calibrate tile info to Europe

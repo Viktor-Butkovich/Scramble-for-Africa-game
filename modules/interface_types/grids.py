@@ -80,11 +80,13 @@ class grid(interface_elements.interface_element):
             image_id = current_cell.tile.get_image_id_list()[0]
             if type(image_id) == dict:
                 image_id = image_id["image_id"]
-            return_list.append({
-                "image_id": image_id,
-                "x_offset": current_cell.x / self.coordinate_width,
-                "y_offset": current_cell.y / self.coordinate_height,
-            })
+            return_list.append(
+                {
+                    "image_id": image_id,
+                    "x_offset": current_cell.x / self.coordinate_width,
+                    "y_offset": current_cell.y / self.coordinate_height,
+                }
+            )
         return return_list
 
     def to_save_dict(self):
