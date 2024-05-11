@@ -1408,7 +1408,7 @@ def ministers_screen():
     available_minister_display_y = 770
     cycle_input_dict = {
         "coordinates": scaling.scale_coordinates(
-            available_minister_display_x - (position_icon_width / 2) - 25,
+            available_minister_display_x - (position_icon_width / 2) - 50,
             available_minister_display_y,
         ),
         "width": scaling.scale_width(50),
@@ -1930,34 +1930,48 @@ def tile_interface():
     )
 
     input_dict = {
-        "coordinates": scaling.scale_coordinates(0, separation),
+        "coordinates": (0, 0),
         "width": scaling.scale_width(25),
-        "height": scaling.scale_height(15),
+        "height": scaling.scale_height(25),
         "modes": ["strategic", "europe"],
-        "image_id": "buttons/cycle_passengers_down_button.png",
-        "init_type": "cycle same tile button",
+        "init_type": "same tile icon",
+        "image_id": "buttons/default_button.png",
+        "is_last": False,
+        "color": "gray",
         "parent_collection": same_tile_ordered_collection,
     }
-    cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-    del input_dict["member_config"]
-    input_dict["coordinates"] = (0, 0)
-    input_dict["height"] = scaling.scale_height(25)
-    input_dict["init_type"] = "same tile icon"
-    input_dict["image_id"] = "buttons/default_button.png"
-    input_dict["is_last"] = False
-    input_dict["color"] = "gray"
+
     for i in range(0, 3):  # add button to cycle through
         input_dict["index"] = i
         same_tile_icon = constants.actor_creation_manager.create_interface_element(
             input_dict
         )
-    input_dict["height"] = scaling.scale_height(15)
-    input_dict["index"] = i + 1
-    input_dict["is_last"] = True
+
     same_tile_icon = constants.actor_creation_manager.create_interface_element(
-        input_dict
+        {
+            "coordinates": (0, 0),
+            "width": scaling.scale_width(25),
+            "height": scaling.scale_height(15),
+            "modes": ["strategic", "europe"],
+            "init_type": "same tile icon",
+            "image_id": "buttons/default_button.png",
+            "index": 3,
+            "is_last": True,
+            "color": "gray",
+            "parent_collection": same_tile_ordered_collection,
+        }
+    )
+
+    cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(
+        {
+            "coordinates": scaling.scale_coordinates(0, separation),
+            "width": scaling.scale_width(25),
+            "height": scaling.scale_height(15),
+            "modes": ["strategic", "europe"],
+            "image_id": "buttons/cycle_passengers_down_button.png",
+            "init_type": "cycle same tile button",
+            "parent_collection": same_tile_ordered_collection,
+        }
     )
 
     # tile background image's tooltip

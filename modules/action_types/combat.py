@@ -274,12 +274,6 @@ class combat(action.action):
                             "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few savages and considers lowering them in the future.",
                             "Sensationalized news stories circulate of indolent ministers sending the empire's finest to die in distant jungles.",
                         ]
-                        text += (
-                            random.choice(killed_by_natives_flavor)
-                            + " Public opinion has decreased by "
-                            + str(self.public_opinion_change * -1)
-                            + ". /n /n"
-                        )
                         text += f"{random.choice(killed_by_natives_flavor)} Public opinion has decreased by {self.public_opinion_change * -1}. /n /n"
             else:
                 if self.opponent.npmob_type == "beast":
