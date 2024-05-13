@@ -387,10 +387,10 @@ class actor:
                 was_word = "were"
             if status.strategic_map_grid in self.grids:
                 location_message = "at (" + str(self.x) + ", " + str(self.y) + ")"
-            elif status.europe_grid in self.grids:
-                location_message = "in Europe"
             elif status.slave_traders_grid in self.grids:
                 location_message = "in the Arab slave markets"
+            else:
+                location_message = f"in {self.grids[0].name}"
 
             if self.actor_type == "tile":
                 transportation_minister.display_message(

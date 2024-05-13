@@ -99,7 +99,10 @@ class conversion(action.action):
                     + str(self.current_village.aggressiveness - 1)
                     + ". /n /n"
                 )
-            if self.current_village.aggressiveness <= 7:
+            if (
+                self.current_village.aggressiveness <= 7
+                and self.current_village.has_cannibals()
+            ):
                 text += "The villagers have been persuaded to abandon their cannibalistic traditions. /n /n"
             self.public_relations_change = random.randrange(0, 2)
             if self.public_relations_change > 0:

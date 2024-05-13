@@ -2121,7 +2121,7 @@ class toggle_button(button):
         if not self.attached_label.actor in [None, "none"]:
             if self.toggle_variable == "wait_until_full":
                 tooltip_text.append(
-                    "Toggles wait until full - waiting until there is a full load to transport/no remaining warehouse space before starting automatic route"
+                    "Toggles wait until full - waiting until there is a full load to transport or no remaining warehouse space before starting automatic route"
                 )
                 if getattr(self.attached_label.actor, self.toggle_variable):
                     tooltip_text.append("Currently waiting until full")
