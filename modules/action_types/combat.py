@@ -210,7 +210,7 @@ class combat(action.action):
                 text += f"As a non-military unit, your {self.current_unit.name} will receive a -1 penalty after their roll. /n"
 
             if self.current_unit.disorganized:
-                text += f"The {self.name} {utility.conjugate('be', self.current_unit.number)} disorganized and will receive a -1 penalty after their roll. /n"
+                text += f"The {self.current_unit.name} {utility.conjugate('be', self.current_unit.number)} disorganized and will receive a -1 penalty after their roll. /n"
             elif self.opponent.disorganized:
                 if self.opponent.npmob_type == "beast":
                     text += f"The {self.opponent.name} {utility.conjugate('be', self.opponent.number)} injured and will receive a -1 after its roll. /n"

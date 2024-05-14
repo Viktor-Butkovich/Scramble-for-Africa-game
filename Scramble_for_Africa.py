@@ -47,17 +47,16 @@ except Exception:  # displays error message and records error message in crash l
 # Performance impacts from repeated exit/load - not everything is being removed each time
 # Add ambient sounds
 #
+# Possible issues:
+# "If you do not reappoint" message after successful trial, maybe for a couple turns - probably didn't have fired penalty,
+# Notification clicking sometimes ignored on certain resolutions, possibly due to windows 125% size mode
+#   Can replicate with 500 width, 1000 height resolution
+# Minister not correctly removed - says old evidence removed even after not in game anymore - might not actually be happening, could've still existed
+# Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
+#
 #   new SFA features:
 # Find whistle sound for train
-# "If you do not reappoint" message after successful trial, maybe for a couple turns - probably didn't have fired penalty,
-# Find bug with defending battalion rolling a 6 not getting promotion message, but still promoting
-# Add movement penalty tooltip to Maxim gun button
 # Overlapping tooltips in same actor overlapping on other resolutions (check on this resolution as well)
 # Ship moving away from Asia not switching music at start of turn
-# Add attack villages/build canoes to recruitment description tooltips
-# Allow tabbing through units from ministers screen
-# Notification clicking sometimes ignored on certain resolutions, possibly due to windows 125% size mode
-# Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
-# The "combat is disorganized" instead of "safari" when attacking with safari
 # Disable safe click area when targeting for any reason, allows easier deselection
-# Show attrition, building cost, movement cost
+# Change order of victory achievements

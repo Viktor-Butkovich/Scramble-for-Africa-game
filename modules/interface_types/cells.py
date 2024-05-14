@@ -175,15 +175,8 @@ class cell:
                 ):  # same effect as clear area with port
                     return False
         else:
-            if self.terrain in ["savannah", "hills"]:
-                if random.randrange(1, 7) >= 2:  # only attrition on 1's
-                    return False
-            elif self.terrain in ["mountain", "desert", "water"]:
-                if random.randrange(1, 7) >= 3:  # attrition on 1's and 2's
-                    return False
-            elif self.terrain in ["jungle", "swamp"]:
-                if random.randrange(1, 7) >= 4:  # attrition on 1-3
-                    return False
+            if random.randrange(1, 7) >= constants.terrain_attrition_dict.get(self.terrain, 1) + 1: # Attrition on 1-, 2-, or 3-, based on terrain
+                return False
 
             if (
                 self.has_building("village")

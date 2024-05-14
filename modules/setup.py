@@ -223,7 +223,7 @@ def misc():
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(10),
-                "modes": ["strategic", "europe"],
+                "modes": ["strategic", "europe", "ministers", "new_game_setup"],
                 "init_type": "ordered collection",
                 "allow_minimize": True,
                 "allow_move": True,
@@ -333,7 +333,7 @@ def equipment_types_config():
                 "max_movement_points": -1,
             },
             "description": [
-                "A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls",
+                "A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls, but decreases movement points by 1",
                 "Can only be equipped by battalions",
             ],
         }
@@ -1196,7 +1196,7 @@ def buttons():
     input_dict["coordinates"] = scaling.scale_coordinates(
         110, constants.default_display_height - 50
     )
-    input_dict["modes"] = ["strategic", "europe"]
+    input_dict["modes"] = ["strategic", "europe", "ministers"]
     input_dict["keybind_id"] = pygame.K_TAB
     input_dict["image_id"] = "buttons/cycle_units_button.png"
     input_dict["init_type"] = "cycle units button"
@@ -2190,7 +2190,6 @@ def inventory_interface():
 
     status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element(
         {
-            #'coordinates': scaling.scale_coordinates(0, 0),
             "width": scaling.scale_width(10),
             "height": scaling.scale_height(30),
             "init_type": "ordered collection",
@@ -2757,7 +2756,7 @@ def minister_interface():
     status.minister_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (5, minister_display_top_y),
+                "coordinates": (5, -5),
                 "width": 10,
                 "height": 10,
                 "modes": ["ministers"],
@@ -2767,6 +2766,7 @@ def minister_interface():
                 "allow_minimize": True,
                 "allow_move": True,
                 "description": "minister information panel",
+                "parent_collection": status.info_displays_collection,
             }
         )
     )
@@ -2873,7 +2873,7 @@ def country_interface():
     status.country_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (5, constants.mob_ordered_list_start_y),
+                "coordinates": (5, -5),
                 "width": 10,
                 "height": 10,
                 "modes": ["new_game_setup"],
@@ -2883,6 +2883,7 @@ def country_interface():
                 "allow_minimize": True,
                 "allow_move": True,
                 "description": "country information panel",
+                "parent_collection": status.info_displays_collection
             }
         )
     )

@@ -114,7 +114,7 @@ class conversion(action.action):
             )
         elif subject == "critical_failure":
             text += self.generate_notification_text("failure")
-            text += "Angered by your company' attempts to destroy their spiritual traditions, the natives attack the missionaries. /n /n"
+            text += "Angered by your company's attempts to destroy their spiritual traditions, the natives attack the missionaries. /n /n"
         elif subject == "critical_success":
             text += self.generate_notification_text("success")
             text += "The evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity - this evangelist is now a veteran. /n /n"

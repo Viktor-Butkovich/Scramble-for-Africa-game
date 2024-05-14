@@ -122,7 +122,7 @@ def update_descriptions(target="all"):
                 first_line += "."
                 text_list.append(first_line)
                 text_list.append(
-                    "When combined with workers, a hunter becomes a safari unit that can kill beasts, and acquire canoes to move swiftly along rivers."
+                    "When combined with workers, a hunter becomes a safari unit that can track and hunt beasts, and acquire canoes to move swiftly along rivers."
                 )
 
             elif current_target == "engineer":
@@ -164,7 +164,7 @@ def update_descriptions(target="all"):
                 first_line += "."
                 text_list.append(first_line)
                 text_list.append(
-                    "When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves."
+                    "When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack native warriors and villages, build forts, and capture slaves."
                 )
 
         elif current_target.endswith(" workers"):
