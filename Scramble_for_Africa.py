@@ -47,4 +47,8 @@ except Exception:  # displays error message and records error message in crash l
 # Performance impacts from repeated exit/load - not everything is being removed each time
 # Add ambient sounds
 #
+# Possible issues:
+# Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
+#
 #   new SFA features:
+# Add more achievements, especially non-victory condition achievements

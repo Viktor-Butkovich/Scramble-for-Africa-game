@@ -223,7 +223,7 @@ def misc():
                 ),
                 "width": scaling.scale_width(10),
                 "height": scaling.scale_height(10),
-                "modes": ["strategic", "europe"],
+                "modes": ["strategic", "europe", "ministers", "new_game_setup"],
                 "init_type": "ordered collection",
                 "allow_minimize": True,
                 "allow_move": True,
@@ -333,7 +333,7 @@ def equipment_types_config():
                 "max_movement_points": -1,
             },
             "description": [
-                "A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls",
+                "A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls, but decreases movement points by 1",
                 "Can only be equipped by battalions",
             ],
         }
@@ -1196,7 +1196,7 @@ def buttons():
     input_dict["coordinates"] = scaling.scale_coordinates(
         110, constants.default_display_height - 50
     )
-    input_dict["modes"] = ["strategic", "europe"]
+    input_dict["modes"] = ["strategic", "europe", "ministers"]
     input_dict["keybind_id"] = pygame.K_TAB
     input_dict["image_id"] = "buttons/cycle_units_button.png"
     input_dict["init_type"] = "cycle units button"
@@ -1408,7 +1408,7 @@ def ministers_screen():
     available_minister_display_y = 770
     cycle_input_dict = {
         "coordinates": scaling.scale_coordinates(
-            available_minister_display_x - (position_icon_width / 2) - 25,
+            available_minister_display_x - (position_icon_width / 2) - 50,
             available_minister_display_y,
         ),
         "width": scaling.scale_width(50),
@@ -1930,34 +1930,48 @@ def tile_interface():
     )
 
     input_dict = {
-        "coordinates": scaling.scale_coordinates(0, separation),
+        "coordinates": (0, 0),
         "width": scaling.scale_width(25),
-        "height": scaling.scale_height(15),
+        "height": scaling.scale_height(25),
         "modes": ["strategic", "europe"],
-        "image_id": "buttons/cycle_passengers_down_button.png",
-        "init_type": "cycle same tile button",
+        "init_type": "same tile icon",
+        "image_id": "buttons/default_button.png",
+        "is_last": False,
+        "color": "gray",
         "parent_collection": same_tile_ordered_collection,
     }
-    cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(
-        input_dict
-    )
-    del input_dict["member_config"]
-    input_dict["coordinates"] = (0, 0)
-    input_dict["height"] = scaling.scale_height(25)
-    input_dict["init_type"] = "same tile icon"
-    input_dict["image_id"] = "buttons/default_button.png"
-    input_dict["is_last"] = False
-    input_dict["color"] = "gray"
+
     for i in range(0, 3):  # add button to cycle through
         input_dict["index"] = i
         same_tile_icon = constants.actor_creation_manager.create_interface_element(
             input_dict
         )
-    input_dict["height"] = scaling.scale_height(15)
-    input_dict["index"] = i + 1
-    input_dict["is_last"] = True
+
     same_tile_icon = constants.actor_creation_manager.create_interface_element(
-        input_dict
+        {
+            "coordinates": (0, 0),
+            "width": scaling.scale_width(25),
+            "height": scaling.scale_height(15),
+            "modes": ["strategic", "europe"],
+            "init_type": "same tile icon",
+            "image_id": "buttons/default_button.png",
+            "index": 3,
+            "is_last": True,
+            "color": "gray",
+            "parent_collection": same_tile_ordered_collection,
+        }
+    )
+
+    cycle_same_tile_button = constants.actor_creation_manager.create_interface_element(
+        {
+            "coordinates": scaling.scale_coordinates(0, separation),
+            "width": scaling.scale_width(25),
+            "height": scaling.scale_height(15),
+            "modes": ["strategic", "europe"],
+            "image_id": "buttons/cycle_passengers_down_button.png",
+            "init_type": "cycle same tile button",
+            "parent_collection": same_tile_ordered_collection,
+        }
     )
 
     # tile background image's tooltip
@@ -2174,18 +2188,19 @@ def inventory_interface():
             }
         )
 
-    status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element(
-        {
-            #'coordinates': scaling.scale_coordinates(0, 0),
-            "width": scaling.scale_width(10),
-            "height": scaling.scale_height(30),
-            "init_type": "ordered collection",
-            "is_info_display": True,
-            "actor_type": "mob_inventory",
-            "description": "mob inventory panel",
-            "parent_collection": status.mob_inventory_collection,
-            "member_config": {"calibrate_exempt": True},
-        }
+    status.mob_inventory_info_display = (
+        constants.actor_creation_manager.create_interface_element(
+            {
+                "width": scaling.scale_width(10),
+                "height": scaling.scale_height(30),
+                "init_type": "ordered collection",
+                "is_info_display": True,
+                "actor_type": "mob_inventory",
+                "description": "mob inventory panel",
+                "parent_collection": status.mob_inventory_collection,
+                "member_config": {"calibrate_exempt": True},
+            }
+        )
     )
 
     # mob inventory background image's tooltip
@@ -2743,7 +2758,7 @@ def minister_interface():
     status.minister_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (5, minister_display_top_y),
+                "coordinates": (5, -5),
                 "width": 10,
                 "height": 10,
                 "modes": ["ministers"],
@@ -2753,6 +2768,7 @@ def minister_interface():
                 "allow_minimize": True,
                 "allow_move": True,
                 "description": "minister information panel",
+                "parent_collection": status.info_displays_collection,
             }
         )
     )
@@ -2859,7 +2875,7 @@ def country_interface():
     status.country_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (5, constants.mob_ordered_list_start_y),
+                "coordinates": (5, -5),
                 "width": 10,
                 "height": 10,
                 "modes": ["new_game_setup"],
@@ -2869,6 +2885,7 @@ def country_interface():
                 "allow_minimize": True,
                 "allow_move": True,
                 "description": "country information panel",
+                "parent_collection": status.info_displays_collection,
             }
         )
     )

@@ -200,7 +200,6 @@ class sound_manager_template:
         else:
             state_changed = False
         self.previous_state = current_state
-        status.current_country
         if current_state == "europe" and status.current_country:
             adjective = status.current_country.adjective
             country_songs = [

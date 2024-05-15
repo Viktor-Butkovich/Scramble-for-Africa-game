@@ -47,6 +47,8 @@ def cycle_player_turn(start_of_turn=False):
             and not status.europe_grid in cycled_mob.grids
         ):
             set_game_mode("strategic")
+        elif constants.current_game_mode == "ministers":
+            set_game_mode("strategic")
         actor_utility.calibrate_actor_info_display(
             status.mob_info_display, None, override_exempt=True
         )

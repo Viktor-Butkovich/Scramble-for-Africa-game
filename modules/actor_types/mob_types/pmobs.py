@@ -737,6 +737,7 @@ class pmob(mob):
                 self.end_turn_destination.grids[0],
                 (self.end_turn_destination.x, self.end_turn_destination.y),
             )
+            self.images[0].current_cell.tile.select(music_override=True)
             self.manage_inventory_attrition()  # do an inventory check when crossing ocean, using the destination's terrain
             self.end_turn_destination = "none"
 

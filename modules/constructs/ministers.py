@@ -326,12 +326,7 @@ class minister:
                         skill_type
                     ]  # like General to military
                     self.tooltip_text.append(
-                        "    "
-                        + str(rank)
-                        + ". "
-                        + skill_name.capitalize()
-                        + ": "
-                        + self.apparent_skill_descriptions[skill_type]
+                        f"    {rank}. {skill_name.capitalize()}: {self.apparent_skill_descriptions[skill_type]}"
                     )
 
         self.tooltip_text.append("Evidence: " + str(self.corruption_evidence))
@@ -1280,7 +1275,7 @@ class minister:
         Output:
             None
         """
-        if not self.current_position == "none":
+        if self.current_position != "none":
             status.current_ministers[self.current_position] = None
             for current_minister_image in status.minister_image_list:
                 if current_minister_image.minister_type == self.current_position:

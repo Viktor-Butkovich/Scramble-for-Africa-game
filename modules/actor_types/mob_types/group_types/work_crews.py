@@ -58,6 +58,7 @@ class work_crew(group):
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
+        building.cell.tile.update_image_bundle()
         actor_utility.calibrate_actor_info_display(
             status.tile_info_display, building.cell.tile
         )  # update tile ui with worked building

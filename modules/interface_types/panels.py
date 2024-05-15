@@ -3,6 +3,7 @@
 from .buttons import button
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 
 class panel(button):
@@ -34,12 +35,14 @@ class panel(button):
     def on_click(self):
         """
         Description:
-            Panels have no on_click behavior, but, since they aren't whiteespace, they don't prevent units from being deselected
+            Panels have no on_click behavior, but, since they aren't whitespace, they don't prevent units from being deselected
         Input:
             None
         Output:
             string: Returns 'none' to designate that this click did nothing - still prevents units from deselected but also allows other buttons to be clicked
         """
+        flags.choosing_advertised_commodity = False
+        flags.choosing_destination = False
         return "none"
 
     def update_tooltip(self):

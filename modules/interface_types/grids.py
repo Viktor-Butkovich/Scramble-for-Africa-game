@@ -83,8 +83,14 @@ class grid(interface_elements.interface_element):
             return_list.append(
                 {
                     "image_id": image_id,
-                    "x_offset": current_cell.x / self.coordinate_width,
-                    "y_offset": current_cell.y / self.coordinate_height,
+                    "x_offset": (current_cell.x) / self.coordinate_width
+                    - 0.5
+                    + (0.7 / self.coordinate_width),
+                    "y_offset": (current_cell.y) / self.coordinate_height
+                    - 0.5
+                    + (0.4 / self.coordinate_height),
+                    "x_size": 1.05 / self.coordinate_width,
+                    "y_size": 1.05 / self.coordinate_height,
                 }
             )
         return return_list

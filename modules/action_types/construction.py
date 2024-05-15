@@ -174,17 +174,7 @@ class construction(action.action):
             terrain = status.displayed_mob.images[0].current_cell.terrain
             if not self.building_type in ["train", "steamboat"]:
                 message.append(
-                    utility.generate_capitalized_article(self.building_name)
-                    + self.building_name
-                    + " "
-                    + utility.conjugate("cost", self.building_name)
-                    + " "
-                    + str(base_cost)
-                    + " money by default, which is multiplied by "
-                    + str(constants.terrain_build_cost_multiplier_dict[terrain])
-                    + " when built in "
-                    + terrain
-                    + " terrain"
+                    f"{utility.generate_capitalized_article(self.building_name)}{self.building_name} {utility.conjugate('cost', 1, self.building_name)} {base_cost} money by default, which is multiplied by {constants.terrain_build_cost_multiplier_dict[terrain]} when built in {terrain} terrain"
                 )
         return message
 

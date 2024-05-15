@@ -1,5 +1,6 @@
 # Contains functionality for labels
 
+import pygame
 from .buttons import button
 from ..util import scaling, text_utility, utility, market_utility
 import modules.constants.constants as constants
@@ -603,4 +604,10 @@ class multi_line_label(label):
         self.format_message()
         for text_line in self.message:
             self.width = max(self.ideal_width, self.font.calculate_size(text_line))
+        self.Rect = pygame.Rect(
+            self.x,
+            constants.display_height - self.y - self.height,
+            self.width,
+            self.height,
+        )
         self.image.update_state(self.x, self.y, self.width, self.height)

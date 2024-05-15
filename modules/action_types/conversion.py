@@ -99,7 +99,10 @@ class conversion(action.action):
                     + str(self.current_village.aggressiveness - 1)
                     + ". /n /n"
                 )
-            if self.current_village.aggressiveness <= 7:
+            if (
+                self.current_village.aggressiveness <= 7
+                and self.current_village.has_cannibals()
+            ):
                 text += "The villagers have been persuaded to abandon their cannibalistic traditions. /n /n"
             self.public_relations_change = random.randrange(0, 2)
             if self.public_relations_change > 0:
@@ -111,7 +114,7 @@ class conversion(action.action):
             )
         elif subject == "critical_failure":
             text += self.generate_notification_text("failure")
-            text += "Angered by your company' attempts to destroy their spiritual traditions, the natives attack the missionaries. /n /n"
+            text += "Angered by your company's attempts to destroy their spiritual traditions, the natives attack the missionaries. /n /n"
         elif subject == "critical_success":
             text += self.generate_notification_text("success")
             text += "The evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity - this evangelist is now a veteran. /n /n"

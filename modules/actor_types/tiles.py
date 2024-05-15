@@ -470,18 +470,35 @@ class tile(actor):  # to do: make terrain tiles a subclass
                 + ")"
             )
             if self.cell.visible:
-                if self.cell.terrain == "water":
-                    if coordinates[1] == 0:
-                        tooltip_message.append("This is an ocean water tile")
+                if self.cell.terrain != "none":
+                    if self.cell.terrain == "water":
+                        if coordinates[1] == 0:
+                            tooltip_message.append("This is an ocean water tile")
+                            tooltip_message.append(
+                                f"    Movement cost: {constants.terrain_movement_cost_dict[self.cell.terrain]} (with steamship)"
+                            )
+                            tooltip_message.append(f"        Otherwise impassable")
+                        else:
+                            tooltip_message.append("This is a river water tile")
+                            tooltip_message.append(
+                                f"    Movement cost: {constants.terrain_movement_cost_dict[self.cell.terrain]} (with canoes or steamboat)"
+                            )
+                            tooltip_message.append(
+                                f"        Otherwise costs entire turn of movement"
+                            )
                     else:
-                        tooltip_message.append("This is a river water tile")
-                else:
+                        tooltip_message.append(
+                            f"This is {utility.generate_article(self.cell.terrain)} {self.cell.terrain} tile"
+                        )
+                        tooltip_message.append(
+                            f"    Movement cost: {constants.terrain_movement_cost_dict[self.cell.terrain]}"
+                        )
                     tooltip_message.append(
-                        "This is "
-                        + utility.generate_article(self.cell.terrain)
-                        + " "
-                        + self.cell.terrain
-                        + " tile"
+                        f"    Building cost multiplier: x{constants.terrain_build_cost_multiplier_dict[self.cell.terrain]}"
+                    )
+                    attrition_dict = {1: "light", 2: "moderate", 3: "severe"}
+                    tooltip_message.append(
+                        f"    Attrition: {attrition_dict[constants.terrain_attrition_dict[self.cell.terrain]]}"
                     )
                 if not self.cell.village == "none":  # if village present, show village
                     tooltip_message += self.cell.village.get_tooltip()
@@ -549,7 +566,7 @@ class tile(actor):  # to do: make terrain tiles a subclass
         else:
             return False
 
-    def select(self):
+    def select(self, music_override: bool = False):
         """
         Description:
             Selects this tile and switches music based on which type of tile is selected, if the type of tile selected would change the music
@@ -558,7 +575,9 @@ class tile(actor):  # to do: make terrain tiles a subclass
         Output:
             None
         """
-        if flags.player_turn and main_loop_utility.action_possible():
+        if music_override or (
+            flags.player_turn and main_loop_utility.action_possible()
+        ):
             if (
                 self.cell.grid.grid_type == "slave_traders_grid"
                 and constants.slave_traders_strength > 0
