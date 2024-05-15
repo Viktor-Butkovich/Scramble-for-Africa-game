@@ -215,8 +215,8 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
                 possible_tooltip_drawer.draw_tooltip(
                     below_screen, beyond_screen, height, width, y_displacement
                 )
-                y_displacement += scaling.unscale_width(
-                    font.size * (len(possible_tooltip_drawer.tooltip_text) + 1)
+                y_displacement += font.size * (
+                    len(possible_tooltip_drawer.tooltip_text) + 1
                 )
                 stopping = True
             elif (
@@ -226,8 +226,8 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
                 possible_tooltip_drawer.draw_tooltip(
                     below_screen, beyond_screen, height, width, y_displacement
                 )
-                y_displacement += scaling.unscale_width(
-                    font.size * (len(possible_tooltip_drawer.tooltip_text) + 1)
+                y_displacement += font.size * (
+                    len(possible_tooltip_drawer.tooltip_text) + 1
                 )
                 stopping = True
         if not stopping:
@@ -235,8 +235,8 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
                 possible_tooltip_drawer.draw_tooltip(
                     below_screen, beyond_screen, height, width, y_displacement
                 )
-                y_displacement += scaling.unscale_width(
-                    font.size * (len(possible_tooltip_drawer.tooltip_text) + 1)
+                y_displacement += font.size * (
+                    len(possible_tooltip_drawer.tooltip_text) + 1
                 )
 
 

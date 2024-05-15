@@ -48,32 +48,3 @@ def scale_height(height):
     ratio = constants.display_height / constants.default_display_height
     scaled_height = round(height * ratio)
     return scaled_height
-
-
-def unscale_width(width):
-    """
-    Description:
-        Returns a version of the inputted width scaled to the program's default screen resolution. For example, if the inputted width is as wide as the player's screen, the returned width will be as wide as the program's default screen
-    Input:
-        int width: Scaled pixel width
-    Output:
-        int: Unscaled pixel width
-    """
-    ratio = constants.display_width / constants.default_display_width
-    unscaled_width = round(width / ratio)
-    return unscaled_width
-
-
-def unscale_height(height):
-    """
-    Description:
-        Returns a version of the inputted height scaled to the program's default screen resolution. For example, if the inputted height is as tall as the player's screen, the returned height will be as tall as the program's default
-            screen
-    Input:
-        int height: Scaled pixel height
-    Output:
-        int: Unscaled pixel height
-    """
-    ratio = constants.display_height / constants.default_display_height
-    unscaled_height = round(height / ratio)
-    return unscaled_height

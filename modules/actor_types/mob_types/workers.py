@@ -233,6 +233,7 @@ class worker(pmob):
                 status.mob_info_display, None, override_exempt=True
             )
             vehicle.select()
+            vehicle.selection_sound()
 
     def uncrew_vehicle(self, vehicle):
         """

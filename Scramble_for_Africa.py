@@ -48,10 +48,7 @@ except Exception:  # displays error message and records error message in crash l
 # Add ambient sounds
 #
 # Possible issues:
-# Notification clicking sometimes ignored on certain resolutions, possibly due to windows 125% size mode
-#   Can replicate with 500 width, 1000 height resolution
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
-# Find whistle sound for train
-# Overlapping tooltips in same actor overlapping on other resolutions (check on this resolution as well)
+# Add more achievements, especially non-victory condition achievements

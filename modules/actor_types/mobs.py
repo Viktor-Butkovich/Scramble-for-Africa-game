@@ -926,11 +926,14 @@ class mob(actor):
         """
         possible_sounds = []
         if self.is_pmob:
-            if self.is_vehicle:  # Overlaps with voices
-                if self.vehicle_type == "train":
-                    constants.sound_manager.play_sound("effects/train_horn")
+            if self.is_vehicle:  # Overlaps with voices if crewed
+                if self.has_crew:
+                    if self.vehicle_type == "train":
+                        constants.sound_manager.play_sound("effects/train_horn")
+                    else:
+                        constants.sound_manager.play_sound("effects/foghorn")
                 else:
-                    constants.sound_manager.play_sound("effects/foghorn")
+                    return
 
             if self.is_officer or self.is_group or self.is_vehicle:
                 if (
