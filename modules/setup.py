@@ -2188,17 +2188,19 @@ def inventory_interface():
             }
         )
 
-    status.mob_inventory_info_display = constants.actor_creation_manager.create_interface_element(
-        {
-            "width": scaling.scale_width(10),
-            "height": scaling.scale_height(30),
-            "init_type": "ordered collection",
-            "is_info_display": True,
-            "actor_type": "mob_inventory",
-            "description": "mob inventory panel",
-            "parent_collection": status.mob_inventory_collection,
-            "member_config": {"calibrate_exempt": True},
-        }
+    status.mob_inventory_info_display = (
+        constants.actor_creation_manager.create_interface_element(
+            {
+                "width": scaling.scale_width(10),
+                "height": scaling.scale_height(30),
+                "init_type": "ordered collection",
+                "is_info_display": True,
+                "actor_type": "mob_inventory",
+                "description": "mob inventory panel",
+                "parent_collection": status.mob_inventory_collection,
+                "member_config": {"calibrate_exempt": True},
+            }
+        )
     )
 
     # mob inventory background image's tooltip
@@ -2883,7 +2885,7 @@ def country_interface():
                 "allow_minimize": True,
                 "allow_move": True,
                 "description": "country information panel",
-                "parent_collection": status.info_displays_collection
+                "parent_collection": status.info_displays_collection,
             }
         )
     )

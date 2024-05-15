@@ -523,13 +523,10 @@ def manage_lmb_down(clicked_button):
                                     constants.current_time
                                 )  # outlines should be shown immediately once destination is chosen
                                 status.displayed_mob.remove_from_turn_queue()
-                                actor_utility.calibrate_actor_info_display(
-                                    status.mob_info_display, status.displayed_mob
-                                )
-                                actor_utility.calibrate_actor_info_display(
-                                    status.tile_info_display,
-                                    status.displayed_mob.images[0].current_cell.tile,
-                                )
+                                status.displayed_mob.select()
+                                status.displayed_mob.images[
+                                    0
+                                ].current_cell.tile.select()
                         else:  # cannot move to same continent
                             actor_utility.calibrate_actor_info_display(
                                 status.mob_info_display, None

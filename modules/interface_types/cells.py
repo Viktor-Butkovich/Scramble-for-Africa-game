@@ -175,7 +175,10 @@ class cell:
                 ):  # same effect as clear area with port
                     return False
         else:
-            if random.randrange(1, 7) >= constants.terrain_attrition_dict.get(self.terrain, 1) + 1: # Attrition on 1-, 2-, or 3-, based on terrain
+            if (
+                random.randrange(1, 7)
+                >= constants.terrain_attrition_dict.get(self.terrain, 1) + 1
+            ):  # Attrition on 1-, 2-, or 3-, based on terrain
                 return False
 
             if (

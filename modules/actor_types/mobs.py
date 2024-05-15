@@ -551,10 +551,6 @@ class mob(actor):
         """
         if new_grid == status.europe_grid:
             self.modes.append("europe")
-            actor_utility.calibrate_actor_info_display(status.tile_info_display, None)
-            actor_utility.calibrate_actor_info_display(
-                status.tile_info_display, new_grid.cell_list[0][0].tile
-            )
         else:  # if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, "europe")
         self.x, self.y = new_coordinates
@@ -727,14 +723,10 @@ class mob(actor):
                     "This unit is currently disorganized, giving a combat penalty until its next turn"
                 )
 
-        if not self.end_turn_destination == "none":
+        if self.end_turn_destination != "none":
             if self.end_turn_destination.cell.grid == status.strategic_map_grid:
                 tooltip_list.append(
-                    "This unit has been issued an order to travel to ("
-                    + str(self.end_turn_destination.cell.x)
-                    + ", "
-                    + str(self.end_turn_destination.cell.y)
-                    + ") in Africa at the end of the turn"
+                    f"This unit has been issued an order to travel to ({self.end_turn_destination.cell.x}, {self.end_turn_destination.cell.y}) in Africa at the end of the turn"
                 )
             elif self.end_turn_destination.cell.grid == status.slave_traders_grid:
                 tooltip_list.append(
@@ -742,20 +734,12 @@ class mob(actor):
                 )
             else:
                 tooltip_list.append(
-                    "This unit has been issued an order to travel to "
-                    + self.end_turn_destination.cell.grid.grid_type[:-5].capitalize()
-                    + " at the end of the turn"
+                    f"This unit has been issued an order to travel to {self.end_turn_destination.cell.grid.grid_type[:-5].capitalize()} at the end of the turn"
                 )
 
         if self.is_npmob and self.npmob_type == "beast":
             tooltip_list.append(
-                "This beast tends to live in "
-                + self.preferred_terrains[0]
-                + ", "
-                + self.preferred_terrains[1]
-                + ", and "
-                + self.preferred_terrains[2]
-                + " terrain "
+                f"This beast tends to live in {self.preferred_terrains[0]}, {self.preferred_terrains[1]}, and {self.preferred_terrains[2]} terrain"
             )
 
         if self.is_npmob:
@@ -779,17 +763,7 @@ class mob(actor):
                 start_coordinates = self.base_automatic_route[0]
                 end_coordinates = self.base_automatic_route[-1]
                 tooltip_list.append(
-                    "This unit has a designated movement route of length "
-                    + str(len(self.base_automatic_route))
-                    + ", picking up commodities at ("
-                    + str(start_coordinates[0])
-                    + ", "
-                    + str(start_coordinates[1])
-                    + ") and dropping them off at ("
-                    + str(end_coordinates[0])
-                    + ", "
-                    + str(end_coordinates[1])
-                    + ")"
+                    f"This unit has a designated movement route of length {len(self.base_automatic_route)}, picking up commodities at ({start_coordinates[0]}, {start_coordinates[1]}) and dropping them off at ({end_coordinates[0]}, {end_coordinates[1]})"
                 )
 
         self.set_tooltip(tooltip_list)

@@ -551,20 +551,7 @@ def trigger_worker_migration():  # resolves migration if it occurs
                 destination = village_destination_dict[source_village]
                 destination_settlement = destination.settlement
 
-                current_notification_text = (
-                    str(village_num_migrated_dict[source_village])
-                    + " worker"
-                    + utility.generate_plural(village_num_migrated_dict[source_village])
-                    + " migrated from the village of "
-                    + source_village.name
-                    + " to the slums surrounding "
-                    + destination_settlement.name
-                    + " at ("
-                    + str(destination.x)
-                    + ", "
-                    + str(destination.y)
-                    + "). /n /n"
-                )
+                current_notification_text = f"{village_num_migrated_dict[source_village]} worker{utility.generate_plural(village_num_migrated_dict[source_village])} migrated from the village of {source_village.name} to the slums surrounding {destination_settlement.name} at ({destination.x}, {destination.y}). /n /n"
 
                 constants.notification_manager.display_notification(
                     {
@@ -580,18 +567,7 @@ def trigger_worker_migration():  # resolves migration if it occurs
             ):  # 3 wandering workers settled in the slums surrounding Port Young at (0, 0). /n /n
                 destination_settlement = destination.settlement
 
-                current_notification_text = (
-                    str(wandering_num_migrated_dict[destination])
-                    + " wandering worker"
-                    + utility.generate_plural(wandering_num_migrated_dict[destination])
-                    + " settled in the slums surrounding "
-                    + destination_settlement.name
-                    + " at ("
-                    + str(destination.x)
-                    + ", "
-                    + str(destination.y)
-                    + "). /n /n"
-                )
+                current_notification_text = f"{wandering_num_migrated_dict[destination]} wandering worker{utility.generate_plural(wandering_num_migrated_dict[destination])} settled in the slums surrounding {destination_settlement.name} at ({destination.x}, {destination.y}). /n /n"
 
                 constants.notification_manager.display_notification(
                     {
@@ -775,13 +751,13 @@ def manage_ministers():
     """
     removed_ministers = []
     for current_minister in status.minister_list:
-        removing_minister = False
+        removing_current_minister = False
         if (
             current_minister.just_removed
             and current_minister.current_position == "none"
         ):
             current_minister.respond("fired")
-            removing_minister = True
+            removing_current_minister = True
         elif (
             current_minister.current_position == "none"
             and random.randrange(1, 7) == 1
@@ -816,11 +792,7 @@ def manage_ministers():
                     "fabricated_evidence",
                 )
             text_utility.print_to_screen(
-                "The "
-                + str(current_minister.fabricated_evidence)
-                + " fabricated evidence against "
-                + current_minister.name
-                + " is no longer usable."
+                f"The {current_minister.fabricated_evidence} fabricated evidence against {current_minister.name} is no longer usable."
             )
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
@@ -836,27 +808,14 @@ def manage_ministers():
                 current_position = current_minister.current_position
             if evidence_lost == current_minister.corruption_evidence:
                 current_minister.display_message(
-                    "All of the "
-                    + str(current_minister.corruption_evidence)
-                    + " evidence of "
-                    + current_position
-                    + " "
-                    + current_minister.name
-                    + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n"
+                    f"All of the {current_minister.corruption_evidence} evidence of {current_position} {current_minister.name}'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n"
                 )
             else:
                 current_minister.display_message(
-                    str(evidence_lost)
-                    + " of the "
-                    + str(current_minister.corruption_evidence)
-                    + " evidence of "
-                    + current_position
-                    + " "
-                    + current_minister.name
-                    + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n"
+                    f"{evidence_lost} of the {current_minister.corruption_evidence} evidence of {current_position} {current_minister.name}'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n"
                 )
             current_minister.corruption_evidence -= evidence_lost
-        if removing_minister:
+        if removing_current_minister:
             current_minister.remove_complete()
     if flags.prosecution_bribed_judge:
         text_utility.print_to_screen(
@@ -868,9 +827,9 @@ def manage_ministers():
         current_minister = removed_ministers.pop(0)
         current_minister.respond("retirement")
 
-        if not current_minister.current_position == "none":
+        if current_minister.current_position != "none":
             current_minister.appoint("none")
-        current_minister.remove()
+        current_minister.remove_complete()
 
     if (
         len(status.minister_list) <= constants.minister_limit - 2

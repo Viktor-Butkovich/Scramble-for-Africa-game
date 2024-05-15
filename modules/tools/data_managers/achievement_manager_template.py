@@ -65,38 +65,6 @@ class achievement_manager_template:
         Output:
             None
         """
-        if achievement_type in self.victory_conditions and verbose == True:
-            if (
-                status.current_country.name == "Britain"
-                and "Victorian Man" not in self.achievements
-            ):
-                self.achieve("Victorian Man")
-            elif (
-                status.current_country.name == "France"
-                and "L'enterprise, c'est moi" not in self.achievements
-            ):
-                self.achieve("L'enterprise, c'est moi")
-            elif (
-                status.current_country.name == "Germany"
-                and "Second Reich" not in self.achievements
-            ):
-                self.achieve("Second Reich")
-            elif (
-                status.current_country.name == "Belgium"
-                and "Absolutely Flemished" not in self.achievements
-            ):
-                self.achieve("Absolutely Flemished")
-            elif (
-                status.current_country.name == "Italy"
-                and "New Empire" not in self.achievements
-            ):
-                self.achieve("New Empire")
-            elif (
-                status.current_country.name == "Portugal"
-                and "Mapa Cor-de-Rosa" not in self.achievements
-            ):
-                self.achieve("Mapa Cor-de-Rosa")
-
         if not achievement_type in self.achievements:
             self.achievements.append(achievement_type)
             constants.actor_creation_manager.create_interface_element(
@@ -155,6 +123,38 @@ class achievement_manager_template:
                             "notification_type": "action",
                         }
                     )
+
+        if achievement_type in self.victory_conditions and verbose == True:
+            if (
+                status.current_country.name == "Britain"
+                and "Victorian Man" not in self.achievements
+            ):
+                self.achieve("Victorian Man")
+            elif (
+                status.current_country.name == "France"
+                and "L'enterprise, c'est moi" not in self.achievements
+            ):
+                self.achieve("L'enterprise, c'est moi")
+            elif (
+                status.current_country.name == "Germany"
+                and "Second Reich" not in self.achievements
+            ):
+                self.achieve("Second Reich")
+            elif (
+                status.current_country.name == "Belgium"
+                and "Absolutely Flemished" not in self.achievements
+            ):
+                self.achieve("Absolutely Flemished")
+            elif (
+                status.current_country.name == "Italy"
+                and "New Empire" not in self.achievements
+            ):
+                self.achieve("New Empire")
+            elif (
+                status.current_country.name == "Portugal"
+                and "Mapa Cor-de-Rosa" not in self.achievements
+            ):
+                self.achieve("Mapa Cor-de-Rosa")
 
     def get_description(self, achievement_type: str) -> str:
         """
