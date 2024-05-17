@@ -261,6 +261,8 @@ class attack_village(action.action):
         new_unit = None
         if self.roll_result >= self.current_min_success:
             self.current_village.change_population(-1 * self.population_decrease)
+            if self.current_village.population <= 0:
+                constants.achievement_manager.achieve("Naught but Ashes")
         elif self.roll_result <= self.current_max_crit_fail:
             warrior = self.current_village.spawn_warrior()
             warrior.show_images()

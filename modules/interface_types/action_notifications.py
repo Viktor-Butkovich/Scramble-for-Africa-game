@@ -292,10 +292,10 @@ class off_tile_exploration_notification(action_notification):
 
         if reveal_cell:
             cell.set_visibility(True)
-        constants.public_opinion_tracker.change(public_opinion_increase)
-        constants.money_tracker.change(money_increase)
         status.minimap_grid.calibrate(cell.x, cell.y)
         super().__init__(input_dict)
+        constants.public_opinion_tracker.change(public_opinion_increase)
+        constants.money_tracker.change(money_increase)
 
     def remove(self):
         """

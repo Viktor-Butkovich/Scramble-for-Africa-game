@@ -2471,21 +2471,6 @@ class switch_game_mode_button(button):
                         "choices": ["confirm main menu", "none"],
                     }
                 )
-            elif constants.current_game_mode == "trial":
-                if status.displayed_defense.fabricated_evidence > 0:
-                    text = f"WARNING: Your {status.displayed_defense.fabricated_evidence} piece{utility.generate_plural(status.displayed_defense.fabricated_evidence)} of fabricated evidence against {status.displayed_defense.current_position} {status.displayed_defense.name} will disappear at the end of the turn if left unused. /n /n"
-                    constants.notification_manager.display_notification(
-                        {
-                            "message": text,
-                        }
-                    )
-                if flags.prosecution_bribed_judge:
-                    text = "WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n"
-                    constants.notification_manager.display_notification(
-                        {
-                            "message": text,
-                        }
-                    )
 
             if self.to_mode != "main_menu":
                 game_transitions.set_game_mode(self.to_mode)

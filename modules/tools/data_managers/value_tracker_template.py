@@ -1,4 +1,5 @@
 import modules.constants.constants as constants
+import modules.constants.status as status
 
 
 class value_tracker_template:
@@ -82,6 +83,10 @@ class public_opinion_tracker_template(value_tracker_template):
         """
         super().change(value_change)
         constants.money_label.check_for_updates()
+        if self.get() <= 0:
+            constants.achievement_manager.achieve("Vilified")
+        elif self.get() >= 100:
+            constants.achievement_manager.achieve("Idolized")
 
 
 class money_tracker_template(value_tracker_template):
@@ -173,13 +178,18 @@ class money_tracker_template(value_tracker_template):
         if total_revenue == 0:
             notification_text += "  None /n"
 
+        if (
+            total_revenue > 0
+            and total_revenue
+            > status.transaction_history["subsidies"]
+            + status.transaction_history["loan"]
+        ):
+            constants.achievement_manager.check_achievements("Return on Investment")
+
         notification_text += "/nExpenses: /n"
         total_expenses = 0
         for transaction_type in constants.transaction_types:
             if self.transaction_history[transaction_type] < 0:
-                # if transaction_type == 'misc. expenses':
-                #    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
-                # else:
                 notification_text += (
                     "  "
                     + constants.transaction_descriptions[transaction_type].capitalize()

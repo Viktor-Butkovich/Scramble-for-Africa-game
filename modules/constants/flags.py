@@ -25,3 +25,4 @@ capital: bool = False
 r_ctrl: bool = False
 l_ctrl: bool = False
 ctrl: bool = False
+any_slaves: bool = False

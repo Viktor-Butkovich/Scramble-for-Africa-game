@@ -131,6 +131,7 @@ class expedition(group):
         else:
             current_cell = self.images[0].current_cell
         promoted = self.veteran
+        found_river_source = False
         for current_direction in ["up", "down", "left", "right"]:
             target_cell = current_cell.adjacent_cells[current_direction]
             if target_cell and not target_cell.visible:
@@ -183,6 +184,7 @@ class expedition(group):
                             + " money for this discovery. /n /n"
                         )
                         public_opinion_increase += random.randrange(10, 31)
+                        found_river_source = True
 
                     if public_opinion_increase > 0:  # Royal/National/Imperial
                         text += (
@@ -217,3 +219,5 @@ class expedition(group):
                             },
                         }
                     )
+        if found_river_source:
+            constants.achievement_manager.achieve("Explorer")

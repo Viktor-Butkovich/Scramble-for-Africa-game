@@ -7,6 +7,7 @@ from ...util import market_utility
 from ...util import text_utility
 import modules.constants.constants as constants
 import modules.constants.status as status
+import modules.constants.flags as flags
 
 
 class worker(pmob):
@@ -391,6 +392,7 @@ class slave_worker(worker):
         Output:
             None
         """
+        flags.any_slaves = True
         input_dict["worker_type"] = "slave"
         super().__init__(from_save, input_dict)
         if constants.slave_traders_strength <= 0:

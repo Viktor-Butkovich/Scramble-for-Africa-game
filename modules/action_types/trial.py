@@ -462,6 +462,7 @@ class trial(action.campaign):
                     "on_remove": self.leave_trial_screen,
                 }
             )
+            constants.achievement_manager.achieve("Guilty")
 
         else:
             text = (

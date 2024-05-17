@@ -272,6 +272,8 @@ class slave_capture(action.action):
         new_unit = None
         if self.roll_result >= self.current_min_success:
             self.current_village.change_population(-1)
+            if self.current_village.population <= 0:
+                constants.achievement_manager.achieve("Naught but Ashes")
             new_unit = constants.actor_creation_manager.create(
                 False,
                 {

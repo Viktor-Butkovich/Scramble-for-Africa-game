@@ -237,6 +237,7 @@ class suppress_slave_trade(action.action):
                         "message": text,
                     }
                 )
+                constants.achievement_manager.achieve("Abolitionist")
             constants.public_opinion_tracker.change(self.public_opinion_increase)
         elif self.roll_result <= self.current_max_crit_fail:
             self.current_unit.die()
