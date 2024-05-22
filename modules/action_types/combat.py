@@ -768,6 +768,7 @@ class combat(action.action):
                     constants.public_opinion_tracker.change(
                         self.public_relations_change
                     )
+                    constants.achievement_manager.achieve("Big Game Hunter")
 
         if not self.defending:
             self.current_unit.set_movement_points(0)

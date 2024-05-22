@@ -75,6 +75,7 @@ class save_load_manager_template:
         self.copied_flags = []
         self.copied_flags.append("prosecution_bribed_judge")
         self.copied_flags.append("any_slaves")
+        self.copied_flags.append("victories_this_game")
 
     def new_game(self, country):
         """
@@ -87,6 +88,7 @@ class save_load_manager_template:
         """
         flags.creating_new_game = True
         flags.any_slaves = False
+        flags.victories_this_game = []
         country.select()
 
         for grid_type in constants.grid_types_list:

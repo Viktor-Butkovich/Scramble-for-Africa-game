@@ -75,36 +75,12 @@ class achievement_manager_template:
         Output:
             None
         """
-        if not achievement_type in self.achievements:
-            self.achievements.append(achievement_type)
-            constants.actor_creation_manager.create_interface_element(
-                {
-                    "coordinates": scaling.scale_coordinates(0, 0),
-                    "width": scaling.scale_width(40),
-                    "height": scaling.scale_height(40),
-                    "image_id": f"achievements/{achievement_type}.png",
-                    "init_type": "tooltip free image",
-                    "parent_collection": self.achievement_displays[
-                        len(self.achievements) // 16
-                    ],
-                    "tooltip_text": [
-                        achievement_type
-                        + ": "
-                        + self.get_description(achievement_type),
-                        self.get_quote(achievement_type),
-                    ],
-                }
-            )
+        if (not achievement_type in self.achievements) or (achievement_type in self.victory_conditions and not achievement_type in flags.victories_this_game):
             with open("save_games/achievements.pickle", "wb") as handle:
                 pickle.dump(self.achievements, handle)
                 handle.close()
             if verbose:
-                if achievement_type in self.victory_conditions:
-                    constants.notification_manager.display_notification(
-                        {
-                            "message": f'Victory achievement unlocked - "{achievement_type}": {self.get_description(achievement_type)} /n /n{self.get_quote(achievement_type)} /n /n',
-                            "attached_interface_elements": [
-                                action_utility.generate_free_image_input_dict(
+                attached_interface_elements = action_utility.generate_free_image_input_dict(
                                     f"achievements/{achievement_type}.png",
                                     120,
                                     override_input_dict={
@@ -113,28 +89,59 @@ class achievement_manager_template:
                                         }
                                     },
                                 )
-                            ],
-                            "choices": ["continue", "confirm main menu"],
-                        }
-                    )
+                if achievement_type in self.victory_conditions:
+                    flags.victories_this_game.append(achievement_type)
+                    if achievement_type in self.achievements:
+                        constants.notification_manager.display_notification(
+                            {
+                                "message": f'Victory - "{achievement_type}": {self.get_description(achievement_type)} /n /n{self.get_quote(achievement_type)} /n /n',
+                                "attached_interface_elements": [
+                                    attached_interface_elements
+                                ],
+                                "choices": ["continue", "confirm main menu"],
+                            }
+                        )
+                    else:
+                        constants.notification_manager.display_notification(
+                            {
+                                "message": f'Victory achievement unlocked - "{achievement_type}": {self.get_description(achievement_type)} /n /n{self.get_quote(achievement_type)} /n /n',
+                                "attached_interface_elements": [
+                                    attached_interface_elements
+                                ],
+                                "choices": ["continue", "confirm main menu"],
+                            }
+                        )
                 else:
                     constants.notification_manager.display_notification(
                         {
                             "message": f'Achievement unlocked - "{achievement_type}": {self.get_description(achievement_type)} /n /n{self.get_quote(achievement_type)} /n /n',
                             "attached_interface_elements": [
-                                action_utility.generate_free_image_input_dict(
-                                    f"achievements/{achievement_type}.png",
-                                    120,
-                                    override_input_dict={
-                                        "member_config": {
-                                            "order_x_offset": scaling.scale_width(-75),
-                                        }
-                                    },
-                                )
+                                attached_interface_elements
                             ],
                             "notification_type": "action",
                         }
                     )
+
+            if not achievement_type in self.achievements:
+                self.achievements.append(achievement_type)
+                constants.actor_creation_manager.create_interface_element(
+                    {
+                        "coordinates": scaling.scale_coordinates(0, 0),
+                        "width": scaling.scale_width(40),
+                        "height": scaling.scale_height(40),
+                        "image_id": f"achievements/{achievement_type}.png",
+                        "init_type": "tooltip free image",
+                        "parent_collection": self.achievement_displays[
+                            len(self.achievements) // 16
+                        ],
+                        "tooltip_text": [
+                            achievement_type
+                            + ": "
+                            + self.get_description(achievement_type),
+                            self.get_quote(achievement_type),
+                        ],
+                    }
+                )
 
         if achievement_type in self.victory_conditions and verbose == True:
             if status.current_country:
@@ -203,6 +210,7 @@ class achievement_manager_template:
             "Idolized": "Reach 100 public opinion",
             "Explorer": "Find a river source",
             "Archaeologist": "Complete 1 lore mission",
+            "Big Game Hunter": "Kill a beast",
         }[achievement_type]
 
     def get_quote(self, achievement_type: str) -> str:
@@ -228,6 +236,7 @@ class achievement_manager_template:
             "Idolized": '"These expeditions respond to an extraordinarily civilizing Christian idea: to abolish slavery in Africa, to dispel the darkness that still reigns in part of the world... in short, pouring out the treasures of civilization" - Leopold II',
             "Explorer": '"But my estimates, for instance, based upon book information, were simply ridiculous. Fanciful images of African attractions were soon dissipated... and all crude ideas began to resolve themselves into shape." - Henry Morton Stanley',
             "Archaeologist": '"The British Museum is great for seeing how excellent we were at stealing things." - Russell Howard',
+            "Big Game Hunter": '"Some thought they were.. the spirits of dead medicine men come back to spread madness. For others, they were the devil, sent to stop the white men from owning the world." - Samuel \"the Muslim\""'
         }.get(achievement_type, "")
 
     def check_achievements(self, achievement_type: str = None) -> None:

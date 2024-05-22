@@ -177,12 +177,11 @@ class money_tracker_template(value_tracker_template):
                 total_revenue += self.transaction_history[transaction_type]
         if total_revenue == 0:
             notification_text += "  None /n"
-
         if (
             total_revenue > 0
             and total_revenue
-            > status.transaction_history["subsidies"]
-            + status.transaction_history["loan"]
+            > self.transaction_history["subsidies"]
+            + self.transaction_history["loan"]
         ):
             constants.achievement_manager.check_achievements("Return on Investment")
 
