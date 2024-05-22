@@ -61,6 +61,32 @@ def setup(*args):
     flags.creating_new_game = False
 
 
+def info_displays():
+    """
+    Description:
+        Initializes info displays collection (must be run after new game setup is created for correct layering)
+    Input:
+        None
+    Output:
+        None
+    """
+    status.info_displays_collection = (
+        constants.actor_creation_manager.create_interface_element(
+            {
+                "coordinates": scaling.scale_coordinates(
+                    5, constants.default_display_height - 205 + 125 - 5
+                ),
+                "width": scaling.scale_width(10),
+                "height": scaling.scale_height(10),
+                "modes": ["strategic", "europe", "ministers", "new_game_setup"],
+                "init_type": "ordered collection",
+                "description": "general information panel",
+                "resize_with_contents": True,
+            }
+        )
+    )
+
+
 def misc():
     """
     Description:
@@ -213,24 +239,6 @@ def misc():
 
     constants.achievement_manager = (
         achievement_manager_template.achievement_manager_template()
-    )
-
-    status.info_displays_collection = (
-        constants.actor_creation_manager.create_interface_element(
-            {
-                "coordinates": scaling.scale_coordinates(
-                    5, constants.default_display_height - 205 + 125 - 5
-                ),
-                "width": scaling.scale_width(10),
-                "height": scaling.scale_height(10),
-                "modes": ["strategic", "europe", "ministers", "new_game_setup"],
-                "init_type": "ordered collection",
-                "allow_minimize": True,
-                "allow_move": True,
-                "description": "general information panel",
-                "resize_with_contents": True,
-            }
-        )
     )
 
     status.grids_collection = constants.actor_creation_manager.create_interface_element(

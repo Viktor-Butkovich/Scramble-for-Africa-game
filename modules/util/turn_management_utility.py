@@ -891,6 +891,7 @@ def game_end_check():
     if constants.money < 0:
         text = ""
         text += "Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
+        constants.achievement_manager.achieve("I DECLARE BANKRUPTCY!")
         constants.notification_manager.display_notification(
             {
                 "message": text,
@@ -1087,3 +1088,20 @@ def end_turn_warnings():
                 constants.notification_manager.display_notification(
                     {"message": text, "zoom_destination": current_cell.tile}
                 )
+
+    for minister in status.minister_list:
+        if minister.fabricated_evidence > 0:
+            text = f"WARNING: Your {minister.fabricated_evidence} piece{utility.generate_plural(minister.fabricated_evidence)} of fabricated evidence against {minister.current_position} {minister.name} will disappear at the end of the turn if left unused. /n /n"
+            constants.notification_manager.display_notification(
+                {
+                    "message": text,
+                }
+            )
+
+    if flags.prosecution_bribed_judge:
+        text = "WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n"
+        constants.notification_manager.display_notification(
+            {
+                "message": text,
+            }
+        )

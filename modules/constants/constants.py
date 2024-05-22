@@ -347,7 +347,7 @@ color_dict: Dict[str, tuple[int, int, int]] = {
 }
 
 quality_colors: Dict[str, tuple[int, int, int]] = {
-    1: (137, 137, 137),
+    1: (180, 180, 180),
     2: (255, 255, 255),
     3: (0, 230, 41),
     4: (41, 168, 255),

@@ -271,49 +271,31 @@ class money_label_template(value_label):
 
         tooltip_text.append("")
         tooltip_text.append(
-            "At the end of the turn, you will pay a total of "
-            + str(total_upkeep)
-            + " money to your "
-            + str(total_number)
-            + " workers."
+            f"At the end of the turn, your {total_number} worker{utility.generate_plural(total_number)} will cost a total of {total_upkeep} money in upkeep."
         )
         for worker_type in worker_type_info_dicts:
             current_dict = worker_type_info_dicts[worker_type]
+            if worker_type == "slave":
+                verb = "cost"
+            else:
+                verb = "be paid"
             if current_dict["upkeep"] > 0:
                 if current_dict["number"] > 0:
                     tooltip_text.append(
-                        "    Your "
-                        + str(current_dict["number"])
-                        + " "
-                        + current_dict["name"]
-                        + " will be paid "
-                        + str(current_dict["upkeep"])
-                        + " money, totaling to "
-                        + str(current_dict["total_upkeep"])
-                        + " money."
+                        f"    Your {current_dict['number']} {current_dict['name']} will {verb} {current_dict['upkeep']} money, totaling to {current_dict['total_upkeep']} money."
                     )
                 else:
                     tooltip_text.append(
-                        "    Any "
-                        + current_dict["name"]
-                        + " would each be paid "
-                        + str(current_dict["upkeep"])
-                        + " money."
+                        f"    Any {current_dict['name']} would each {verb} {current_dict['upkeep']} money."
                     )
             else:
                 if current_dict["number"] > 0:
                     tooltip_text.append(
-                        "    Your "
-                        + str(current_dict["number"])
-                        + " "
-                        + current_dict["name"]
-                        + " will not need to be paid."
+                        f"    Your {current_dict['number']} {current_dict['name']} will not need to be paid."
                     )
                 else:
                     tooltip_text.append(
-                        "    Any "
-                        + current_dict["name"]
-                        + " would not need to be paid."
+                        f"    Any {current_dict['name']} would not need to be paid."
                     )
 
         tooltip_text.append("")

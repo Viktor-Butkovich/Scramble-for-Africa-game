@@ -1,3 +1,5 @@
+from typing import List
+
 crashed: bool = False
 lmb_down: bool = False
 rmb_down: bool = False
@@ -25,3 +27,5 @@ capital: bool = False
 r_ctrl: bool = False
 l_ctrl: bool = False
 ctrl: bool = False
+any_slaves: bool = False
+victories_this_game: List[str] = []

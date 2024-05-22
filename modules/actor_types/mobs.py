@@ -930,6 +930,7 @@ class mob(actor):
                 if self.has_crew:
                     if self.vehicle_type == "train":
                         constants.sound_manager.play_sound("effects/train_horn")
+                        return
                     else:
                         constants.sound_manager.play_sound("effects/foghorn")
                 else:
