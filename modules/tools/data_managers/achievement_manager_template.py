@@ -75,20 +75,25 @@ class achievement_manager_template:
         Output:
             None
         """
-        if (not achievement_type in self.achievements) or (achievement_type in self.victory_conditions and not achievement_type in flags.victories_this_game):
+        if (not achievement_type in self.achievements) or (
+            achievement_type in self.victory_conditions
+            and not achievement_type in flags.victories_this_game
+        ):
             with open("save_games/achievements.pickle", "wb") as handle:
                 pickle.dump(self.achievements, handle)
                 handle.close()
             if verbose:
-                attached_interface_elements = action_utility.generate_free_image_input_dict(
-                                    f"achievements/{achievement_type}.png",
-                                    120,
-                                    override_input_dict={
-                                        "member_config": {
-                                            "order_x_offset": scaling.scale_width(-75),
-                                        }
-                                    },
-                                )
+                attached_interface_elements = (
+                    action_utility.generate_free_image_input_dict(
+                        f"achievements/{achievement_type}.png",
+                        120,
+                        override_input_dict={
+                            "member_config": {
+                                "order_x_offset": scaling.scale_width(-75),
+                            }
+                        },
+                    )
+                )
                 if achievement_type in self.victory_conditions:
                     flags.victories_this_game.append(achievement_type)
                     if achievement_type in self.achievements:
@@ -236,7 +241,7 @@ class achievement_manager_template:
             "Idolized": '"These expeditions respond to an extraordinarily civilizing Christian idea: to abolish slavery in Africa, to dispel the darkness that still reigns in part of the world... in short, pouring out the treasures of civilization" - Leopold II',
             "Explorer": '"But my estimates, for instance, based upon book information, were simply ridiculous. Fanciful images of African attractions were soon dissipated... and all crude ideas began to resolve themselves into shape." - Henry Morton Stanley',
             "Archaeologist": '"The British Museum is great for seeing how excellent we were at stealing things." - Russell Howard',
-            "Big Game Hunter": '"Some thought they were.. the spirits of dead medicine men come back to spread madness. For others, they were the devil, sent to stop the white men from owning the world." - Samuel \"the Muslim\""'
+            "Big Game Hunter": '"Some thought they were.. the spirits of dead medicine men come back to spread madness. For others, they were the devil, sent to stop the white men from owning the world." - Samuel "the Muslim""',
         }.get(achievement_type, "")
 
     def check_achievements(self, achievement_type: str = None) -> None:

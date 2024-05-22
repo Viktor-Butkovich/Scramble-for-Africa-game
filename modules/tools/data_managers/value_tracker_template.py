@@ -180,8 +180,7 @@ class money_tracker_template(value_tracker_template):
         if (
             total_revenue > 0
             and total_revenue
-            > self.transaction_history["subsidies"]
-            + self.transaction_history["loan"]
+            > self.transaction_history["subsidies"] + self.transaction_history["loan"]
         ):
             constants.achievement_manager.check_achievements("Return on Investment")
 
