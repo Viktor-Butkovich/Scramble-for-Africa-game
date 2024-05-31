@@ -52,3 +52,5 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
+# Add English Schottische II, Portuguese March I, and French Start 1 songs from 5/27 texts
+# Also include new 5/28 songs

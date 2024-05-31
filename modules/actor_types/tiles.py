@@ -480,9 +480,12 @@ class tile(actor):  # to do: make terrain tiles a subclass
                             tooltip_message.append(f"        Otherwise impassable")
                         else:
                             tooltip_message.append("This is a river water tile")
-                            tooltip_message.append(
-                                f"    Movement cost: {constants.terrain_movement_cost_dict[self.cell.terrain]} (with canoes or steamboat)"
-                            )
+                            if self.cell.terrain_features.get("cataract", False):
+                                tooltip_message.append(f"    Impassable for steamboats")
+                            else:
+                                tooltip_message.append(
+                                    f"    Movement cost: {constants.terrain_movement_cost_dict[self.cell.terrain]} (with canoes or steamboat)"
+                                )
                             tooltip_message.append(
                                 f"        Otherwise costs entire turn of movement"
                             )
