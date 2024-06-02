@@ -54,3 +54,4 @@ except Exception:  # displays error message and records error message in crash l
 #   new SFA features:
 # Add English Schottische II, Portuguese March I, and French Start 1 songs from 5/27 texts
 # Also include new 5/28 songs
+# Add equip all button - show when selected unit can equip any items in the tile, equips everything possible when clicked (invalid click only when busy)
