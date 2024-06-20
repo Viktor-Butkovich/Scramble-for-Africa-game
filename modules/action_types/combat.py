@@ -200,7 +200,7 @@ class combat(action.action):
                 if self.current_unit.battalion_type == "imperial":
                     text += "Your professional imperial soldiers will receive a +2 bonus after their roll. /n"
                 else:
-                    text += "Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n"
+                    text += "Though your foreign soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n"
             elif self.current_unit.is_safari:
                 if self.opponent.npmob_type == "beast":
                     text += "Your safari is trained in hunting beasts and will receive a +2 bonus after their roll. /n"
