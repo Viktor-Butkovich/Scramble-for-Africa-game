@@ -377,11 +377,17 @@ class mob(actor):
                         local_infrastructure == "none"
                         or adjacent_infrastructure == "none"
                     ):  # if both have infrastructure and connected by land or bridge, use discount
-                        cost = cost / 2
+                        # don't count adjacent ferry as road, but allow ferry in tile to count as road for moving to adjacent tiles
+                        if not (
+                            adjacent_infrastructure != "none"
+                            and adjacent_infrastructure.infrastructure_type == "ferry"
+                        ):
+                            cost = cost / 2
                     # otherwise, use default cost but not full cost (no canoe penantly)
-                    if (
+                    if (  # if entering a ferry without canoes - if using canoes, ignore ferry
                         adjacent_infrastructure != "none"
                         and adjacent_infrastructure.infrastructure_type == "ferry"
+                        and not self.can_swim_river
                     ):
                         cost = 2
                 elif (
