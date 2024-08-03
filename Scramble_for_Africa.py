@@ -43,7 +43,6 @@ except Exception:  # displays error message and records error message in crash l
 # add minister speech bubbles
 # Add random events
 # Add debug settings menu within game, rather than needing to edit .json out of game
-# Change game to be fullscreen by default, along with debug setting to make it windowed
 # Add autosave and multiple save slots
 # Performance impacts from repeated exit/load - not everything is being removed each time
 # Add ambient sounds
@@ -52,3 +51,4 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
+# Add equip all button - show when selected unit can equip any items in the tile, equips everything possible when clicked (invalid click only when busy)

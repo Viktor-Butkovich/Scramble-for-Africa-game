@@ -195,6 +195,7 @@ class grid(interface_elements.interface_element):
                     cell.terrain_features[terrain_feature_type] = {
                         "feature_type": terrain_feature_type
                     }
+                    cell.tile.update_image_bundle()
 
     def draw(self):
         """

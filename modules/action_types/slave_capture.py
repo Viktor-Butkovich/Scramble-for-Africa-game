@@ -161,7 +161,7 @@ class slave_capture(action.action):
             text += "Angered by your company's brutal attempts at subjugation, the natives attack the battalion. /n /n"
         elif subject == "critical_success":
             text += self.generate_notification_text("success")
-            text += "With insights into the optimal strategies to intimidate and defeat the African natives, the major is now a veteran and will be more successful in future venture. /n /n"
+            text += "With insights into the optimal strategies to intimidate and defeat the African natives, the major is now a veteran and will be more successful in future ventures. /n /n"
         return text
 
     def generate_current_roll_modifier(self):

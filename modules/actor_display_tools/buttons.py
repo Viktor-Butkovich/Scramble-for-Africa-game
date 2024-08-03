@@ -57,9 +57,8 @@ class embark_all_passengers_button(button):
             vehicle = status.displayed_mob
             can_embark = True
             if self.vehicle_type == "train":
-                if (
-                    vehicle.images[0].current_cell.contained_buildings["train_station"]
-                    == "none"
+                if not vehicle.images[0].current_cell.has_intact_building(
+                    "train_station"
                 ):
                     text_utility.print_to_screen(
                         "A train can only pick up passengers at a train station."
@@ -147,9 +146,8 @@ class disembark_all_passengers_button(button):
             vehicle = status.displayed_mob
             can_disembark = True
             if self.vehicle_type == "train":
-                if (
-                    vehicle.images[0].current_cell.contained_buildings["train_station"]
-                    == "none"
+                if not vehicle.images[0].current_cell.has_intact_building(
+                    "train_station"
                 ):
                     text_utility.print_to_screen(
                         "A train can only drop off passengers at a train station."
@@ -694,12 +692,9 @@ class disembark_vehicle_button(button):
             if len(self.attached_label.actor.contained_mobs) > 0:
                 can_disembark = True
                 if self.vehicle_type == "train":
-                    if (
-                        self.attached_label.actor.images[
-                            0
-                        ].current_cell.contained_buildings["train_station"]
-                        == "none"
-                    ):
+                    if not self.attached_label.actor.images[
+                        0
+                    ].current_cell.has_intact_building("train_station"):
                         text_utility.print_to_screen(
                             "A train can only drop off passengers at a train station."
                         )
@@ -806,11 +801,8 @@ class embark_vehicle_button(button):
                 vehicles = rider.images[0].current_cell.get_vehicles(self.vehicle_type)
                 can_embark = True
                 if vehicles[0].vehicle_type == "train":
-                    if (
-                        vehicles[0]
-                        .images[0]
-                        .current_cell.contained_buildings["train_station"]
-                        == "none"
+                    if not rider.images[0].current_cell.has_intact_building(
+                        "train_station"
                     ):
                         text_utility.print_to_screen(
                             "A train can only pick up passengers at a train station."
