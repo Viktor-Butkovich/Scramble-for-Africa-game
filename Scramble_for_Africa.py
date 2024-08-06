@@ -52,3 +52,5 @@ except Exception:  # displays error message and records error message in crash l
 #
 #   new SFA features:
 # Add equip all button - show when selected unit can equip any items in the tile, equips everything possible when clicked (invalid click only when busy)
+# Add steamship destination tooltip to Asia grid
+# Add notification for failed attempt to click on end turn destination

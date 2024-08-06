@@ -135,7 +135,7 @@ class actor:
             None
         """
         for current_commodity in self.get_held_commodities():
-            status.displayed_tile.change_inventory(
+            self.images[0].current_cell.tile.change_inventory(
                 current_commodity, self.get_inventory(current_commodity)
             )
             self.set_inventory(current_commodity, 0)
