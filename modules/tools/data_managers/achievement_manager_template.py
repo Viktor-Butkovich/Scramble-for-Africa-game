@@ -64,8 +64,6 @@ class achievement_manager_template:
             ),
         ]
         for achievement in loaded_achievements:
-            print(loaded_achievements)
-            print("loading achievements")
             self.achieve(achievement, verbose=False)
 
     def achieve(self, achievement_type: str, verbose: bool = True):
