@@ -51,6 +51,9 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
-# Add equip all button - show when selected unit can equip any items in the tile, equips everything possible when clicked (invalid click only when busy)
 # Add steamship destination tooltip to Asia grid
+#   Any tile should have a tooltip when it is a destination for any unit, and for any units it is a destination for
 # Add notification for failed attempt to click on end turn destination
+# Buy consumer goods tooltip should explain how they are used to trade with villages
+# Add achievement for building railroad bridge
+# Add warehouses to trading posts

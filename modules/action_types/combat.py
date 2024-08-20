@@ -251,9 +251,9 @@ class combat(action.action):
                 else:
                     self.public_opinion_change = random.randrange(-3, 4)
                     if self.current_unit.number == 1:
-                        phrase = "was "
+                        phrase = "was"
                     else:
-                        phrase = "were all "
+                        phrase = "were all"
                     if self.opponent.origin_village.has_cannibals():
                         ending = "dragged off screaming"
                     else:
