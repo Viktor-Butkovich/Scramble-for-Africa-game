@@ -51,6 +51,10 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
+# Add label icon to slave traders and Europe abstract tiles - allows easily knowing what it is without clicking
+# Number of workers not being maintained correctly
+# Discover river source after entering, not on discovery - requires hiding terrain feature, etc.
+# Attacking ferry incorrectly causing disorganized (if from connected tile)
 # Add steamship destination tooltip to Asia grid
 #   Any tile should have a tooltip when it is a destination for any unit, and for any units it is a destination for
 # Add notification for failed attempt to click on end turn destination
