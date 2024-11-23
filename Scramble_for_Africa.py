@@ -69,4 +69,4 @@ except Exception:  # displays error message and records error message in crash l
 # Add achievement for building railroad bridge
 # Add warehouses to trading posts
 # Add achievement for selling your first commodity
-# Add notification for when worker upkeep changes (start of turn and after action), with tutorial advice for African workers 
+# Add notification for when worker upkeep changes (start of turn and after action), with tutorial advice for African workers

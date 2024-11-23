@@ -746,9 +746,9 @@ class combat(action.action):
                 self.opponent.set_disorganized(True)
             else:
                 if (
-                    len(combat_cell.contained_mobs) > 2
-                ):  # len == 2 if only attacker and defender in tile
-                    self.current_unit.retreat()  # attacker retreats in draw or if more defenders remaining
+                    combat_cell.get_best_combatant("npmob") != "none"
+                ):  # Attacker retreats in draw or if more defenders remaining
+                    self.current_unit.retreat()
                 elif (
                     self.current_unit.movement_points
                     < self.current_unit.get_movement_cost(0, 0, True)
