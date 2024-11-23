@@ -521,7 +521,10 @@ class mob(actor):
                 )
 
     def set_max_movement_points(
-        self, new_value, initial_setup=True, allow_increase=True
+        self,
+        new_value,
+        initial_setup=True,
+        allow_increase=True,
     ):
         """
         Description:

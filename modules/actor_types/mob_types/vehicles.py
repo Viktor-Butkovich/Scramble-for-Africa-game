@@ -476,7 +476,8 @@ class train(vehicle):
             None
         """
         super().__init__(from_save, input_dict)
-        self.set_max_movement_points(16)
+        if not from_save:
+            self.set_max_movement_points(16)
         self.has_infinite_movement = False
         self.vehicle_type = "train"
         self.can_swim = False
