@@ -611,6 +611,8 @@ class actor:
         Output:
             None
         """
+        if hasattr(self, "initializing") and self.initializing:
+            return
         self.set_image(self.get_image_id_list())
 
     def set_inventory_capacity(self, new_value):
