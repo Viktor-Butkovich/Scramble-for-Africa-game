@@ -27,6 +27,7 @@ class notification(multi_line_label):
                 'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line
                     will be started
                 'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
+                'on_remove' = []: List value - Functions to run after this notification is removed, in format [(function, [args]), ...]
         Output:
             None
         """
@@ -49,7 +50,9 @@ class notification(multi_line_label):
                 input_dict["on_reveal"][0](*input_dict["on_reveal"][1])
             else:
                 input_dict["on_reveal"]()
-        self.on_remove = input_dict.get("on_remove", None)
+        self.on_remove = input_dict.get("on_remove", [])
+        if self.on_remove == None:
+            self.on_remove = []
 
     def format_message(self):
         """
@@ -104,13 +107,8 @@ class notification(multi_line_label):
         Output:
             None
         """
-        if self.on_remove:
-            if (
-                type(self.on_remove) == tuple
-            ):  # If given tuple, call function in 1st index with list of arguments in 2nd index
-                self.on_remove[0](*self.on_remove[1])
-            else:
-                self.on_remove()
+        for current_on_remove in self.on_remove:
+            current_on_remove[0](*current_on_remove[1])
         super().remove()
         status.displayed_notification = None
 

@@ -234,7 +234,7 @@ class notification_manager_template:
         }
 
         input_dict["on_reveal"] = notification_dict.get("on_reveal", None)
-        input_dict["on_remove"] = notification_dict.get("on_remove", None)
+        input_dict["on_remove"] = notification_dict.get("on_remove", [])
 
         if notification_type == "roll":
             input_dict["init_type"] = "dice rolling notification"

@@ -181,9 +181,9 @@ class achievement_manager_template:
             if not flags.any_slaves and "Land of the Free" not in self.achievements:
                 self.achieve("Land of the Free")
 
-            with open("save_games/achievements.pickle", "wb") as handle:
-                pickle.dump(self.achievements, handle)
-                handle.close()
+        with open("save_games/achievements.pickle", "wb") as handle:
+            pickle.dump(self.achievements, handle)
+            handle.close()
 
     def get_description(self, achievement_type: str) -> str:
         """

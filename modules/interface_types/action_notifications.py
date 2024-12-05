@@ -32,7 +32,7 @@ class action_notification(notification):
                     sibling ordered collection
                 'transfer_interface_elements' = False: boolean value - Whether this notification's sibling ordered collection's member should be transferred
                     to that of the next action notification on removal
-                'on_remove' = None: function value - Function to run after this notification is removed
+                'on_remove' = []: List value - Functions to run after this notification is removed, in format [(function, [args]), ...]
         Output:
             None
         """

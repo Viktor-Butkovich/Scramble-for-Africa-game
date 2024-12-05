@@ -52,7 +52,6 @@ class vehicle(pmob):
                 self.has_crew = False
             else:
                 self.has_crew = True
-            self.update_image_bundle()
             self.selection_sound()
         else:  # create crew and passengers through recruitment_manager and embark them
             if input_dict["crew"] == "none":
@@ -70,6 +69,7 @@ class vehicle(pmob):
                     self
                 )  # create passengers and merge as passengers
         self.initializing = False
+        self.update_image_bundle()
         self.set_controlling_minister_type(
             constants.type_minister_dict["transportation"]
         )
@@ -476,7 +476,8 @@ class train(vehicle):
             None
         """
         super().__init__(from_save, input_dict)
-        self.set_max_movement_points(16)
+        if not from_save:
+            self.set_max_movement_points(16)
         self.has_infinite_movement = False
         self.vehicle_type = "train"
         self.can_swim = False

@@ -487,7 +487,7 @@ class action:
                 "message": text + "Click to remove this notification. /n /n",
                 "notification_type": "action",
                 "transfer_interface_elements": True,
-                "on_remove": self.complete,
+                "on_remove": [(self.complete, [])],
                 "audio": self.generate_audio("roll_finished"),
             }
         )

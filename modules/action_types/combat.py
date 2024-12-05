@@ -251,9 +251,9 @@ class combat(action.action):
                 else:
                     self.public_opinion_change = random.randrange(-3, 4)
                     if self.current_unit.number == 1:
-                        phrase = "was "
+                        phrase = "was"
                     else:
-                        phrase = "were all "
+                        phrase = "were all"
                     if self.opponent.origin_village.has_cannibals():
                         ending = "dragged off screaming"
                     else:
@@ -681,7 +681,7 @@ class combat(action.action):
                 "message": text + "Click to remove this notification. /n /n",
                 "notification_type": "action",
                 "transfer_interface_elements": True,
-                "on_remove": self.complete,
+                "on_remove": [(self.complete, [])],
                 "audio": self.generate_audio("roll_finished"),
             }
         )
@@ -746,9 +746,9 @@ class combat(action.action):
                 self.opponent.set_disorganized(True)
             else:
                 if (
-                    len(combat_cell.contained_mobs) > 2
-                ):  # len == 2 if only attacker and defender in tile
-                    self.current_unit.retreat()  # attacker retreats in draw or if more defenders remaining
+                    combat_cell.get_best_combatant("npmob") != "none"
+                ):  # Attacker retreats in draw or if more defenders remaining
+                    self.current_unit.retreat()
                 elif (
                     self.current_unit.movement_points
                     < self.current_unit.get_movement_cost(0, 0, True)

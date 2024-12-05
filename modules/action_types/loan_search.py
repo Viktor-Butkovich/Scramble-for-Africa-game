@@ -245,7 +245,7 @@ class loan_search(action.campaign):
                     },
                     {"tooltip": ["Decline"], "message": "Decline"},
                 ],
-                "on_remove": self.complete,
+                "on_remove": [(self.complete, [])],
             }
         )
 
