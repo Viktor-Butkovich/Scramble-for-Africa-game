@@ -42,6 +42,22 @@ class settlement:
                     elif self.cell.has_building("fort"):
                         if status.current_country.adjective == "british":
                             self.name = "Fort " + self.name
+            if status.displayed_notification:
+                on_remove_call = (actor_utility.press_button, ["rename settlement"])
+                if constants.notification_manager.notification_queue:
+                    if not constants.notification_manager.notification_queue[-1].get(
+                        "on_remove", None
+                    ):
+                        constants.notification_manager.notification_queue[-1][
+                            "on_remove"
+                        ] = []
+                    constants.notification_manager.notification_queue[-1][
+                        "on_remove"
+                    ].append(on_remove_call)
+                else:
+                    status.displayed_notification.on_remove.append(on_remove_call)
+            else:
+                actor_utility.press_button("rename settlement")
         else:
             self.name = input_dict["name"]
         self.cell.tile.set_name(self.name)
