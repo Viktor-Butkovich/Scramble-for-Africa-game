@@ -51,6 +51,9 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
+# Re-record Asian grid song
+# Sort inventory display in ascending order, such that most abundant items are shown last and do not block other items
+# Possible issue with overlapping sounds muffling in late-game, with lots of units
 # Add notification whenever worker prices change - at start of turn or after action/hire
 #   Hiring an X worker has changed X worker upkeep from A to B.
 #   You now pay C per turn for your D X workers.

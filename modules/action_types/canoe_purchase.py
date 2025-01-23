@@ -92,7 +92,7 @@ class canoe_purchase(action.action):
             text += f"The {status.displayed_mob.group_type} failed to make any fruitful transactions. /n /n"
         elif subject == "critical_failure":
             text += self.generate_notification_text("failure")
-            text += f"Angered by the {status.displayed_mob.group_type}'s offer, the native attack the expedition. /n /n"
+            text += f"Angered by the {status.displayed_mob.group_type}'s offer, the natives attack the expedition. /n /n"
         elif subject == "critical_success":
             text += self.generate_notification_text("success")
             text += f"The {status.displayed_mob.officer.name} is now a veteran and will be more successful in future ventures. /n /n"

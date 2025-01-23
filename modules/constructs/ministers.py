@@ -641,8 +641,9 @@ class minister:
         min_result = 1
         max_result = num_sides
         result = self.no_corruption_roll(num_sides, roll_type)
-
+        stealing = False
         if predetermined_corruption or self.check_corruption():
+            stealing = True
             if not self.stolen_already:  # true if stealing
                 self.steal_money(value, roll_type)
             result = random.randrange(
@@ -657,7 +658,7 @@ class minister:
         # if corrupt, chance to choose random non-critical failure result
         if result > num_sides:
             result = num_sides
-        return result
+        return stealing, result
 
     def no_corruption_roll(self, num_sides: int = 6, roll_type: str = "none"):
         """
@@ -690,10 +691,13 @@ class minister:
             string roll_type: Type of roll being made, used in prosector report description if minister steals money and is caught
             int num_dice: How many dice to roll
         Output:
+            bool stealing: Returns whether the roll was stolen
             int list: Returns a list of the rolls' modified results
         """
         results = []
+        stealing = False
         if self.check_corruption() and value > 0:
+            stealing = True
             self.steal_money(value, roll_type)
             self.stolen_already = True
             corrupt_index = random.randrange(0, num_dice)
@@ -706,17 +710,17 @@ class minister:
                     results.append(
                         self.roll(
                             num_sides, min_success, max_crit_fail, value, "none", True
-                        )
+                        )[1]
                     )  # use roll_type none because roll is fake, does not apply modifiers
                 else:  # for dice that are not chosen, can be critical or non-critical failure because higher will be chosen in case of critical failure, no successes allowed
                     results.append(
-                        self.roll(num_sides, min_success, 0, value, "none", True)
+                        self.roll(num_sides, min_success, 0, value, "none", True)[1]
                     )  # 0 for max_crit_fail allows critical failure numbers to be chosen
         else:  # if not corrupt, just roll with minister modifier
             for i in range(num_dice):
                 results.append(self.no_corruption_roll(num_sides, roll_type))
         self.stolen_already = False
-        return results
+        return stealing, results
 
     def attack_roll_to_list(
         self, own_modifier, enemy_modifier, opponent, value, roll_type, num_dice
@@ -732,10 +736,13 @@ class minister:
             string roll_type: Type of roll being made, used in prosector report description if minister steals money and is caught
             int num_dice: number of dice rolled by the friendly unit, not including the one die rolled by the enemy unit
         Output:
+            bool stealing: Returns whether the roll was stolen
             int list: Returns a list of the rolls' modified results, with the first item being the enemy roll
         """
         results = []
+        stealing = False
         if self.check_corruption():
+            stealing = True
             self.steal_money(value, roll_type)
             self.stolen_already = True
             for i in range(num_dice):
@@ -767,7 +774,7 @@ class minister:
             enemy_roll = opponent.combat_roll()
             results = [enemy_roll] + results
         self.stolen_already = False
-        return results
+        return stealing, results
 
     def appoint(self, new_position):
         """
