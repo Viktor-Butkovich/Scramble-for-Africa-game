@@ -1689,6 +1689,10 @@ class terrain_feature_label(actor_display_label):
         Output:
             boolean: Returns same value as superclass as long as the associated terrain feature is present
         """
-        return super().can_show(
-            skip_parent_collection=skip_parent_collection
-        ) and self.actor.cell.terrain_features.get(self.terrain_feature_type, False)
+        return (
+            super().can_show(skip_parent_collection=skip_parent_collection)
+            and self.actor.cell.terrain_features.get(self.terrain_feature_type, False)
+            and self.actor.cell.terrain_features.get(self.terrain_feature_type, {}).get(
+                "visible", True
+            )
+        )

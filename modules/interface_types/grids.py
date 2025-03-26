@@ -686,6 +686,7 @@ class grid(interface_elements.interface_element):
                 "name": river_name + " River Source",
                 "river_name": river_name,
                 "name_icon": True,
+                "visible": False,
             }
             last_cell.terrain_features["river source"][
                 "image_id"

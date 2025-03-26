@@ -51,6 +51,7 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
+# Always show an inventory tab for units that can ever pick up anything, and show a button to equip a piece of equipment present in the tile?
 # Re-record Asian grid song
 # Sort inventory display in ascending order, such that most abundant items are shown last and do not block other items
 # Possible issue with overlapping sounds muffling in late-game, with lots of units
@@ -63,7 +64,6 @@ except Exception:  # displays error message and records error message in crash l
 # Prompt to name a settlement when it first appears, using a default as the randomly generated name - also extend to SE
 # Add label icon to slave traders and Europe abstract tiles - allows easily knowing what it is without clicking
 # Number of workers not being maintained correctly
-# Discover river source after entering, not on discovery - requires hiding terrain feature, etc.
 # Attacking ferry incorrectly causing disorganized (if from connected tile)
 # Add steamship destination tooltip to Asia grid
 #   Any tile should have a tooltip when it is a destination for any unit, and for any units it is a destination for
