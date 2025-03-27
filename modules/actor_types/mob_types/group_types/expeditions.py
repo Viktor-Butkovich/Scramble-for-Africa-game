@@ -131,7 +131,7 @@ class expedition(group):
         else:
             current_cell = self.images[0].current_cell
         found_river_source = False
-        if current_cell.terrain_features.get("river source", False):
+        if current_cell.terrain_features.get("river source", False) and not current_cell.terrain_features["river source"]["visible"]:
             money_increase = random.randrange(40, 61)
             public_opinion_increase = random.randrange(10, 31)
             text = (
@@ -142,10 +142,11 @@ class expedition(group):
                 + f" money and {public_opinion_increase} public opinion for this discovery. /n /n"
             )
             current_cell.terrain_features["river source"]["visible"] = True
+            current_cell.tile.update_image_bundle()
             if (
                 current_cell.tile.name == "default"
             ):  # Only add name of terrain feature once visible
-                self.set_name(current_cell.terrain_features["river source"]["name"])
+                current_cell.tile.set_name(current_cell.terrain_features["river source"]["name"])
             found_river_source = True
             constants.notification_manager.display_notification(
                 {
