@@ -750,22 +750,6 @@ class combat(action.action):
                 self.opponent.retreat()
                 self.opponent.set_disorganized(True)
             else:
-                if (
-                    combat_cell.get_best_combatant("npmob") != "none"
-                ):  # Attacker retreats in draw or if more defenders remaining
-                    self.current_unit.retreat()
-                elif (
-                    self.current_unit.movement_points
-                    < self.current_unit.get_movement_cost(0, 0, True)
-                ):  # if can't afford movement points to stay in attacked tile
-                    constants.notification_manager.display_notification(
-                        {
-                            "message": "While the attack was successful, this unit did not have the "
-                            + str(self.current_unit.get_movement_cost(0, 0, True))
-                            + " movement points required to fully move into the attacked tile and was forced to withdraw. /n /n",
-                        }
-                    )
-                    self.current_unit.retreat()
                 self.opponent.die()
                 if self.opponent.npmob_type != "beast":
                     constants.evil_tracker.change(4)
@@ -774,6 +758,22 @@ class combat(action.action):
                         self.public_relations_change
                     )
                     constants.achievement_manager.achieve("Big Game Hunter")
+                if (
+                    combat_cell.get_best_combatant("npmob") != "none"
+                ):  # Attacker retreats in draw or if more defenders remaining
+                    self.current_unit.retreat()
+                elif (
+                    self.current_unit.movement_points
+                    < self.current_unit.get_movement_cost(0, 0, True)
+                ):  # If can't afford movement points to stay in attacked tile
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": "While the attack was successful, this unit did not have the "
+                            + str(self.current_unit.get_movement_cost(0, 0, True))
+                            + " movement points required to fully move into the attacked tile and was forced to withdraw. /n /n",
+                        }
+                    )
+                    self.current_unit.retreat()
 
         if not self.defending:
             self.current_unit.set_movement_points(0)
