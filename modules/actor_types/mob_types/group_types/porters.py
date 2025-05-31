@@ -51,3 +51,17 @@ class porters(group):
         """
         self.set_max_movement_points(6, initial_setup=False)
         super().promote()
+
+    def attrition_death(self, target):
+        """
+        Description:
+            Resolves either the group's worker or officer dying from attrition, preventing the group from moving in the next turn and automatically recruiting a new one
+                Handles the special case where a veteran officer dies of attrition, resetting the maximum movement points to default
+        Input:
+            None
+        Output:
+            None
+        """
+        if target == "officer" and self.veteran:
+            self.set_max_movement_points(4, initial_setup=False)
+        super().attrition_death(target)
