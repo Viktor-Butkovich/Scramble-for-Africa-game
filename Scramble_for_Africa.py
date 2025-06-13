@@ -51,6 +51,8 @@ except Exception:  # displays error message and records error message in crash l
 # Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
 #
 #   new SFA features:
+# Forecasted production should account for work crews who have 0 movement
+# Trial screen not scaling correctly to resolution - defense info display goes off the right side
 # Always show an inventory tab for units that can ever pick up anything, and show a button to equip a piece of equipment present in the tile?
 # Re-record Asian grid song
 # Sort inventory display in ascending order, such that most abundant items are shown last and do not block other items
