@@ -130,8 +130,43 @@ class expedition(group):
             current_cell = self.vehicle.images[0].current_cell
         else:
             current_cell = self.images[0].current_cell
-        promoted = self.veteran
         found_river_source = False
+        if (
+            current_cell.terrain_features.get("river source", False)
+            and not current_cell.terrain_features["river source"]["visible"]
+        ):
+            money_increase = random.randrange(40, 61)
+            public_opinion_increase = random.randrange(10, 31)
+            text = (
+                "This is the source of the "
+                + current_cell.terrain_features["river source"]["river_name"]
+                + " river, which has been long sought after by explorers - you are granted a reward of "
+                + str(money_increase)
+                + f" money and {public_opinion_increase} public opinion for this discovery. /n /n"
+            )
+            current_cell.terrain_features["river source"]["visible"] = True
+            current_cell.tile.update_image_bundle()
+            if (
+                current_cell.tile.name == "default"
+            ):  # Only add name of terrain feature once visible
+                current_cell.tile.set_name(
+                    current_cell.terrain_features["river source"]["name"]
+                )
+            found_river_source = True
+            constants.notification_manager.display_notification(
+                {
+                    "message": text + "Click to remove this notification. /n /n",
+                    "notification_type": "off_tile_exploration",
+                    "extra_parameters": {
+                        "cell": current_cell,
+                        "reveal_cell": True,
+                        "public_opinion_increase": public_opinion_increase,
+                        "money_increase": money_increase,
+                    },
+                }
+            )
+
+        promoted = self.veteran
         for current_direction in ["up", "down", "left", "right"]:
             target_cell = current_cell.adjacent_cells[current_direction]
             if target_cell and not target_cell.visible:
@@ -173,18 +208,6 @@ class expedition(group):
                             + cardinal_directions[current_direction]
                             + ". /n /n"
                         )
-
-                    if target_cell.terrain_features.get("river source", False):
-                        money_increase = random.randrange(40, 61)
-                        text += (
-                            "This is the source of the "
-                            + target_cell.terrain_features["river source"]["river_name"]
-                            + " river, which has been long sought after by explorers - you are granted a reward of "
-                            + str(money_increase)
-                            + " money for this discovery. /n /n"
-                        )
-                        public_opinion_increase += random.randrange(10, 31)
-                        found_river_source = True
 
                     if public_opinion_increase > 0:  # Royal/National/Imperial
                         text += (

@@ -83,8 +83,13 @@ class tile(actor):  # to do: make terrain tiles a subclass
             self.name == "default"
         ):  # Set tile name to that of any terrain features, if applicable
             for terrain_feature in self.cell.terrain_features:
-                if self.cell.terrain_features[terrain_feature].get("name", False):
-                    self.set_name(self.cell.terrain_features[terrain_feature]["name"])
+                if self.cell.terrain_features[terrain_feature].get(
+                    "visible", True
+                ):  # Only add name of terrain feature once visible
+                    if self.cell.terrain_features[terrain_feature].get("name", False):
+                        self.set_name(
+                            self.cell.terrain_features[terrain_feature]["name"]
+                        )
 
     def set_name(self, new_name):
         """
@@ -314,15 +319,18 @@ class tile(actor):  # to do: make terrain tiles a subclass
                     }
                 )
                 for terrain_feature in self.cell.terrain_features:
-                    new_image_id = self.cell.terrain_features[terrain_feature].get(
-                        "image_id",
-                        status.terrain_feature_types[terrain_feature].image_id,
-                    )
-                    if type(new_image_id) == str and not new_image_id.endswith(".png"):
-                        new_image_id = actor_utility.generate_label_image_id(
-                            new_image_id, y_offset=-0.75
+                    if self.cell.terrain_features[terrain_feature].get("visible", True):
+                        new_image_id = self.cell.terrain_features[terrain_feature].get(
+                            "image_id",
+                            status.terrain_feature_types[terrain_feature].image_id,
                         )
-                    image_id_list = utility.combine(image_id_list, new_image_id)
+                        if type(new_image_id) == str and not new_image_id.endswith(
+                            ".png"
+                        ):
+                            new_image_id = actor_utility.generate_label_image_id(
+                                new_image_id, y_offset=-0.75
+                            )
+                        image_id_list = utility.combine(image_id_list, new_image_id)
                 if self.cell.resource != "none":
                     resource_icon = actor_utility.generate_resource_icon(self)
                     if type(resource_icon) == str:
@@ -516,9 +524,10 @@ class tile(actor):  # to do: make terrain tiles a subclass
                         + " resource"
                     )
                 for terrain_feature in self.cell.terrain_features:
-                    tooltip_message.append(
-                        f"This tile has {utility.generate_article(terrain_feature, add_space=True)}{terrain_feature}"
-                    )
+                    if self.cell.terrain_features[terrain_feature].get("visible", True):
+                        tooltip_message.append(
+                            f"This tile has {utility.generate_article(terrain_feature, add_space=True)}{terrain_feature}"
+                        )
             else:
                 tooltip_message.append("This tile has not been explored")
             if status.current_lore_mission:

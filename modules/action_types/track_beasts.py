@@ -26,6 +26,17 @@ class track_beasts(action.action):
         constants.transaction_descriptions[self.action_type] = "beast tracking"
         self.name = "track beasts"
 
+    def get_default_price(self):
+        """
+        Description:
+            Returns the unmodified price of this action
+        Input:
+            None
+        Output:
+            int: Returns the unmodified price of this action
+        """
+        return 0
+
     def button_setup(self, initial_input_dict):
         """
         Description:
