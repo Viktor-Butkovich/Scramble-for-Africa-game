@@ -890,7 +890,7 @@ def game_end_check():
     """
     if constants.money < 0:
         text = ""
-        text += "Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
+        text += "Your company has insufficient money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
         constants.achievement_manager.achieve("I DECLARE BANKRUPTCY!")
         constants.notification_manager.display_notification(
             {
