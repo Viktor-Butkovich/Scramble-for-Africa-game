@@ -695,6 +695,20 @@ class cell:
                 return True
         return False
 
+    def has_visible_npmob(self):
+        """
+        Description:
+            Returns whether this cell contains a visible npmob
+        Input:
+            None
+        Output:
+            boolean: Returns whether this cell contains a visible npmob
+        """
+        for current_mob in self.contained_mobs:
+            if current_mob.is_npmob and current_mob.visible:
+                return True
+        return False
+
     def get_best_combatant(self, mob_type, target_type="human"):
         """
         Description:

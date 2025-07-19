@@ -892,7 +892,7 @@ class pmob(mob):
                                     and self.movement_points > 0
                                 ):
                                     if (
-                                        (not future_cell.has_npmob())
+                                        (not future_cell.has_visible_npmob())
                                         or self.is_battalion
                                         or self.is_safari
                                         or (
