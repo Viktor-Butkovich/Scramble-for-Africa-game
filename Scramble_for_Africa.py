@@ -54,11 +54,6 @@ except Exception:  # displays error message and records error message in crash l
 # Fix issue where some objects persist after exiting to main menu and re-loading (but not after restarting the whole program) - clearly a remove() issue
 #   Implement a "trap" to detect any leaked tiles, cells, grids, or mobs after exit to main menu
 #       Upon detection, immediately log as much as possible and trigger a crash for future diagnosis
-# By default, on unit creation, for slaves from slave traders, set automatic replacement to true
-#   For captured slaves, set automatic replacement to false
-#   At the moment of creation, have a notification explaining the automatic replacement setting, either way
-#       Also indicate the consequences of public opinion, recruitment cost, etc.
-#       Then indicate that the user can configure this setting with the toggle button
 # Add runaway slave mechanic - like extra attrition check for slaves - 1/36 chance - either escape to villages/free workers
 #   Tends to result in incorporation into villages
 #   Travel based on weighted proximity

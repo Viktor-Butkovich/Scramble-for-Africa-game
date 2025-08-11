@@ -396,6 +396,10 @@ class slave_worker(worker):
         input_dict["worker_type"] = "slave"
         super().__init__(from_save, input_dict)
         if constants.slave_traders_strength <= 0:
+            # Permanently prevent automatic replacement after slave trade ends
+            self.automatically_replace = False
+        elif (not from_save) and not input_dict["purchased"]:
+            # By default, captured slaves won't be automatically replaced by the slave market, only ones originally from slave market
             self.automatically_replace = False
 
     def free_and_replace(self):

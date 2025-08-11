@@ -815,7 +815,7 @@ class button(interface_elements.interface_element):
                 verb = "disable"
             self.set_tooltip(
                 [
-                    utility.capitalize(verb) + "s sentry mode for this unit",
+                    f"{utility.capitalize(verb)}s sentry mode for this unit",
                     "A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units",
                 ]
             )
@@ -833,20 +833,28 @@ class button(interface_elements.interface_element):
             if self.target_type == "unit":
                 target = "unit"
             else:
-                target = "unit's " + self.target_type  # worker or officer
-            self.set_tooltip(
-                [
-                    utility.capitalize(verb)
-                    + "s automatic replacement for this "
-                    + target,
-                    "A unit with automatic replacement will be automatically replaced if it dies from attrition",
-                    "This "
-                    + target
-                    + " is currently set to "
-                    + operator
-                    + "be automatically replaced",
-                ]
-            )
+                target = f"unit's {self.target_type}"  # worker or officer
+            tooltip_text = [
+                f"{utility.capitalize(verb)}s automatic replacement for this {target}",
+                "A unit with automatic replacement will be automatically replaced if it dies from attrition",
+                f"This {target} is currently set to {operator}be automatically replaced",
+            ]
+            if status.displayed_mob and (
+                (
+                    status.displayed_mob.is_worker
+                    and status.worker_types[status.displayed_mob.worker_type]
+                    == status.worker_types["slave"]
+                )
+                or (
+                    status.displayed_mob.is_group
+                    and status.worker_types[status.displayed_mob.worker.worker_type]
+                    == status.worker_types["slave"]
+                )
+            ):
+                tooltip_text.append(
+                    "Slave units can only be automatically replaced through the slave market, incurring another public opinion penalty and purchase cost"
+                )
+            self.set_tooltip(tooltip_text)
 
         elif self.button_type == "wake up all":
             self.set_tooltip(
