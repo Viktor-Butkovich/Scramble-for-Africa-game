@@ -170,13 +170,13 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
         dummy_input_dict["name"] = actor_utility.generate_group_name(
             worker, officer, add_veteran=True
         )
-        dummy_input_dict[
-            "movement_points"
-        ] = actor_utility.generate_group_movement_points(worker, officer)
-        dummy_input_dict[
-            "max_movement_points"
-        ] = actor_utility.generate_group_movement_points(
-            worker, officer, generate_max=True
+        dummy_input_dict["movement_points"] = (
+            actor_utility.generate_group_movement_points(worker, officer)
+        )
+        dummy_input_dict["max_movement_points"] = (
+            actor_utility.generate_group_movement_points(
+                worker, officer, generate_max=True
+            )
         )
         dummy_input_dict["is_officer"] = False
         dummy_input_dict["is_group"] = True
@@ -184,9 +184,9 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
         image_id_list.remove(
             officer.image_dict["default"]
         )  # group default image is empty
-        dummy_input_dict[
-            "image_id_list"
-        ] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer)
+        dummy_input_dict["image_id_list"] = (
+            image_id_list + actor_utility.generate_group_image_id_list(worker, officer)
+        )
         if dummy_input_dict.get("disorganized", False):
             dummy_input_dict["image_id_list"].append("misc/disorganized_icon.png")
 

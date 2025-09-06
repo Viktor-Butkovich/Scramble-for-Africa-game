@@ -47,16 +47,14 @@ except Exception:  # displays error message and records error message in crash l
 # Performance impacts from repeated exit/load - not everything is being removed each time
 # Add ambient sounds
 #
-# Possible issues:
-# Look into special character glitch for Queiros Portuguese name, possibly font issue not having correct special character in the settlement font (but does in minister screen font)
-#
 #   new SFA features:
+# Also look into what happens to unit after escaping - add to population of nearby village
+#   Account for edge cases like all villages full or map without villages
+#   Historically tends to result in incorporation into villages
+#   Travel based on weighted proximity
 # Fix issue where some objects persist after exiting to main menu and re-loading (but not after restarting the whole program) - clearly a remove() issue
 #   Implement a "trap" to detect any leaked tiles, cells, grids, or mobs after exit to main menu
 #       Upon detection, immediately log as much as possible and trigger a crash for future diagnosis
-# Add runaway slave mechanic - like extra attrition check for slaves - 1/36 chance - either escape to villages/free workers
-#   Tends to result in incorporation into villages
-#   Travel based on weighted proximity
 # Incorporate new Asia grid song and 6 other songs
 # Upon minister appointment, have a greyed out version of their candidate portrait, allowing player to reverse or scroll either way
 # Always show an inventory tab for units that can ever pick up anything, and show a button to equip a piece of equipment present in the tile?

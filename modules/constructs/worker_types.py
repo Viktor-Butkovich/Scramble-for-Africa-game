@@ -143,7 +143,7 @@ class worker_type:
             input_dict["image"] = f"mobs/{self.name} 1/default.png"
         return input_dict
 
-    def on_recruit(self, purchased=True) -> None:
+    def on_recruit(self, purchased=True, replaced=False) -> None:
         """
         Description:
             Makes any updates required when worker first recruited (not on load)
@@ -172,23 +172,24 @@ class worker_type:
                 actor_utility.set_slave_traders_strength(
                     constants.slave_traders_strength + 1
                 )
-                constants.notification_manager.display_notification(
-                    {
-                        "message": "If this purchased slave unit suffers attrition, it will be automatically be replaced by a new slave unit from the slave market, incurring another public opinion penalty and purchase cost. /n /nTo switch this behavior, click the automatic replacement toggle for this unit. /n /n",
-                        "notification_type": "action",
-                        "attached_interface_elements": [
-                            action_utility.generate_free_image_input_dict(
-                                "buttons/disable_automatic_replacement_officer_button.png",
-                                120,
-                                override_input_dict={
-                                    "member_config": {
-                                        "order_x_offset": scaling.scale_width(-75),
-                                    }
-                                },
-                            )
-                        ],
-                    }
-                )
+                if not replaced:  # Only show for first-time manual purchase
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": "If this purchased slave unit suffers attrition, it will be automatically be replaced by a new slave unit from the slave market, incurring another public opinion penalty and purchase cost. /n /nTo switch this behavior, click the automatic replacement toggle for this unit. /n /n",
+                            "notification_type": "action",
+                            "attached_interface_elements": [
+                                action_utility.generate_free_image_input_dict(
+                                    "buttons/disable_automatic_replacement_officer_button.png",
+                                    120,
+                                    override_input_dict={
+                                        "member_config": {
+                                            "order_x_offset": scaling.scale_width(-75),
+                                        }
+                                    },
+                                )
+                            ],
+                        }
+                    )
 
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4)  # 2-8
@@ -200,7 +201,9 @@ class worker_type:
                         f"Your use of captured slaves has decreased your public opinion from {current_public_opinion} to {resulting_public_opinion}."
                     )
                 constants.evil_tracker.change(5)
-                if constants.slave_traders_strength > 0:
+                if (
+                    constants.slave_traders_strength > 0 and not replaced
+                ):  # Only show for first-time manual purchase
                     constants.notification_manager.display_notification(
                         {
                             "message": "If this captured slave unit suffers attrition, it will not be automatically be replaced, as it did not originate from the slave market. /n /nTo switch this behavior, click the automatic replacement toggle for this unit. /n /n",

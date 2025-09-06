@@ -35,6 +35,7 @@ class officer(pmob):
             None
         """
         super().__init__(from_save, input_dict)
+        self.group: pmob = None
         self.is_officer = True
         self.officer_type = input_dict.get("officer_type", type(self).__name__)
         self.set_controlling_minister_type(
@@ -133,15 +134,16 @@ class officer(pmob):
         else:
             return False
 
-    def join_group(self):
+    def join_group(self, group: pmob) -> None:
         """
         Description:
             Hides this officer when joining a group, preventing it from being directly interacted with until the group is disbanded
         Input:
-            None
+            pmob group: Group to join
         Output:
             None
         """
+        self.group = group
         self.in_group = True
         self.hide_images()
         self.remove_from_turn_queue()
@@ -155,6 +157,7 @@ class officer(pmob):
         Output:
             None
         """
+        self.group = None
         self.in_group = False
         self.x = group.x
         self.y = group.y

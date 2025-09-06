@@ -456,19 +456,7 @@ class mob(actor):
             None
         """
         if not self.has_infinite_movement:
-            self.movement_points += change
-            if self.movement_points == round(
-                self.movement_points
-            ):  # if whole number, don't show decimal
-                self.movement_points = round(self.movement_points)
-            if self.is_pmob and self.movement_points <= 0:
-                self.remove_from_turn_queue()
-            if (
-                status.displayed_mob == self
-            ):  # update mob info display to show new movement points
-                actor_utility.calibrate_actor_info_display(
-                    status.mob_info_display, self
-                )
+            self.set_movement_points(self.movement_points + change)
 
     def set_movement_points(self, new_value):
         """

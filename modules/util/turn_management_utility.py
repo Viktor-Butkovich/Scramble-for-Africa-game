@@ -154,6 +154,13 @@ def manage_attrition():
     for current_building in status.building_list:
         if current_building.building_type == "resource":
             current_building.manage_health_attrition()
+    for current_pmob in status.pmob_list:
+        if (
+            current_pmob.is_worker
+            and status.worker_types[current_pmob.worker_type]
+            == status.worker_types["slave"]
+        ):
+            current_pmob.manage_runaway_slaves()
 
     for current_pmob in status.pmob_list:
         current_pmob.manage_inventory_attrition()

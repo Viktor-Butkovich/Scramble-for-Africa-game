@@ -131,41 +131,41 @@ class actor_display_label(label):
 
             input_dict["init_type"] = "enable automatic replacement button"
             input_dict["target_type"] = "unit"
-            input_dict[
-                "image_id"
-            ] = "buttons/enable_automatic_replacement_officer_button.png"
+            input_dict["image_id"] = (
+                "buttons/enable_automatic_replacement_officer_button.png"
+            )
             self.add_attached_button(input_dict)
 
             input_dict["init_type"] = "disable automatic replacement button"
-            input_dict[
-                "image_id"
-            ] = "buttons/disable_automatic_replacement_officer_button.png"
+            input_dict["image_id"] = (
+                "buttons/disable_automatic_replacement_officer_button.png"
+            )
             self.add_attached_button(input_dict)
 
             input_dict["init_type"] = "enable automatic replacement button"
-            input_dict[
-                "image_id"
-            ] = "buttons/enable_automatic_replacement_worker_button.png"
+            input_dict["image_id"] = (
+                "buttons/enable_automatic_replacement_worker_button.png"
+            )
             input_dict["target_type"] = "worker"
             self.add_attached_button(input_dict)
 
             input_dict["init_type"] = "disable automatic replacement button"
-            input_dict[
-                "image_id"
-            ] = "buttons/disable_automatic_replacement_worker_button.png"
+            input_dict["image_id"] = (
+                "buttons/disable_automatic_replacement_worker_button.png"
+            )
             self.add_attached_button(input_dict)
 
             input_dict["init_type"] = "enable automatic replacement button"
-            input_dict[
-                "image_id"
-            ] = "buttons/enable_automatic_replacement_officer_button.png"
+            input_dict["image_id"] = (
+                "buttons/enable_automatic_replacement_officer_button.png"
+            )
             input_dict["target_type"] = "officer"
             self.add_attached_button(input_dict)
 
             input_dict["init_type"] = "disable automatic replacement button"
-            input_dict[
-                "image_id"
-            ] = "buttons/disable_automatic_replacement_officer_button.png"
+            input_dict["image_id"] = (
+                "buttons/disable_automatic_replacement_officer_button.png"
+            )
             self.add_attached_button(input_dict)
 
             del input_dict["target_type"]
@@ -983,10 +983,7 @@ class actor_display_label(label):
                         and not new_actor.temp_movement_disabled
                     ) or not new_actor.is_vehicle:  # if riverboat/train with crew or normal unit
                         self.set_label(
-                            self.message_start
-                            + str(new_actor.movement_points)
-                            + "/"
-                            + str(new_actor.max_movement_points)
+                            f"{self.message_start}{new_actor.movement_points}/{new_actor.max_movement_points}"
                         )
                     else:  # if ship or riverboat/train without crew
                         if not new_actor.has_infinite_movement:
