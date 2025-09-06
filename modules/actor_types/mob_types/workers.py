@@ -407,6 +407,20 @@ class slave_worker(worker):
             and random.randrange(1, 7) == 1
         ):  # 1/36 chance in Africa
             self.display_runaway_slaves_notification()
+            sorted_villages = sorted(
+                [village for village in status.village_list if village.population < 9],
+                key=lambda village: utility.find_object_distance(self, village),
+            )
+            if sorted_villages:  # If at least 1 eligible village
+                selected_village = random.choice(
+                    sorted_villages[:3]
+                )  # Choose from 3 closest villages
+                selected_village.change_population(1)
+                if (
+                    random.randrange(1, 7) >= 4
+                ):  # Half chance to increase aggressiveness of destination village
+                    selected_village.change_aggressiveness(1)
+
             if self.automatically_replace:
                 if self.in_group:
                     self.replace(self.group)
@@ -467,9 +481,9 @@ class slave_worker(worker):
                 destination_message = f"from ({self.x}, {self.y})"
 
         if self.automatically_replace:
-            text = f"{utility.capitalize(self.name)} has escaped {destination_message}. /n /n{self.generate_attrition_replacement_text()}"
+            text = f"{utility.capitalize(self.name)} have escaped to a nearby village {destination_message}. /n /n{self.generate_attrition_replacement_text()}"
         else:
-            text = f"{utility.capitalize(self.name)} has escaped {destination_message}. /n /n"
+            text = f"{utility.capitalize(self.name)} have escaped to a nearby village {destination_message}. /n /n"
         constants.notification_manager.display_notification(
             {
                 "message": text,

@@ -48,10 +48,6 @@ except Exception:  # displays error message and records error message in crash l
 # Add ambient sounds
 #
 #   new SFA features:
-# Also look into what happens to unit after escaping - add to population of nearby village
-#   Account for edge cases like all villages full or map without villages
-#   Historically tends to result in incorporation into villages
-#   Travel based on weighted proximity
 # Fix issue where some objects persist after exiting to main menu and re-loading (but not after restarting the whole program) - clearly a remove() issue
 #   Implement a "trap" to detect any leaked tiles, cells, grids, or mobs after exit to main menu
 #       Upon detection, immediately log as much as possible and trigger a crash for future diagnosis
