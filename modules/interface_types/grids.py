@@ -662,9 +662,9 @@ class grid(interface_elements.interface_element):
                             "name": river_name + " River",
                             "name_icon": True,
                         }
-                        river_mouth.terrain_features["river mouth"][
-                            "image_id"
-                        ] = river_mouth.terrain_features["river mouth"]["name"]
+                        river_mouth.terrain_features["river mouth"]["image_id"] = (
+                            river_mouth.terrain_features["river mouth"]["name"]
+                        )
                     current_y = current_y + 1
                 elif direction == 2:
                     current_x = current_x + 1
@@ -688,9 +688,9 @@ class grid(interface_elements.interface_element):
                 "name_icon": True,
                 "visible": False,
             }
-            last_cell.terrain_features["river source"][
-                "image_id"
-            ] = last_cell.terrain_features["river source"]["name"]
+            last_cell.terrain_features["river source"]["image_id"] = (
+                last_cell.terrain_features["river source"]["name"]
+            )
 
     def touching_mouse(self):
         """
@@ -726,6 +726,12 @@ class grid(interface_elements.interface_element):
         Output:
             boolean: Returns whether it would be valid to call this object's draw()
         """
+        if (
+            constants.effect_manager.effect_active("track_dangling_interface")
+            and (not self in status.grid_list)
+            and self.showing
+        ):
+            raise Exception(f"Dangling interface element detected: {self}")
         return self.showing
 
     def remove(self):

@@ -48,9 +48,9 @@ except Exception:  # displays error message and records error message in crash l
 # Add ambient sounds
 #
 #   new SFA features:
-# Fix issue where some objects persist after exiting to main menu and re-loading (but not after restarting the whole program) - clearly a remove() issue
-#   Implement a "trap" to detect any leaked tiles, cells, grids, or mobs after exit to main menu
-#       Upon detection, immediately log as much as possible and trigger a crash for future diagnosis
+# Ongoing issue: Objects occasionally persist after exiting to main menu and re-loading - dangling interface element issue
+#   Implemented "trap" to detect leaked tiles, cells, grids, or mobs after exit to main menu
+#   On detection, a crash is triggered with information for further diagnosis
 # Upon minister appointment, have a greyed out version of their candidate portrait, allowing player to reverse or scroll either way
 # Always show an inventory tab for units that can ever pick up anything, and show a button to equip a piece of equipment present in the tile?
 # Sort inventory display in ascending order, such that most abundant items are shown last and do not block other items
