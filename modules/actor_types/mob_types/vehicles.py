@@ -81,6 +81,19 @@ class vehicle(pmob):
             )
             self.select()
 
+    def temp_disable_movement(self):
+        """
+        Description:
+            Sets this unit's movement to 0 for the next turn, preventing it from taking its usual actions
+        Input:
+            None
+        Output:
+            None
+        """
+        super().temp_disable_movement()
+        if self.has_crew:
+            self.crew.temp_disable_movement()
+
     def set_crew(self, new_crew):
         """
         Description:
@@ -371,9 +384,7 @@ class vehicle(pmob):
             save_dict["crew"] = "none"
         else:
             save_dict["crew"] = self.crew.to_save_dict()
-        save_dict[
-            "passenger_dicts"
-        ] = (
+        save_dict["passenger_dicts"] = (
             []
         )  # list of dictionaries for each passenger, on load a vehicle creates all of its passengers and embarks them
         for current_mob in self.contained_mobs:

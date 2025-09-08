@@ -688,7 +688,7 @@ class mob(actor):
                 if len(self.contained_mobs) > 0:
                     tooltip_list.append("    Passengers: ")
                     for current_mob in self.contained_mobs:
-                        tooltip_list.append("        " + current_mob.name.capitalize())
+                        tooltip_list.append(f"        {current_mob.name.capitalize()}")
                 else:
                     tooltip_list.append("    Passengers: None")
 
@@ -696,12 +696,13 @@ class mob(actor):
                 self.is_vehicle and not self.has_crew
             ):
                 tooltip_list.append(
-                    "Movement points: "
-                    + str(self.movement_points)
-                    + "/"
-                    + str(self.max_movement_points)
+                    f"Movement points: {self.movement_points}/{self.max_movement_points}"
                 )
-            elif self.temp_movement_disabled or self.is_vehicle and not self.has_crew:
+            elif (
+                self.temp_movement_disabled
+                or (self.is_vehicle and not self.has_crew)
+                or (self.has_infinite_movement and self.movement_points == 0)
+            ):
                 tooltip_list.append("No movement")
             else:
                 tooltip_list.append("Movement points: Infinite")

@@ -159,7 +159,7 @@ class value_label(label):
                 "Public opinion represents your company's reputation and expectations for its success and is used to calculate government subsidies"
             )
             tooltip_text.append(
-                "Public opinion tends to approach the netural value of 50 over time"
+                "Public opinion tends to approach the neutral value of 50 over time"
             )
         if self.value_name == "turn":
             tooltip_text.append("Current lore mission: ")
