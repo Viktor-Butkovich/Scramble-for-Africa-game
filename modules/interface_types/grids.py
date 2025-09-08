@@ -726,12 +726,12 @@ class grid(interface_elements.interface_element):
         Output:
             boolean: Returns whether it would be valid to call this object's draw()
         """
-        if (
-            constants.effect_manager.effect_active("track_dangling_interface")
-            and (not self in status.grid_list)
-            and self.showing
+        if constants.effect_manager.effect_active("track_dangling_interface") and (
+            not self in status.grid_list
         ):
-            raise Exception(f"Dangling interface element detected: {self}")
+            raise Exception(
+                f"Dangling interface element detected: {self}, {status.grid_list}, {self.grid_type}"
+            )
         return self.showing
 
     def remove(self):
@@ -743,6 +743,7 @@ class grid(interface_elements.interface_element):
         Output:
             None
         """
+        self.parent_collection.remove_member(self)
         super().remove()
         status.grid_list = utility.remove_from_list(status.grid_list, self)
 
