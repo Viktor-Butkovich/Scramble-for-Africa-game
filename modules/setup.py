@@ -816,20 +816,20 @@ def lore():
     status.lore_types_effects_dict["botany"] = constants.effect_manager.create_effect(
         "botany_completion_effect", "health_attrition_plus_modifier"
     )
-    status.lore_types_effects_dict[
-        "archaeology"
-    ] = constants.effect_manager.create_effect(
-        "archaeology_completion_effect", "combat_plus_modifier"
+    status.lore_types_effects_dict["archaeology"] = (
+        constants.effect_manager.create_effect(
+            "archaeology_completion_effect", "combat_plus_modifier"
+        )
     )
-    status.lore_types_effects_dict[
-        "anthropology"
-    ] = constants.effect_manager.create_effect(
-        "anthropology_completion_effect", "conversion_plus_modifier"
+    status.lore_types_effects_dict["anthropology"] = (
+        constants.effect_manager.create_effect(
+            "anthropology_completion_effect", "conversion_plus_modifier"
+        )
     )
-    status.lore_types_effects_dict[
-        "paleontology"
-    ] = constants.effect_manager.create_effect(
-        "paleontology_completion_effect", "public_relations_campaign_modifier"
+    status.lore_types_effects_dict["paleontology"] = (
+        constants.effect_manager.create_effect(
+            "paleontology_completion_effect", "public_relations_campaign_modifier"
+        )
     )
     status.lore_types_effects_dict["theology"] = constants.effect_manager.create_effect(
         "theology_completion_effect", "religious_campaign_plus_modifier"
@@ -1445,6 +1445,8 @@ def ministers_screen():
                 "init_type": "minister portrait image",
                 "color": "gray",
                 "minister_type": "none",
+                "enable_shader": i
+                == 2,  # Only enable shader for middle portrait (when minister just appointed)
             }
         )
 
