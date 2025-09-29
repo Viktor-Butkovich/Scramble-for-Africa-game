@@ -1000,6 +1000,7 @@ class pmob(mob):
                         current_commodity, 1
                     )
         self.inventory = {}
+        self.sorted_inventory = []
         self.hide_images()
         self.remove_from_turn_queue()
         vehicle.contained_mobs.append(self)

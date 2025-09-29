@@ -63,12 +63,18 @@ class tile(actor):  # to do: make terrain tiles a subclass
             )  # terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
             if self.cell.grid.from_save:
                 self.inventory = self.cell.save_dict["inventory"]
+                self.sorted_inventory = sorted(
+                    self.inventory.items(), key=lambda x: x[1]
+                )  # Sorted version of inventory by amount held, ascending
 
         elif self.grid.grid_type in constants.abstract_grid_type_list:
             self.cell.tile = self
             self.terrain = "none"
             if self.cell.grid.from_save:
                 self.inventory = self.cell.save_dict["inventory"]
+                self.sorted_inventory = sorted(
+                    self.inventory.items(), key=lambda x: x[1]
+                )  # Sorted version of inventory by amount held, ascending
             if (
                 self.grid.grid_type == "europe_grid"
             ):  # Europe should be able to hold commodities despite not being terrain

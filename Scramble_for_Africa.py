@@ -49,7 +49,6 @@ except Exception:  # displays error message and records error message in crash l
 #
 #   new SFA features:
 # Always show an inventory tab for units that can ever pick up anything, and show a button to equip a piece of equipment present in the tile?
-# Sort inventory display in ascending order, such that most abundant items are shown last and do not block other items
 # Possible issue with overlapping sounds muffling in late-game, with lots of units
 # Add notification whenever worker prices change - at start of turn or after action/hire
 #   Hiring an X worker has changed X worker upkeep from A to B.
