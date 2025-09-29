@@ -420,6 +420,8 @@ class cell:
             warehouses_built -= 1
         if self.has_building("resource"):
             warehouses_built -= 1
+        if self.has_building("trading_post"):
+            warehouses_built -= 1
 
         return constants.building_prices["warehouses"] * (
             2**warehouses_built

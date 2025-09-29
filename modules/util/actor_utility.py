@@ -324,7 +324,7 @@ def update_descriptions(target="all"):
 
         elif current_target == "trading_post":
             text_list.append(
-                "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
+                "A trading post increases the likelihood that the natives of the local village will be willing to trade, reduces the risk of hostile interactions when trading, and expands the tile's warehouse capacity."
             )
 
         elif current_target == "mission":

@@ -54,10 +54,8 @@ except Exception:  # displays error message and records error message in crash l
 #   You now pay C per turn for your D X workers.
 #       Customize start of message based on what caused the price change
 # Add equip all button from top perspective - equip all from tile or from mob
-# Add label icon to slave traders and Europe abstract tiles - allows easily knowing what it is without clicking
 # Attacking ferry incorrectly causing disorganized (if from connected tile)
 # Buy consumer goods tooltip should explain how they are used to trade with villages
 # Add achievement for building railroad bridge
-# Add warehouses to trading posts
 # Add achievement for selling your first commodity
 # Add notification for when worker upkeep changes (start of turn and after action), with tutorial advice for African workers
