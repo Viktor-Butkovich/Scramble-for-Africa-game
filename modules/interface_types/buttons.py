@@ -810,7 +810,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == "show previous reports":
             self.set_tooltip(
                 [
-                    "Displays the previous turn's production, sales, and financial reports"
+                    "Displays the previous turn's production, sales, labor market, and financial reports"
                 ]
             )
 
@@ -3180,7 +3180,7 @@ class show_lore_missions_button(button):
 
 class show_previous_reports_button(button):
     """
-    Button appearing near money label that can be clicked to display the previous turn's production, sales, and financial reports again
+    Button appearing near money label that can be clicked to display the previous turn's production, sales, labor market, and financial reports again
     """
 
     def __init__(self, input_dict):
@@ -3218,6 +3218,7 @@ class show_previous_reports_button(button):
             status.previous_financial_report
             or status.previous_production_report
             or status.previous_sales_report
+            or status.previous_labor_market_report
         )
 
     def on_click(self):
@@ -3233,6 +3234,7 @@ class show_previous_reports_button(button):
             for report in [
                 status.previous_production_report,
                 status.previous_sales_report,
+                status.previous_labor_market_report,
                 status.previous_financial_report,
             ]:
                 if report:

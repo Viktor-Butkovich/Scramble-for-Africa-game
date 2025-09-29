@@ -68,6 +68,7 @@ class save_load_manager_template:
         self.copied_statuses.append("previous_production_report")
         self.copied_statuses.append("previous_sales_report")
         self.copied_statuses.append("previous_financial_report")
+        self.copied_statuses.append("previous_labor_market_report")
         self.copied_statuses.append("minister_appointment_tutorial_completed")
         self.copied_statuses.append("exit_minister_screen_tutorial_completed")
         self.copied_statuses.append("transaction_history")
@@ -119,6 +120,9 @@ class save_load_manager_template:
         )
         flags.player_turn = True
         status.previous_financial_report = None
+        status.previous_labor_market_report = None
+        status.previous_production_report = None
+        status.previous_sales_report = None
 
         constants.actor_creation_manager.create_initial_ministers()
 

@@ -49,13 +49,7 @@ except Exception:  # displays error message and records error message in crash l
 # Possible issue with overlapping sounds muffling in late-game, with lots of units
 #
 #   new SFA features:
-# Add notification whenever worker prices change - at start of turn or after action/hire
-#   Hiring an X worker has changed X worker upkeep from A to B.
-#   You now pay C per turn for your D X workers.
-#       Customize start of message based on what caused the price change
-# Add equip all button from top perspective - equip all from tile or from mob
 # Attacking ferry incorrectly causing disorganized (if from connected tile)
 # Buy consumer goods tooltip should explain how they are used to trade with villages
 # Add achievement for building railroad bridge
 # Add achievement for selling your first commodity
-# Add notification for when worker upkeep changes (start of turn and after action), with tutorial advice for African workers

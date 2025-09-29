@@ -253,21 +253,9 @@ class money_label_template(value_label):
         """
         tooltip_text = [self.message]
 
-        total_upkeep = 0.0
-        total_number = 0
-        worker_type_info_dicts = {}
-        for worker_type in status.worker_types:
-            current_dict = {}
-            current_dict["upkeep"] = status.worker_types[worker_type].upkeep
-            current_dict["total_upkeep"] = status.worker_types[
-                worker_type
-            ].get_total_upkeep()
-            current_dict["number"] = status.worker_types[worker_type].number
-            current_dict["name"] = status.worker_types[worker_type].name
-            total_upkeep += current_dict["total_upkeep"]
-            total_number += current_dict["number"]
-            worker_type_info_dicts[worker_type] = current_dict
-        total_upkeep = round(total_upkeep, 2)
+        worker_type_info_dicts = market_utility.gather_worker_type_info_dicts()
+        total_number = worker_type_info_dicts.pop("total_number")
+        total_upkeep = worker_type_info_dicts.pop("total_upkeep")
 
         tooltip_text.append("")
         tooltip_text.append(

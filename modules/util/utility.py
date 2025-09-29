@@ -208,3 +208,28 @@ def combine(*args) -> List:
         else:
             return_list.append(arg)
     return return_list
+
+
+def subtract_nested_dicts(first, second):
+    """
+    Description:
+        Recursively subtracts values in second from first for matching keys, such that:
+        {"a": 1, "b": {"c": 2}} - {"a": 4, "b": {"c": 1}} = {"a": -3, "b": {"c": 1}}
+    Input:
+        first: First dictionary
+        second: Second dictionary
+    Output:
+        dict: A new dictionary with the result of the subtraction, only including the intersection of keys from each input dictionary
+    """
+    result = {}
+    for key in first:
+        if key in second:
+            if isinstance(first[key], dict) and isinstance(second[key], dict):
+                # Recursively subtract nested dictionaries
+                result[key] = subtract_nested_dicts(first[key], second[key])
+            elif isinstance(first[key], (int, float)) and isinstance(
+                second[key], (int, float)
+            ):
+                # Subtract numeric values
+                result[key] = first[key] - second[key]
+    return result

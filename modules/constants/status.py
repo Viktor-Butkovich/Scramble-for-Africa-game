@@ -131,6 +131,7 @@ current_ministers: Dict[str, minister] = {}
 lore_types_effects_dict: Dict[str, effect] = {}
 previous_production_report: str = None
 previous_sales_report: str = None
+previous_labor_market_report: str = None
 previous_financial_report: str = None
 transaction_history: Dict[str, float] = {}
 current_just_appointed_minister: minister = None
