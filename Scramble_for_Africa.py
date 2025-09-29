@@ -46,16 +46,14 @@ except Exception:  # displays error message and records error message in crash l
 # Add autosave and multiple save slots
 # Performance impacts from repeated exit/load - not everything is being removed each time
 # Add ambient sounds
+# Possible issue with overlapping sounds muffling in late-game, with lots of units
 #
 #   new SFA features:
-# Always show an inventory tab for units that can ever pick up anything, and show a button to equip a piece of equipment present in the tile?
-# Possible issue with overlapping sounds muffling in late-game, with lots of units
 # Add notification whenever worker prices change - at start of turn or after action/hire
 #   Hiring an X worker has changed X worker upkeep from A to B.
 #   You now pay C per turn for your D X workers.
 #       Customize start of message based on what caused the price change
 # Add equip all button from top perspective - equip all from tile or from mob
-# Give notification when ship fails to assign an end of turn destination
 # Add label icon to slave traders and Europe abstract tiles - allows easily knowing what it is without clicking
 # Attacking ferry incorrectly causing disorganized (if from connected tile)
 # Buy consumer goods tooltip should explain how they are used to trade with villages
