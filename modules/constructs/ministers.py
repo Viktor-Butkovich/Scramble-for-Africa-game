@@ -798,12 +798,10 @@ class minister:
                 status.available_minister_list, self
             )
         else:
-            constants.available_minister_left_index = (
-                len(status.available_minister_list)
-                - 3
-                + (1 if status.current_just_appointed_minister else 0)
-            )  # move available minister display to newly fired minister
             status.current_just_appointed_minister = None
+            constants.available_minister_left_index = (
+                len(status.available_minister_list) - 2
+            )  # move available minister display to newly fired minister
             status.available_minister_list.append(self)
 
         for current_minister_type_image in status.minister_image_list:
