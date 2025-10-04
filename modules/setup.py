@@ -341,8 +341,9 @@ def equipment_types_config():
                 "max_movement_points": -1,
             },
             "description": [
-                "A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls, but decreases movement points by 1",
-                "Can only be equipped by battalions",
+                "A marvel of modern engineering - 600 rounds per minute to shatter the bravest men.",
+                "Provides a positive modifier (half chance of +1) to all combat rolls, but decreases movement points by 1.",
+                "Can only be equipped by battalions.",
             ],
         }
     )

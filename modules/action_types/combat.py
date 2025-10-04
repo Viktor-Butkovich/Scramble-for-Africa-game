@@ -507,8 +507,13 @@ class combat(action.action):
             if self.current_unit.is_battalion or self.current_unit.is_safari:
                 audio.append("effects/bolt_action_1")
         elif subject == "roll_started":
-            if self.current_unit.is_battalion or self.current_unit.is_safari:
-                audio.append("effects/gunfire")
+            if self.current_unit.equipment.get("Maxim gun", False):
+                audio.append("effects/maxim_gun")
+            audio.append("effects/gunfire")
+            if random.randrange(1, 7) >= 4:
+                audio.append("effects/battle_1")
+            else:
+                audio.append("effects/battle_2")
         return audio
 
     def middle(self, combat_info_dict=None):

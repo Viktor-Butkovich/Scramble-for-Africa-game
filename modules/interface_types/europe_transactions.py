@@ -318,4 +318,9 @@ class buy_item_button(button):
             )
         if self.item_type in status.equipment_types:
             new_tooltip += status.equipment_types[self.item_type].description
+        elif self.item_type == "consumer goods":
+            new_tooltip += [
+                "Mass-manufactured goods delivered abroad to bring about modernity, comfort, and cheap labor.",
+                "Can be presented by a merchant caravan at a native village to attract potential workers and trade for random resources.",
+            ]
         self.set_tooltip(new_tooltip)
