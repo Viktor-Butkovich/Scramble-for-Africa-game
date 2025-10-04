@@ -61,7 +61,7 @@ def start_player_turn(first_turn=False):
         status.previous_production_report,
         status.previous_sales_report,
         status.previous_financial_report,
-        status.previous_labor_market_report
+        status.previous_labor_market_report,
     ) = (None, None, None, None)
     text_utility.print_to_screen("")
     text_utility.print_to_screen("Turn " + str(constants.turn + 1))
@@ -467,29 +467,34 @@ def manage_labor_market_report(initial_state, final_state) -> None:
     report_lines = ["Labor market report:"]
     for worker_type, changes in difference.items():
         upkeep_change = changes["upkeep"]
-        worker_type_total_upkeep = changes["total_upkeep"]
+        worker_type_total_upkeep_change = changes["total_upkeep"]
         number = final_state[worker_type]["number"]
         if upkeep_change != 0:
             if number > 0:
-                if worker_type_total_upkeep > 0:
+                if worker_type_total_upkeep_change > 0:
                     report_lines.append(
-                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} increased by {upkeep_change:+.2f}, "
-                        f"increasing total upkeep by {worker_type_total_upkeep:+.2f}."
+                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} increased from {final_state[worker_type]['upkeep']} to {final_state[worker_type]['upkeep'] + upkeep_change}, "
+                        f"increasing expenses by {abs(worker_type_total_upkeep_change):,.2f}."
                     )
-                elif worker_type_total_upkeep < 0:
+                elif worker_type_total_upkeep_change < 0:
                     report_lines.append(
-                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} decreased by {upkeep_change:+.2f}, "
-                        f"decreasing total upkeep by {worker_type_total_upkeep:+.2f}."
+                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} decreased from {final_state[worker_type]['upkeep']} to {final_state[worker_type]['upkeep'] + upkeep_change}, "
+                        f"decreasing expenses by {abs(worker_type_total_upkeep_change):,.2f}."
                     )
             else:
-                report_lines.append(
-                    f"The upkeep of {worker_type} workers changed by {upkeep_change:+.2f}."
-                )
+                if worker_type_total_upkeep_change > 0:
+                    report_lines.append(
+                        f"The upkeep of {worker_type} workers increased by {upkeep_change:.2f}."
+                    )
+                elif worker_type_total_upkeep_change < 0:
+                    report_lines.append(
+                        f"The upkeep of {worker_type} workers decreased by {upkeep_change:.2f}."
+                    )
 
     if len(report_lines) > 1:
-        summary_line = f"Previous worker upkeep: {abs(constants.money_tracker.transaction_history['worker_upkeep']):.2f} /n"
+        summary_line = f"Previous upkeep: {abs(constants.money_tracker.transaction_history['worker_upkeep']):.2f} /n"
         summary_line += f"Total change: {total_upkeep_change:+.2f} /n"
-        summary_line += f"Projected worker upkeep (next turn): {abs(constants.money_tracker.transaction_history['worker_upkeep']) + total_upkeep_change:.2f}"
+        summary_line += f"Projected upkeep (next turn): {abs(constants.money_tracker.transaction_history['worker_upkeep']) + total_upkeep_change:.2f}"
     else:
         report_lines.append(
             "No notable changes to the labor market occurred this turn."

@@ -120,23 +120,44 @@ def attempt_worker_upkeep_change(change_type, worker_type):
     """
     if random.randrange(1, 7) >= 4:  # half chance of change
         current_price = status.worker_types[worker_type].upkeep
+        total_change = abs(
+            round(
+                status.worker_types[worker_type].number
+                * constants.worker_upkeep_increment,
+                2,
+            )
+        )
         if change_type == "increase":
             changed_price = round(current_price + constants.worker_upkeep_increment, 2)
             status.worker_types[worker_type].upkeep = changed_price
-            constants.notification_manager.display_notification(
-                {
-                    "message": f"Hiring {utility.generate_article(worker_type)} {worker_type} worker increased {worker_type} worker upkeep from {current_price} to {changed_price}. /n /n",
-                }
-            )
+            if total_change > 0:
+                constants.notification_manager.display_notification(
+                    {
+                        "message": f"Hiring {utility.generate_article(worker_type)} {worker_type} worker increased {worker_type} worker upkeep from {current_price} to {changed_price}, increasing expenses by an additional {total_change:,.2f}. /n /n",
+                    }
+                )
+            else:
+                constants.notification_manager.display_notification(
+                    {
+                        "message": f"Hiring {utility.generate_article(worker_type)} {worker_type} worker increased {worker_type} worker upkeep from {current_price} to {changed_price}. /n /n",
+                    }
+                )
         elif change_type == "decrease":
             changed_price = round(current_price - constants.worker_upkeep_increment, 2)
             if changed_price >= status.worker_types[worker_type].min_upkeep:
                 status.worker_types[worker_type].upkeep = changed_price
-                constants.notification_manager.display_notification(
-                    {
-                        "message": f"Adding {utility.generate_article(worker_type)} {worker_type} worker to the labor pool decreased {worker_type} worker upkeep from {current_price} to {changed_price}. /n /n",
-                    }
-                )
+                if total_change > 0:
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": f"Adding {utility.generate_article(worker_type)} {worker_type} worker to the labor pool decreased {worker_type} worker upkeep from {current_price} to {changed_price}, decreasing expenses by an additional {total_change:,.2f}. /n /n",
+                        }
+                    )
+                else:
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": f"Adding {utility.generate_article(worker_type)} {worker_type} worker to the labor pool decreased {worker_type} worker upkeep from {current_price} to {changed_price}. /n /n",
+                        }
+                    )
             if worker_type == "African":
                 constants.achievement_manager.check_achievements("Minimum Wage")
         constants.money_label.check_for_updates()
