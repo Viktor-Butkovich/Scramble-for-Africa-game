@@ -145,6 +145,8 @@ class native_warriors(npmob):
         Output:
             None
         """
+        if constants.effect_manager.effect_active("hyperaggressive"):
+            return
         if (
             random.randrange(1, 7) >= 4 and random.randrange(1, 7) >= 4
         ):  # 1/4 chance of despawn

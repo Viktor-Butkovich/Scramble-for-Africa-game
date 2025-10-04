@@ -250,8 +250,9 @@ class npmob(mob):
             None
         """
         closest_target = self.find_closest_target()
-        if (
-            self.npmob_type == "native_warriors" and random.randrange(1, 7) <= 3
+        if self.npmob_type == "native_warriors" and (
+            random.randrange(1, 7) <= 3
+            and not constants.effect_manager.effect_active("hyperaggressive")
         ):  # half chance of moving randomly instead
             if not self.visible():
                 current_cell = self.grids[0].find_cell(self.x, self.y)

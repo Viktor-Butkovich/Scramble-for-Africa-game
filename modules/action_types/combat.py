@@ -775,11 +775,16 @@ class combat(action.action):
 
         if not self.defending:
             self.current_unit.set_movement_points(0)
+            origin_cell = self.current_unit.grids[0].find_cell(
+                self.current_unit.x - 1 * self.current_unit.last_move_direction[0],
+                self.current_unit.y - 1 * self.current_unit.last_move_direction[1],
+            )
             if (
                 combat_cell.terrain == "water"
                 and combat_cell.y > 0
                 and not self.current_unit.can_swim_river
-            ):  # if attacked river and can't swim, become disorganized after combat
+                and not origin_cell.has_walking_connection(combat_cell)
+            ):  # if attacked river without bridge/ferry and can't swim, become disorganized after combat
                 self.current_unit.set_disorganized(True)
 
         super().complete()

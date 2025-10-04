@@ -33,7 +33,8 @@
       "reset_achievements",
       "fullscreen",
       "link_inventory_tabs",
-      "enable_crash_button"
+      "enable_crash_button",
+      "hyperaggressive"
    ],
    "active_effects": [
       "track_dangling_interface",
