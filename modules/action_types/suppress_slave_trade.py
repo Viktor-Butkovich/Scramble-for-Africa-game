@@ -70,7 +70,13 @@ class suppress_slave_trade(action.action):
         """
         audio = super().generate_audio(subject)
         if subject == "roll_started":
+            if self.current_unit.equipment.get("Maxim gun", False):
+                audio.append("effects/maxim_gun")
             audio.append("effects/gunfire")
+            if random.randrange(1, 7) >= 4:
+                audio.append("effects/battle_1")
+            else:
+                audio.append("effects/battle_2")
         return audio
 
     def generate_current_roll_modifier(self):
