@@ -456,19 +456,7 @@ class mob(actor):
             None
         """
         if not self.has_infinite_movement:
-            self.movement_points += change
-            if self.movement_points == round(
-                self.movement_points
-            ):  # if whole number, don't show decimal
-                self.movement_points = round(self.movement_points)
-            if self.is_pmob and self.movement_points <= 0:
-                self.remove_from_turn_queue()
-            if (
-                status.displayed_mob == self
-            ):  # update mob info display to show new movement points
-                actor_utility.calibrate_actor_info_display(
-                    status.mob_info_display, self
-                )
+            self.set_movement_points(self.movement_points + change)
 
     def set_movement_points(self, new_value):
         """
@@ -700,7 +688,7 @@ class mob(actor):
                 if len(self.contained_mobs) > 0:
                     tooltip_list.append("    Passengers: ")
                     for current_mob in self.contained_mobs:
-                        tooltip_list.append("        " + current_mob.name.capitalize())
+                        tooltip_list.append(f"        {current_mob.name.capitalize()}")
                 else:
                     tooltip_list.append("    Passengers: None")
 
@@ -708,12 +696,13 @@ class mob(actor):
                 self.is_vehicle and not self.has_crew
             ):
                 tooltip_list.append(
-                    "Movement points: "
-                    + str(self.movement_points)
-                    + "/"
-                    + str(self.max_movement_points)
+                    f"Movement points: {self.movement_points}/{self.max_movement_points}"
                 )
-            elif self.temp_movement_disabled or self.is_vehicle and not self.has_crew:
+            elif (
+                self.temp_movement_disabled
+                or (self.is_vehicle and not self.has_crew)
+                or (self.has_infinite_movement and self.movement_points == 0)
+            ):
                 tooltip_list.append("No movement")
             else:
                 tooltip_list.append("Movement points: Infinite")

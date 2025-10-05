@@ -145,7 +145,7 @@ class construction(action.action):
         elif self.building_type == "steamboat":
             message.append("Can only be assembled at a river port")
 
-        if self.building_type in ["train_station", "port", "resource"]:
+        if self.building_type in ["train_station", "port", "resource", "trading_post"]:
             message.append(
                 "Also upgrades this tile's warehouses by 9 inventory capacity, or creates new warehouses if none are present"
             )
@@ -625,7 +625,12 @@ class construction(action.action):
                 input_dict["image"] = "buildings/" + self.building_type + ".png"
             new_building = constants.actor_creation_manager.create(False, input_dict)
 
-            if self.building_type in ["port", "train_station", "resource"]:
+            if self.building_type in [
+                "port",
+                "train_station",
+                "resource",
+                "trading_post",
+            ]:
                 warehouses = self.current_unit.images[0].current_cell.get_building(
                     "warehouses"
                 )
@@ -648,4 +653,6 @@ class construction(action.action):
                 actor_utility.calibrate_actor_info_display(
                     status.mob_info_display, self.current_unit
                 )  # update mob display to show new upgrade possibilities
+            if self.building_name == "railroad bridge":
+                constants.achievement_manager.achieve("Spared No Expense")
         super().complete()

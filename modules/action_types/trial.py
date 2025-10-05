@@ -417,31 +417,16 @@ class trial(action.campaign):
         """
         prosecution = status.displayed_prosecution
         defense = status.displayed_defense
+        text = ""
         if self.roll_result >= self.current_min_success:
-            confiscated_money = defense.stolen_money / 2.0
-            text = (
-                "You have won the trial, removing "
-                + defense.name
-                + " as "
-                + defense.current_position
-                + " and putting him in prison. /n /n"
-            )
+            confiscated_money = round(defense.stolen_money / 2.0, 2)
+            text = f"You have won the trial, removing {defense.name} as {defense.current_position} and putting him in prison. /n /n"
             if confiscated_money > 0:
-                text += (
-                    "While most of "
-                    + defense.name
-                    + "'s money was spent on the trial or unaccounted for, authorities managed to confiscate "
-                    + str(confiscated_money)
-                    + " money, which has been given to your company as compensation. /n /n"
-                )
+                text += f"While most of {defense.name}'s money was spent on the trial or unaccounted for, authorities managed to confiscate {confiscated_money} money, which has been given to your company as compensation. /n /n"
                 text += " /n /n"
                 constants.money_tracker.change(confiscated_money, "trial_compensation")
             else:
-                text += (
-                    "Authorities searched "
-                    + defense.name
-                    + "'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. /n /n"
-                )
+                text += f"Authorities searched {defense.name}'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. /n /n"
             constants.notification_manager.display_notification(
                 {
                     "message": text,
@@ -465,13 +450,7 @@ class trial(action.campaign):
             constants.achievement_manager.achieve("Guilty")
 
         else:
-            text = (
-                "You have lost the trial and "
-                + defense.name
-                + " goes unpunished, remaining your "
-                + defense.current_position
-                + ". /n /n"
-            )
+            text += f"You have lost the trial and {defense.name} goes unpunished, remaining your {defense.current_position}. /n /n"
             fabricated_evidence = defense.fabricated_evidence
             real_evidence = defense.corruption_evidence - defense.fabricated_evidence
 
@@ -484,52 +463,16 @@ class trial(action.campaign):
                     lost_evidence += 1
 
             if fabricated_evidence > 0:
-                text += (
-                    "Fabricated evidence is temporary, so the "
-                    + str(fabricated_evidence)
-                    + " piece"
-                    + utility.generate_plural(fabricated_evidence)
-                    + " of fabricated evidence used in this trial "
-                )
-                text += (
-                    utility.conjugate("be", fabricated_evidence)
-                    + " now irrelevant to future trials. /n /n"
-                )
+                text += f"Fabricated evidence is temporary, so the {fabricated_evidence} piece{utility.generate_plural(fabricated_evidence)} of fabricated evidence used in this trial {utility.conjugate('be', fabricated_evidence)} now irrelevant to future trials. /n /n"
 
             if real_evidence > 0:
-                if lost_evidence == 0:  # if no evidence lost
+                if lost_evidence == 0:  # If no evidence lost
                     text += "All of the real evidence used in this trial remains potent enough to be used in future trials against "
                     text += defense.name + ". /n /n"
-                elif lost_evidence < real_evidence:  # if some evidence lost
-                    text += (
-                        "Of the "
-                        + str(real_evidence)
-                        + " piece"
-                        + utility.generate_plural(real_evidence)
-                        + " of real evidence used in this trial, "
-                        + str(remaining_evidence)
-                    )
-                    text += (
-                        " "
-                        + utility.conjugate("remain", remaining_evidence)
-                        + " potent enough to be relevant to future trials against "
-                        + defense.name
-                        + ", while "
-                        + str(lost_evidence)
-                        + " "
-                        + utility.conjugate("be", lost_evidence)
-                    )
-                    text += " now irrelevant. /n /n"
+                elif lost_evidence < real_evidence:  # If some evidence lost
+                    text += f"Of the {real_evidence} piece{utility.generate_plural(real_evidence)} of real evidence used in this trial, {remaining_evidence} {utility.conjugate('remain', remaining_evidence)} potent enough to be relevant to future trials against {defense.name}, while {lost_evidence} {utility.conjugate('be', lost_evidence)} now irrelevant. /n /n"
                 else:  # if all evidence lost
-                    text += (
-                        "Of the "
-                        + str(real_evidence)
-                        + " piece"
-                        + utility.generate_plural(real_evidence)
-                        + " of real evidence used in this trial, none remain potent enough to be relevant to future trials against "
-                        + defense.name
-                        + ". /n /n"
-                    )
+                    text += f"Of the {real_evidence} piece{utility.generate_plural(real_evidence)} of real evidence used in this trial, none remain potent enough to be relevant to future trials against {defense.name}. /n /n"
 
             defense.fabricated_evidence = 0
             defense.corruption_evidence = remaining_evidence

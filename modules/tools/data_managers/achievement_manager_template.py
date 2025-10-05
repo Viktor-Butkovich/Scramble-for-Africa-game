@@ -217,6 +217,8 @@ class achievement_manager_template:
             "Explorer": "Find a river source",
             "Archaeologist": "Complete 1 lore mission",
             "Big Game Hunter": "Kill a beast",
+            "Spared No Expense": "Build a railroad bridge",
+            "First Paycheck": "Sell a commodity",
         }[achievement_type]
 
     def get_quote(self, achievement_type: str) -> str:
@@ -243,6 +245,8 @@ class achievement_manager_template:
             "Explorer": '"But my estimates, for instance, based upon book information, were simply ridiculous. Fanciful images of African attractions were soon dissipated... and all crude ideas began to resolve themselves into shape." - Henry Morton Stanley',
             "Archaeologist": '"The British Museum is great for seeing how excellent we were at stealing things." - Russell Howard',
             "Big Game Hunter": '"Some thought they were.. the spirits of dead medicine men come back to spread madness. For others, they were the devil, sent to stop the white men from owning the world." - Samuel "the Muslim""',
+            "Spared No Expense": '"Engineering is the art of directing the great sources of power in nature for the use and convenience of man." - Thomas Tredgold',
+            "First Paycheck": '"It was not really a question of price. It was a question of success." - J.P. Morgan',
         }.get(achievement_type, "")
 
     def check_achievements(self, achievement_type: str = None) -> None:
@@ -254,27 +258,27 @@ class achievement_manager_template:
             if constants.money_tracker.get() >= 10000:
                 self.achieve("Entrepreneur")
 
-        if achievement_type == "Heart of Darkness":
+        elif achievement_type == "Heart of Darkness":
             if status.strategic_map_grid:
                 for current_cell in status.strategic_map_grid.get_flat_cell_list():
                     if not current_cell.visible:
                         return
                 self.achieve("Heart of Darkness")
 
-        if achievement_type == "It Belongs in a Museum":
+        elif achievement_type == "It Belongs in a Museum":
             if len(constants.completed_lore_missions) >= 3:
                 self.achieve("It Belongs in a Museum")
 
             if len(constants.completed_lore_missions) >= 1:
                 self.achieve("Archaeologist")
 
-        if achievement_type == "Minimum Wage":
+        elif achievement_type == "Minimum Wage":
             if (
                 status.worker_types["African"].upkeep <= 0.5
                 and status.worker_types["African"].number >= 10
             ):
                 self.achieve("Minimum Wage")
 
-        if achievement_type == "Return on Investment":
+        elif achievement_type == "Return on Investment":
             if constants.money_tracker.get() >= 500:
                 self.achieve("Return on Investment")

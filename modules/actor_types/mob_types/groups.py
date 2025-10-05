@@ -48,8 +48,8 @@ class group(pmob):
             )
         self.group_type = "none"
         super().__init__(from_save, input_dict)
-        self.worker.join_group()
-        self.officer.join_group()
+        self.worker.join_group(self)
+        self.officer.join_group(self)
         self.is_group = True
         for current_mob in [
             self.worker,
@@ -76,6 +76,39 @@ class group(pmob):
             self.set_movement_points(
                 actor_utility.generate_group_movement_points(self.worker, self.officer)
             )
+
+    def set_movement_points(self, new_value):
+        """
+        Description:
+            Sets this mob's movement points to the inputted amount. Ensures that sub-mob movement points are also updated
+        Input:
+            None
+        Output:
+            None
+        """
+        super().set_movement_points(new_value)
+        missing_movement = self.max_movement_points - new_value
+        # Workaround to allow unit component movement to be reduced when group movement is reduced while not setting to max when group is created
+        if missing_movement > 0:
+            self.officer.set_movement_points(
+                max(0, self.officer.max_movement_points - missing_movement)
+            )
+            self.worker.set_movement_points(
+                max(0, self.worker.max_movement_points - missing_movement)
+            )
+
+    def temp_disable_movement(self):
+        """
+        Description:
+            Sets this unit's movement to 0 for the next turn, preventing it from taking its usual actions
+        Input:
+            None
+        Output:
+            None
+        """
+        super().temp_disable_movement()
+        self.officer.temp_disable_movement()
+        self.worker.temp_disable_movement()
 
     def replace_worker(self, new_worker_type):
         """
@@ -106,7 +139,7 @@ class group(pmob):
         self.worker.fire(wander=False)
         self.worker = new_worker
         self.worker.update_image_bundle()
-        self.worker.join_group()
+        self.worker.join_group(self)
         self.update_image_bundle()
         if previous_selected:
             previous_selected.select()
@@ -184,49 +217,16 @@ class group(pmob):
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle
-            destination_message = (
-                " from the "
-                + self.name
-                + " aboard the "
-                + zoom_destination.name
-                + " at ("
-                + str(self.x)
-                + ", "
-                + str(self.y)
-                + ") "
-            )
+            destination_message = f" from the {self.name} aboard the {zoom_destination.name} at ({self.x}, {self.y}) "
         elif self.in_building:
             zoom_destination = self.building.cell.get_intact_building("resource")
-            destination_message = (
-                " from the "
-                + self.name
-                + " working in the "
-                + zoom_destination.name
-                + " at ("
-                + str(self.x)
-                + ", "
-                + str(self.y)
-                + ") "
-            )
+            destination_message = f" from the {self.name} working in the {zoom_destination.name} at ({self.x}, {self.y}) "
         else:
             zoom_destination = self
-            destination_message = (
-                " from the "
-                + self.name
-                + " at ("
-                + str(self.x)
-                + ", "
-                + str(self.y)
-                + ") "
-            )
+            destination_message = f" from the {self.name} at ({self.x}, {self.y}) "
 
         if target == "officer":
-            text = (
-                "The "
-                + self.officer.name
-                + destination_message
-                + "has died from attrition. /n /n "
-            )
+            text = f"The {self.officer.name}{destination_message}has died from attrition. /n /n "
             if self.officer.automatically_replace:
                 text += (
                     self.officer.generate_attrition_replacement_text()
@@ -253,12 +253,7 @@ class group(pmob):
             )
 
         elif target == "worker":
-            text = (
-                "The "
-                + self.worker.name
-                + destination_message
-                + "have died from attrition. /n /n "
-            )
+            text = f"The {self.worker.name}{destination_message}have died from attrition. /n /n "
             if self.worker.automatically_replace:
                 text += (
                     self.worker.generate_attrition_replacement_text()
@@ -373,9 +368,9 @@ class group(pmob):
         """
         super().go_to_grid(new_grid, new_coordinates)
         self.officer.go_to_grid(new_grid, new_coordinates)
-        self.officer.join_group()
+        self.officer.join_group(self)
         self.worker.go_to_grid(new_grid, new_coordinates)
-        self.worker.join_group()
+        self.worker.join_group(self)
 
     def disband(self):
         """

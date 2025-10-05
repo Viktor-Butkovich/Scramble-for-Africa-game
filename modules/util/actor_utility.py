@@ -324,7 +324,7 @@ def update_descriptions(target="all"):
 
         elif current_target == "trading_post":
             text_list.append(
-                "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
+                "A trading post increases the likelihood that the natives of the local village will be willing to trade, reduces the risk of hostile interactions when trading, and expands the tile's warehouse capacity."
             )
 
         elif current_target == "mission":
@@ -494,7 +494,7 @@ def calibrate_actor_info_display(info_display, new_actor, override_exempt=False)
         None
     """
     if new_actor == "none":
-        print(0 / 0)
+        raise Exception("Tried to calibrate actor info display to 'none'")
     if info_display == status.tile_info_display:
         for current_same_tile_icon in status.same_tile_icon_list:
             current_same_tile_icon.reset()

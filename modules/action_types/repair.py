@@ -95,7 +95,12 @@ class repair(action.action):
                 + str(self.get_price())
                 + " money"
             )
-            if self.building_type in ["port", "train_station", "resource"]:
+            if self.building_type in [
+                "port",
+                "train_station",
+                "resource",
+                "trading_post",
+            ]:
                 message.append("If successful, also repairs this tile's warehouses")
             message.append("Costs all remaining movement points, at least 1")
         return message

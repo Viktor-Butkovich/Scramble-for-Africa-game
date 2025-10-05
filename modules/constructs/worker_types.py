@@ -7,6 +7,8 @@ import modules.constants.constants as constants
 import modules.util.market_utility as market_utility
 import modules.util.text_utility as text_utility
 import modules.util.actor_utility as actor_utility
+import modules.util.action_utility as action_utility
+import modules.util.scaling as scaling
 
 
 class worker_type:
@@ -94,7 +96,7 @@ class worker_type:
             None
         """
         self.recruitment_cost = new_number
-        constants.recruitment_costs[self.adjective + " workers"] = self.recruitment_cost
+        constants.recruitment_costs[f"{self.adjective} workers"] = self.recruitment_cost
 
     def reset(self) -> None:
         """
@@ -130,7 +132,7 @@ class worker_type:
             dictionary: Returns dictionary with standard entries for this worker type
         """
         input_dict = {
-            "image": "mobs/" + self.name + "/default.png",
+            "image": f"mobs/{self.name}/default.png",
             "name": self.name,
             "init_type": self.init_type,
             "worker_type": self.adjective,
@@ -138,10 +140,10 @@ class worker_type:
         if (
             self.adjective == "Asian" and random.randrange(1, 7) >= 4
         ):  # Half chance each for East/South Asian variants
-            input_dict["image"] = "mobs/" + self.name + " 1/default.png"
+            input_dict["image"] = f"mobs/{self.name} 1/default.png"
         return input_dict
 
-    def on_recruit(self, purchased=True) -> None:
+    def on_recruit(self, purchased=True, replaced=False) -> None:
         """
         Description:
             Makes any updates required when worker first recruited (not on load)
@@ -150,11 +152,7 @@ class worker_type:
         Output:
             None
         """
-        if not self.adjective in ["religious", "slave"]:
-            market_utility.attempt_worker_upkeep_change("increase", self.adjective)
-            if self.adjective == "African":
-                constants.achievement_manager.check_achievements("Minimum Wage")
-        elif self.adjective == "slave":
+        if self.adjective == "slave":
             if purchased:  # as opposed to captured
                 if not constants.effect_manager.effect_active("no_slave_trade_penalty"):
                     public_opinion_penalty = 5 + random.randrange(-3, 4)  # 2-8
@@ -163,11 +161,7 @@ class worker_type:
                     resulting_public_opinion = constants.public_opinion_tracker.get()
                     if not resulting_public_opinion == current_public_opinion:
                         text_utility.print_to_screen(
-                            "Participating in the slave trade has decreased your public opinion from "
-                            + str(current_public_opinion)
-                            + " to "
-                            + str(resulting_public_opinion)
-                            + "."
+                            f"Participating in the slave trade has decreased your public opinion from {current_public_opinion} to {resulting_public_opinion}."
                         )
                 else:
                     text_utility.print_to_screen(
@@ -178,6 +172,25 @@ class worker_type:
                 actor_utility.set_slave_traders_strength(
                     constants.slave_traders_strength + 1
                 )
+                if not replaced:  # Only show for first-time manual purchase
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": "If this purchased slave unit suffers attrition, it will be automatically be replaced by a new slave unit from the slave market, incurring another public opinion penalty and purchase cost. /n /nTo switch this behavior, click the automatic replacement toggle for this unit. /n /n",
+                            "notification_type": "action",
+                            "attached_interface_elements": [
+                                action_utility.generate_free_image_input_dict(
+                                    "buttons/disable_automatic_replacement_officer_button.png",
+                                    120,
+                                    override_input_dict={
+                                        "member_config": {
+                                            "order_x_offset": scaling.scale_width(-75),
+                                        }
+                                    },
+                                )
+                            ],
+                        }
+                    )
+
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4)  # 2-8
                 current_public_opinion = constants.public_opinion_tracker.get()
@@ -185,13 +198,33 @@ class worker_type:
                 resulting_public_opinion = constants.public_opinion_tracker.get()
                 if not resulting_public_opinion == current_public_opinion:
                     text_utility.print_to_screen(
-                        "Your use of captured slaves has decreased your public opinion from "
-                        + str(current_public_opinion)
-                        + " to "
-                        + str(resulting_public_opinion)
-                        + "."
+                        f"Your use of captured slaves has decreased your public opinion from {current_public_opinion} to {resulting_public_opinion}."
                     )
                 constants.evil_tracker.change(5)
+                if (
+                    constants.slave_traders_strength > 0 and not replaced
+                ):  # Only show for first-time manual purchase
+                    constants.notification_manager.display_notification(
+                        {
+                            "message": "If this captured slave unit suffers attrition, it will not be automatically be replaced, as it did not originate from the slave market. /n /nTo switch this behavior, click the automatic replacement toggle for this unit. /n /n",
+                            "notification_type": "action",
+                            "attached_interface_elements": [
+                                action_utility.generate_free_image_input_dict(
+                                    "buttons/enable_automatic_replacement_officer_button.png",
+                                    120,
+                                    override_input_dict={
+                                        "member_config": {
+                                            "order_x_offset": scaling.scale_width(-75),
+                                        }
+                                    },
+                                )
+                            ],
+                        }
+                    )
+        elif self.adjective != "religious":
+            market_utility.attempt_worker_upkeep_change("increase", self.adjective)
+            if self.adjective == "African":
+                constants.achievement_manager.check_achievements("Minimum Wage")
 
     def on_fire(self, wander=False):
         """
@@ -215,11 +248,7 @@ class worker_type:
             resulting_public_opinion = constants.public_opinion_tracker.get()
             if not resulting_public_opinion == current_public_opinion:
                 text_utility.print_to_screen(
-                    "Freeing slaves has increased your public opinion from "
-                    + str(current_public_opinion)
-                    + " to "
-                    + str(resulting_public_opinion)
-                    + "."
+                    f"Freeing slaves has increased your public opinion from {current_public_opinion} to {resulting_public_opinion}."
                 )
 
             if wander:
@@ -243,11 +272,5 @@ class worker_type:
             resulting_public_opinion = constants.public_opinion
             if not current_public_opinion == resulting_public_opinion:
                 text_utility.print_to_screen(
-                    "Firing "
-                    + self.name
-                    + " reflected poorly on your company and reduced your public opinion from "
-                    + str(current_public_opinion)
-                    + " to "
-                    + str(resulting_public_opinion)
-                    + "."
+                    f"Firing {self.name} reflected poorly on your company and reduced your public opinion from {current_public_opinion} to {resulting_public_opinion}."
                 )

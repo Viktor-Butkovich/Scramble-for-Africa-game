@@ -420,6 +420,8 @@ class cell:
             warehouses_built -= 1
         if self.has_building("resource"):
             warehouses_built -= 1
+        if self.has_building("trading_post"):
+            warehouses_built -= 1
 
         return constants.building_prices["warehouses"] * (
             2**warehouses_built
@@ -692,6 +694,20 @@ class cell:
         """
         for current_mob in self.contained_mobs:
             if current_mob.is_npmob:
+                return True
+        return False
+
+    def has_visible_npmob(self):
+        """
+        Description:
+            Returns whether this cell contains a visible npmob
+        Input:
+            None
+        Output:
+            boolean: Returns whether this cell contains a visible npmob
+        """
+        for current_mob in self.contained_mobs:
+            if current_mob.is_npmob and current_mob.visible:
                 return True
         return False
 

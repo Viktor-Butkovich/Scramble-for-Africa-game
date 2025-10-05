@@ -47,6 +47,9 @@ class actor:
         self.infinite_inventory_capacity = False
         self.inventory_capacity = 0
         self.inventory = input_dict.get("inventory", {})
+        self.sorted_inventory = sorted(
+            self.inventory.items(), key=lambda x: x[1]
+        )  # Sorted version of inventory by amount held, ascending
 
     def to_save_dict(self):
         """
@@ -200,8 +203,8 @@ class actor:
             string: Returns name of the item held at the inputted index of the inventory, or None if no inventory held at that index
         """
         current_index: int = 0
-        for item_type in self.inventory:
-            current_index += self.inventory.get(item_type, 0)
+        for item_type, amount in self.sorted_inventory:
+            current_index += amount
             # If holding 1 coffee, increment index by 1, now to current_index=1
             if (
                 current_index > index
@@ -234,6 +237,9 @@ class actor:
         self.inventory[commodity] = new_value
         if new_value <= 0:
             del self.inventory[commodity]
+        self.sorted_inventory = sorted(
+            self.inventory.items(), key=lambda x: x[1]
+        )  # Sorted version of inventory by amount held, ascending
 
     def get_held_commodities(self, ignore_consumer_goods=False):
         """

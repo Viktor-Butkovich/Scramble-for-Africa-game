@@ -226,6 +226,18 @@ def to_main_menu(override=False):
     )
     actor_utility.calibrate_actor_info_display(status.tile_info_display, None)
     minister_utility.calibrate_minister_info_display(None)
+    if constants.effect_manager.effect_active("track_dangling_interface"):
+        interface_to_remove = (
+            status.actor_list
+            + status.grid_list
+            + status.village_list
+            + status.minister_list
+            + status.lore_mission_list
+            + status.dice_list
+        )
+        print(
+            f"Tracking {len(interface_to_remove)} interface elements before exiting to main menu."
+        )
     for current_actor in status.actor_list:
         current_actor.remove_complete()
     for current_grid in status.grid_list:
@@ -253,6 +265,23 @@ def to_main_menu(override=False):
         status.lore_types_effects_dict[current_completed_lore_type].remove()
     constants.completed_lore_mission_types = []
     constants.completed_lore_missions = {}
+    if constants.effect_manager.effect_active("track_dangling_interface"):
+        remaining_interface = (
+            status.actor_list
+            + status.grid_list
+            + status.village_list
+            + status.minister_list
+            + status.lore_mission_list
+            + status.dice_list
+        )
+        print(
+            f"Found {len(remaining_interface)} dangling interface elements after exiting to main menu."
+        )
+        if remaining_interface:
+            raise Exception(
+                f"Dangling interface elements after exiting to main menu: {remaining_interface}"
+            )
+
     set_game_mode("main_menu")
 
 

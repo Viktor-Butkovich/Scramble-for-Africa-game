@@ -39,7 +39,14 @@ def calibrate_minister_info_display(new_minister):
         None
     """
     if new_minister == "none":
-        print(0 / 0)
+        raise Exception("Tried to calibrate minister info display to 'none'")
+    if (
+        status.current_just_appointed_minister
+        and new_minister != status.displayed_minister
+        and new_minister != status.current_just_appointed_minister
+    ):  # Remove current just appointed minister if deselected or another minister selected
+        status.current_just_appointed_minister = None
+        update_available_minister_display()
     status.displayed_minister = new_minister
     target = "none"
     if status.displayed_minister:
@@ -59,7 +66,7 @@ def calibrate_trial_info_display(info_display, new_minister):
         None
     """
     if new_minister == "none":
-        print(0 / 0)
+        raise Exception("Tried to calibrate trial info display to 'none'")
     if type(info_display) == list:
         return
     target = "none"
@@ -103,8 +110,27 @@ def update_available_minister_display():
         None
     """
     available_minister_portrait_list = status.available_minister_portrait_list
+    constants.available_minister_left_index = max(
+        -2,
+        min(
+            constants.available_minister_left_index,
+            len(status.available_minister_list)
+            - 3
+            + (1 if status.current_just_appointed_minister else 0),
+        ),
+    )  # Bound center to be on an available minister, if any (treating just-appointed minister as part of the list)
     available_minister_left_index = constants.available_minister_left_index
-    available_minister_list = status.available_minister_list
+    if status.current_just_appointed_minister:
+        available_minister_list = status.available_minister_list.copy()
+        insert_index = available_minister_left_index + 2
+        if insert_index < len(available_minister_list):
+            available_minister_list.insert(
+                insert_index, status.current_just_appointed_minister
+            )
+        else:
+            available_minister_list.append(status.current_just_appointed_minister)
+    else:
+        available_minister_list = status.available_minister_list
     for current_index in range(len(available_minister_portrait_list)):
         minister_index = available_minister_left_index + current_index
         if minister_index < len(available_minister_list) and minister_index >= 0:

@@ -2,6 +2,7 @@
 
 import pygame
 import random
+from typing import List
 from ..constructs import images, villages
 from ..util import utility, actor_utility, main_loop_utility, text_utility
 from .actors import actor
@@ -62,12 +63,18 @@ class tile(actor):  # to do: make terrain tiles a subclass
             )  # terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
             if self.cell.grid.from_save:
                 self.inventory = self.cell.save_dict["inventory"]
+                self.sorted_inventory = sorted(
+                    self.inventory.items(), key=lambda x: x[1]
+                )  # Sorted version of inventory by amount held, ascending
 
         elif self.grid.grid_type in constants.abstract_grid_type_list:
             self.cell.tile = self
             self.terrain = "none"
             if self.cell.grid.from_save:
                 self.inventory = self.cell.save_dict["inventory"]
+                self.sorted_inventory = sorted(
+                    self.inventory.items(), key=lambda x: x[1]
+                )  # Sorted version of inventory by amount held, ascending
             if (
                 self.grid.grid_type == "europe_grid"
             ):  # Europe should be able to hold commodities despite not being terrain
@@ -470,13 +477,7 @@ class tile(actor):  # to do: make terrain tiles a subclass
         if self.show_terrain:  # if is terrain, show tooltip
             tooltip_message = []
             coordinates = self.get_main_grid_coordinates()
-            tooltip_message.append(
-                "Coordinates: ("
-                + str(coordinates[0])
-                + ", "
-                + str(coordinates[1])
-                + ")"
-            )
+            tooltip_message.append(f"Coordinates: ({coordinates[0]}, {coordinates[1]})")
             if self.cell.visible:
                 if self.cell.terrain != "none":
                     if self.cell.terrain == "water":
@@ -517,11 +518,7 @@ class tile(actor):  # to do: make terrain tiles a subclass
                     not self.cell.resource == "none"
                 ):  # if not village but other resource present, show resource
                     tooltip_message.append(
-                        "This tile has "
-                        + utility.generate_article(self.cell.resource)
-                        + " "
-                        + self.cell.resource
-                        + " resource"
+                        f"This tile has {utility.generate_article(self.cell.resource)} {self.cell.resource} resource"
                     )
                 for terrain_feature in self.cell.terrain_features:
                     if self.cell.terrain_features[terrain_feature].get("visible", True):
@@ -535,13 +532,41 @@ class tile(actor):  # to do: make terrain tiles a subclass
                     coordinates[0], coordinates[1]
                 ):
                     tooltip_message.append(
-                        "There are rumors that the "
-                        + status.current_lore_mission.name
-                        + " may be found here"
+                        f"There are rumors that the {status.current_lore_mission.name} may be found here"
                     )
+            tooltip_message += self.generate_incoming_steamships_tooltip()
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])
+
+    def generate_incoming_steamships_tooltip(self) -> List[str]:
+        """
+        Description:
+            Generates and returns a description of the incoming steamships to this tile at the end of the turn, if any
+        Input:
+            None
+        Output:
+            string list: Description list
+        """
+        equivalent_tile = self.get_equivalent_tile()
+        num_incoming_vehicles = len(
+            [
+                current_pmob
+                for current_pmob in status.pmob_list
+                if current_pmob.is_vehicle
+                and current_pmob.end_turn_destination != "none"
+                and (
+                    current_pmob.end_turn_destination == self
+                    or current_pmob.end_turn_destination == equivalent_tile
+                )
+            ]
+        )  # Count number of vehicle arriving to this tile
+        if num_incoming_vehicles > 0:
+            return [
+                f"There {utility.conjugate("be", num_incoming_vehicles)} {num_incoming_vehicles} steamship{utility.generate_plural(num_incoming_vehicles)} arriving here at the end of the turn"
+            ]
+        else:
+            return []
 
     def set_coordinates(self, x, y):
         """
@@ -653,15 +678,16 @@ class abstract_tile(tile):
         Output:
             None
         """
+        tooltip_message = []
         if self.cell.grid.grid_type == "slave_traders_grid":
-            self.set_tooltip(
-                [
-                    self.name,
-                    "Slave traders strength: " + str(constants.slave_traders_strength),
-                ]
-            )
+            tooltip_message += [
+                self.name,
+                "Slave traders strength: " + str(constants.slave_traders_strength),
+            ]
         else:
-            self.set_tooltip([self.name])
+            tooltip_message.append(self.name)
+        tooltip_message += self.generate_incoming_steamships_tooltip()
+        self.set_tooltip(tooltip_message)
 
     def can_show_tooltip(self):
         """

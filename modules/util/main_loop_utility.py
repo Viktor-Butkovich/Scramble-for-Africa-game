@@ -509,8 +509,16 @@ def manage_lmb_down(clicked_button):
                                     and destination_x
                                     < status.strategic_map_grid.coordinate_width
                                 ):  # or is harbor
-                                    text_utility.print_to_screen(
-                                        "You can only send ships to coastal waters and coastal ports."
+                                    constants.notification_manager.display_notification(
+                                        {
+                                            "message": "You can only send steamships to coastal waters or coastal ports. /n /nThe movement order was not issued. /n /n"
+                                        }
+                                    )
+                                    actor_utility.calibrate_actor_info_display(
+                                        status.tile_info_display,
+                                        status.displayed_mob.images[
+                                            0
+                                        ].current_cell.tile,
                                     )
                                     stopping = True
                             if not stopping:
@@ -528,11 +536,21 @@ def manage_lmb_down(clicked_button):
                                     0
                                 ].current_cell.tile.select()
                         else:  # cannot move to same continent
+                            if status.displayed_mob.grid == status.strategic_map_grid:
+                                constants.notification_manager.display_notification(
+                                    {
+                                        "message": "This movement order can only send steamships between theatres (e.g. Africa to Europe). To move within a theatre, use standard W/A/S/D movement. /n /nThe movement order was not issued. /n /n"
+                                    }
+                                )
+                            else:
+                                constants.notification_manager.display_notification(
+                                    {
+                                        "message": "This movement order can only send steamships between theatres (e.g. Europe to Africa). /n /nThe movement order was not issued. /n /n"
+                                    }
+                                )
                             actor_utility.calibrate_actor_info_display(
-                                status.mob_info_display, None
-                            )
-                            text_utility.print_to_screen(
-                                "You can only send ships to other theatres."
+                                status.tile_info_display,
+                                status.displayed_mob.images[0].current_cell.tile,
                             )
             flags.choosing_destination = False
 

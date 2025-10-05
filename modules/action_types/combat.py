@@ -507,8 +507,13 @@ class combat(action.action):
             if self.current_unit.is_battalion or self.current_unit.is_safari:
                 audio.append("effects/bolt_action_1")
         elif subject == "roll_started":
-            if self.current_unit.is_battalion or self.current_unit.is_safari:
-                audio.append("effects/gunfire")
+            if self.current_unit.equipment.get("Maxim gun", False):
+                audio.append("effects/maxim_gun")
+            audio.append("effects/gunfire")
+            if random.randrange(1, 7) >= 4:
+                audio.append("effects/battle_1")
+            else:
+                audio.append("effects/battle_2")
         return audio
 
     def middle(self, combat_info_dict=None):
@@ -758,10 +763,8 @@ class combat(action.action):
                         self.public_relations_change
                     )
                     constants.achievement_manager.achieve("Big Game Hunter")
-                if (
-                    combat_cell.get_best_combatant("npmob") != "none"
-                ):  # Attacker retreats in draw or if more defenders remaining
-                    self.current_unit.retreat()
+                if combat_cell.has_visible_npmob():
+                    self.current_unit.retreat()  # Attacker retreats in draw or if more defenders remaining
                 elif (
                     self.current_unit.movement_points
                     < self.current_unit.get_movement_cost(0, 0, True)
@@ -777,11 +780,16 @@ class combat(action.action):
 
         if not self.defending:
             self.current_unit.set_movement_points(0)
+            origin_cell = self.current_unit.grids[0].find_cell(
+                self.current_unit.x - 1 * self.current_unit.last_move_direction[0],
+                self.current_unit.y - 1 * self.current_unit.last_move_direction[1],
+            )
             if (
                 combat_cell.terrain == "water"
                 and combat_cell.y > 0
                 and not self.current_unit.can_swim_river
-            ):  # if attacked river and can't swim, become disorganized after combat
+                and not origin_cell.has_walking_connection(combat_cell)
+            ):  # if attacked river without bridge/ferry and can't swim, become disorganized after combat
                 self.current_unit.set_disorganized(True)
 
         super().complete()

@@ -61,7 +61,8 @@ def start_player_turn(first_turn=False):
         status.previous_production_report,
         status.previous_sales_report,
         status.previous_financial_report,
-    ) = (None, None, None)
+        status.previous_labor_market_report,
+    ) = (None, None, None, None)
     text_utility.print_to_screen("")
     text_utility.print_to_screen("Turn " + str(constants.turn + 1))
     if not first_turn:
@@ -79,13 +80,13 @@ def start_player_turn(first_turn=False):
         manage_upkeep()
         manage_loans()
         manage_slave_traders()
-        manage_worker_price_changes()
         manage_worker_migration()
         manage_commodity_sales()
-        manage_ministers()
         manage_subsidies()  # subsidies given after public opinion changes
+        manage_worker_price_changes()
         manage_financial_report()
         manage_lore()
+        manage_ministers()
         actor_utility.reset_action_prices()
         game_end_check()
 
@@ -154,6 +155,13 @@ def manage_attrition():
     for current_building in status.building_list:
         if current_building.building_type == "resource":
             current_building.manage_health_attrition()
+    for current_pmob in status.pmob_list:
+        if (
+            current_pmob.is_worker
+            and status.worker_types[current_pmob.worker_type]
+            == status.worker_types["slave"]
+        ):
+            current_pmob.manage_runaway_slaves()
 
     for current_pmob in status.pmob_list:
         current_pmob.manage_inventory_attrition()
@@ -393,39 +401,27 @@ def manage_worker_price_changes():
     Output:
         None
     """
+    initial_state = market_utility.gather_worker_type_info_dicts()
     for worker_type in status.worker_types:
+        current_price = status.worker_types[worker_type].upkeep
         if status.worker_types[worker_type].upkeep_variance:
             worker_roll = random.randrange(1, 7)
             if worker_roll >= 5:
-                current_price = status.worker_types[worker_type].upkeep
                 changed_price = round(
                     current_price - constants.worker_upkeep_increment, 2
                 )
                 if changed_price >= status.worker_types[worker_type].min_upkeep:
                     status.worker_types[worker_type].upkeep = changed_price
                     text_utility.print_to_screen(
-                        "An influx of "
-                        + worker_type
-                        + " workers has decreased their upkeep from "
-                        + str(current_price)
-                        + " to "
-                        + str(changed_price)
-                        + "."
+                        f"An influx of {worker_type} workers has decreased their upkeep from {current_price} to {changed_price}."
                     )
             elif worker_roll == 1:
-                current_price = status.worker_types[worker_type].upkeep
                 changed_price = round(
                     current_price + constants.worker_upkeep_increment, 2
                 )
                 status.worker_types[worker_type].upkeep = changed_price
                 text_utility.print_to_screen(
-                    "A shortage of "
-                    + worker_type
-                    + " workers has increased their upkeep from "
-                    + str(current_price)
-                    + " to "
-                    + str(changed_price)
-                    + "."
+                    f"A shortage of {worker_type} workers has increased their upkeep from {current_price} to {changed_price}."
                 )
 
     if constants.slave_traders_strength > 0:
@@ -438,11 +434,7 @@ def manage_worker_price_changes():
             if changed_price >= status.worker_types["slave"].min_recruitment_cost:
                 status.worker_types["slave"].set_recruitment_cost(changed_price)
                 text_utility.print_to_screen(
-                    "An influx of captured slaves has decreased the purchase cost of slave workers from "
-                    + str(current_price)
-                    + " to "
-                    + str(changed_price)
-                    + "."
+                    f"An influx of captured slaves has decreased the purchase cost of slave workers from {current_price} to {changed_price}."
                 )
         elif worker_roll == 1:
             current_price = status.worker_types["slave"].recruitment_cost
@@ -451,12 +443,72 @@ def manage_worker_price_changes():
             )
             status.worker_types["slave"].set_recruitment_cost(changed_price)
             text_utility.print_to_screen(
-                "A shortage of captured slaves has increased the purchase cost of slave workers from "
-                + str(current_price)
-                + " to "
-                + str(changed_price)
-                + "."
+                f"A shortage of captured slaves has increased the purchase cost of slave workers from {current_price} to {changed_price}."
             )
+    final_state = market_utility.gather_worker_type_info_dicts()
+    manage_labor_market_report(initial_state, final_state)
+
+
+def manage_labor_market_report(initial_state, final_state) -> None:
+    """
+    Description:
+        Displays a labor market report at the end of the turn, showing changes in worker upkeep and total upkeep
+    Input:
+        dict initial_state: Dictionary of worker type information yielded by gather_worker_type_info_dicts before worker upkeep changes
+        dict final_state: Dictionary of worker type information yielded by gather_worker_type_info_dicts after worker upkeep changes
+    Output:
+        None
+    """
+    difference = utility.subtract_nested_dicts(final_state, initial_state)
+    report_lines = []
+    total_upkeep_change = difference.pop("total_upkeep")
+    difference.pop("total_number")
+
+    report_lines = ["Labor market report:"]
+    for worker_type, changes in difference.items():
+        upkeep_change = changes["upkeep"]
+        worker_type_total_upkeep_change = changes["total_upkeep"]
+        number = final_state[worker_type]["number"]
+        if upkeep_change != 0:
+            if number > 0:
+                if worker_type_total_upkeep_change > 0:
+                    report_lines.append(
+                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} increased from {final_state[worker_type]['upkeep']} to {final_state[worker_type]['upkeep'] + upkeep_change}, "
+                        f"increasing expenses by {abs(worker_type_total_upkeep_change):,.2f}."
+                    )
+                elif worker_type_total_upkeep_change < 0:
+                    report_lines.append(
+                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} decreased from {final_state[worker_type]['upkeep']} to {final_state[worker_type]['upkeep'] + upkeep_change}, "
+                        f"decreasing expenses by {abs(worker_type_total_upkeep_change):,.2f}."
+                    )
+            else:
+                if worker_type_total_upkeep_change > 0:
+                    report_lines.append(
+                        f"The upkeep of {worker_type} workers increased by {upkeep_change:.2f}."
+                    )
+                elif worker_type_total_upkeep_change < 0:
+                    report_lines.append(
+                        f"The upkeep of {worker_type} workers decreased by {upkeep_change:.2f}."
+                    )
+
+    if len(report_lines) > 1:
+        summary_line = f"Previous upkeep: {abs(constants.money_tracker.transaction_history['worker_upkeep']):.2f} /n"
+        summary_line += f"Total change: {total_upkeep_change:+.2f} /n"
+        summary_line += f"Projected upkeep (next turn): {abs(constants.money_tracker.transaction_history['worker_upkeep']) + total_upkeep_change:.2f}"
+    else:
+        report_lines.append(
+            "No notable changes to the labor market occurred this turn."
+        )
+        summary_line = f"Total worker upkeep: {abs(constants.money_tracker.transaction_history['worker_upkeep']):.2f}"
+
+    report_lines.append(summary_line)
+    labor_market_report_text = " /n /n".join(report_lines) + " /n /n"
+    constants.notification_manager.display_notification(
+        {
+            "message": labor_market_report_text,
+        }
+    )
+    status.previous_labor_market_report = labor_market_report_text
 
 
 def manage_worker_migration():

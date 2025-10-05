@@ -341,8 +341,9 @@ def equipment_types_config():
                 "max_movement_points": -1,
             },
             "description": [
-                "A Maxim gun provides a positive modifier (half chance of +1) to all combat rolls, but decreases movement points by 1",
-                "Can only be equipped by battalions",
+                "A marvel of modern engineering - 600 rounds per minute to shatter the bravest men.",
+                "Provides a positive modifier (half chance of +1) to all combat rolls, but decreases movement points by 1.",
+                "Can only be equipped by battalions.",
             ],
         }
     )
@@ -816,20 +817,20 @@ def lore():
     status.lore_types_effects_dict["botany"] = constants.effect_manager.create_effect(
         "botany_completion_effect", "health_attrition_plus_modifier"
     )
-    status.lore_types_effects_dict[
-        "archaeology"
-    ] = constants.effect_manager.create_effect(
-        "archaeology_completion_effect", "combat_plus_modifier"
+    status.lore_types_effects_dict["archaeology"] = (
+        constants.effect_manager.create_effect(
+            "archaeology_completion_effect", "combat_plus_modifier"
+        )
     )
-    status.lore_types_effects_dict[
-        "anthropology"
-    ] = constants.effect_manager.create_effect(
-        "anthropology_completion_effect", "conversion_plus_modifier"
+    status.lore_types_effects_dict["anthropology"] = (
+        constants.effect_manager.create_effect(
+            "anthropology_completion_effect", "conversion_plus_modifier"
+        )
     )
-    status.lore_types_effects_dict[
-        "paleontology"
-    ] = constants.effect_manager.create_effect(
-        "paleontology_completion_effect", "public_relations_campaign_modifier"
+    status.lore_types_effects_dict["paleontology"] = (
+        constants.effect_manager.create_effect(
+            "paleontology_completion_effect", "public_relations_campaign_modifier"
+        )
     )
     status.lore_types_effects_dict["theology"] = constants.effect_manager.create_effect(
         "theology_completion_effect", "religious_campaign_plus_modifier"
@@ -1445,6 +1446,8 @@ def ministers_screen():
                 "init_type": "minister portrait image",
                 "color": "gray",
                 "minister_type": "none",
+                "enable_shader": i
+                == 2,  # Only enable shader for middle portrait (when minister just appointed)
             }
         )
 
@@ -1485,7 +1488,7 @@ def trial_screen():
     status.defense_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (defense_x, defense_y),
+                "coordinates": scaling.scale_coordinates(defense_x, defense_y),
                 "width": 10,
                 "height": 10,
                 "modes": ["trial"],
@@ -1560,7 +1563,7 @@ def trial_screen():
     status.prosecution_info_display = (
         constants.actor_creation_manager.create_interface_element(
             {
-                "coordinates": (prosecution_x, prosecution_y),
+                "coordinates": scaling.scale_coordinates(prosecution_x, prosecution_y),
                 "width": 10,
                 "height": 10,
                 "modes": ["trial"],

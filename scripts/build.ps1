@@ -13,6 +13,7 @@ cd SFA_exe
 Move-Item -Path dist/Scramble_for_Africa.exe
 rm Scramble_for_Africa.spec -force
 rmdir build -force -Recurse
+rmdir sound_editing -force -Recurse
 rm dist -force -Recurse
 rm modules -force -Recurse
 rm -force Scramble_for_Africa.py

@@ -100,7 +100,7 @@ class minister:
             self.voice_set = input_dict["voice_set"]
             self.voice_setup(from_save)
             if self.current_position != "none":
-                self.appoint(self.current_position)
+                self.appoint(self.current_position, from_save=True)
             else:
                 status.available_minister_list.append(self)
         else:
@@ -582,9 +582,9 @@ class minister:
         save_dict["apparent_skills"] = self.apparent_skills
         save_dict["apparent_skill_descriptions"] = self.apparent_skill_descriptions
         save_dict["apparent_corruption"] = self.apparent_corruption
-        save_dict[
-            "apparent_corruption_description"
-        ] = self.apparent_corruption_description
+        save_dict["apparent_corruption_description"] = (
+            self.apparent_corruption_description
+        )
         save_dict["interests"] = self.interests
         save_dict["corruption"] = self.corruption
         save_dict["undetected_corruption_events"] = self.undetected_corruption_events
@@ -776,12 +776,13 @@ class minister:
         self.stolen_already = False
         return stealing, results
 
-    def appoint(self, new_position):
+    def appoint(self, new_position: str, from_save: bool = False) -> None:
         """
         Description:
             Appoints this minister to a new office, putting it in control of relevant units. If the new position is 'none', removes the minister from their current office
         Input:
             string new_position: Office to appoint this minister to, like 'Minister of Trade'. If this equals 'none', fires this minister
+            bool from_save: Whether this appointment is occurring during game load
         Output:
             None
         """
@@ -796,18 +797,12 @@ class minister:
             status.available_minister_list = utility.remove_from_list(
                 status.available_minister_list, self
             )
-            if (
-                constants.available_minister_left_index
-                >= len(status.available_minister_list) - 3
-            ):
-                constants.available_minister_left_index = (
-                    len(status.available_minister_list) - 3
-                )  # move available minister display up because available minister was removed
         else:
-            status.available_minister_list.append(self)
+            status.current_just_appointed_minister = None
             constants.available_minister_left_index = (
-                len(status.available_minister_list) - 3
+                len(status.available_minister_list) - 2
             )  # move available minister display to newly fired minister
+            status.available_minister_list.append(self)
 
         for current_minister_type_image in status.minister_image_list:
             if current_minister_type_image.get_actor_type() == None:
@@ -821,6 +816,8 @@ class minister:
                 self
             )  # update minister label
 
+        if new_position != "none" and not from_save:
+            status.current_just_appointed_minister = self
         minister_utility.update_available_minister_display()
 
         if not status.minister_appointment_tutorial_completed:

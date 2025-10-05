@@ -81,7 +81,7 @@ class button(interface_elements.interface_element):
             False  # used to prioritize notification buttons in drawing and tooltips
         )
 
-    def calibrate(self, new_actor, override_exempt=False):
+    def calibrate(self, new_actor, override_exempt=False) -> None:
         """
         Description:
             Attaches this button to the inputted actor and updates this button's image to that of the actor. May also display a shader over this button, if its particular
@@ -93,13 +93,19 @@ class button(interface_elements.interface_element):
             None
         """
         super().calibrate(new_actor, override_exempt)
+        self.calibrate_shader()
+
+    def calibrate_shader(self) -> None:
+        """
+        Updates this button's shader based on its shader condition, if enabled
+        """
         if self.enable_shader:
             shader_image_id = "misc/shader.png"
             if self.enable_shader_condition():
                 if type(self.image.image_id) == str:
                     self.image.set_image([self.image.image_id, shader_image_id])
                 elif not shader_image_id in self.image.image_id:
-                    self.image.set_image(self.image.image_id + shader_image_id)
+                    self.image.set_image(self.image.image_id + [shader_image_id])
             else:
                 if not type(self.image.image_id) == str:
                     if shader_image_id in self.image.image_id:
@@ -110,7 +116,7 @@ class button(interface_elements.interface_element):
                             image_id = image_id[0]
                         self.image.set_image(image_id)
 
-    def enable_shader_condition(self):
+    def enable_shader_condition(self) -> bool:
         """
         Description:
             Calculates and returns whether this button should display its shader, given that it has shader enabled - open to be redefined by subclasses w/ specific criteria
@@ -804,7 +810,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == "show previous reports":
             self.set_tooltip(
                 [
-                    "Displays the previous turn's production, sales, and financial reports"
+                    "Displays the previous turn's production, sales, labor market, and financial reports"
                 ]
             )
 
@@ -815,7 +821,7 @@ class button(interface_elements.interface_element):
                 verb = "disable"
             self.set_tooltip(
                 [
-                    utility.capitalize(verb) + "s sentry mode for this unit",
+                    f"{utility.capitalize(verb)}s sentry mode for this unit",
                     "A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units",
                 ]
             )
@@ -833,20 +839,28 @@ class button(interface_elements.interface_element):
             if self.target_type == "unit":
                 target = "unit"
             else:
-                target = "unit's " + self.target_type  # worker or officer
-            self.set_tooltip(
-                [
-                    utility.capitalize(verb)
-                    + "s automatic replacement for this "
-                    + target,
-                    "A unit with automatic replacement will be automatically replaced if it dies from attrition",
-                    "This "
-                    + target
-                    + " is currently set to "
-                    + operator
-                    + "be automatically replaced",
-                ]
-            )
+                target = f"unit's {self.target_type}"  # worker or officer
+            tooltip_text = [
+                f"{utility.capitalize(verb)}s automatic replacement for this {target}",
+                "A unit with automatic replacement will be automatically replaced if it dies from attrition",
+                f"This {target} is currently set to {operator}be automatically replaced",
+            ]
+            if status.displayed_mob and (
+                (
+                    status.displayed_mob.is_worker
+                    and status.worker_types[status.displayed_mob.worker_type]
+                    == status.worker_types["slave"]
+                )
+                or (
+                    status.displayed_mob.is_group
+                    and status.worker_types[status.displayed_mob.worker.worker_type]
+                    == status.worker_types["slave"]
+                )
+            ):
+                tooltip_text.append(
+                    "Slave units can only be automatically replaced through the slave market, incurring another public opinion penalty and purchase cost"
+                )
+            self.set_tooltip(tooltip_text)
 
         elif self.button_type == "wake up all":
             self.set_tooltip(
@@ -2590,6 +2604,21 @@ class minister_portrait_image(button):
             return True
         return False
 
+    def enable_shader_condition(self) -> bool:
+        """
+        Description:
+            Calculates and returns whether this button should display its shader, given that it has shader enabled - current minister was just appointed
+        Input:
+            None
+        Output:
+            boolean: Returns whether this button should display its shader, given that it has shader enabled
+        """
+        return (
+            super().enable_shader_condition()
+            and self.current_minister != "none"
+            and self.current_minister == status.current_just_appointed_minister
+        )
+
     def draw(self):
         """
         Description:
@@ -2642,6 +2671,10 @@ class minister_portrait_image(button):
                 if (
                     self in status.available_minister_portrait_list
                 ):  # if available minister portrait
+                    if self.current_minister == status.current_just_appointed_minister:
+                        return
+                    else:
+                        status.current_just_appointed_minister = None
                     own_index = status.available_minister_list.index(
                         self.current_minister
                     )
@@ -2699,17 +2732,14 @@ class minister_portrait_image(button):
                 self.tooltip_text = ["There is no available candidate in this slot."]
             else:  # If appointed minister portrait
                 self.tooltip_text = [
-                    "No " + self.minister_type + " is currently appointed.",
-                    "Without a "
-                    + self.minister_type
-                    + ", "
-                    + self.type_keyword
-                    + "-oriented actions are not possible",
+                    f"No {self.minister_type} is currently appointed.",
+                    f"Without a {self.minister_type}, {self.type_keyword}-oriented actions are not possible.",
                 ]
             self.image.set_image(self.default_image_id)
         else:  # If minister icon on strategic mode, no need to show empty minister
             self.image.set_image("misc/empty.png")
         self.current_minister = new_minister
+        self.calibrate_shader()
 
     def update_tooltip(self):
         """
@@ -2880,7 +2910,7 @@ class cycle_available_ministers_button(button):
         ):  # left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
             if not constants.available_minister_left_index + 4 > len(
                 status.available_minister_list
-            ):
+            ) + (1 if status.current_just_appointed_minister else 0):
                 return super().can_show(skip_parent_collection=skip_parent_collection)
             else:
                 return False
@@ -2897,12 +2927,13 @@ class cycle_available_ministers_button(button):
         if main_loop_utility.action_possible():
             if self.direction == "left":
                 constants.available_minister_left_index -= 1
-            if self.direction == "right":
+            if self.direction == "right" and not status.current_just_appointed_minister:
                 constants.available_minister_left_index += 1
+            status.current_just_appointed_minister = None
             minister_utility.update_available_minister_display()
             status.available_minister_portrait_list[
                 2
-            ].on_click()  # select new middle portrait
+            ].on_click()  # Select new middle portrait
         else:
             text_utility.print_to_screen(
                 "You are busy and cannot select other ministers."
@@ -3149,7 +3180,7 @@ class show_lore_missions_button(button):
 
 class show_previous_reports_button(button):
     """
-    Button appearing near money label that can be clicked to display the previous turn's production, sales, and financial reports again
+    Button appearing near money label that can be clicked to display the previous turn's production, sales, labor market, and financial reports again
     """
 
     def __init__(self, input_dict):
@@ -3187,6 +3218,7 @@ class show_previous_reports_button(button):
             status.previous_financial_report
             or status.previous_production_report
             or status.previous_sales_report
+            or status.previous_labor_market_report
         )
 
     def on_click(self):
@@ -3202,6 +3234,7 @@ class show_previous_reports_button(button):
             for report in [
                 status.previous_production_report,
                 status.previous_sales_report,
+                status.previous_labor_market_report,
                 status.previous_financial_report,
             ]:
                 if report:
@@ -3362,7 +3395,7 @@ class reorganize_unit_button(button):
             return True
         return False
 
-    def enable_shader_condition(self):
+    def enable_shader_condition(self) -> bool:
         """
         Description:
             Calculates and returns whether this button should display its shader, given that it has shader enabled - reorganize button displays shader when current

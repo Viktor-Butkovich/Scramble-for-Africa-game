@@ -892,7 +892,7 @@ class pmob(mob):
                                     and self.movement_points > 0
                                 ):
                                     if (
-                                        (not future_cell.has_npmob())
+                                        (not future_cell.has_visible_npmob())
                                         or self.is_battalion
                                         or self.is_safari
                                         or (
@@ -1000,6 +1000,7 @@ class pmob(mob):
                         current_commodity, 1
                     )
         self.inventory = {}
+        self.sorted_inventory = []
         self.hide_images()
         self.remove_from_turn_queue()
         vehicle.contained_mobs.append(self)

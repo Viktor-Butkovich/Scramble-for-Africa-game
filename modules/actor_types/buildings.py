@@ -89,9 +89,7 @@ class building(actor):
         """
         save_dict = super().to_save_dict()
         save_dict["building_type"] = self.building_type
-        save_dict[
-            "contained_work_crews"
-        ] = (
+        save_dict["contained_work_crews"] = (
             []
         )  # List of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
         save_dict["image"] = self.image_dict["default"]
@@ -276,6 +274,7 @@ class building(actor):
             "resource",
             "port",
             "train_station",
+            "trading_post",
         ]:
             self.cell.get_building("warehouses").set_damaged(new_value)
         self.cell.tile.update_image_bundle()

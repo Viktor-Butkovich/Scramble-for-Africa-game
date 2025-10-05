@@ -1,16 +1,12 @@
 # Contains functionality for worker units
 import random
 
-from .pmobs import pmob
-from ...util import actor_utility
-from ...util import market_utility
-from ...util import text_utility
-import modules.constants.constants as constants
-import modules.constants.status as status
-import modules.constants.flags as flags
+from modules.actor_types.mob_types import pmobs
+from modules.util import actor_utility, market_utility, text_utility, utility
+from modules.constants import constants, status, flags
 
 
-class worker(pmob):
+class worker(pmobs.pmob):
     """
     pmob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     """
@@ -38,6 +34,7 @@ class worker(pmob):
             None
         """
         super().__init__(from_save, input_dict)
+        self.group: pmobs.pmob = None
         self.number = 2  # Workers is plural
         self.is_worker = True
         self.is_church_volunteers = False
@@ -47,7 +44,7 @@ class worker(pmob):
         status.worker_types[self.worker_type].number += 1
         if not from_save:
             status.worker_types[self.worker_type].on_recruit(
-                input_dict.get("purchased", None)
+                input_dict.get("purchased", True), replaced=False
             )
         self.set_controlling_minister_type(constants.type_minister_dict["production"])
 
@@ -83,15 +80,8 @@ class worker(pmob):
         else:
             destination = attached_group
         destination_message = (
-            " for the "
-            + destination.name
-            + " at ("
-            + str(destination.x)
-            + ", "
-            + str(destination.y)
-            + ")"
+            f" for the {destination.name} at ({destination.x}, {destination.y})"
         )
-        status.worker_types[self.worker_type].on_recruit(purchased=True)
         if not self.worker_type in ["slave", "religious"]:
             if self.worker_type == "African":  # get worker from nearest slum or village
                 new_worker_source = actor_utility.find_closest_available_worker(
@@ -106,25 +96,11 @@ class worker(pmob):
 
                     if new_worker_source in status.village_list:
                         text_utility.print_to_screen(
-                            "Replacement workers have been automatically hired from "
-                            + new_worker_source.name
-                            + " village at ("
-                            + str(new_worker_source.x)
-                            + ", "
-                            + str(new_worker_source.y)
-                            + ")"
-                            + destination_message
-                            + "."
+                            f"Replacement workers have been automatically hired from {new_worker_source.name} village at ({new_worker_source.x}, {new_worker_source.y}) {destination_message}."
                         )
                     elif new_worker_source in status.slums_list:
                         text_utility.print_to_screen(
-                            "Replacement workers have been automatically hired from the slums at ("
-                            + str(new_worker_source.x)
-                            + ", "
-                            + str(new_worker_source.y)
-                            + ")"
-                            + destination_message
-                            + "."
+                            f"Replacement workers have been automatically hired from the slums at ({new_worker_source.x}, {new_worker_source.y}) {destination_message}."
                         )
 
                 else:  # if no villages or slums with available workers, recruit abstract African workers and give bigger upkeep penalty to compensate
@@ -132,18 +108,13 @@ class worker(pmob):
                         "increase", self.worker_type
                     )
                     text_utility.print_to_screen(
-                        "As there were no available workers in nearby slums and villages, replacement workers were automatically hired from a nearby colony"
-                        + destination_message
-                        + ", incurring an increased penalty on African worker upkeep."
+                        f"As there were no available workers in nearby slums and villages, replacement workers were automatically hired from a nearby colony {destination_message}, incurring an increased penalty on African worker upkeep."
                     )
 
             else:
+
                 text_utility.print_to_screen(
-                    "Replacement "
-                    + self.worker_type
-                    + " workers have been automatically hired"
-                    + destination_message
-                    + "."
+                    f"Replacement {self.worker_type} workers have been automatically hired {destination_message}."
                 )
 
         elif self.worker_type == "slave":
@@ -152,17 +123,14 @@ class worker(pmob):
                 "attrition_replacements",
             )
             text_utility.print_to_screen(
-                "Replacement slave workers were automatically purchased"
-                + destination_message
-                + ", costing "
-                + str(constants.recruitment_costs["slave workers"])
-                + " money."
+                f"Replacement slave workers were automatically purchased {destination_message}, costing {constants.recruitment_costs['slave workers']} money."
             )
 
         elif self.worker_type == "religious":
             text_utility.print_to_screen(
                 "Replacement church volunteers have been automatically found among nearby colonists."
             )
+        status.worker_types[self.worker_type].on_recruit(purchased=True, replaced=True)
 
     def to_save_dict(self):
         """
@@ -263,15 +231,16 @@ class worker(pmob):
         self.add_to_turn_queue()
         self.update_image_bundle()
 
-    def join_group(self):
+    def join_group(self, group: pmobs.pmob) -> None:
         """
         Description:
             Hides this worker when joining a group, preventing it from being directly interacted with until the group is disbanded
         Input:
-            None
+            pmob group: Group to join
         Output:
             None
         """
+        self.group = group
         self.in_group = True
         self.hide_images()
         self.remove_from_turn_queue()
@@ -285,6 +254,7 @@ class worker(pmob):
         Output:
             None
         """
+        self.group = None
         self.in_group = False
         self.x = group.x
         self.y = group.y
@@ -354,7 +324,7 @@ class worker(pmob):
         )
         return image_id_list
 
-    def get_worker(self) -> "pmob":
+    def get_worker(self) -> pmobs.pmob:
         """
         Description:
             Returns the worker associated with this unit, if any (self if worker, crew if vehicle, worker component if group)
@@ -396,9 +366,13 @@ class slave_worker(worker):
         input_dict["worker_type"] = "slave"
         super().__init__(from_save, input_dict)
         if constants.slave_traders_strength <= 0:
+            # Permanently prevent automatic replacement after slave trade ends
+            self.automatically_replace = False
+        elif (not from_save) and not input_dict["purchased"]:
+            # By default, captured slaves won't be automatically replaced by the slave market, only ones originally from slave market
             self.automatically_replace = False
 
-    def free_and_replace(self):
+    def free_and_replace(self) -> None:
         """
         Description:
             Frees this slave and immediately recruits them as an African worker, only usable when not in a group
@@ -421,6 +395,101 @@ class slave_worker(worker):
             new_worker.embark_vehicle(self.vehicle, focus=False)
             self.disembark_vehicle(self.vehicle, focus=False)
         self.fire(wander=False)
+
+    def manage_runaway_slaves(self) -> None:
+        """
+        Runs a runaway slaves check on this unit
+            If on Africa grid, 1/36 chance to run away, displaying a notification and either replacing or removing the unit
+        """
+        if (
+            status.strategic_map_grid in self.grids
+            and random.randrange(1, 7) == 1
+            and random.randrange(1, 7) == 1
+        ):  # 1/36 chance in Africa
+            self.display_runaway_slaves_notification()
+            sorted_villages = sorted(
+                [village for village in status.village_list if village.population < 9],
+                key=lambda village: utility.find_object_distance(self, village),
+            )
+            if sorted_villages:  # If at least 1 eligible village
+                selected_village = random.choice(
+                    sorted_villages[:3]
+                )  # Choose from 3 closest villages
+                selected_village.change_population(1)
+                if (
+                    random.randrange(1, 7) >= 4
+                ):  # Half chance to increase aggressiveness of destination village
+                    selected_village.change_aggressiveness(1)
+
+            if self.automatically_replace:
+                if self.in_group:
+                    self.replace(self.group)
+                    self.group.temp_disable_movement()
+                else:
+                    self.replace()
+                    self.temp_disable_movement()
+            else:
+                if self.in_group:
+                    reembark_officer = None
+                    reembark_vehicle = None
+                    if self.group.in_vehicle:
+                        reembark_officer = self.group.officer
+                        reembark_vehicle = self.group.vehicle
+                        self.group.disembark_vehicle(self.group.vehicle)
+                    self.group.disband()
+                    if reembark_officer:
+                        # If part of group in vehicle, remove unit while keeping officer as passenger
+                        reembark_officer.embark_vehicle(reembark_vehicle)
+                elif (
+                    self.in_vehicle
+                ):  # Note that slave worker cannot be vehicle crew, so in vehicle must be passenger
+                    self.disembark_vehicle(self.vehicle)
+                self.die(death_type="runaway")
+
+    def display_runaway_slaves_notification(self) -> None:
+        """
+        Displays a notification describing a runaway slave event for this unit
+        """
+        if self.in_group:
+            if self.group.in_vehicle:
+                zoom_destination = self.group.vehicle
+                destination_message = f"from the {self.group.name} aboard the {zoom_destination.name} at ({self.x}, {self.y})"
+            elif self.group.in_building:
+                zoom_destination = self.group.building.cell.get_intact_building(
+                    "resource"
+                )
+                destination_message = f"from the {self.group.name} working in the {zoom_destination.name} at ({self.x}, {self.y})"
+            else:
+                zoom_destination = self
+                destination_message = (
+                    f"from the {self.group.name} at ({self.group.x}, {self.group.y})"
+                )
+            if (not self.automatically_replace) and not zoom_destination.is_vehicle:
+                # If unit won't exist after replacement, use its tile instead
+                zoom_destination = zoom_destination.images[0].current_cell.tile
+        else:
+            if self.in_vehicle:
+                zoom_destination = self.vehicle
+                destination_message = (
+                    f"from the {zoom_destination.name} at ({self.x}, {self.y})"
+                )
+            else:
+                if not self.automatically_replace:
+                    zoom_destination = self.images[0].current_cell.tile
+                else:
+                    zoom_destination = self
+                destination_message = f"from ({self.x}, {self.y})"
+
+        if self.automatically_replace:
+            text = f"{utility.capitalize(self.name)} have escaped to a nearby village {destination_message}. /n /n{self.generate_attrition_replacement_text()}"
+        else:
+            text = f"{utility.capitalize(self.name)} have escaped to a nearby village {destination_message}. /n /n"
+        constants.notification_manager.display_notification(
+            {
+                "message": text,
+                "zoom_destination": zoom_destination,
+            }
+        )
 
 
 class church_volunteers(worker):
