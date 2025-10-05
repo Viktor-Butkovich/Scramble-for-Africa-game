@@ -49,6 +49,3 @@ except Exception:  # displays error message and records error message in crash l
 # Possible issue with overlapping sounds muffling in late-game, with lots of units
 #
 #   new SFA features:
-# Buy consumer goods tooltip should explain how they are used to trade with villages
-# Add achievement for building railroad bridge
-# Add achievement for selling your first commodity

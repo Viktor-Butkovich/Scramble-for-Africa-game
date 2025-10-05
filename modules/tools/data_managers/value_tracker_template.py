@@ -183,6 +183,8 @@ class money_tracker_template(value_tracker_template):
             > self.transaction_history["subsidies"] + self.transaction_history["loan"]
         ):
             constants.achievement_manager.check_achievements("Return on Investment")
+        if self.transaction_history["sold_commodities"] > 0:
+            constants.achievement_manager.achieve("First Paycheck")
 
         notification_text += "/nExpenses: /n"
         total_expenses = 0

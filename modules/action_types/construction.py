@@ -653,4 +653,6 @@ class construction(action.action):
                 actor_utility.calibrate_actor_info_display(
                     status.mob_info_display, self.current_unit
                 )  # update mob display to show new upgrade possibilities
+            if self.building_name == "railroad bridge":
+                constants.achievement_manager.achieve("Spared No Expense")
         super().complete()
