@@ -179,7 +179,7 @@ class worker_type:
                             "notification_type": "action",
                             "attached_interface_elements": [
                                 action_utility.generate_free_image_input_dict(
-                                    "buttons/disable_automatic_replacement_officer_button.png",
+                                    "buttons/disable_automatic_replacement_worker_button.png",
                                     120,
                                     override_input_dict={
                                         "member_config": {

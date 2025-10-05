@@ -364,15 +364,30 @@ class enable_automatic_replacement_button(button):
                 return False
             elif displayed_mob.is_vehicle:
                 return False
-            elif displayed_mob.is_group and self.target_type == "unit":
+            elif (
+                self.target_type == "worker"
+                and not displayed_mob.is_worker
+                and not displayed_mob.is_group
+            ):
                 return False
-            elif (not displayed_mob.is_group) and (not self.target_type == "unit"):
+            elif self.target_type == "officer" and not displayed_mob.is_group:
+                return False
+            elif self.target_type == "unit" and displayed_mob.is_worker:
                 return False
             elif (
                 (self.target_type == "unit" and displayed_mob.automatically_replace)
                 or (
                     self.target_type == "worker"
-                    and displayed_mob.worker.automatically_replace
+                    and (
+                        (
+                            displayed_mob.is_worker
+                            and displayed_mob.automatically_replace
+                        )
+                        or (
+                            displayed_mob.is_group
+                            and displayed_mob.worker.automatically_replace
+                        )
+                    )
                 )
                 or (
                     self.target_type == "officer"
@@ -396,7 +411,10 @@ class enable_automatic_replacement_button(button):
             if self.target_type == "unit":
                 target = displayed_mob
             elif self.target_type == "worker":
-                target = displayed_mob.worker
+                if displayed_mob.is_worker:
+                    target = displayed_mob
+                elif displayed_mob.is_group:
+                    target = displayed_mob.worker
             elif self.target_type == "officer":
                 target = displayed_mob.officer
             target.set_automatically_replace(True)
@@ -453,13 +471,30 @@ class disable_automatic_replacement_button(button):
                 return False
             elif displayed_mob.is_group and self.target_type == "unit":
                 return False
-            elif (not displayed_mob.is_group) and (not self.target_type == "unit"):
+            elif (
+                self.target_type == "worker"
+                and not displayed_mob.is_worker
+                and not displayed_mob.is_group
+            ):
+                return False
+            elif self.target_type == "officer" and not displayed_mob.is_group:
+                return False
+            elif self.target_type == "unit" and displayed_mob.is_worker:
                 return False
             elif (
                 (self.target_type == "unit" and not displayed_mob.automatically_replace)
                 or (
                     self.target_type == "worker"
-                    and not displayed_mob.worker.automatically_replace
+                    and (
+                        (
+                            displayed_mob.is_worker
+                            and not displayed_mob.automatically_replace
+                        )
+                        or (
+                            displayed_mob.is_group
+                            and not displayed_mob.worker.automatically_replace
+                        )
+                    )
                 )
                 or (
                     self.target_type == "officer"
@@ -483,7 +518,10 @@ class disable_automatic_replacement_button(button):
             if self.target_type == "unit":
                 target = displayed_mob
             elif self.target_type == "worker":
-                target = displayed_mob.worker
+                if displayed_mob.is_worker:
+                    target = displayed_mob
+                elif displayed_mob.is_group:
+                    target = displayed_mob.worker
             elif self.target_type == "officer":
                 target = displayed_mob.officer
             target.set_automatically_replace(False)

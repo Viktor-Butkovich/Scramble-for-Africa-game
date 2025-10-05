@@ -836,7 +836,9 @@ class button(interface_elements.interface_element):
             elif self.button_type == "disable automatic replacement":
                 verb = "disable"
                 operator = ""
-            if self.target_type == "unit":
+            if self.target_type == "unit" or (
+                status.displayed_mob and status.displayed_mob.is_worker
+            ):
                 target = "unit"
             else:
                 target = f"unit's {self.target_type}"  # worker or officer
