@@ -161,6 +161,7 @@ def simulate_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
         dummy_input_dict["group_type"] = constants.officer_group_type_dict[
             officer.officer_type
         ]
+        dummy_input_dict["disorganized"] = officer.disorganized or worker.disorganized
         if dummy_input_dict["group_type"] == "battalion":
             dummy_input_dict["disorganized"] = True
             if worker.worker_type == "European":

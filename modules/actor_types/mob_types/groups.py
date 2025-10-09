@@ -61,6 +61,7 @@ class group(pmob):
                 )
                 current_mob.set_inventory(current_commodity, 0)
         self.set_group_type("none")
+        self.set_disorganized(self.worker.disorganized or self.officer.disorganized)
         self.update_image_bundle()
         if not from_save:
             actor_utility.calibrate_actor_info_display(
