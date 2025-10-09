@@ -7,8 +7,6 @@ from ...util import (
     text_utility,
     utility,
     actor_utility,
-    minister_utility,
-    game_transitions,
 )
 import modules.constants.constants as constants
 import modules.constants.status as status

@@ -7,7 +7,6 @@ from ..util import (
     utility,
     actor_utility,
     minister_utility,
-    main_loop_utility,
     scaling,
 )
 import modules.constants.constants as constants
@@ -272,25 +271,23 @@ class minister:
         """
         self.tooltip_text = []
         if not self.current_position == "none":
-            keyword = constants.minister_type_dict[
-                self.current_position
-            ]  # type, like military
             self.tooltip_text.append(
-                "This is " + self.name + ", your " + self.current_position + "."
+                f"This is {self.name}, your {self.current_position}."
             )
         else:
             self.tooltip_text.append(
-                "This is " + self.name + ", an available minister candidate."
+                f"This is {self.name}, an available minister candidate."
             )
-        self.tooltip_text.append("Background: " + self.background)
-        self.tooltip_text.append("Social status: " + self.status)
+        self.tooltip_text.append(f"Background: {self.background}")
+        self.tooltip_text.append(f"Social status: {self.status}")
         self.tooltip_text.append(
-            "Interests: " + self.interests[0] + " and " + self.interests[1]
+            f"Interests: {self.interests[0]} and {self.interests[1]}"
         )
 
         if self.apparent_corruption_description != "unknown":
-            self.tooltip_text.append("Loyalty: " + self.apparent_corruption_description)
+            self.tooltip_text.append(f"Loyalty: {self.apparent_corruption_description}")
 
+        skill_message = ""
         if self.current_position == "none":
             displayed_skill = self.get_max_apparent_skill()
         else:
@@ -299,37 +296,27 @@ class minister:
         if displayed_skill != "unknown":
             displayed_skill_name = constants.minister_type_dict[
                 displayed_skill
-            ]  # like General to military]
-            if self.apparent_skill_descriptions[displayed_skill] != "unknown":
-                if self.current_position == "none":
-                    message = (
-                        "Highest ability: "
-                        + self.apparent_skill_descriptions[displayed_skill]
-                        + " ("
-                        + displayed_skill_name
-                        + ")"
-                    )
-                else:
-                    message = (
-                        displayed_skill_name.capitalize()
-                        + " ability: "
-                        + self.apparent_skill_descriptions[displayed_skill]
-                    )
-                self.tooltip_text.append(message)
+            ]  # like General to military
+        else:
+            displayed_skill_name = "unknown"
 
-        rank = 0
-        for skill_value in range(6, 0, -1):  # iterates backwards from 6 to 1
-            for skill_type in self.apparent_skills:
-                if self.apparent_skills[skill_type] == skill_value:
-                    rank += 1
-                    skill_name = constants.minister_type_dict[
-                        skill_type
-                    ]  # like General to military
-                    self.tooltip_text.append(
-                        f"    {rank}. {skill_name.capitalize()}: {self.apparent_skill_descriptions[skill_type]}"
-                    )
+        if self.current_position == "none":
+            if displayed_skill != "unknown":
+                skill_message = f"Highest ability: {self.apparent_skill_descriptions[displayed_skill]} ({displayed_skill_name})"
+        else:
+            if displayed_skill != "unknown":
+                skill_message = f"{displayed_skill_name.capitalize()} ability: {self.apparent_skill_descriptions[displayed_skill]}"
+            else:
+                skill_message = f"{displayed_skill_name.capitalize()} ability: unknown"
+        if skill_message != "":
+            self.tooltip_text.append(skill_message)
 
-        self.tooltip_text.append("Evidence: " + str(self.corruption_evidence))
+        for rank, skill in enumerate(self.sorted_apparent_skills):
+            self.tooltip_text.append(
+                f"    {rank+1}. {constants.minister_type_dict[skill].capitalize()}: {self.apparent_skill_descriptions[skill]}"
+            )
+
+        self.tooltip_text.append(f"Evidence: {self.corruption_evidence}")
         if self.just_removed and self.current_position == "none":
             self.tooltip_text.append(
                 "This minister was just removed from office and expects to be reappointed to an office by the end of the turn."
@@ -337,6 +324,19 @@ class minister:
             self.tooltip_text.append(
                 "If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty."
             )
+
+    @property
+    def sorted_apparent_skills(self) -> List[str]:
+        """
+        Provides a list of skill types sorted from highest to lowest apparent value
+        """
+        return [
+            skill
+            for skill, value in sorted(
+                self.apparent_skills.items(), key=lambda item: item[1], reverse=True
+            )
+            if self.apparent_skill_descriptions[skill] != "unknown"
+        ]
 
     def generate_icon_input_dicts(self, alignment="left"):
         """

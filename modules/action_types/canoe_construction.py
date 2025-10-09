@@ -86,9 +86,7 @@ class canoe_consruction(action.action):
                 f"The {status.displayed_mob.group_type} tries to build canoes. /n /n"
             )
         elif subject == "success":
-            text += (
-                f"The {status.displayed_mob.group_type} successfuly built canoes. /n /n"
-            )
+            text += f"The {status.displayed_mob.group_type} successfully built canoes. /n /n"
         elif subject == "failure":
             text += f"The {status.displayed_mob.group_type} failed to make any functional canoes. /n /n"
         elif subject == "critical_success":
