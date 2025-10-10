@@ -460,13 +460,16 @@ class slave_worker(worker):
                 )
                 destination_message = f"from the {self.group.name} working in the {zoom_destination.name} at ({self.x}, {self.y})"
             else:
-                zoom_destination = self
+                zoom_destination = self.group
                 destination_message = (
                     f"from the {self.group.name} at ({self.group.x}, {self.group.y})"
                 )
-            if (not self.automatically_replace) and not zoom_destination.is_vehicle:
+            if not self.automatically_replace:
+                if zoom_destination.actor_type == "building":
+                    zoom_destination = zoom_destination.cell.tile
+                elif not zoom_destination.is_vehicle:
+                    zoom_destination = zoom_destination.images[0].current_cell.tile
                 # If unit won't exist after replacement, use its tile instead
-                zoom_destination = zoom_destination.images[0].current_cell.tile
         else:
             if self.in_vehicle:
                 zoom_destination = self.vehicle
