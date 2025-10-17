@@ -49,3 +49,4 @@ except Exception:  # displays error message and records error message in crash l
 # Possible issue with overlapping sounds muffling in late-game, with lots of units
 #
 #   new SFA features:
+# Village resettled message incorrectly showing on new game after exiting to main menu from existing game
