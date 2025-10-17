@@ -511,7 +511,7 @@ def manage_lmb_down(clicked_button):
                                 ):  # or is harbor
                                     constants.notification_manager.display_notification(
                                         {
-                                            "message": "You can only send steamships to coastal waters or coastal ports. /n /nThe movement order was not issued. /n /n"
+                                            "message": "You can only send steamships to coastal waters, coastal ports, or other theatres (e.g. Europe, Asia). /n /nThe movement order was not issued. /n /n"
                                         }
                                     )
                                     actor_utility.calibrate_actor_info_display(
