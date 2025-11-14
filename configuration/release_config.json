@@ -34,7 +34,8 @@
       "fullscreen",
       "link_inventory_tabs",
       "enable_crash_button",
-      "hyperaggressive"
+      "hyperaggressive",
+      "runaway"
    ],
    "active_effects": [
       "track_dangling_interface",
