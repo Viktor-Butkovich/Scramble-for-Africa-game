@@ -2865,17 +2865,30 @@ def minister_interface():
             x_displacement = 25
         else:
             x_displacement = 0
-        input_dict["member_config"] = {"order_x_offset": x_displacement}
-        input_dict["actor_label_type"] = current_actor_label_type
-
         if current_actor_label_type == "current_skill":
-            input_dict["init_type"] = "list item label"
-            input_dict["list_type"] = "minister_skills"
             for i in range(len(constants.skill_types)):
-                input_dict["list_index"] = i
-                constants.actor_creation_manager.create_interface_element(input_dict)
+                constants.actor_creation_manager.create_interface_element(
+                    {
+                        **input_dict,
+                        "init_type": "list item label",
+                        "list_type": "minister_skills",
+                        "list_index": i,
+                        "member_config": {
+                            "order_x_offset": x_displacement,
+                        },
+                        "actor_label_type": current_actor_label_type,
+                    }
+                )
         else:
-            constants.actor_creation_manager.create_interface_element(input_dict)
+            constants.actor_creation_manager.create_interface_element(
+                {
+                    **input_dict,
+                    "member_config": {
+                        "order_x_offset": x_displacement,
+                    },
+                    "actor_label_type": current_actor_label_type,
+                }
+            )
     # minister info labels setup
 
 
