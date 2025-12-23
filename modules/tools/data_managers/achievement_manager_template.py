@@ -101,6 +101,7 @@ class achievement_manager_template:
                                     attached_interface_elements
                                 ],
                                 "choices": ["continue", "confirm main menu"],
+                                "notification_priority": -1,
                             }
                         )
                     else:
@@ -111,6 +112,7 @@ class achievement_manager_template:
                                     attached_interface_elements
                                 ],
                                 "choices": ["continue", "confirm main menu"],
+                                "notification_priority": -1,
                             }
                         )
                 else:

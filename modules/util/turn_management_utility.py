@@ -948,6 +948,7 @@ def game_end_check():
             {
                 "message": text,
                 "choices": ["confirm main menu", "quit"],
+                "notification_priority": -1,
             }
         )
 
