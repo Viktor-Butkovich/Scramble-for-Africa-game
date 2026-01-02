@@ -1,5 +1,5 @@
 import pygame
-from typing import Dict, List
+from typing import Dict, List, Set
 from modules.tools.data_managers.sound_manager_template import sound_manager_template
 from modules.tools.data_managers.save_load_manager_template import (
     save_load_manager_template,
@@ -621,7 +621,9 @@ slave_recruitment_cost_increment: float = 1.0
 base_upgrade_price: float = 20.0  # 20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 consumer_goods_starting_price: int = 1
 
-slave_traders_natural_max_strength: int = 0  # regenerates to natural strength, can increase indefinitely when slaves are purchased
+slave_traders_natural_max_strength: int = (
+    0  # regenerates to natural strength, can increase indefinitely when slaves are purchased
+)
 slave_traders_strength: int = 0
 
 list_descriptions: Dict[str, List[str]] = {}
@@ -733,3 +735,59 @@ titles: List[str] = [
     "Cavaliere",
     "Patrizio",
 ]
+
+weighted_vowels: Dict[str, int] = {
+    "A": 5,
+    "E": 2,
+    "I": 2,
+    "O": 3,
+    "U": 2,
+}
+vowels: Set[str] = {"A", "E", "I", "O", "U"}
+
+weighted_consonants: Dict[str, int] = {
+    "B": 15,
+    "M": 15,
+    "N": 6,
+    "S": 3,
+    "T": 3,
+    "C": 1,
+    "D": 1,
+    "F": 1,
+    "G": 1,
+    "H": 1,
+    "J": 1,
+    "K": 1,
+    "L": 1,
+    "P": 1,
+    "Q": 1,
+    "R": 1,
+    "V": 1,
+    "W": 1,
+    "X": 1,
+    "Y": 1,
+    "Z": 1,
+}
+consonants: Set[str] = {
+    "B",
+    "C",
+    "D",
+    "F",
+    "G",
+    "H",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+}
