@@ -563,7 +563,7 @@ class tile(actor):  # to do: make terrain tiles a subclass
         )  # Count number of vehicle arriving to this tile
         if num_incoming_vehicles > 0:
             return [
-                f"There {utility.conjugate("be", num_incoming_vehicles)} {num_incoming_vehicles} steamship{utility.generate_plural(num_incoming_vehicles)} arriving here at the end of the turn"
+                f"There {utility.conjugate('be', num_incoming_vehicles)} {num_incoming_vehicles} steamship{utility.generate_plural(num_incoming_vehicles)} arriving here at the end of the turn"
             ]
         else:
             return []
