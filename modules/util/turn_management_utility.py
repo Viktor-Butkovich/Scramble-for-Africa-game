@@ -471,24 +471,24 @@ def manage_labor_market_report(initial_state, final_state) -> None:
         number = final_state[worker_type]["number"]
         if upkeep_change != 0:
             if number > 0:
-                if worker_type_total_upkeep_change > 0:
+                if upkeep_change > 0:
                     report_lines.append(
-                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} increased from {final_state[worker_type]['upkeep']} to {final_state[worker_type]['upkeep'] + upkeep_change}, "
+                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} increased from {final_state[worker_type]['upkeep'] - upkeep_change} to {final_state[worker_type]['upkeep']}, "
                         f"increasing expenses by {abs(worker_type_total_upkeep_change):,.2f}."
                     )
-                elif worker_type_total_upkeep_change < 0:
+                elif upkeep_change < 0:
                     report_lines.append(
-                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} decreased from {final_state[worker_type]['upkeep']} to {final_state[worker_type]['upkeep'] + upkeep_change}, "
+                        f"The upkeep of your {number} {worker_type} worker{utility.generate_plural(number)} decreased from {final_state[worker_type]['upkeep'] - upkeep_change} to {final_state[worker_type]['upkeep']}, "
                         f"decreasing expenses by {abs(worker_type_total_upkeep_change):,.2f}."
                     )
             else:
-                if worker_type_total_upkeep_change > 0:
+                if upkeep_change > 0:
                     report_lines.append(
-                        f"The upkeep of {worker_type} workers increased by {upkeep_change:.2f}."
+                        f"The upkeep of {worker_type} workers increased from {final_state[worker_type]['upkeep'] - upkeep_change} to {final_state[worker_type]['upkeep']}."
                     )
-                elif worker_type_total_upkeep_change < 0:
+                elif upkeep_change < 0:
                     report_lines.append(
-                        f"The upkeep of {worker_type} workers decreased by {upkeep_change:.2f}."
+                        f"The upkeep of {worker_type} workers decreased from {final_state[worker_type]['upkeep'] - upkeep_change} to {final_state[worker_type]['upkeep']}."
                     )
 
     if len(report_lines) > 1:
@@ -948,6 +948,7 @@ def game_end_check():
             {
                 "message": text,
                 "choices": ["confirm main menu", "quit"],
+                "notification_priority": -1,
             }
         )
 

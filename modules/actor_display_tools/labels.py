@@ -765,23 +765,11 @@ class actor_display_label(label):
 
         elif self.actor_label_type == "ability":
             tooltip_text = [self.message]
-            rank = 0
-            if not self.actor == "none":
-                for skill_value in range(6, 0, -1):  # iterates backwards from 6 to 1
-                    for skill_type in self.actor.apparent_skills:
-                        if self.actor.apparent_skills[skill_type] == skill_value:
-                            rank += 1
-                            skill_name = constants.minister_type_dict[
-                                skill_type
-                            ]  # like General to military
-                            tooltip_text.append(
-                                "    "
-                                + str(rank)
-                                + ". "
-                                + skill_name.capitalize()
-                                + ": "
-                                + self.actor.apparent_skill_descriptions[skill_type]
-                            )
+            if self.actor != "none":
+                for rank, skill in enumerate(self.actor.sorted_apparent_skills):
+                    tooltip_text.append(
+                        f"    {rank+1}. {constants.minister_type_dict[skill].capitalize()}: {self.actor.apparent_skill_descriptions[skill]}"
+                    )
             self.set_tooltip(tooltip_text)
 
         elif self.actor_label_type == "loyalty":
@@ -795,10 +783,7 @@ class actor_display_label(label):
             )
             if not self.attached_building == "none":
                 tooltip_text.append(
-                    "Work crews: "
-                    + str(len(self.attached_building.contained_work_crews))
-                    + "/"
-                    + str(self.attached_building.scale)
+                    f"Work crews: {len(self.attached_building.contained_work_crews)}/{self.attached_building.scale}"
                 )
                 for current_work_crew in self.attached_building.contained_work_crews:
                     tooltip_text.append(
@@ -1088,6 +1073,14 @@ class actor_display_label(label):
                                 )
                             )
 
+            elif self.actor_label_type == "current_skill":
+                self.attached_list = new_actor.sorted_apparent_skills
+                if len(self.attached_list) > self.list_index:
+                    skill = self.attached_list[self.list_index]
+                    self.set_label(
+                        f"{self.list_index + 1}. {constants.minister_type_dict[skill].capitalize()}: {self.actor.apparent_skill_descriptions[skill]}"
+                    )
+
             elif self.actor_label_type in ["workers", "officer"]:
                 if self.actor.is_group:
                     if self.actor_label_type == "workers":
@@ -1199,36 +1192,29 @@ class actor_display_label(label):
                 message = ""
                 if new_actor.current_position == "none":
                     displayed_skill = new_actor.get_max_apparent_skill()
-                    message += "Highest ability: "
                 else:
                     displayed_skill = new_actor.current_position
-                    message += "Current ability: "
-                if displayed_skill != "unknown":
+
+                if displayed_skill == "unknown":
+                    displayed_skill_name = "unknown"
+                else:
                     displayed_skill_name = constants.minister_type_dict[
                         displayed_skill
                     ]  # like General to military
-                    message += (
-                        new_actor.apparent_skill_descriptions[displayed_skill]
-                        + " ("
-                        + displayed_skill_name
-                        + ")"
-                    )
+
+                if new_actor.current_position == "none":
+                    if displayed_skill != "unknown":
+                        message += f"Highest ability: {new_actor.apparent_skill_descriptions[displayed_skill]} ({displayed_skill_name})"
+                        # e.g. Highest ability: Genius (military) if still a candidate
+                    # No message needed for candidate with no known skills
                 else:
-                    message += displayed_skill
+                    message += f"{displayed_skill_name.capitalize()} ability: {new_actor.apparent_skill_descriptions[displayed_skill]}"
+                    # e.g. Military ability: Genius if currently appointed as General
                 self.set_label(message)
 
             elif self.actor_label_type == "loyalty":
                 self.set_label(
                     self.message_start + new_actor.apparent_corruption_description
-                )
-
-            elif self.actor_label_type in constants.skill_types:
-                self.set_label(
-                    self.actor_label_type.capitalize()
-                    + ": "
-                    + self.actor.apparent_skill_descriptions[
-                        constants.type_minister_dict[self.actor_label_type]
-                    ]
                 )
 
             elif self.actor_label_type in ["minister_name", "country_name"]:
@@ -1366,20 +1352,9 @@ class actor_display_label(label):
         ):
             return False
         elif self.actor_label_type == "ability":
-            empty = True
-            for skill_type in self.actor.apparent_skills:
-                if self.actor.apparent_skill_descriptions[skill_type] != "unknown":
-                    empty = False
-            if empty:
-                return False
-            else:
-                return result
-        elif self.actor_label_type in constants.skill_types:
-            return (
-                self.actor.apparent_skill_descriptions[
-                    constants.type_minister_dict[self.actor_label_type]
-                ]
-                != "unknown"
+            return result and not (
+                self.actor.current_position == "none"
+                and self.actor.get_max_apparent_skill() == "unknown"
             )
         else:
             return result

@@ -1,0 +1,15 @@
+name: scramble_for_africa
+channel_priority: strict
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pyinstaller
+  - black
+  - pip
+  - pip:
+    - pygame
+
+# Create environment with `mamba env create -f environment.yml`
+# To add new dependencies, update the `environment.yml`, then update the environment with `mamba env update -f environment.yml --prune`
+# Remove env with `conda env remove --name scramble_for_africa`, and clear cache with `conda clean -a`

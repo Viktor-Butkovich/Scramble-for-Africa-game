@@ -37,7 +37,7 @@ except Exception:  # displays error message and records error message in crash l
     manage_crash(Exception)
 
 # tasks:
-#   general (game-agnostic):
+# Add aspect ratio changes from SE
 # replace usages of 'none' with None
 # Add type hints on sight - gradual process
 # add minister speech bubbles
@@ -47,5 +47,7 @@ except Exception:  # displays error message and records error message in crash l
 # Performance impacts from repeated exit/load - not everything is being removed each time
 # Add ambient sounds
 # Possible issue with overlapping sounds muffling in late-game, with lots of units
+# Address issue where a large settlement with 3 work crews can overlap with the text box - add a scrolling mechanism
 #
 #   new SFA features:
+# Village resettled message incorrectly showing on new game after exiting to main menu from existing game

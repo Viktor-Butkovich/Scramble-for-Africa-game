@@ -105,22 +105,33 @@ class notification_manager_template:
         valid_transfer = False
         if status.displayed_notification == None:
             if self.notification_queue:
+                max_priority = max(
+                    n.get("notification_priority", 0) for n in self.notification_queue
+                )
+                for idx, n in enumerate(self.notification_queue):
+                    if n.get("notification_priority", 0) == max_priority:
+                        notification_index = idx
+                        break
+                # Find the highest remaining notification priority, and display the first notification with that priority level
+                notification = self.notification_queue[notification_index]
                 if transferred_interface_elements and (
-                    self.notification_queue[0].get("notification_type", "none")
-                    in ["action", "roll"]
-                    or "choices" in self.notification_queue[0]
+                    notification.get("notification_type", "none") in ["action", "roll"]
+                    or "choices" in notification
                 ):
                     valid_transfer = True
-                    if "attached_interface_elements" in self.notification_queue[0]:
-                        self.notification_queue[0]["attached_interface_elements"] = (
+                    if "attached_interface_elements" in notification:
+                        notification["attached_interface_elements"] = (
                             transferred_interface_elements
-                            + self.notification_queue[0]["attached_interface_elements"]
+                            + notification["attached_interface_elements"]
                         )
                     else:
-                        self.notification_queue[0][
-                            "attached_interface_elements"
-                        ] = transferred_interface_elements
-                self.notification_to_front(self.notification_queue.pop(0))
+                        notification["attached_interface_elements"] = (
+                            transferred_interface_elements
+                        )
+                # Remove the selected notification from the queue and bring to front
+                self.notification_to_front(
+                    self.notification_queue.pop(notification_index)
+                )
 
         if transferred_interface_elements and not valid_transfer:
             for element in transferred_interface_elements:
@@ -153,9 +164,24 @@ class notification_manager_template:
         """
         if self.locked or self.notification_queue or status.displayed_notification:
             if insert_index != None:
-                self.notification_queue.insert(insert_index, input_dict)
+                self.notification_queue.insert(
+                    insert_index,
+                    {
+                        **input_dict,
+                        "notification_priority": input_dict.get(
+                            "notification_priority", 0
+                        ),
+                    },
+                )
             else:
-                self.notification_queue.append(input_dict)
+                self.notification_queue.append(
+                    {
+                        **input_dict,
+                        "notification_priority": input_dict.get(
+                            "notification_priority", 0
+                        ),
+                    }
+                )
         else:
             self.notification_to_front(input_dict)
 

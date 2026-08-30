@@ -61,6 +61,7 @@ class group(pmob):
                 )
                 current_mob.set_inventory(current_commodity, 0)
         self.set_group_type("none")
+        self.set_disorganized(self.worker.disorganized or self.officer.disorganized)
         self.update_image_bundle()
         if not from_save:
             actor_utility.calibrate_actor_info_display(
@@ -230,7 +231,16 @@ class group(pmob):
             if self.officer.automatically_replace:
                 text += (
                     self.officer.generate_attrition_replacement_text()
-                )  #'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
+                )  # 'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
+
+            constants.notification_manager.display_notification(
+                {
+                    "message": text,
+                    "zoom_destination": zoom_destination,
+                }
+            )
+
+            if self.officer.automatically_replace:
                 self.officer.replace(self)
                 self.officer.death_sound()
             else:
@@ -245,6 +255,13 @@ class group(pmob):
                 if self.in_vehicle:
                     worker.embark_vehicle(zoom_destination)
 
+        elif target == "worker":
+            text = f"The {self.worker.name}{destination_message}have died from attrition. /n /n "
+            if self.worker.automatically_replace:
+                text += (
+                    self.worker.generate_attrition_replacement_text()
+                )  #'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
+
             constants.notification_manager.display_notification(
                 {
                     "message": text,
@@ -252,12 +269,7 @@ class group(pmob):
                 }
             )
 
-        elif target == "worker":
-            text = f"The {self.worker.name}{destination_message}have died from attrition. /n /n "
             if self.worker.automatically_replace:
-                text += (
-                    self.worker.generate_attrition_replacement_text()
-                )  #'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
                 self.worker.replace(self)
                 self.worker.death_sound()
             else:
@@ -271,13 +283,6 @@ class group(pmob):
                 worker.attrition_death(False)
                 if self.in_vehicle:
                     officer.embark_vehicle(zoom_destination)
-
-            constants.notification_manager.display_notification(
-                {
-                    "message": text,
-                    "zoom_destination": zoom_destination,
-                }
-            )
 
     def fire(self):
         """

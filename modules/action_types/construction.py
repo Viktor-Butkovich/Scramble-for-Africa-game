@@ -187,6 +187,7 @@ class construction(action.action):
         Output:
             string: Returns text for the inputted subject
         """
+        actor_utility.update_descriptions(self.building_type)
         text = super().generate_notification_text(subject)
         if self.building_name in ["train", "steamboat"]:
             verb = "assemble"

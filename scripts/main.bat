@@ -1,0 +1,1 @@
+conda run -n scramble_for_africa --no-capture-output python Scramble_for_Africa.py

@@ -403,8 +403,8 @@ class slave_worker(worker):
         """
         if (
             status.strategic_map_grid in self.grids
-            and random.randrange(1, 7) == 1
-            and random.randrange(1, 7) == 1
+            and constants.effect_manager.effect_active("runaway")
+            or (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1)
         ):  # 1/36 chance in Africa
             self.display_runaway_slaves_notification()
             sorted_villages = sorted(
@@ -436,6 +436,8 @@ class slave_worker(worker):
                         reembark_officer = self.group.officer
                         reembark_vehicle = self.group.vehicle
                         self.group.disembark_vehicle(self.group.vehicle)
+                    if self.group.in_building:
+                        self.group.leave_building(self.group.building)
                     self.group.disband()
                     if reembark_officer:
                         # If part of group in vehicle, remove unit while keeping officer as passenger
@@ -460,13 +462,16 @@ class slave_worker(worker):
                 )
                 destination_message = f"from the {self.group.name} working in the {zoom_destination.name} at ({self.x}, {self.y})"
             else:
-                zoom_destination = self
+                zoom_destination = self.group
                 destination_message = (
                     f"from the {self.group.name} at ({self.group.x}, {self.group.y})"
                 )
-            if (not self.automatically_replace) and not zoom_destination.is_vehicle:
+            if not self.automatically_replace:
+                if zoom_destination.actor_type == "building":
+                    zoom_destination = zoom_destination.cell.tile
+                elif not zoom_destination.is_vehicle:
+                    zoom_destination = zoom_destination.images[0].current_cell.tile
                 # If unit won't exist after replacement, use its tile instead
-                zoom_destination = zoom_destination.images[0].current_cell.tile
         else:
             if self.in_vehicle:
                 zoom_destination = self.vehicle

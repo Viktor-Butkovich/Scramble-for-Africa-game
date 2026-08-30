@@ -7,8 +7,6 @@ from ...util import (
     text_utility,
     utility,
     actor_utility,
-    minister_utility,
-    game_transitions,
 )
 import modules.constants.constants as constants
 import modules.constants.status as status
@@ -554,22 +552,14 @@ class pmob(mob):
         constants.evil_tracker.change(1)
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
-                text = (
-                    utility.capitalize(self.name)
-                    + " has died from attrition at ("
-                    + str(self.x)
-                    + ", "
-                    + str(self.y)
-                    + ") /n /n"
-                    + self.generate_attrition_replacement_text()
-                )
+                text = f"{utility.capitalize(self.name)} has died from attrition at ({self.x}, {self.y}). /n /n"
+                text += self.generate_attrition_replacement_text()
                 constants.notification_manager.display_notification(
                     {
                         "message": text,
                         "zoom_destination": self,
                     }
                 )
-
             self.temp_disable_movement()
             self.replace()
             self.death_sound("violent")
@@ -577,12 +567,7 @@ class pmob(mob):
             if show_notification:
                 constants.notification_manager.display_notification(
                     {
-                        "message": utility.capitalize(self.name)
-                        + " has died from attrition at ("
-                        + str(self.x)
-                        + ", "
-                        + str(self.y)
-                        + ")",
+                        "message": f"{utility.capitalize(self.name)} has died from attrition at ({self.x}, {self.y}). /n /n",
                         "zoom_destination": self.images[0].current_cell.tile,
                     }
                 )

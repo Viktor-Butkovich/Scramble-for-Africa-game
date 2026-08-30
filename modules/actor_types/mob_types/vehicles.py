@@ -185,32 +185,24 @@ class vehicle(pmob):
                             current_sub_mob.attrition_death(attrition_unit_type)
 
                         else:  # if non-group passenger died of attrition
-                            text = (
-                                "The "
-                                + current_sub_mob.name
-                                + " aboard the "
-                                + self.name
-                                + " at ("
-                                + str(self.x)
-                                + ", "
-                                + str(self.y)
-                                + ") have died from attrition. /n /n"
-                            )
+                            text = f"The {current_sub_mob.name} aboard the {self.name} at ({self.x}, {self.y}) have died from attrition. /n /n"
                             if current_sub_mob.automatically_replace:
                                 text += (
                                     current_sub_mob.generate_attrition_replacement_text()
                                 )  #'The ' + current_sub_mob.name + ' will remain inactive for the next turn as replacements are found.'
-                                current_sub_mob.replace()
-                                current_sub_mob.temp_disable_movement()
-                                current_sub_mob.death_sound("violent")
-                            else:
-                                non_replaced_attrition.append(current_sub_mob)
                             constants.notification_manager.display_notification(
                                 {
                                     "message": text,
                                     "zoom_destination": self,
                                 }
                             )
+                            if current_sub_mob.automatically_replace:
+                                current_sub_mob.replace()
+                                current_sub_mob.temp_disable_movement()
+                                current_sub_mob.death_sound("violent")
+                            else:
+                                non_replaced_attrition.append(current_sub_mob)
+
         for current_mob in non_replaced_attrition:
             current_sub_mob.disembark_vehicle(self)
             current_sub_mob.attrition_death(False)
@@ -225,23 +217,9 @@ class vehicle(pmob):
             None
         """
         constants.evil_tracker.change(1)
-        text = (
-            "The "
-            + crew.name
-            + " crewing the "
-            + self.name
-            + " at ("
-            + str(self.x)
-            + ", "
-            + str(self.y)
-            + ") have died from attrition. /n /n "
-        )
+        text = f"The {crew.name} crewing the {self.name} at ({self.x}, {self.y}) have died from attrition. /n /n "
         if crew.automatically_replace:
-            text += (
-                "The "
-                + self.name
-                + " will remain inactive for the next turn as replacements are found. /n /n"
-            )
+            text += f"The {self.name} will remain inactive for the next turn as replacements are found. /n /n"
             crew.replace(self)
             self.temp_disable_movement()
         else:

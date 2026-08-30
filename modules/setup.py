@@ -1870,16 +1870,16 @@ def mob_interface():
             "parent_collection": status.mob_info_display,
             "member_config": {"order_x_offset": x_displacement},
         }
-        if current_actor_label_type != "current passenger":
-            input_dict["init_type"] = "actor display label"
-            constants.actor_creation_manager.create_interface_element(input_dict)
-        else:
+        if current_actor_label_type == "current passenger":
             input_dict["init_type"] = "list item label"
             input_dict["list_type"] = "ship"
             for i in range(0, 3):  # 0, 1, 2
                 # label for each passenger
                 input_dict["list_index"] = i
                 constants.actor_creation_manager.create_interface_element(input_dict)
+        else:
+            input_dict["init_type"] = "actor display label"
+            constants.actor_creation_manager.create_interface_element(input_dict)
 
     tab_collection_relative_coordinates = (450, -30)
     status.mob_tabbed_collection = (
@@ -2849,27 +2849,46 @@ def minister_interface():
     }
 
     # minister info labels setup
-    minister_info_display_labels = (
-        [
-            "minister_name",
-            "minister_office",
-            "background",
-            "social status",
-            "interests",
-            "loyalty",
-            "ability",
-        ]
-        + constants.skill_types
-        + ["evidence"]
-    )
+    minister_info_display_labels = [
+        "minister_name",
+        "minister_office",
+        "background",
+        "social status",
+        "interests",
+        "loyalty",
+        "ability",
+        "current_skill",
+        "evidence",
+    ]
     for current_actor_label_type in minister_info_display_labels:
-        if current_actor_label_type in constants.skill_types:
+        if current_actor_label_type == "current_skill":
             x_displacement = 25
         else:
             x_displacement = 0
-        input_dict["member_config"] = {"order_x_offset": x_displacement}
-        input_dict["actor_label_type"] = current_actor_label_type
-        constants.actor_creation_manager.create_interface_element(input_dict)
+        if current_actor_label_type == "current_skill":
+            for i in range(len(constants.skill_types)):
+                constants.actor_creation_manager.create_interface_element(
+                    {
+                        **input_dict,
+                        "init_type": "list item label",
+                        "list_type": "minister_skills",
+                        "list_index": i,
+                        "member_config": {
+                            "order_x_offset": x_displacement,
+                        },
+                        "actor_label_type": current_actor_label_type,
+                    }
+                )
+        else:
+            constants.actor_creation_manager.create_interface_element(
+                {
+                    **input_dict,
+                    "member_config": {
+                        "order_x_offset": x_displacement,
+                    },
+                    "actor_label_type": current_actor_label_type,
+                }
+            )
     # minister info labels setup
 
 
