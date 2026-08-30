@@ -37,7 +37,7 @@ except Exception:  # displays error message and records error message in crash l
     manage_crash(Exception)
 
 # tasks:
-#   general (game-agnostic):
+# Add aspect ratio changes from SE
 # replace usages of 'none' with None
 # Add type hints on sight - gradual process
 # add minister speech bubbles
